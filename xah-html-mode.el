@@ -224,11 +224,11 @@
 
 
 
-(defun xhm-get-tag-type (εtag-name)
-  "Return the wrap-type info of εtag-name in `xhm-html5-tag-names'"
+(defun xhm-get-tag-type (φtag-name)
+  "Return the wrap-type info of φtag-name in `xhm-html5-tag-names'"
   (elt
    (cdr
-    (assoc εtag-name xhm-html5-tag-names)
+    (assoc φtag-name xhm-html5-tag-names)
     ) 0))
 
 (defvar xhm-lang-name-map nil "a alist that maps lang name. Each element has this form 「(‹lang code› . [‹emacs major mode name› ‹file_extension›])」")
@@ -289,6 +289,8 @@
            ("sass" . ["sass-mode" "sass"])
            ("scss" . ["css-mode" "css"])
 
+           ("vimrc" . ["vimrc-mode" "vim"])
+
            ) )
 
 ;(defvar xhm-lang-name-list nil "a alist that maps lang name. Each element has this form 「(‹lang code› . [‹emacs major mode name› ‹file_extension›])」")
@@ -344,7 +346,7 @@ Returns a vector [langCode pos1 pos2], where pos1 pos2 are the boundary of the t
 
  ) ))
 
-(defun xhm-get-precode-make-new-file (εlangNameMap)
+(defun xhm-get-precode-make-new-file (φlang-name-map)
   "Create a new file in current dir with text inside pre code block.
 For example, if the cursor is somewhere between the tags:
 <pre class=\"python\">print 7</pre>
@@ -360,7 +362,7 @@ If there's a text selection, use that region as content."
         (p2 (elt ξxx 2))
         (ξtextContent (buffer-substring-no-properties p1 p2) )
 
-        (ξyy (cdr (assoc ξlangCode εlangNameMap)))
+        (ξyy (cdr (assoc ξlangCode φlang-name-map)))
         (ξfileSuffix (elt ξyy 1))
         )
 
@@ -377,16 +379,16 @@ If there's a text selection, use that region as content."
     )
   )
 
-(defun xhm-htmlize-string (εsource-code-str εmajor-mode-name)
-  "Take εsource-code-str and return a htmlized version using major mode εmajor-mode-name.
+(defun xhm-htmlize-string (φsource-code-str φmajor-mode-name)
+  "Take φsource-code-str and return a htmlized version using major mode φmajor-mode-name.
 The purpose is to syntax color source code in HTML.
 This function requires the `htmlize-buffer' from 〔htmlize.el〕 by Hrvoje Niksic."
   (interactive)
   (let (htmlizeOutputBuffer resultStr)
     ;; put code in a temp buffer, set the mode, fontify
     (with-temp-buffer
-      (insert εsource-code-str)
-      (funcall (intern εmajor-mode-name))
+      (insert φsource-code-str)
+      (funcall (intern φmajor-mode-name))
       (font-lock-fontify-buffer)
       (setq htmlizeOutputBuffer (htmlize-buffer))
       )
@@ -399,7 +401,7 @@ This function requires the `htmlize-buffer' from 〔htmlize.el〕 by Hrvoje Niks
     (kill-buffer htmlizeOutputBuffer)
     resultStr ) )
 
-(defun xhm-htmlize-precode (εlangCodeMap)
+(defun xhm-htmlize-precode (φlang-code-map)
   "Replace text enclosed by “pre” tag to htmlized code.
 For example, if the cursor is somewhere between the pre tags <pre class=\"‹langCode›\">…▮…</pre>, then after calling, the text inside the pre tag will be htmlized.  That is, wrapped with many span tags for syntax coloring.
 
@@ -416,7 +418,7 @@ This function requires the `htmlize-buffer' from 〔htmlize.el〕 by Hrvoje Niks
             (ξlangCode (elt t78730 0))
             (p1 (elt t78730 1))
             (p2 (elt t78730 2))
-            (ξmodeName (elt (cdr (assoc ξlangCode εlangCodeMap)) 0))
+            (ξmodeName (elt (cdr (assoc ξlangCode φlang-code-map)) 0))
             )
 
         ;; remove beginning or trailing whitespace
@@ -440,7 +442,7 @@ This command does the inverse of `xhm-htmlize-precode'."
     (xhm-remove-span-tag-region (elt t55238 1) (elt t55238 2))
     ) )
 
-(defun xhm-htmlize-or-de-precode (langCodeMap)
+(defun xhm-htmlize-or-de-precode (φlang-code-map)
   "Call `xhm-htmlize-precode' or `xhm-dehtmlize-precode'."
   (interactive (list xhm-lang-name-map))
   (let* (
@@ -463,7 +465,7 @@ This command does the inverse of `xhm-htmlize-precode'."
       ;;         (let (
       ;;               langCodeResult
       ;;               ξmode-name)
-      ;;           (setq langCodeResult (assoc langCode langCodeMap))
+      ;;           (setq langCodeResult (assoc langCode φlang-code-map))
       ;;           (if (null langCodeResult)
       ;;               (progn (error "Your lang code 「%s」 is not recognized." langCode))
       ;;             (progn
@@ -568,57 +570,61 @@ This command does the inverse of `xhm-htmlize-precode'."
   (setq xhm-keymap (make-sparse-keymap))
 ;  (define-key xhm-keymap (kbd "C-c /") 'xhm-sgml-close-tag)
 ;  (define-key xhm-keymap (kbd "C-c <delete>") 'xhm-delete-tag)
+
   (define-key xhm-keymap (kbd "<C-right>") 'xhm-skip-tag-forward)
   (define-key xhm-keymap (kbd "<C-left>") 'xhm-skip-tag-backward)
 
-  ;; commands you should give a give to
-  ;; 'xhm-remove-html-tags
-  ;; 'xhm-htmlize-or-de-precode
-  ;; 'xhm-get-precode-make-new-file
-  ;; 'xhm-make-citation
-  ;; 'xhm-htmlize-keyboard-shortcut-notation
-  ;; 'xhm-source-url-linkify
-  ;; 'xhm-lines-to-html-list
-  ;; 'xhm-wrap-url
-  ;; 'xhm-wikipedia-linkify
-  ;; 'xhm-pre-source-code
-  ;; 'xhm-wrap-p-tag
-  ;; 'xhm-replace-html-chars-to-unicode
-  ;; 'xhm-replace-html-&<>-to-entities
-  ;; 'xhm-update-title
-  ;; 'xhm-htmlize-elisp-keywords
-  ;; 'xhm-emacs-to-windows-kbd-notation
-  ;; 'xhm-make-html-table
-  ;; 'xhm-rename-html-inline-image
-  ;; 'xhm-extract-url
-  ;; 'xhm-wrap-html-tag
+  (define-key xhm-keymap (kbd "<tab> <backspace>") 'xhm-remove-html-tags)
+  (define-key xhm-keymap (kbd "<tab> <return>") 'xhm-insert-br-tag)
+  (define-key xhm-keymap (kbd "<tab> -") 'xhm-insert-hr-tag)
+  (define-key xhm-keymap (kbd "<tab> .") 'xhm-lines-to-html-list)
+  (define-key xhm-keymap (kbd "<tab> 3") 'xhm-update-title)
+  (define-key xhm-keymap (kbd "<tab> 6") 'xhm-html-to-text)
+  (define-key xhm-keymap (kbd "<tab> 7") 'xhm-htmlize-or-de-precode)
+  (define-key xhm-keymap (kbd "<tab> 8") 'xhm-get-precode-make-new-file)
+  (define-key xhm-keymap (kbd "<tab> c") 'xhm-make-citation)
+  (define-key xhm-keymap (kbd "<tab> e") 'xhm-wrap-html-tag)
+  (define-key xhm-keymap (kbd "<tab> k") 'xhm-htmlize-keyboard-shortcut-notation)
+  (define-key xhm-keymap (kbd "<tab> l 3") 'xhm-source-url-linkify)
+  (define-key xhm-keymap (kbd "<tab> l s") 'xhm-make-link-defunct)
+  (define-key xhm-keymap (kbd "<tab> l u") 'xhm-wrap-url)
+  (define-key xhm-keymap (kbd "<tab> l w") 'xhm-wikipedia-linkify)
+  (define-key xhm-keymap (kbd "<tab> m") 'xhm-pre-source-code)
+  (define-key xhm-keymap (kbd "<tab> p") 'xhm-wrap-p-tag)
+  (define-key xhm-keymap (kbd "<tab> r ,") 'xhm-replace-html-chars-to-unicode)
+  (define-key xhm-keymap (kbd "<tab> r .") 'xhm-replace-html-&<>-to-entities)
+  (define-key xhm-keymap (kbd "<tab> r e") 'xhm-htmlize-elisp-keywords)
+  (define-key xhm-keymap (kbd "<tab> r k") 'xhm-emacs-to-windows-kbd-notation)
+  (define-key xhm-keymap (kbd "<tab> r m") 'xhm-make-html-table)
+  (define-key xhm-keymap (kbd "<tab> t r") 'xhm-rename-html-inline-image)
+  (define-key xhm-keymap (kbd "<tab> t u") 'xhm-extract-url)
+  (define-key xhm-keymap (kbd "<tab> w") (lambda () (interactive) (xhm-wrap-html-tag "b" "w")))
 
 )
 
 
 
-(defun xhm-tag-self-closing-p (εtag-name)
+(defun xhm-tag-self-closing-p (φtag-name)
   "Return true if the tag is a self-closing tag, ⁖ br."
   (interactive)
-  (member εtag-name  xhm-html5-self-close-tags) )
+  (member φtag-name  xhm-html5-self-close-tags) )
 
-(defun xhm-cursor-in-tag-markup-p (&optional bracketPositions)
+(defun xhm-cursor-in-tag-markup-p (&optional φbracketPositions)
   "Return true if cursor is inside a tag markup.
 For example,
  <p class=\"…\">…</p>
  If cursor is between the beginning p or ending p markup.
- bracketPositions is optional. If nil, then
- `xhm-get-bracket-positions' is called to get it.
-"
+ φbracketPositions is optional. If nil, then
+ `xhm-get-bracket-positions' is called to get it."
   (interactive)
   (let ( pl< pl> pr> pr< )
-      (when (not bracketPositions)
+      (when (not φbracketPositions)
         (progn
-          (setq bracketPositions (xhm-get-bracket-positions) )
-          (setq pl< (elt bracketPositions 0) )
-          (setq pl> (elt bracketPositions 1) )
-          (setq pr< (elt bracketPositions 2) )
-          (setq pr> (elt bracketPositions 3) )
+          (setq φbracketPositions (xhm-get-bracket-positions) )
+          (setq pl< (elt φbracketPositions 0) )
+          (setq pl> (elt φbracketPositions 1) )
+          (setq pr< (elt φbracketPositions 2) )
+          (setq pr> (elt φbracketPositions 3) )
           )
         )
       (if (and (< pl> pl<) (< pr> pr<))
@@ -626,22 +632,22 @@ For example,
         (progn (message "%s" "no") nil)
         ) ) )
 
-(defun xhm-end-tag-p (&optional bracketPositions)
+(defun xhm-end-tag-p (&optional φbracketPositions)
   "Return t if cursor is inside a begin tag, else nil.
 This function assumes your cursor is inside a tag, ⁖ <…▮…>
  It simply check if the left brack is followed by a slash or not.
 
-bracketPositions is optional. If nil, then
+φbracketPositions is optional. If nil, then
  `xhm-get-bracket-positions' is called to get it.
 "
   (let ( pl< pl> pr> pr< )
-      (when (not bracketPositions)
+      (when (not φbracketPositions)
         (progn
-          (setq bracketPositions (xhm-get-bracket-positions) )
-          (setq pl< (elt bracketPositions 0) )
-          (setq pl> (elt bracketPositions 1) )
-          (setq pr< (elt bracketPositions 2) )
-          (setq pr> (elt bracketPositions 3) )
+          (setq φbracketPositions (xhm-get-bracket-positions) )
+          (setq pl< (elt φbracketPositions 0) )
+          (setq pl> (elt φbracketPositions 1) )
+          (setq pr< (elt φbracketPositions 2) )
+          (setq pr> (elt φbracketPositions 3) )
           )
         )
 (goto-char pl<)
@@ -649,15 +655,15 @@ bracketPositions is optional. If nil, then
 (looking-at "/" )
        ) )
 
-(defun xhm-get-tag-name (&optional left<)
+(defun xhm-get-tag-name (&optional φleft<)
   "Return the tag name.
 This function assumes your cursor is inside a tag, ⁖ <…▮…>
 "
   (let ( p1 p2 )
-    (when (not left<)
-      (setq left< (search-backward "<") )
+    (when (not φleft<)
+      (setq φleft< (search-backward "<") )
       )
-    (goto-char left<)
+    (goto-char φleft<)
     (forward-char 1)
     (when (looking-at "/" )
       (forward-char 1)
@@ -835,13 +841,13 @@ See also:
     (setq myText (elt bds 0) p1 (elt bds 1) p2 (elt bds 2)  )
     (replace-pairs-region p1 p2 '( ["&" "＆"] ["<" "‹"] [">" "›"] ) ) ) )
 
-(defun xhm-replace-html-named-entities (ξstring &optional ξfrom ξto)
+(defun xhm-replace-html-named-entities (φstring &optional φfrom φto)
   "Replace HTML entities to Unicode character.
 For example, “&copy;” becomes “©”.
 
 When called interactively, work on current text block or text selection. (a “text block” is text between empty lines)
 
-When called in lisp code, if ξstring is non-nil, returns a changed string.  If ξstring nil, change the text in the region between positions ξfrom ξto.
+When called in lisp code, if φstring is non-nil, returns a changed string.  If φstring nil, change the text in the region between positions φfrom φto.
 
 The following HTML Entities are not replaced:
  &amp; &
@@ -860,8 +866,8 @@ See also:
        (list nil (elt bds 1) (elt bds 2))) ) )
 
   (let (workOnStringP inputStr outputStr)
-    (setq workOnStringP (if ξstring t nil))
-    (setq inputStr (if workOnStringP ξstring (buffer-substring-no-properties ξfrom ξto)))
+    (setq workOnStringP (if φstring t nil))
+    (setq inputStr (if workOnStringP φstring (buffer-substring-no-properties φfrom φto)))
 
     (setq outputStr
           (let ((case-fold-search nil))
@@ -879,16 +885,16 @@ See also:
     (if workOnStringP
         outputStr
       (save-excursion
-        (delete-region ξfrom ξto)
-        (goto-char ξfrom)
+        (delete-region φfrom φto)
+        (goto-char φfrom)
         (insert outputStr) )) ) )
 
-(defun xhm-get-html-file-title (fName)
+(defun xhm-get-html-file-title (φfname)
   "Return FNAME <title> tag's text.
 Assumes that the file contains the string
 “<title>…</title>”."
   (with-temp-buffer
-      (insert-file-contents fName nil nil nil t)
+      (insert-file-contents φfname nil nil nil t)
       (goto-char 1)
       (buffer-substring-no-properties
        (search-forward "<title>") (- (search-forward "</title>") 8))
@@ -948,28 +954,28 @@ It will become:
     (insert resultStr)
     ) )
 
-(defun xhm-make-html-table-string (textBlock ξdelimiter)
+(defun xhm-make-html-table-string (φtextBlock φdelimiter)
   "Transform the string TEXTBLOCK into a HTML marked up table.
 
  “\\n” is used as delimiter of rows. Extra newlines at the end is discarded.
-The argument ξdelimiter is a char used as the delimiter for columns.
+The argument φdelimiter is a char used as the delimiter for columns.
 
  See the parent function `xhm-make-html-table'."
-(let ((txtbk textBlock))
+(let ((txtbk φtextBlock))
     (setq txtbk (replace-regexp-in-string "\n+$" "\n" (concat txtbk "\n"))) ; make sure ending is just one newline char
-    (setq txtbk (replace-regexp-in-string ξdelimiter "</td><td>" txtbk))
+    (setq txtbk (replace-regexp-in-string φdelimiter "</td><td>" txtbk))
     (setq txtbk (replace-regexp-in-string "\n" "</td></tr>\n<tr><td>" txtbk))
     (setq txtbk (substring txtbk 0 -8)) ; delete the beginning “<tr><td>” in last line
     (concat "<table class=\"nrm\">\n<tr><td>" txtbk "</table>")
 ))
 
-(defun xhm-make-html-table (sep)
+(defun xhm-make-html-table (φsep)
   "Transform the current text block or selection into a HTML table.
 
 If there's a text selection, use the selection as input.
 Otherwise, used current text block delimited by empty lines.
 
-SEP is a string used as a delimitor for columns.
+ΦSEP is a string used as a delimitor for columns.
 
 For example:
 
@@ -992,7 +998,7 @@ with “*” as separator, becomes
     (setq p1 (elt bds 1) )
     (setq p2 (elt bds 2) )
     (delete-region p1 p2)
-    (insert (xhm-make-html-table-string myStr sep) "\n")
+    (insert (xhm-make-html-table-string myStr φsep) "\n")
   ))
 
 (defun xhm-make-html-table-undo ()
@@ -1048,11 +1054,11 @@ Note: only span tags of the form 「<span class=\"…\">…</span>」 are delete
       (replace-regexp-pairs-region (point-min) (point-max) '(["<span class=\"[^\"]+\">" ""]))
       (replace-pairs-region (point-min) (point-max) '( ["</span>" ""] ["&amp;" "&"] ["&lt;" "<"] ["&gt;" ">"] ) ) ) ) )
 
-(defun xhm-remove-html-tags (ξstring &optional ξfrom ξto)
-"Delete HTML tags in string or region.
+(defun xhm-remove-html-tags (φstring &optional φfrom φto)
+  "Delete HTML tags in string or region.
 Work on current text block or text selection. (a “text block” is text between empty lines)
 
-When called in lisp code, if ξstring is non-nil, returns a changed string.  If ξstring nil, change the text in the region between positions ξfrom ξto.
+When called in lisp code, if φstring is non-nil, returns a changed string.  If φstring nil, change the text in the region between positions φfrom φto.
 
 WARNING: this command does not cover all HTML tags or convert all HTML entities. For robust solution you might use: 「lynx -dump -display_charset=utf-8 URL」."
   (interactive
@@ -1062,8 +1068,8 @@ WARNING: this command does not cover all HTML tags or convert all HTML entities.
        (list nil (elt bds 1) (elt bds 2))) ) )
 
   (let (workOnStringP inputStr outputStr)
-    (setq workOnStringP (if ξstring t nil))
-    (setq inputStr (if workOnStringP ξstring (buffer-substring-no-properties ξfrom ξto)))
+    (setq workOnStringP (if φstring t nil))
+    (setq inputStr (if workOnStringP φstring (buffer-substring-no-properties φfrom φto)))
     (setq outputStr
           (let ((case-fold-search t) (tempStr inputStr))
 
@@ -1105,11 +1111,11 @@ tempStr
     (if workOnStringP
         outputStr
       (save-excursion
-        (delete-region ξfrom ξto)
-        (goto-char ξfrom)
+        (delete-region φfrom φto)
+        (goto-char φfrom)
         (insert outputStr) )) ) )
 
-;; (defun xhm-html-to-text (ξstring &optional ξfrom ξto)
+;; (defun xhm-html-to-text (φstring &optional φfrom φto)
 ;; "Convert html to plain text on text selection or current text block."
 ;;   (interactive
 ;;    (if (region-active-p)
@@ -1118,8 +1124,8 @@ tempStr
 ;;        (list nil (elt bds 1) (elt bds 2))) ) )
 
 ;;   (let (workOnStringP inputStr outputStr)
-;;     (setq workOnStringP (if ξstring t nil))
-;;     (setq inputStr (if workOnStringP ξstring (buffer-substring-no-properties ξfrom ξto)))
+;;     (setq workOnStringP (if φstring t nil))
+;;     (setq inputStr (if workOnStringP φstring (buffer-substring-no-properties φfrom φto)))
 ;;     (setq outputStr
 ;;           (let ((case-fold-search t) (tempStr inputStr))
 ;; (setq tempStr (replace-regexp-pairs-in-string tempStr '(
@@ -1142,11 +1148,11 @@ tempStr
 ;;     (if workOnStringP
 ;;         outputStr
 ;;       (save-excursion
-;;         (delete-region ξfrom ξto)
-;;         (goto-char ξfrom)
+;;         (delete-region φfrom φto)
+;;         (goto-char φfrom)
 ;;         (insert outputStr) )) ) )
 
-(defun xhm-html-to-text (ξstring &optional ξfrom ξto)
+(defun xhm-html-to-text (φstring &optional φfrom φto)
 "Convert html to plain text on text selection or current text block."
   (interactive
    (if (region-active-p)
@@ -1155,8 +1161,8 @@ tempStr
        (list nil (elt bds 1) (elt bds 2))) ) )
 
   (let (workOnStringP inputStr outputStr)
-    (setq workOnStringP (if ξstring t nil))
-    (setq inputStr (if workOnStringP ξstring (buffer-substring-no-properties ξfrom ξto)))
+    (setq workOnStringP (if φstring t nil))
+    (setq inputStr (if workOnStringP φstring (buffer-substring-no-properties φfrom φto)))
 
     (setq outputStr
           (with-temp-buffer
@@ -1190,8 +1196,8 @@ tempStr
         (goto-char ξfrom)
         (insert outputStr) )) ) )
 
-(defun xhm-extract-url (htmlText &optional convert-relative-URL-p)
-  "Returns a list of URLs in the HTML text string htmlText.
+(defun xhm-extract-url (φhtml-text &optional φconvert-relative-URL?)
+  "Returns a list of URLs in the HTML text string φhtml-text.
 
 When called interactively, use text selection as input, or current text block between empty lines. Output URLs in a buffer named 「*extract URL output*」, also copy output to `kill-ring'.
 
@@ -1201,7 +1207,7 @@ WARNING: this function extract all text of the form 「<a … href=\"…\" …>�
   (interactive (list (elt (get-selection-or-unit 'block) 0) current-prefix-arg ) )
   (let ((urlList (list)))
     (with-temp-buffer
-      (insert htmlText)
+      (insert φhtml-text)
       (goto-char 1)
       (while (re-search-forward "<a.+?href=\"\\([^\"]+?\\)\".+?>" nil "NOERROR")
         (setq urlList (cons (match-string 1) urlList))
@@ -1212,7 +1218,7 @@ WARNING: this function extract all text of the form 「<a … href=\"…\" …>�
         ) )
 (message "%S" urlList )
     (setq urlList (reverse urlList) )
-    (when convert-relative-URL-p
+    (when φconvert-relative-URL?
       (setq urlList
             (mapcar
              (lambda (ξx)
@@ -1231,7 +1237,7 @@ WARNING: this function extract all text of the form 「<a … href=\"…\" …>�
           ) ) )
     urlList ))
 
-(defun xhm-update-title ( εnewTitle)
+(defun xhm-update-title ( φnewTitle)
   "Update a HTML article's title and h1 tags.
 Update the <title>…</title> and <h1>…</h1> of current buffer."
   (interactive
@@ -1252,7 +1258,7 @@ Update the <title>…</title> and <h1>…</h1> of current buffer."
              (setq p2 (- (point) 1) )
              (delete-region p1 p2 )
              (goto-char p1)
-             (insert εnewTitle ) )
+             (insert φnewTitle ) )
 
       (if (search-forward "<h1>")
           (progn
@@ -1261,7 +1267,7 @@ Update the <title>…</title> and <h1>…</h1> of current buffer."
             (setq p2 (- (point) 1) )
             (delete-region p1 p2 )
             (goto-char p1)
-            (insert εnewTitle ) )
+            (insert φnewTitle ) )
         (progn
           (message "<h1> tag not found. adding") ) ) ) ))
 
@@ -1465,7 +1471,9 @@ The anchor text may be of 4 possibilities, depending on value of `universal-argu
     (insert resultLinkStr)
     ))
 
-(defun xhm-wikipedia-url-linkify (ξstring &optional ξfrom-to-pair)
+
+
+(defun xhm-wikipedia-url-linkify (φstring &optional φfrom-to-pair)
   "Make the URL at cursor point into a html link.
 
 If there is a text selection, use that as input.
@@ -1477,7 +1485,7 @@ http://en.wikipedia.org/wiki/Emacs
 
 When called interactively, work on current URL or text selection.
 
-When called in lisp code, if ξstring is non-nil, returns a changed string.  If ξstring nil, change the text in the region between positions in sequence ξfrom-to-pair."
+When called in lisp code, if φstring is non-nil, returns a changed string.  If φstring nil, change the text in the region between positions in sequence φfrom-to-pair."
 
   (interactive
    (if (region-active-p)
@@ -1485,27 +1493,27 @@ When called in lisp code, if ξstring is non-nil, returns a changed string.  If 
      (let ((bds (get-selection-or-unit 'url)) )
        (list nil (vector (aref bds 1) (aref bds 2))) ) ) )
 
-  (let (workOnStringP inputStr outputStr
-                      (ξfrom (elt ξfrom-to-pair 0))
-                      (ξto (elt ξfrom-to-pair 1)))
-    (setq workOnStringP (if () t nil))
-    (setq inputStr (if workOnStringP ξstring (buffer-substring-no-properties ξfrom ξto)))
+  (let (ξwork_on_string? inputStr outputStr
+                      (ξfrom (elt φfrom-to-pair 0))
+                      (ξto (elt φfrom-to-pair 1)))
+    (setq ξwork_on_string? (if () t nil))
+    (setq inputStr (if ξwork_on_string? φstring (buffer-substring-no-properties ξfrom ξto)))
 
     (setq outputStr (format "<a href=\"%s\">%s</a>" (url-percent-encode-string inputStr) (replace-regexp-in-string "_" " " (url-percent-decode-string (file-name-nondirectory inputStr) ) )) )
 
-    (if workOnStringP
+    (if ξwork_on_string?
         outputStr
       (progn
         (delete-region ξfrom ξto)
         (goto-char ξfrom)
         (insert outputStr) )) ) )
 
-(defun xhm-wrap-url (ξstring &optional ξfrom ξto)
+(defun xhm-wrap-url (φstring &optional φfrom φto)
   "Make the URL at cursor point into a html link.
 
 When called interactively, work on current glyph sequence or text selection.
 
-When called in lisp code, if ξstring is non-nil, returns a changed string.  If ξstring nil, change the text in the region between positions ξfrom ξto."
+When called in lisp code, if φstring is non-nil, returns a changed string.  If φstring nil, change the text in the region between positions φfrom φto."
   (interactive
    (if (region-active-p)
        (list nil (region-beginning) (region-end))
@@ -1513,15 +1521,15 @@ When called in lisp code, if ξstring is non-nil, returns a changed string.  If 
        (list nil (elt bds 1) (elt bds 2)) ) ) )
 
   (let (workOnStringP inputStr outputStr)
-    (setq workOnStringP (if ξstring t nil))
-    (setq inputStr (if workOnStringP ξstring (buffer-substring-no-properties ξfrom ξto)))
+    (setq workOnStringP (if φstring t nil))
+    (setq inputStr (if workOnStringP φstring (buffer-substring-no-properties φfrom φto)))
     (setq outputStr (concat "<a href=\"" (url-percent-encode-string inputStr) "\">" inputStr "</a>" )  )
 
     (if workOnStringP
         outputStr
       (save-excursion
-        (delete-region ξfrom ξto)
-        (goto-char ξfrom)
+        (delete-region φfrom φto)
+        (goto-char φfrom)
         (insert outputStr) )) )
   )
 
@@ -1551,7 +1559,7 @@ If there's a text selection, wrap p around each text block (separated by 2 newli
   (interactive)
   (xhm-wrap-html-tag "hr") )
 
-(defun xhm-emacs-to-windows-kbd-notation-string (inputStr)
+(defun xhm-emacs-to-windows-kbd-notation-string (φinput-string)
   "Change emacs keyboard-shortcut notation to Windows's notation.
 For example:
  「C-h f」⇒ 「Ctrl+h f」
@@ -1560,33 +1568,33 @@ For example:
 
 This command will do most emacs syntax correctly, but not 100% correct.
 "
-(let ((case-fold-search nil))
-(replace-regexp-pairs-in-string inputStr
-[
-                            ["C-\\(.\\)" "Ctrl+\\1"]
-                            ["M-\\(.\\)" "Meta+\\1"]
-                            ["S-\\(.\\)" "Shift+\\1"]
-                            ["s-\\(.\\)" "Super+\\1"]
-                            ["H-\\(.\\)" "Hyper+\\1"]
+  (let ((case-fold-search nil))
+    (replace-regexp-pairs-in-string φinput-string
+                                    [
+                                     ["C-\\(.\\)" "Ctrl+\\1"]
+                                     ["M-\\(.\\)" "Meta+\\1"]
+                                     ["S-\\(.\\)" "Shift+\\1"]
+                                     ["s-\\(.\\)" "Super+\\1"]
+                                     ["H-\\(.\\)" "Hyper+\\1"]
 
-                            ["<prior>" "PageUp"]
-                            ["<next>" "PageDown"]
-                            ["<home>" "Home"]
-                            ["<end>" "End"]
+                                     ["<prior>" "PageUp"]
+                                     ["<next>" "PageDown"]
+                                     ["<home>" "Home"]
+                                     ["<end>" "End"]
 
-                            ["<f1>" "F1"] ["<f2>" "F2"] ["<f3>" "F3"] ["<f4>" "F4"] ["<f5>" "F5"] ["<f6>" "F6"] ["<f7>" "F7"] ["<f8>" "F8"] ["<f9>" "F9"] ["<f10>" "F10"] ["<f11>" "F11"] ["<f12>" "F12"]
+                                     ["<f1>" "F1"] ["<f2>" "F2"] ["<f3>" "F3"] ["<f4>" "F4"] ["<f5>" "F5"] ["<f6>" "F6"] ["<f7>" "F7"] ["<f8>" "F8"] ["<f9>" "F9"] ["<f10>" "F10"] ["<f11>" "F11"] ["<f12>" "F12"]
 
-                            ["RET" "Enter"]
-                            ["<return>" "Return"]
-                            ["TAB" "Tab"]
-                            ["<tab>" "Tab"]
+                                     ["RET" "Enter"]
+                                     ["<return>" "Return"]
+                                     ["TAB" "Tab"]
+                                     ["<tab>" "Tab"]
 
-                            ["<right>" "→"]
-                            ["<left>" "←"]
-                            ["<up>" "↑"]
-                            ["<down>" "↓"]
+                                     ["<right>" "→"]
+                                     ["<left>" "←"]
+                                     ["<up>" "↑"]
+                                     ["<down>" "↓"]
 
-                            ["<insert>" "Insert"]
+                                     ["<insert>" "Insert"]
                             ["<delete>" "Delete"]
 
                             ["<backspace>" "Backspace"]
@@ -1846,20 +1854,20 @@ Case shouldn't matter, except when it's emacs's key notation.
 (defvar xhm-class-input-history nil "for input history of `xhm-wrap-html-tag'")
 (setq xhm-class-input-history (list) )
 
-(defun xhm-add-open/close-tag (εtag-name className p1 p2)
+(defun xhm-add-open/close-tag (φtag-name className p1 p2)
   "Add HTML open/close tags around region boundary p1 p2.
 This function does not `save-excursion'.
 "
   (let* (
         (classStr (if (or (equal className nil) (string= className "") ) "" (format " class=\"%s\"" className)))
-        (insStrLeft (format "<%s%s>" εtag-name classStr) )
-        (insStrRight (format "</%s>" εtag-name ) )
+        (insStrLeft (format "<%s%s>" φtag-name classStr) )
+        (insStrRight (format "</%s>" φtag-name ) )
         )
 
       (goto-char p1)
 
-      (if (xhm-tag-self-closing-p εtag-name)
-          (progn (insert (format "<%s%s />" εtag-name classStr) ))
+      (if (xhm-tag-self-closing-p φtag-name)
+          (progn (insert (format "<%s%s />" φtag-name classStr) ))
         (progn
           ;; (setq myText (buffer-substring-no-properties p1 p2)
           (insert insStrLeft )
@@ -1869,12 +1877,11 @@ This function does not `save-excursion'.
         )
       ) )
 
-(defun xhm-wrap-html-tag (εtag-name &optional className)
-  "Insert/wrap HTML tag to text selection or current word/line/text-block.
-When there's not text selection, the tag will be wrapped around current word/line/text-block, depending on the tag used.
+(defun xhm-wrap-html-tag (φtag-name &optional className)
+  "Insert/wrap HTML tag to current text unit or text selection.
+When there's no text selection, the tag will be wrapped around current {word, line, text-block}, depending on the tag used.
 
-If current line or word is empty, then insert open/end tags and place cursor between them.
-"
+If current line or word is empty, then insert open/end tags and place cursor between them."
 ;; If `universal-argument' is called first, then also prompt for a “class” attribute. Empty value means don't add the attribute.
   (interactive
    (list
@@ -1887,7 +1894,7 @@ If current line or word is empty, then insert open/end tags and place cursor bet
             lineWordBlock
             )
     (progn
-      (setq lineWordBlock (xhm-get-tag-type εtag-name) )
+      (setq lineWordBlock (xhm-get-tag-type φtag-name) )
       (setq bds
             (cond
              ((equal lineWordBlock "w") (get-selection-or-unit 'word))
@@ -1897,16 +1904,16 @@ If current line or word is empty, then insert open/end tags and place cursor bet
              ))
       (setq p1 (elt bds 1) )
       (setq p2 (elt bds 2) )
-      (xhm-add-open/close-tag εtag-name className p1 p2)
+      (xhm-add-open/close-tag φtag-name className p1 p2)
 
       (when ; put cursor between when input text is empty
-          (and (equal p1 p2) (not (xhm-tag-self-closing-p εtag-name)))
+          (and (equal p1 p2) (not (xhm-tag-self-closing-p φtag-name)))
           (progn (search-backward "</" ) )
          )
  ) ) )
 
-(defun xhm-pre-source-code (&optional εlang-code)
-  "Insert/wrap a <pre class=\"‹εlang-code›\"> tags to text selection or current text block.
+(defun xhm-pre-source-code (&optional φlang-code)
+  "Insert/wrap a <pre class=\"‹φlang-code›\"> tags to text selection or current text block.
 "
   (interactive
    (list
@@ -1917,10 +1924,10 @@ If current line or word is empty, then insert open/end tags and place cursor bet
     (setq bds (get-selection-or-unit 'block))
     (setq p1 (elt bds 1) )
     (setq p2 (elt bds 2) )
-    (xhm-add-open/close-tag "pre" εlang-code p1 p2))
+    (xhm-add-open/close-tag "pre" φlang-code p1 p2))
   )
 
-(defun xhm-rename-html-inline-image (εnew-file-path)
+(defun xhm-rename-html-inline-image (φnew-file-path)
   "Replace current HTML inline image's file name.
 
 When cursor is in HTML link file path, e.g.  <img src=\"gki/macosxlogo.png\" > and this command is called, it'll prompt user for a new name. The link path will be changed to the new name, the corresponding file will also be renamed. The operation is aborted if a name exists."
@@ -1940,13 +1947,13 @@ When cursor is in HTML link file path, e.g.  <img src=\"gki/macosxlogo.png\" > a
          ;; (setq ξffp (windows-style-path-to-unix (local-url-to-file-path ξffp)))
          )
 
-    (if (file-exists-p εnew-file-path)
-        (progn (error "file 「%s」 exist." εnew-file-path ))
+    (if (file-exists-p φnew-file-path)
+        (progn (error "file 「%s」 exist." φnew-file-path ))
       (progn
-        (rename-file ξffp εnew-file-path )
-        (message "rename to %s" εnew-file-path)
+        (rename-file ξffp φnew-file-path )
+        (message "rename to %s" φnew-file-path)
         (delete-region p1 p2)
-        (insert (xahsite-filepath-to-href-value εnew-file-path (or (buffer-file-name) default-directory)))
+        (insert (xahsite-filepath-to-href-value φnew-file-path (or (buffer-file-name) default-directory)))
         )
       )
     ))
