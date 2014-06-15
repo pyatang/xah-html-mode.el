@@ -11,10 +11,11 @@
 ;;; Commentary:
 ;; Major mode for editing pure HTML5 files.
 ;; home page: http://ergoemacs.org/emacs/xah-html-mode.html
-;; beta stage. Mostly just used by me. There are about 20 functions that act on HTML. They have inline doc. But don't have keys. No over-all doc.
+;; beta stage. Mostly just used by me. There are about 20 functions that act on HTML. They have inline doc.
 
 ;;; HISTORY
 
+;; 0.8, 2014-06-14 added keybindings, and some style cleanup.
 ;; 0.7.1, 2014-03-18 added a “main” tag to “xhm-wrap-html-tag”.
 ;; 0.7.0, 2014-01-26 xhm-wrap-html-tag now will always do a class. (no need for prefix arg anymore). Also, now the default tag is “div” instead of “span”
 ;; 0.6.9, 2014-01-11 xhm-make-link-defunct behavier changed slightly. See inline doc.
@@ -583,7 +584,7 @@ This command does the inverse of `xhm-htmlize-precode'."
   (define-key xhm-keymap (kbd "<tab> 7") 'xhm-htmlize-or-de-precode)
   (define-key xhm-keymap (kbd "<tab> 8") 'xhm-get-precode-make-new-file)
   (define-key xhm-keymap (kbd "<tab> c") 'xhm-make-citation)
-  (define-key xhm-keymap (kbd "<tab> e") 'xhm-wrap-html-tag)
+  (define-key xhm-keymap (kbd "<tab> SPC") 'xhm-wrap-html-tag)
   (define-key xhm-keymap (kbd "<tab> k") 'xhm-htmlize-keyboard-shortcut-notation)
   (define-key xhm-keymap (kbd "<tab> l 3") 'xhm-source-url-linkify)
   (define-key xhm-keymap (kbd "<tab> l s") 'xhm-make-link-defunct)
