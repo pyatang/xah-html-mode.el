@@ -15,6 +15,7 @@
 
 ;;; HISTORY
 
+;; 2014-06-16 renamed xhm-htmlize-or-de-precode to xhm-toggle-syntax-coloring-markup. lots of other changes.
 ;; 0.8, 2014-06-14 added keybindings, and some style cleanup.
 ;; 0.7.1, 2014-03-18 added a “main” tag to “xhm-wrap-html-tag”.
 ;; 0.7.0, 2014-01-26 xhm-wrap-html-tag now will always do a class. (no need for prefix arg anymore). Also, now the default tag is “div” instead of “span”
@@ -181,27 +182,8 @@
 
 (defcustom xhm-html5-self-close-tags nil
   "a list of HTML5 self-closing tag name. "
-:group 'xah-html-mode )
-(setq xhm-html5-self-close-tags
-'(
-"area"
-"base"
-"br"
-"col"
-"command"
-"embed"
-"hr"
-"img"
-"input"
-"keygen"
-"link"
-"meta"
-"param"
-"source"
-"track"
-"wbr"
-)
- )
+  :group 'xah-html-mode )
+(setq xhm-html5-self-close-tags '( "area" "base" "br" "col" "command" "embed" "hr" "img" "input" "keygen" "link" "meta" "param" "source" "track" "wbr"))
 
 (defvar xhm-css-color-names nil "a list of CSS color names.")
 (setq xhm-css-color-names
@@ -232,7 +214,7 @@
     (assoc φtag-name xhm-html5-tag-names)
     ) 0))
 
-(defvar xhm-lang-name-map nil "a alist that maps lang name. Each element has this form 「(‹lang code› . [‹emacs major mode name› ‹file_extension›])」")
+(defvar xhm-lang-name-map nil "a alist that maps lang name. Each element has this form 「(‹lang code› . [‹emacs major mode name› ‹file extension›])」")
 (setq xhm-lang-name-map
 '(
            ("ahk" . ["ahk-mode" "ahk"])
@@ -262,8 +244,8 @@
            ("xml" . ["sgml-mode" "xml"])
            ("html6" . ["xah-html6-mode" "html6"])
            ("java" . ["java-mode" "java"])
-           ("js" . ["js-mode" "js"])
-           ("nodejs" . ["js-mode" "js"])
+           ("js" . ["xah-js-mode" "js"])
+           ("nodejs" . ["xah-js-mode" "js"])
            ("lsl" . ["xlsl-mode" "lsl"])
            ("latex" . ["latex-mode" "txt"])
            ("ocaml" . ["tuareg-mode" "ocaml"])
@@ -294,10 +276,10 @@
 
            ) )
 
-;(defvar xhm-lang-name-list nil "a alist that maps lang name. Each element has this form 「(‹lang code› . [‹emacs major mode name› ‹file_extension›])」")
-; (mapcar (lambda (x) (car x)) xhm-lang-name-map)
+(defvar xhm-lang-name-list nil "a list of langcode.")
+(setq xhm-lang-name-list (mapcar 'car xhm-lang-name-map) )
 
-(defun xhm-precode-htmlized-p (p1 p2)
+(defun xhm-precode-htmlized? (p1 p2)
   "Return true if region p1 p2 is htmlized code.
 WARNING: it just losely check if it contains span tag."
   (progn
@@ -314,38 +296,14 @@ Your cursor must be between the tags.
 Returns a vector [langCode pos1 pos2], where pos1 pos2 are the boundary of the text content."
   (interactive)
   (let (langCode p1 p2)
-    (if (region-active-p)
-        (progn
-          (setq p1 (region-beginning) )
-          (setq p2 (region-end) )
-          ;; (setq langCode (read-string "langcode:"))
-          (setq langCode (ido-completing-read "langcode:" (mapcar (lambda (x) (car x)) xhm-lang-name-map) ))
-          (vector langCode p1 p2)
-          )
-
-;;       (progn
-;; (save-excursion
-;;         (re-search-backward "<pre class=\"\\([-A-Za-z0-9]+\\)\"") ; tag begin position
-;;         (setq langCode (match-string 1))
-;;         (setq p1 (search-forward ">"))    ; text content begin
-;;         (search-forward "</pre>")
-;;         (setq p2 (search-backward "<"))   ; text content end
-;;         (vector langCode p1 p2)
-;;  ))
-
-      (progn
-        (save-excursion
-          (re-search-backward "<pre class=\"\\([-A-Za-z0-9]+\\)\"") ; tag begin position
-          (setq langCode (match-string 1))
-          (setq p1 (search-forward ">"))    ; text content begin
-          (backward-char 1)
-          (xhm-skip-tag-forward)
-          (setq p2 (search-backward "<"))   ; text content end
-(message "thissss 「%s」" (vector langCode p1 p2)) ; todo xxxxxxxxx 2013-06-25
-          (vector langCode p1 p2)
-          ))
-
- ) ))
+    (save-excursion
+      (re-search-backward "<pre class=\"\\([-A-Za-z0-9]+\\)\"") ; tag begin position
+      (setq langCode (match-string 1))
+      (setq p1 (search-forward ">")) ; text content begin
+      (backward-char 1)
+      (xhm-skip-tag-forward)
+      (setq p2 (search-backward "</pre>")) ; text content end
+      (vector langCode p1 p2))))
 
 (defun xhm-get-precode-make-new-file (φlang-name-map)
   "Create a new file in current dir with text inside pre code block.
@@ -372,7 +330,7 @@ If there's a text selection, use that region as content."
       (split-window-vertically)
       (find-file (format "xx-testscript-%d.%s" (random 9008000 ) ξfileSuffix) )
       (insert ξtextContent)
-      (when (xhm-precode-htmlized-p (point-min) (point-max))
+      (when (xhm-precode-htmlized? (point-min) (point-max))
         (xhm-remove-span-tag-region (point-min) (point-max))
         )
 ;      (save-buffer )
@@ -402,87 +360,82 @@ This function requires the `htmlize-buffer' from 〔htmlize.el〕 by Hrvoje Niks
     (kill-buffer htmlizeOutputBuffer)
     resultStr ) )
 
+(defun xhm-langcode-to-major-mode-name (φlang-code φlang-code-map)
+  "get the `major-mode' name associated with φlang-code."
+  (interactive)
+  (elt (cdr (assoc φlang-code φlang-code-map)) 0))
+
 (defun xhm-htmlize-precode (φlang-code-map)
   "Replace text enclosed by “pre” tag to htmlized code.
-For example, if the cursor is somewhere between the pre tags <pre class=\"‹langCode›\">…▮…</pre>, then after calling, the text inside the pre tag will be htmlized.  That is, wrapped with many span tags for syntax coloring.
+
+For example, if the cursor is inside the pre tags <pre class=\"‹langCode›\">…▮…</pre>, then after calling, the text inside the pre tag will be htmlized. That is, wrapped with many span tags for syntax coloring.
 
 The opening tag must be of the form <pre class=\"‹langCode›\">.  The ‹langCode› determines what emacs mode is used to colorize the text. See `xhm-lang-name-map' for possible ‹langCode›.
 
-See also: `xhm-dehtmlize-precode', `xhm-htmlize-or-de-precode'.
+Cursor will end up right before </pre>.
+
+See also: `xhm-dehtmlize-precode', `xhm-toggle-syntax-coloring-markup'.
 This function requires the `htmlize-buffer' from 〔htmlize.el〕 by Hrvoje Niksic."
   (interactive (list xhm-lang-name-map))
-  (let (ξlangCode p1 p2 inputStr ξmodeName )
+  (let (ξlangCode p1 p2 ξmodeName )
+    (let* (
+           (t78730 (xhm-get-precode-langCode))
+           (ξlangCode (elt t78730 0))
+           (p1 (elt t78730 1))
+           (p2 (elt t78730 2))
+           ;; (ξmodeName (elt (cdr (assoc ξlangCode φlang-code-map)) 0))
+           (ξmodeName (xhm-langcode-to-major-mode-name ξlangCode φlang-code-map)))
+      ;; remove beginning or trailing whitespace
+      (xhm-htmlize-region p1 p2 ξmodeName t))))
 
-    (save-excursion
-      (let* (
-            (t78730 (xhm-get-precode-langCode))
-            (ξlangCode (elt t78730 0))
-            (p1 (elt t78730 1))
-            (p2 (elt t78730 2))
-            (ξmodeName (elt (cdr (assoc ξlangCode φlang-code-map)) 0))
-            )
+(defun xhm-htmlize-region (φp1 φp2 φmode-name &optional φtrim-whitespace-boundary?)
+  "Htmlized region φp1 φp2 using `major-mode' φmode-name.
 
-        ;; remove beginning or trailing whitespace
-        (setq inputStr (replace-regexp-in-string "\\`[ \t\n]*" "" (replace-regexp-in-string "[ \t\n]*\\'" "" (buffer-substring-no-properties p1 p2))) )
+This function requires the `htmlize-buffer' from 〔htmlize.el〕 by Hrvoje Niksic."
+  (interactive
+   (region-beginning)
+   (region-end)
+   (list (ido-completing-read "Chose mode for coloring:" (mapcar 'cdr auto-mode-alist))))
+  (let* (
+         (ξinput-str (buffer-substring-no-properties φp1 φp2))
+         (ξout-str 
+          (xhm-htmlize-string (if φtrim-whitespace-boundary?
+                                  (replace-regexp-in-string "\\`[ \t\n]*" "" (replace-regexp-in-string "[ \t\n]*\\'" "" ξinput-str))
+                                ξinput-str
+                                ) φmode-name)))
 
-        (progn
-          (let ((t38838 (xhm-htmlize-string inputStr ξmodeName) ))
-            (if (equal inputStr t38838)
-                (progn (message "No change needed."))
-              (progn
-                (delete-region p1 p2 )
-                (goto-char p1)
-                (insert t38838) ) ) ) ) ) ) ) )
+    (if (string= ξinput-str ξout-str)
+        nil
+      (progn
+        (delete-region φp1 φp2)
+        (insert ξout-str)))))
 
-(defun xhm-dehtmlize-precode ()
+(defun xhm-dehtmlize-precode (φp1 φp2)
   "Delete span tags between pre tags.
 Note: only span tags of the form 「<span class=\"…\">…</span>」 are deleted.
 This command does the inverse of `xhm-htmlize-precode'."
-  (interactive)
-  (let ((t55238 (xhm-get-precode-langCode)))
-    (xhm-remove-span-tag-region (elt t55238 1) (elt t55238 2))
-    ) )
+  (interactive
+   (let* (
+          (t55238 (xhm-get-precode-langCode))
+          (list (elt t55238 1) (elt t55238 2))
+          )
+     ))
+  (xhm-remove-span-tag-region φp1 φp2)
+ )
 
-(defun xhm-htmlize-or-de-precode (φlang-code-map)
+(defun xhm-toggle-syntax-coloring-markup (φlang-name-map)
   "Call `xhm-htmlize-precode' or `xhm-dehtmlize-precode'."
   (interactive (list xhm-lang-name-map))
   (let* (
-         (t34342 (xhm-get-precode-langCode))
-         (p1 (elt t34342 1))
-         (p2 (elt t34342 2))
-         )
-    (if (xhm-precode-htmlized-p p1 p2)
+         (ξt34342 (xhm-get-precode-langCode))
+         (p1 (elt ξt34342 1))
+         (p2 (elt ξt34342 2)))
+    (if (xhm-precode-htmlized? p1 p2)
         (progn
-          (message "doing de-htmlizing")
           ;; (xhm-remove-span-tag-region p1 p2)
-          (xhm-dehtmlize-precode)
-          )
-
+          (xhm-dehtmlize-precode p1 p2))
       (progn
-        (message "doing htmlizing")
-        (xhm-htmlize-precode xhm-lang-name-map) )
-      ;; (progn               ;; do htmlize
-      ;;         (message "doing htmlizing")
-      ;;         (let (
-      ;;               langCodeResult
-      ;;               ξmode-name)
-      ;;           (setq langCodeResult (assoc langCode φlang-code-map))
-      ;;           (if (null langCodeResult)
-      ;;               (progn (error "Your lang code 「%s」 is not recognized." langCode))
-      ;;             (progn
-      ;;               (save-excursion
-      ;;                 (setq ξmode-name (elt (cdr langCodeResult) 0))
-      ;;                 (let ((newInStr inputStr) resultStr)
-      ;;                   (setq newInStr (replace-regexp-in-string "\\`[ \t\n]*" "" newInStr) ) ; trim beginning
-      ;;                   (setq newInStr (replace-regexp-in-string "[ \t\n]+\\'" "" newInStr) ) ; trim trailing
-      ;;                   (setq resultStr (xhm-htmlize-string newInStr ξmode-name))
-      ;;                   (if (equal (length inputStr) (length resultStr))
-      ;;                       (message "%s" "htmlize done, but no change necessary.")
-      ;;                     (progn
-      ;;                       (delete-region p1 p2)
-      ;;                       (insert resultStr) ) ) ) )) )) )
-
-      ) ))
+        (xhm-htmlize-precode φlang-name-map)))))
 
 
 ;; syntax table
@@ -581,7 +534,7 @@ This command does the inverse of `xhm-htmlize-precode'."
   (define-key xhm-keymap (kbd "<tab> .") 'xhm-lines-to-html-list)
   (define-key xhm-keymap (kbd "<tab> 3") 'xhm-update-title)
   (define-key xhm-keymap (kbd "<tab> 6") 'xhm-html-to-text)
-  (define-key xhm-keymap (kbd "<tab> 7") 'xhm-htmlize-or-de-precode)
+  (define-key xhm-keymap (kbd "<tab> 7") 'xhm-toggle-syntax-coloring-markup)
   (define-key xhm-keymap (kbd "<tab> 8") 'xhm-get-precode-make-new-file)
   (define-key xhm-keymap (kbd "<tab> c") 'xhm-make-citation)
   (define-key xhm-keymap (kbd "<tab> SPC") 'xhm-wrap-html-tag)
@@ -605,12 +558,12 @@ This command does the inverse of `xhm-htmlize-precode'."
 
 
 
-(defun xhm-tag-self-closing-p (φtag-name)
+(defun xhm-tag-self-closing? (φtag-name)
   "Return true if the tag is a self-closing tag, ⁖ br."
   (interactive)
   (member φtag-name  xhm-html5-self-close-tags) )
 
-(defun xhm-cursor-in-tag-markup-p (&optional φbracketPositions)
+(defun xhm-cursor-in-tag-markup? (&optional φbracketPositions)
   "Return true if cursor is inside a tag markup.
 For example,
  <p class=\"…\">…</p>
@@ -633,7 +586,7 @@ For example,
         (progn (message "%s" "no") nil)
         ) ) )
 
-(defun xhm-end-tag-p (&optional φbracketPositions)
+(defun xhm-end-tag? (&optional φbracketPositions)
   "Return t if cursor is inside a begin tag, else nil.
 This function assumes your cursor is inside a tag, ⁖ <…▮…>
  It simply check if the left brack is followed by a slash or not.
@@ -725,9 +678,9 @@ Also delete the matching beginning/ending tag."
     ;; if so, O shit, it's complex. Need to determine if one of the nested has the same tag name. and and …
     ;; if not, then we can proceed. Just find the closing tag and delete it. Also the beginning.
     (let ( )
-      (if (xhm-cursor-in-tag-markup-p)
+      (if (xhm-cursor-in-tag-markup?)
           (progn
-            (if (xhm-end-tag-p)
+            (if (xhm-end-tag?)
                 (progn (message "end %s" (xhm-get-tag-name)))
               (progn (message "begin %s" (xhm-get-tag-name))
                      )
@@ -866,9 +819,9 @@ See also:
      (let ((bds (get-selection-or-unit 'block)) )
        (list nil (elt bds 1) (elt bds 2))) ) )
 
-  (let (workOnStringP inputStr outputStr)
-    (setq workOnStringP (if φstring t nil))
-    (setq inputStr (if workOnStringP φstring (buffer-substring-no-properties φfrom φto)))
+  (let (workOnString? inputStr outputStr)
+    (setq workOnString? (if φstring t nil))
+    (setq inputStr (if workOnString? φstring (buffer-substring-no-properties φfrom φto)))
 
     (setq outputStr
           (let ((case-fold-search nil))
@@ -883,7 +836,7 @@ See also:
  )
             )  )
 
-    (if workOnStringP
+    (if workOnString?
         outputStr
       (save-excursion
         (delete-region φfrom φto)
@@ -1047,13 +1000,15 @@ And the following HTML entities are changed:
  &lt; ⇒ <
  &gt; ⇒ >
 
-Note: only span tags of the form 「<span class=\"…\">…</span>」 are deleted."
+Note: only span tags of the form 「<span class=\"…\">…</span>」 are deleted.
+
+When done, the cursor is placed at p2."
   (interactive "r")
-  (save-excursion
-    (save-restriction
-      (narrow-to-region p1 p2)
-      (replace-regexp-pairs-region (point-min) (point-max) '(["<span class=\"[^\"]+\">" ""]))
-      (replace-pairs-region (point-min) (point-max) '( ["</span>" ""] ["&amp;" "&"] ["&lt;" "<"] ["&gt;" ">"] ) ) ) ) )
+  (save-restriction
+    (narrow-to-region p1 p2)
+    (replace-regexp-pairs-region (point-min) (point-max) '(["<span class=\"[^\"]+\">" ""]))
+    (replace-pairs-region (point-min) (point-max) '( ["</span>" ""] ["&amp;" "&"] ["&lt;" "<"] ["&gt;" ">"] )) 
+    (goto-char (point-max))))
 
 (defun xhm-remove-html-tags (φstring &optional φfrom φto)
   "Delete HTML tags in string or region.
@@ -1068,9 +1023,9 @@ WARNING: this command does not cover all HTML tags or convert all HTML entities.
      (let ((bds (get-selection-or-unit 'block)) )
        (list nil (elt bds 1) (elt bds 2))) ) )
 
-  (let (workOnStringP inputStr outputStr)
-    (setq workOnStringP (if φstring t nil))
-    (setq inputStr (if workOnStringP φstring (buffer-substring-no-properties φfrom φto)))
+  (let (workOnString? inputStr outputStr)
+    (setq workOnString? (if φstring t nil))
+    (setq inputStr (if workOnString? φstring (buffer-substring-no-properties φfrom φto)))
     (setq outputStr
           (let ((case-fold-search t) (tempStr inputStr))
 
@@ -1109,7 +1064,7 @@ WARNING: this command does not cover all HTML tags or convert all HTML entities.
 tempStr
  ) )
 
-    (if workOnStringP
+    (if workOnString?
         outputStr
       (save-excursion
         (delete-region φfrom φto)
@@ -1124,9 +1079,9 @@ tempStr
 ;;      (let ((bds (get-selection-or-unit 'block)) )
 ;;        (list nil (elt bds 1) (elt bds 2))) ) )
 
-;;   (let (workOnStringP inputStr outputStr)
-;;     (setq workOnStringP (if φstring t nil))
-;;     (setq inputStr (if workOnStringP φstring (buffer-substring-no-properties φfrom φto)))
+;;   (let (workOnString? inputStr outputStr)
+;;     (setq workOnString? (if φstring t nil))
+;;     (setq inputStr (if workOnString? φstring (buffer-substring-no-properties φfrom φto)))
 ;;     (setq outputStr
 ;;           (let ((case-fold-search t) (tempStr inputStr))
 ;; (setq tempStr (replace-regexp-pairs-in-string tempStr '(
@@ -1146,7 +1101,7 @@ tempStr
 
 ;; (setq outputStr (xhm-remove-html-tags outputStr) )
 
-;;     (if workOnStringP
+;;     (if workOnString?
 ;;         outputStr
 ;;       (save-excursion
 ;;         (delete-region φfrom φto)
@@ -1161,9 +1116,9 @@ tempStr
      (let ((bds (get-selection-or-unit 'block)) )
        (list nil (elt bds 1) (elt bds 2))) ) )
 
-  (let (workOnStringP inputStr outputStr)
-    (setq workOnStringP (if φstring t nil))
-    (setq inputStr (if workOnStringP φstring (buffer-substring-no-properties φfrom φto)))
+  (let (workOnString? inputStr outputStr)
+    (setq workOnString? (if φstring t nil))
+    (setq inputStr (if workOnString? φstring (buffer-substring-no-properties φfrom φto)))
 
     (setq outputStr
           (with-temp-buffer
@@ -1190,7 +1145,7 @@ tempStr
 
 (setq outputStr (xhm-remove-html-tags outputStr) )
 
-    (if workOnStringP
+    (if workOnString?
         outputStr
       (save-excursion
         (delete-region ξfrom ξto)
@@ -1302,15 +1257,15 @@ The order of lines for {title, author, date/time, url} needs not be in that orde
 
     (setq myList (split-string inputText "[[:space:]]*\n[[:space:]]*" t) )
 
-    (let (εx (case-fold-search t))
+    (let (ξx (case-fold-search t))
       (while (> (length myList) 0)
-        (setq εx (pop myList) )
+        (setq ξx (pop myList) )
         (cond
-         ((string-match "^https?://" εx ) (setq ξurl εx))
-         ((string-match "^ *[bB]y " εx ) (setq ξauthor εx))
-         ((string-match "^ *author[: ]" εx ) (setq ξauthor εx))
-         ((is-datetimestamp-p εx) (setq ξdate εx))
-         (t (setq ξtitle εx))
+         ((string-match "^https?://" ξx ) (setq ξurl ξx))
+         ((string-match "^ *[bB]y " ξx ) (setq ξauthor ξx))
+         ((string-match "^ *author[: ]" ξx ) (setq ξauthor ξx))
+         ((is-datetimestamp-p ξx) (setq ξdate ξx))
+         (t (setq ξtitle ξx))
          )
         )
       )
@@ -1521,12 +1476,12 @@ When called in lisp code, if φstring is non-nil, returns a changed string.  If 
      (let ((bds (unit-at-cursor 'glyphs)) )
        (list nil (elt bds 1) (elt bds 2)) ) ) )
 
-  (let (workOnStringP inputStr outputStr)
-    (setq workOnStringP (if φstring t nil))
-    (setq inputStr (if workOnStringP φstring (buffer-substring-no-properties φfrom φto)))
+  (let (workOnString? inputStr outputStr)
+    (setq workOnString? (if φstring t nil))
+    (setq inputStr (if workOnString? φstring (buffer-substring-no-properties φfrom φto)))
     (setq outputStr (concat "<a href=\"" (url-percent-encode-string inputStr) "\">" inputStr "</a>" )  )
 
-    (if workOnStringP
+    (if workOnString?
         outputStr
       (save-excursion
         (delete-region φfrom φto)
@@ -1867,7 +1822,7 @@ This function does not `save-excursion'.
 
       (goto-char p1)
 
-      (if (xhm-tag-self-closing-p φtag-name)
+      (if (xhm-tag-self-closing? φtag-name)
           (progn (insert (format "<%s%s />" φtag-name classStr) ))
         (progn
           ;; (setq myText (buffer-substring-no-properties p1 p2)
@@ -1908,7 +1863,7 @@ If current line or word is empty, then insert open/end tags and place cursor bet
       (xhm-add-open/close-tag φtag-name className p1 p2)
 
       (when ; put cursor between when input text is empty
-          (and (equal p1 p2) (not (xhm-tag-self-closing-p φtag-name)))
+          (and (equal p1 p2) (not (xhm-tag-self-closing? φtag-name)))
           (progn (search-backward "</" ) )
          )
  ) ) )
