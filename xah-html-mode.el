@@ -279,7 +279,7 @@
 (defvar xhm-lang-name-list nil "a list of langcode.")
 (setq xhm-lang-name-list (mapcar 'car xhm-lang-name-map) )
 
-(defun xhm-precode-htmlized? (p1 p2)
+(defun xhm-precode-htmlized-p (p1 p2)
   "Return true if region p1 p2 is htmlized code.
 WARNING: it just losely check if it contains span tag."
   (progn
@@ -319,24 +319,18 @@ If there's a text selection, use that region as content."
         (ξlangCode (elt ξxx 0))
         (p1 (elt ξxx 1))
         (p2 (elt ξxx 2))
-        (ξtextContent (buffer-substring-no-properties p1 p2) )
-
+        (ξtextContent (buffer-substring-no-properties p1 p2))
         (ξyy (cdr (assoc ξlangCode φlang-name-map)))
-        (ξfileSuffix (elt ξyy 1))
-        )
-
+        (ξfileSuffix (elt ξyy 1)))
     (progn
       (delete-region p1 p2 )
       (split-window-vertically)
-      (find-file (format "xx-testscript-%d.%s" (random 9008000 ) ξfileSuffix) )
+      (find-file (format "xx-testscript-%d.%s" (random 9008000 ) ξfileSuffix))
       (insert ξtextContent)
-      (when (xhm-precode-htmlized? (point-min) (point-max))
-        (xhm-remove-span-tag-region (point-min) (point-max))
-        )
-;      (save-buffer )
-      )
-    )
-  )
+      (when (xhm-precode-htmlized-p (point-min) (point-max))
+        (xhm-remove-span-tag-region (point-min) (point-max))))))
+
+
 
 (defun xhm-htmlize-string (φsource-code-str φmajor-mode-name)
   "Take φsource-code-str and return a htmlized version using major mode φmajor-mode-name.
@@ -398,7 +392,7 @@ This function requires the `htmlize-buffer' from 〔htmlize.el〕 by Hrvoje Niks
    (list (ido-completing-read "Chose mode for coloring:" (mapcar 'cdr auto-mode-alist))))
   (let* (
          (ξinput-str (buffer-substring-no-properties φp1 φp2))
-         (ξout-str 
+         (ξout-str
           (xhm-htmlize-string (if φtrim-whitespace-boundary?
                                   (replace-regexp-in-string "\\`[ \t\n]*" "" (replace-regexp-in-string "[ \t\n]*\\'" "" ξinput-str))
                                 ξinput-str
@@ -430,69 +424,82 @@ This command does the inverse of `xhm-htmlize-precode'."
          (ξt34342 (xhm-get-precode-langCode))
          (p1 (elt ξt34342 1))
          (p2 (elt ξt34342 2)))
-    (if (xhm-precode-htmlized? p1 p2)
+    (if (xhm-precode-htmlized-p p1 p2)
         (progn
           ;; (xhm-remove-span-tag-region p1 p2)
           (xhm-dehtmlize-precode p1 p2))
       (progn
         (xhm-htmlize-precode φlang-name-map)))))
 
+(defun xhm-redo-syntax-coloring-buffer ()
+  "redo all pre lang code syntax coloring in current html page."
+  (interactive)
+  (let (langCode p1 p2)
+    (goto-char (point-min))
+    (while
+      (re-search-forward "<pre class=\"\\([-A-Za-z0-9]+\\)\">" nil "NOERROR")
+      (setq langCode (match-string 1))
+      (setq p1 (point))
+      (backward-char 1)
+      (xhm-skip-tag-forward)
+      (search-backward "</pre>")
+      (setq p2 (point))
+      (save-restriction
+        (narrow-to-region p1 p2)
+        (xhm-dehtmlize-precode (point-min) (point-max))
+        (xhm-htmlize-region (point-min) (point-max) (xhm-langcode-to-major-mode-name langCode xhm-lang-name-map) t)))))
+
 
 ;; syntax table
 (defvar xhm-syntax-table nil "Syntax table for `xah-html-mode'.")
+
 (setq xhm-syntax-table
       (let ((synTable (make-syntax-table)))
+        (modify-syntax-entry ?\n "> b" synTable)
+        (modify-syntax-entry ?\! "." synTable)
+        (modify-syntax-entry ?\" "\"" synTable)
+        (modify-syntax-entry ?\# "." synTable)
+        (modify-syntax-entry ?\$ "." synTable)
+        (modify-syntax-entry ?\% "." synTable)
+        (modify-syntax-entry ?\& "." synTable)
+        (modify-syntax-entry ?\' "." synTable)
+        (modify-syntax-entry ?\( "()" synTable)
+        (modify-syntax-entry ?\) ")(" synTable)
+        (modify-syntax-entry ?\* "." synTable)
+        (modify-syntax-entry ?\+ "." synTable)
+        (modify-syntax-entry ?\, "." synTable)
+        (modify-syntax-entry ?\- "_" synTable)
+        (modify-syntax-entry ?\. "." synTable)
+        (modify-syntax-entry ?\/ "." synTable)
+        (modify-syntax-entry '(?0 . ?9) "w" synTable)
+        (modify-syntax-entry ?\: "." synTable)
+        (modify-syntax-entry ?\; "." synTable)
+        (modify-syntax-entry ?\< "." synTable)
+        (modify-syntax-entry ?\= "." synTable)
+        (modify-syntax-entry ?\> "." synTable)
+        (modify-syntax-entry ?\? "." synTable)
+        (modify-syntax-entry ?\@ "." synTable)
+        (modify-syntax-entry '(?A . ?Z) "w" synTable)
+        (modify-syntax-entry ?\[ "(]" synTable)
+        (modify-syntax-entry ?\\ "\\" synTable)
+        (modify-syntax-entry ?\] ")[" synTable)
+        (modify-syntax-entry ?^ "." synTable) ; can't use blackslash, because it became control
+        (modify-syntax-entry ?\_ "_" synTable)
+        (modify-syntax-entry ?\` "." synTable)
+        (modify-syntax-entry '(?a . ?z) "w" synTable)
+        (modify-syntax-entry ?\{ "(}" synTable)
+        (modify-syntax-entry ?\| "." synTable)
+        (modify-syntax-entry ?\} "){" synTable)
+        (modify-syntax-entry ?\~ "." synTable)
 
- (progn                                  ; all on US keyboard
+        (modify-syntax-entry ?“ "(”" synTable)
+        (modify-syntax-entry ?” ")“" synTable)
 
- ;; (modify-syntax-entry ?\" "\"" synTable)
-   (modify-syntax-entry ?' "w" synTable)
+        (modify-syntax-entry ?‘ "(’" synTable)
+        (modify-syntax-entry ?’ ")‘" synTable)
 
- ;; (modify-syntax-entry ?, "." synTable)
- ;; (modify-syntax-entry ?. "." synTable)
- ;; (modify-syntax-entry ?: "." synTable)
- ;; (modify-syntax-entry ?? "." synTable)
- ;; (modify-syntax-entry ?\; "." synTable)
-
- ;; (modify-syntax-entry ?! "." synTable)
- ;; (modify-syntax-entry ?@ "." synTable)
- ;; (modify-syntax-entry ?# "." synTable)
- ;; (modify-syntax-entry ?$ "." synTable)
- ;; (modify-syntax-entry ?% "." synTable)
- ;; (modify-syntax-entry ?^ "." synTable)
- ;; (modify-syntax-entry ?& "." synTable)
- ;; (modify-syntax-entry ?* "." synTable)
- ;; (modify-syntax-entry ?+ "." synTable)
- ;; (modify-syntax-entry ?= "." synTable)
- ;; (modify-syntax-entry ?/ "." synTable)
- ;; (modify-syntax-entry ?\ "/" synTable)
-
- ;; (modify-syntax-entry ?_ "_" synTable)
- ;; (modify-syntax-entry ?- "w" synTable)
-
- ;; (modify-syntax-entry ?( "(" synTable)
- ;; (modify-syntax-entry ?) ")" synTable)
- ;; (modify-syntax-entry ?[ "(" synTable)
- ;; (modify-syntax-entry ?] ")" synTable)
- ;; (modify-syntax-entry ?{ "(" synTable)
- ;; (modify-syntax-entry ?} ")" synTable)
-        (modify-syntax-entry ?< "." synTable)
-        (modify-syntax-entry ?> "." synTable)
-
- ;; (modify-syntax-entry ?| "." synTable)
- ;; (modify-syntax-entry ?` "." synTable)
- ;; (modify-syntax-entry ?~ "." synTable)
- )
-
-        (modify-syntax-entry ?“ "(" synTable)
-        (modify-syntax-entry ?” ")" synTable)
-        (modify-syntax-entry ?‘ "(" synTable)
-        (modify-syntax-entry ?’ ")" synTable)
-
-;; (modify-syntax-entry ?“ "\"" synTable)
-;; (modify-syntax-entry ?” "\"" synTable)
-
-        synTable))
+        synTable)
+)
 
 
 
@@ -536,6 +543,7 @@ This command does the inverse of `xhm-htmlize-precode'."
   (define-key xhm-keymap (kbd "<tab> 6") 'xhm-html-to-text)
   (define-key xhm-keymap (kbd "<tab> 7") 'xhm-toggle-syntax-coloring-markup)
   (define-key xhm-keymap (kbd "<tab> 8") 'xhm-get-precode-make-new-file)
+  (define-key xhm-keymap (kbd "<tab> 9") 'xhm-redo-syntax-coloring-buffer)
   (define-key xhm-keymap (kbd "<tab> c") 'xhm-make-citation)
   (define-key xhm-keymap (kbd "<tab> SPC") 'xhm-wrap-html-tag)
   (define-key xhm-keymap (kbd "<tab> k") 'xhm-htmlize-keyboard-shortcut-notation)
@@ -552,8 +560,8 @@ This command does the inverse of `xhm-htmlize-precode'."
   (define-key xhm-keymap (kbd "<tab> r m") 'xhm-make-html-table)
   (define-key xhm-keymap (kbd "<tab> t r") 'xhm-rename-html-inline-image)
   (define-key xhm-keymap (kbd "<tab> t u") 'xhm-extract-url)
+  (define-key xhm-keymap (kbd "<tab> r v") 'xhm-make-html-table-undo)
   (define-key xhm-keymap (kbd "<tab> w") (lambda () (interactive) (xhm-wrap-html-tag "b" "w")))
-
 )
 
 
@@ -1007,7 +1015,7 @@ When done, the cursor is placed at p2."
   (save-restriction
     (narrow-to-region p1 p2)
     (replace-regexp-pairs-region (point-min) (point-max) '(["<span class=\"[^\"]+\">" ""]))
-    (replace-pairs-region (point-min) (point-max) '( ["</span>" ""] ["&amp;" "&"] ["&lt;" "<"] ["&gt;" ">"] )) 
+    (replace-pairs-region (point-min) (point-max) '( ["</span>" ""] ["&amp;" "&"] ["&lt;" "<"] ["&gt;" ">"] ))
     (goto-char (point-max))))
 
 (defun xhm-remove-html-tags (φstring &optional φfrom φto)
@@ -1125,7 +1133,7 @@ tempStr
             (insert inputStr)
             (goto-char 1)
             (let ((case-fold-search nil) )
-              (replace-pairs-region 1 (point-max) 
+              (replace-pairs-region 1 (point-max)
  '(
    ["<script>\\([^\\<]+?\\)</script>" ""]
    ["<li>" "<li>• " ]
@@ -1426,8 +1434,6 @@ The anchor text may be of 4 possibilities, depending on value of `universal-argu
     (delete-region p1-tag p2-tag)
     (insert resultLinkStr)
     ))
-
-
 
 (defun xhm-wikipedia-url-linkify (φstring &optional φfrom-to-pair)
   "Make the URL at cursor point into a html link.
