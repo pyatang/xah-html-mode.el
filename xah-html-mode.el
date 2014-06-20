@@ -431,13 +431,19 @@ This command does the inverse of `xhm-htmlize-precode'."
       (progn
         (xhm-htmlize-precode φlang-name-map)))))
 
-(defun xhm-redo-syntax-coloring-buffer ()
+(defun xhm-redo-syntax-coloring-buffer (&optional φlang-code)
   "redo all pre lang code syntax coloring in current html page."
   (interactive)
   (let (langCode p1 p2)
+
+    ;; (ξsearch-string
+    ;;  (if φlang-code
+    ;;      (progn (format "<pre class=\"\\([-A-Za-z0-9]+\\)\">" φlang-code))
+    ;;    (progn "<pre class=\"\\([-A-Za-z0-9]+\\)\">")))
+
     (goto-char (point-min))
     (while
-      (re-search-forward "<pre class=\"\\([-A-Za-z0-9]+\\)\">" nil "NOERROR")
+        (re-search-forward "<pre class=\"\\([-A-Za-z0-9]+\\)\">" nil "NOERROR")
       (setq langCode (match-string 1))
       (setq p1 (point))
       (backward-char 1)
@@ -529,39 +535,41 @@ This command does the inverse of `xhm-htmlize-precode'."
 (defvar xhm-keymap nil "Keybinding for `xah-html-mode'")
 (progn
   (setq xhm-keymap (make-sparse-keymap))
-;  (define-key xhm-keymap (kbd "C-c /") 'xhm-sgml-close-tag)
-;  (define-key xhm-keymap (kbd "C-c <delete>") 'xhm-delete-tag)
-
   (define-key xhm-keymap (kbd "<C-right>") 'xhm-skip-tag-forward)
   (define-key xhm-keymap (kbd "<C-left>") 'xhm-skip-tag-backward)
 
-  (define-key xhm-keymap (kbd "<tab> <backspace>") 'xhm-remove-html-tags)
-  (define-key xhm-keymap (kbd "<tab> <return>") 'xhm-insert-br-tag)
-  (define-key xhm-keymap (kbd "<tab> -") 'xhm-insert-hr-tag)
-  (define-key xhm-keymap (kbd "<tab> .") 'xhm-lines-to-html-list)
-  (define-key xhm-keymap (kbd "<tab> 3") 'xhm-update-title)
-  (define-key xhm-keymap (kbd "<tab> 6") 'xhm-html-to-text)
-  (define-key xhm-keymap (kbd "<tab> 7") 'xhm-toggle-syntax-coloring-markup)
-  (define-key xhm-keymap (kbd "<tab> 8") 'xhm-get-precode-make-new-file)
-  (define-key xhm-keymap (kbd "<tab> 9") 'xhm-redo-syntax-coloring-buffer)
-  (define-key xhm-keymap (kbd "<tab> c") 'xhm-make-citation)
-  (define-key xhm-keymap (kbd "<tab> SPC") 'xhm-wrap-html-tag)
-  (define-key xhm-keymap (kbd "<tab> k") 'xhm-htmlize-keyboard-shortcut-notation)
-  (define-key xhm-keymap (kbd "<tab> l 3") 'xhm-source-url-linkify)
-  (define-key xhm-keymap (kbd "<tab> l s") 'xhm-make-link-defunct)
-  (define-key xhm-keymap (kbd "<tab> l u") 'xhm-wrap-url)
-  (define-key xhm-keymap (kbd "<tab> l w") 'xhm-wikipedia-linkify)
-  (define-key xhm-keymap (kbd "<tab> m") 'xhm-pre-source-code)
-  (define-key xhm-keymap (kbd "<tab> p") 'xhm-wrap-p-tag)
-  (define-key xhm-keymap (kbd "<tab> r ,") 'xhm-replace-html-chars-to-unicode)
-  (define-key xhm-keymap (kbd "<tab> r .") 'xhm-replace-html-&<>-to-entities)
-  (define-key xhm-keymap (kbd "<tab> r e") 'xhm-htmlize-elisp-keywords)
-  (define-key xhm-keymap (kbd "<tab> r k") 'xhm-emacs-to-windows-kbd-notation)
-  (define-key xhm-keymap (kbd "<tab> r m") 'xhm-make-html-table)
-  (define-key xhm-keymap (kbd "<tab> t r") 'xhm-rename-html-inline-image)
-  (define-key xhm-keymap (kbd "<tab> t u") 'xhm-extract-url)
-  (define-key xhm-keymap (kbd "<tab> r v") 'xhm-make-html-table-undo)
-  (define-key xhm-keymap (kbd "<tab> w") (lambda () (interactive) (xhm-wrap-html-tag "b" "w")))
+  (define-prefix-command 'xhm-single-keys-keymap)
+
+  (define-key xhm-keymap (kbd "<menu> e") xhm-single-keys-keymap)
+  (define-key xhm-keymap (kbd "<tab>") xhm-single-keys-keymap)
+
+  (define-key xhm-single-keys-keymap (kbd "<backspace>") 'xhm-remove-html-tags)
+  (define-key xhm-single-keys-keymap (kbd "<return>") 'xhm-insert-br-tag)
+  (define-key xhm-single-keys-keymap (kbd "-") 'xhm-insert-hr-tag)
+  (define-key xhm-single-keys-keymap (kbd ".") 'xhm-lines-to-html-list)
+  (define-key xhm-single-keys-keymap (kbd "3") 'xhm-update-title)
+  (define-key xhm-single-keys-keymap (kbd "6") 'xhm-html-to-text)
+  (define-key xhm-single-keys-keymap (kbd "7") 'xhm-toggle-syntax-coloring-markup)
+  (define-key xhm-single-keys-keymap (kbd "8") 'xhm-get-precode-make-new-file)
+  (define-key xhm-single-keys-keymap (kbd "9") 'xhm-redo-syntax-coloring-buffer)
+  (define-key xhm-single-keys-keymap (kbd "c") 'xhm-make-citation)
+  (define-key xhm-single-keys-keymap (kbd "SPC") 'xhm-wrap-html-tag)
+  (define-key xhm-single-keys-keymap (kbd "k") 'xhm-htmlize-keyboard-shortcut-notation)
+  (define-key xhm-single-keys-keymap (kbd "l 3") 'xhm-source-url-linkify)
+  (define-key xhm-single-keys-keymap (kbd "l s") 'xhm-make-link-defunct)
+  (define-key xhm-single-keys-keymap (kbd "l u") 'xhm-wrap-url)
+  (define-key xhm-single-keys-keymap (kbd "l w") 'xhm-wikipedia-linkify)
+  (define-key xhm-single-keys-keymap (kbd "m") 'xhm-pre-source-code)
+  (define-key xhm-single-keys-keymap (kbd "p") 'xhm-wrap-p-tag)
+  (define-key xhm-single-keys-keymap (kbd "r ,") 'xhm-replace-html-chars-to-unicode)
+  (define-key xhm-single-keys-keymap (kbd "r .") 'xhm-replace-html-&<>-to-entities)
+  (define-key xhm-single-keys-keymap (kbd "r e") 'xhm-htmlize-elisp-keywords)
+  (define-key xhm-single-keys-keymap (kbd "r k") 'xhm-emacs-to-windows-kbd-notation)
+  (define-key xhm-single-keys-keymap (kbd "r m") 'xhm-make-html-table)
+  (define-key xhm-single-keys-keymap (kbd "t r") 'xhm-rename-html-inline-image)
+  (define-key xhm-single-keys-keymap (kbd "t u") 'xhm-extract-url)
+  (define-key xhm-single-keys-keymap (kbd "r v") 'xhm-make-html-table-undo)
+  (define-key xhm-single-keys-keymap (kbd "w") (lambda () (interactive) (xhm-wrap-html-tag "b" "w")))
 )
 
 
@@ -1949,7 +1957,7 @@ This is heuristic based, does not remove ALL possible redundant whitespace."
 
 ;; define the mode
 (define-derived-mode xah-html-mode fundamental-mode
-  "ξhtml"
+  "Σhtml"
   "A simple major mode for HTML5.
 HTML5 keywords are colored.
 
