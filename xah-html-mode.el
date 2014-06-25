@@ -287,15 +287,14 @@
            ) )
 
 (defvar xhm-lang-name-list nil "a list of langcode.")
-(setq xhm-lang-name-list (mapcar 'car xhm-lang-name-map) )
+(setq xhm-lang-name-list (mapcar 'car xhm-lang-name-map))
 
-(defun xhm-precode-htmlized-p (p1 p2)
-  "Return true if region p1 p2 is htmlized code.
+(defun xhm-precode-htmlized-p (φp1 φp2)
+  "Return true if region φp1 φp2 is htmlized code.
 WARNING: it just losely check if it contains span tag."
   (progn
-    (goto-char p1)
-    (re-search-forward "<span class=" p2 "NOERROR")
-    ))
+    (goto-char φp1)
+    (re-search-forward "<span class=" φp2 "NOERROR")))
 
 (defun xhm-get-precode-langCode ()
   "Get the langCode and position boundary of current HTML pre block.
@@ -305,15 +304,15 @@ Your cursor must be between the tags.
 
 Returns a vector [langCode pos1 pos2], where pos1 pos2 are the boundary of the text content."
   (interactive)
-  (let (langCode p1 p2)
+  (let (ξlangCode p1 p2)
     (save-excursion
       (re-search-backward "<pre class=\"\\([-A-Za-z0-9]+\\)\"") ; tag begin position
-      (setq langCode (match-string 1))
+      (setq ξlangCode (match-string 1))
       (setq p1 (search-forward ">")) ; text content begin
       (backward-char 1)
       (xhm-skip-tag-forward)
       (setq p2 (search-backward "</pre>")) ; text content end
-      (vector langCode p1 p2))))
+      (vector ξlangCode p1 p2))))
 
 (defun xhm-get-precode-make-new-file (φlang-name-map)
   "Create a new file in current dir with text inside pre code block.
@@ -444,7 +443,7 @@ This command does the inverse of `xhm-htmlize-precode'."
 (defun xhm-redo-syntax-coloring-buffer (&optional φlang-code)
   "redo all pre lang code syntax coloring in current html page."
   (interactive)
-  (let (langCode p1 p2)
+  (let (ξlangCode p1 p2)
 
     ;; (ξsearch-string
     ;;  (if φlang-code
@@ -454,7 +453,7 @@ This command does the inverse of `xhm-htmlize-precode'."
     (goto-char (point-min))
     (while
         (re-search-forward "<pre class=\"\\([-A-Za-z0-9]+\\)\">" nil "NOERROR")
-      (setq langCode (match-string 1))
+      (setq ξlangCode (match-string 1))
       (setq p1 (point))
       (backward-char 1)
       (xhm-skip-tag-forward)
@@ -463,7 +462,7 @@ This command does the inverse of `xhm-htmlize-precode'."
       (save-restriction
         (narrow-to-region p1 p2)
         (xhm-dehtmlize-precode (point-min) (point-max))
-        (xhm-htmlize-region (point-min) (point-max) (xhm-langcode-to-major-mode-name langCode xhm-lang-name-map) t)))))
+        (xhm-htmlize-region (point-min) (point-max) (xhm-langcode-to-major-mode-name ξlangCode xhm-lang-name-map) t)))))
 
 
 ;; syntax table
@@ -1019,7 +1018,7 @@ For Example: 「Emacs」 ⇒ 「<a href=\"http://en.wikipedia.org/wiki/Emacs\">E
     (delete-region p1 p2)
     (insert resultStr) ))
 
-(defun xhm-remove-span-tag-region (p1 p2)
+(defun xhm-remove-span-tag-region (φp1 φp2)
   "Delete HTML “span” tags in region.
 And the following HTML entities are changed:
  &amp; ⇒ &
@@ -1028,10 +1027,10 @@ And the following HTML entities are changed:
 
 Note: only span tags of the form 「<span class=\"…\">…</span>」 are deleted.
 
-When done, the cursor is placed at p2."
+When done, the cursor is placed at φp2."
   (interactive "r")
   (save-restriction
-    (narrow-to-region p1 p2)
+    (narrow-to-region φp1 φp2)
     (replace-regexp-pairs-region (point-min) (point-max) '(["<span class=\"[^\"]+\">" ""]))
     (replace-pairs-region (point-min) (point-max) '( ["</span>" ""] ["&amp;" "&"] ["&lt;" "<"] ["&gt;" ">"] ))
     (goto-char (point-max))))
@@ -1583,7 +1582,7 @@ This command will do most emacs syntax correctly, but not 100% correct.
  "FIXEDCASE"))
  )
 
-(defun xhm-emacs-to-windows-kbd-notation (p1 p2)
+(defun xhm-emacs-to-windows-kbd-notation (φp1 φp2)
   "Change emacs key notation to Windows's notation.
 
 For example:
@@ -1599,13 +1598,13 @@ For detail on exactly which string are changed, see `xhm-emacs-to-windows-kbd-no
      (list (elt bds 1) (elt bds 2)) ) )
 
   (let (  (case-fold-search nil)
-          (inputStr (buffer-substring-no-properties p1 p2))
+          (inputStr (buffer-substring-no-properties φp1 φp2))
           )
-    (delete-region p1 p2 )
+    (delete-region φp1 φp2)
     (insert
      (xhm-emacs-to-windows-kbd-notation-string inputStr) ) ) )
 
-(defun xhm-htmlize-elisp-keywords (p1 p2)
+(defun xhm-htmlize-elisp-keywords (φp1 φp2)
   "Replace curly quoted elisp function/variable names to HTML markup.
 
 Example:
@@ -1619,7 +1618,7 @@ Example:
 
 Works on text selection or current text block.
 
-When called in lisp program, the arguments p1 p2 are region positions.
+When called in lisp program, the arguments φp1 φp2 are region positions.
 
 Note: a word is changed only if all of the following are true:
 
@@ -1648,7 +1647,7 @@ Some issues:
        (elispIdentifierRegex "\\([:-A-Za-z0-9]+\\)")
        (wantedRegex (concat "“" elispIdentifierRegex "”") )
        )
-    (setq inputStr (buffer-substring-no-properties p1 p2) )
+    (setq inputStr (buffer-substring-no-properties φp1 φp2) )
     (setq resultStr
             (let ( mStr (case-fold-search nil) (ξsomeStr inputStr) )
               (with-temp-buffer
@@ -1674,7 +1673,7 @@ Some issues:
     (if (equal (length changedItems) 0)
         (progn (message "%s" "No change needed."))
       (progn
-            (delete-region p1 p2)
+            (delete-region φp1 φp2)
             (insert resultStr)
             (with-output-to-temp-buffer "*changed items*"
               (mapcar (lambda (x) (princ x) (princ "\n") ) (reverse changedItems)) )
@@ -1834,8 +1833,8 @@ Case shouldn't matter, except when it's emacs's key notation.
 (defvar xhm-class-input-history nil "for input history of `xhm-wrap-html-tag'")
 (setq xhm-class-input-history (list) )
 
-(defun xhm-add-open/close-tag (φtag-name className p1 p2)
-  "Add HTML open/close tags around region boundary p1 p2.
+(defun xhm-add-open/close-tag (φtag-name className φp1 φp2)
+  "Add HTML open/close tags around region boundary φp1 φp2.
 This function does not `save-excursion'.
 "
   (let* (
@@ -1844,14 +1843,14 @@ This function does not `save-excursion'.
         (insStrRight (format "</%s>" φtag-name ) )
         )
 
-      (goto-char p1)
+      (goto-char φp1)
 
       (if (xhm-tag-self-closing? φtag-name)
           (progn (insert (format "<%s%s />" φtag-name classStr) ))
         (progn
-          ;; (setq myText (buffer-substring-no-properties p1 p2)
+          ;; (setq myText (buffer-substring-no-properties φp1 φp2)
           (insert insStrLeft )
-          (goto-char (+ p2 (length insStrLeft)))
+          (goto-char (+ φp2 (length insStrLeft)))
           (insert insStrRight )
           )
         )
