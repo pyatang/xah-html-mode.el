@@ -42,9 +42,10 @@
 ;; 0.3, 2012-05-13 added comment handling. improved syntax coloring. Added keymap and syntax table."
 ;; 0.2, 2012-05-12 first version
 
-(require 'ido)
 (require 'xfrp_find_replace_pairs)
 (require 'xeu_elisp_util)
+
+(require 'ido)
 (require 'sgml-mode)
 (require 'htmlize)
 (require 'hi-lock) ; uses its face definitions
@@ -1966,7 +1967,6 @@ This is called by emacs abbrev system."
   (define-key xhm-single-keys-keymap (kbd "7") 'xhm-toggle-syntax-coloring-markup)
   (define-key xhm-single-keys-keymap (kbd "8") 'xhm-get-precode-make-new-file)
   (define-key xhm-single-keys-keymap (kbd "9") 'xhm-redo-syntax-coloring-buffer)
-  (define-key xhm-single-keys-keymap (kbd "c") 'xhm-make-citation)
   (define-key xhm-single-keys-keymap (kbd "k") 'xhm-htmlize-keyboard-shortcut-notation)
   (define-key xhm-single-keys-keymap (kbd "l 3") 'xhm-source-url-linkify)
   (define-key xhm-single-keys-keymap (kbd "l s") 'xhm-make-link-defunct)
@@ -1979,14 +1979,13 @@ This is called by emacs abbrev system."
   (define-key xhm-single-keys-keymap (kbd "r e") 'xhm-htmlize-elisp-keywords)
   (define-key xhm-single-keys-keymap (kbd "r k") 'xhm-emacs-to-windows-kbd-notation)
   (define-key xhm-single-keys-keymap (kbd "r m") 'xhm-make-html-table)
-  (define-key xhm-single-keys-keymap (kbd "t r") 'xhm-rename-html-inline-image)
   (define-key xhm-single-keys-keymap (kbd "t u") 'xhm-extract-url)
   (define-key xhm-single-keys-keymap (kbd "r v") 'xhm-make-html-table-undo)
   (define-key xhm-single-keys-keymap (kbd "w") (lambda () (interactive) (xhm-wrap-html-tag "b" "w")))
+  (define-key xhm-single-keys-keymap (kbd "x") 'xhm-rename-html-inline-image)
+  (define-key xhm-single-keys-keymap (kbd "y") 'xhm-make-citation)
 
 )
-
-
 
 
 
