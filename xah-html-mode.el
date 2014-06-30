@@ -159,9 +159,9 @@
 ("output" . ["z"])
 ("param" . ["z"])
 ("progress" . ["z"])
-("q" . ["z"])
+("q" . ["w"])
 ("samp" . ["z"])
-("script" . ["z"])
+("script" . ["b"])
 ("section" . ["b"])
 ("select" . ["z"])
 ("source" . ["z"])
@@ -421,11 +421,11 @@ This command does the inverse of `xhm-htmlize-precode'."
   (interactive
    (let* (
           (t55238 (xhm-get-precode-langCode))
-          (list (elt t55238 1) (elt t55238 2))
-          )
-     ))
-  (xhm-remove-span-tag-region φp1 φp2)
- )
+          (list (elt t55238 1) (elt t55238 2)))))
+  (save-restriction 
+    (narrow-to-region φp1 φp2)
+    (xhm-remove-span-tag-region (point-min) (point-max))
+    (xhm-code-tag-to-brackets (point-min) (point-max))))
 
 (defun xhm-toggle-syntax-coloring-markup (φlang-name-map)
   "Call `xhm-htmlize-precode' or `xhm-dehtmlize-precode'."
@@ -436,7 +436,6 @@ This command does the inverse of `xhm-htmlize-precode'."
          (p2 (elt ξt34342 2)))
     (if (xhm-precode-htmlized-p p1 p2)
         (progn
-          ;; (xhm-remove-span-tag-region p1 p2)
           (xhm-dehtmlize-precode p1 p2))
       (progn
         (xhm-htmlize-precode φlang-name-map)))))
@@ -739,25 +738,33 @@ this is a quick 1 min hackjob, works only when there's no nesting."
 ;;   (interactive)
 ;;   )
 
-(defun xhm-replace-html-&<>-to-entities ()
-  "Replace HTML < > & to HTML entities.
-This works on the current text selection or block of text.
+(defun xhm-replace-html-&<>-to-entities (φp1 φp2 &optional φentity-to-char-p)
+  "Replace HTML chars & < > to HTML entities.
+This works on the current text selection or text block.
 The string replaced are:
- & ⇒ &amp;
- < ⇒ &lt;
- > ⇒ &gt;
+ & → &amp;
+ < → &lt;
+ > → &gt;
+
+if `universal-argument' is called, the replacement direction is reversed. That is
+ &amp; ⇒ &
+etc.
+
+when called in lisp program, 
+φp1 φp2 are region begin/end.
+if φentity-to-char-p is true, change entities to chars instead.
 
 See also:
 `xhm-replace-html-named-entities'
-`xhm-replace-html-&<>-to-entities'
 `xhm-replace-html-chars-to-unicode'
 "
-  (interactive)
-  (let (bds p1 p2 myText)
-    (setq bds (get-selection-or-unit 'block))
-    (setq myText (elt bds 0) p1 (elt bds 1) p2 (elt bds 2)  )
-    (save-excursion (replace-pairs-region p1 p2 '( ["&" "&amp;"] ["<" "&lt;"] [">" "&gt;"] ) ))
-     ) )
+  (interactive
+   (let ((bds (get-selection-or-unit 'block)))
+     (list (elt bds 1) (elt bds 2) (if current-prefix-arg t nil))))
+  (save-excursion 
+    (if φentity-to-char-p
+        (replace-pairs-region φp1 φp2 '( ["&amp;" "&"] ["&lt;" "<"] ["&gt;" ">"] ))
+      (replace-pairs-region φp1 φp2 '( ["&" "&amp;"] ["<" "&lt;"] [">" "&gt;"] )))))
 
 (defun xhm-replace-html-chars-to-unicode ()
   "Replace HTML < > & to similar Unicode char.
@@ -770,7 +777,6 @@ The characters replaced are:
 See also:
 `xhm-replace-html-named-entities'
 `xhm-replace-html-&<>-to-entities'
-`xhm-replace-html-chars-to-unicode'
 "
   (interactive)
   (let (bds p1 p2 myText)
@@ -782,7 +788,7 @@ See also:
   "Replace HTML entities to Unicode character.
 For example, “&copy;” becomes “©”.
 
-When called interactively, work on current text block or text selection. (a “text block” is text between empty lines)
+When called interactively, work on current text block or text selection. (a “text block” is text between blank lines)
 
 When called in lisp code, if φstring is non-nil, returns a changed string.  If φstring nil, change the text in the region between positions φfrom φto.
 
@@ -792,7 +798,6 @@ The following HTML Entities are not replaced:
  &gt; >
 
 See also:
-`xhm-replace-html-named-entities'
 `xhm-replace-html-&<>-to-entities'
 `xhm-replace-html-chars-to-unicode'
 "
@@ -985,12 +990,53 @@ When done, the cursor is placed at φp2."
   (save-restriction
     (narrow-to-region φp1 φp2)
     (replace-regexp-pairs-region (point-min) (point-max) '(["<span class=\"[^\"]+\">" ""]))
-    (replace-pairs-region (point-min) (point-max) '( ["</span>" ""] ["&amp;" "&"] ["&lt;" "<"] ["&gt;" ">"] ))
+    (replace-pairs-region (point-min) (point-max) '( ["</span>" ""] ))
+    (xhm-replace-html-&<>-to-entities (point-min) (point-max) "ΦENTITY-TO-CHAR-P")
+    (goto-char (point-max))))
+
+(defun xhm-code-tag-to-brackets (φp1 φp2 &optional φchange-entity-p)
+  "Change HTML code tags to brackets in text selection or current text block.
+
+ <code>…</code>
+and
+ <code class=\"…\">…</code>
+are changed to
+「…」
+
+<var class=\"…\">…</var>
+ is changed to
+ ‹…›
+
+The html entities &amp; &lt; &gt; are changed to & < >.
+
+if `universal-argument' is called first, don't convert the html entities.
+
+When done, the cursor is placed at φp2.
+
+when called in lisp program, 
+φp1 φp2 are region begin/end.
+If φchange-entity-p is true, convert html entities to char.
+"
+  (interactive
+   (let ((bds (get-selection-or-unit 'block)))
+     (list (elt bds 1) (elt bds 2) (if current-prefix-arg nil t))))
+
+  (save-restriction
+    (narrow-to-region φp1 φp2)
+    (replace-regexp-pairs-region (point-min) (point-max) '(["<code class=\"[^\"]+\">" "「"] ["<var class=\"[^\"]+\">" "‹"]))
+    (replace-pairs-region 
+     (point-min) (point-max)
+     '( 
+       ["<code>" "「"] 
+       ["</code>" "」"]
+       ["<var>" "‹"] 
+       ["</var>" "›"] ))
+    (when φchange-entity-p (xhm-replace-html-&<>-to-entities (point-min) (point-max) "ΦENTITY-TO-CHAR-P"))
     (goto-char (point-max))))
 
 (defun xhm-remove-html-tags (φstring &optional φfrom φto)
   "Delete HTML tags in string or region.
-Work on current text block or text selection. (a “text block” is text between empty lines)
+Work on current text block or text selection. (a “text block” is text between blank lines)
 
 When called in lisp code, if φstring is non-nil, returns a changed string.  If φstring nil, change the text in the region between positions φfrom φto.
 
@@ -1133,7 +1179,7 @@ tempStr
 (defun xhm-extract-url (φhtml-text &optional φconvert-relative-URL?)
   "Returns a list of URLs in the HTML text string φhtml-text.
 
-When called interactively, use text selection as input, or current text block between empty lines. Output URLs in a buffer named 「*extract URL output*」, also copy output to `kill-ring'.
+When called interactively, use text selection as input, or current text block between blank lines. Output URLs in a buffer named 「*extract URL output*」, also copy output to `kill-ring'.
 
 If `universal-argument' is called first, tries to convert relative URL to HTTP form.
 
@@ -1219,7 +1265,7 @@ After execution, the lines will become
 
 <cite>Circus Maximalist</cite> <time>1994-09-12</time> By Paul Gray. @ <a href=\"http://www.time.com/time/magazine/article/0,9171,981408,00.html\">Source www.time.com</a>
 
-If there's a text selection, use it for input, otherwise the input is a text block between empty lines.
+If there's a text selection, use it for input, otherwise the input is a text block between blank lines.
 
 The order of lines for {title, author, date/time, url} needs not be in that order. Author should start with “by”.
 "
@@ -1480,16 +1526,6 @@ If there's a text selection, wrap p around each text block (separated by 2 newli
     (insert "<p>" (replace-regexp-in-string "\n\n+" "</p>\n\n<p>" (trim-string inputText)) "</p>")
     )
   )
-
-(defun xhm-insert-br-tag ()
-  "Add <br /> tag."
-  (interactive)
-  (xhm-wrap-html-tag "br") )
-
-(defun xhm-insert-hr-tag ()
-  "Add <hr /> tag."
-  (interactive)
-  (xhm-wrap-html-tag "hr") )
 
 (defun xhm-emacs-to-windows-kbd-notation-string (φinput-string)
   "Change emacs keyboard-shortcut notation to Windows's notation.
@@ -1801,13 +1837,13 @@ This function does not `save-excursion'."
   "Insert/wrap HTML tag to current text unit or text selection.
 When there's no text selection, the tag will be wrapped around current {word, line, text-block}, depending on the tag used.
 
-If current line or word is empty, then insert open/end tags and place cursor between them."
-;; If `universal-argument' is called first, then also prompt for a “class” attribute. Empty value means don't add the attribute.
+If current line or word is empty, then insert open/end tags and place cursor between them.
+If `universal-argument' is called first, then also prompt for a “class” attribute. Empty value means don't add the attribute."
+
   (interactive
    (list
     (ido-completing-read "HTML tag:" xhm-html5-tag-list "PREDICATE" "REQUIRE-MATCH" nil xhm-html-tag-input-history "div")
-    (if t
-;; current-prefix-arg
+    (if current-prefix-arg
         (read-string "class:" nil xhm-class-input-history "")
       nil ) ) )
   (let (bds p1 p2
@@ -1922,6 +1958,34 @@ This is called by emacs abbrev system."
 (define-abbrev-table 'xhm-abbrev-table
   '(
 
+    ("8c" "class=\"\"" nil :system t)
+
+    ("8w" "width" nil :system t)
+    ("8h" "height" nil :system t)
+    ("bgc" "background-color" nil :system t)
+
+    ;; todo
+;; http://xahlee.info/js/css_colors.html
+;; http://xahlee.info/js/css_color_names.html
+    ("white" "#ffffff" nil :system t)
+    ("silver" "#c0c0c0" nil :system t)
+    ("gray" "#808080" nil :system t)
+    ("black" "#000000" nil :system t)
+    ("red" "#ff0000" nil :system t)
+    ("maroon" "#800000" nil :system t)
+    ("yellow" "#ffff00" nil :system t)
+    ("olive" "#808000" nil :system t)
+    ("lime" "#00ff00" nil :system t)
+    ("green" "#008000" nil :system t)
+    ("aqua" "#00ffff" nil :system t)
+    ("teal" "#008080" nil :system t)
+    ("blue" "#0000ff" nil :system t)
+    ("navy" "#000080" nil :system t)
+    ("fuchsia" "#ff00ff" nil :system t)
+    ("purple" "#800080" nil :system t)
+    ("orange" "#ffa500" nil :system t)
+    ("hsl" "hsl(0,100%,50%)" nil :system t)
+
     ("html5" "<!DOCTYPE html>" nil :system t)
     ("html4s" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">" nil :system t)
     ("html4t" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">" nil :system t)
@@ -1958,10 +2022,11 @@ This is called by emacs abbrev system."
 
   (define-key xhm-keymap (kbd "<menu> e") xhm-single-keys-keymap)
 
-  (define-key xhm-single-keys-keymap (kbd "<backspace>") 'xhm-remove-html-tags)
-  (define-key xhm-single-keys-keymap (kbd "<return>") 'xhm-insert-br-tag)
-  (define-key xhm-single-keys-keymap (kbd "-") 'xhm-insert-hr-tag)
   (define-key xhm-single-keys-keymap (kbd ".") 'xhm-lines-to-html-list)
+  (define-key xhm-single-keys-keymap (kbd "m") 'xhm-pre-source-code)
+  (define-key xhm-single-keys-keymap (kbd "p") 'xhm-wrap-p-tag)
+
+  (define-key xhm-single-keys-keymap (kbd "<backspace>") 'xhm-remove-html-tags)
   (define-key xhm-single-keys-keymap (kbd "3") 'xhm-update-title)
   (define-key xhm-single-keys-keymap (kbd "6") 'xhm-html-to-text)
   (define-key xhm-single-keys-keymap (kbd "7") 'xhm-toggle-syntax-coloring-markup)
@@ -1972,8 +2037,6 @@ This is called by emacs abbrev system."
   (define-key xhm-single-keys-keymap (kbd "l s") 'xhm-make-link-defunct)
   (define-key xhm-single-keys-keymap (kbd "l u") 'xhm-wrap-url)
   (define-key xhm-single-keys-keymap (kbd "l w") 'xhm-wikipedia-linkify)
-  (define-key xhm-single-keys-keymap (kbd "m") 'xhm-pre-source-code)
-  (define-key xhm-single-keys-keymap (kbd "p") 'xhm-wrap-p-tag)
   (define-key xhm-single-keys-keymap (kbd "r ,") 'xhm-replace-html-chars-to-unicode)
   (define-key xhm-single-keys-keymap (kbd "r .") 'xhm-replace-html-&<>-to-entities)
   (define-key xhm-single-keys-keymap (kbd "r e") 'xhm-htmlize-elisp-keywords)
