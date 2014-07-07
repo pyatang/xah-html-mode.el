@@ -2055,7 +2055,7 @@ This is called by emacs abbrev system."
 
 
 ;; define the mode
-(define-derived-mode xah-html-mode fundamental-mode
+(define-derived-mode xah-html-mode prog-mode
   "∑html"
   "A simple major mode for HTML5.
 HTML5 keywords are colored.
