@@ -389,7 +389,6 @@ This function requires the `htmlize-buffer' from 〔htmlize.el〕 by Hrvoje Niks
            (p2 (elt t78730 2))
            ;; (ξmodeName (elt (cdr (assoc ξlangCode φlang-code-map)) 0))
            (ξmodeName (xhm-langcode-to-major-mode-name ξlangCode φlang-code-map)))
-      ;; remove beginning or trailing whitespace
       (xhm-htmlize-region p1 p2 ξmodeName t))))
 
 (defun xhm-htmlize-region (φp1 φp2 φmode-name &optional φtrim-whitespace-boundary?)
@@ -742,17 +741,14 @@ this is a quick 1 min hackjob, works only when there's no nesting."
   "Replace HTML chars & < > to HTML entities.
 This works on the current text selection or text block.
 The string replaced are:
- & → &amp;
- < → &lt;
- > → &gt;
+ & ⇒ &amp;
+ < ⇒ &lt;
+ > ⇒ &gt;
 
-if `universal-argument' is called, the replacement direction is reversed. That is
- &amp; ⇒ &
-etc.
+if `universal-argument' is called, the replacement direction is
+ reversed. That is &amp; ⇒ & etc.
 
-when called in lisp program, 
-φp1 φp2 are region begin/end.
-if φentity-to-char-p is true, change entities to chars instead.
+when called in lisp program, φp1 φp2 are region begin/end. if φentity-to-char-p is true, change entities to chars instead.
 
 See also:
 `xhm-replace-html-named-entities'
@@ -1964,6 +1960,9 @@ This is called by emacs abbrev system."
     ("8h" "height" nil :system t)
     ("bgc" "background-color" nil :system t)
 
+    ("css1" "<link rel=\"stylesheet\" href=\"../../lbasic.css\" />")
+    ("css2" "<style type=\"text/css\">\np {line-height:130%}\n</style>")
+
     ;; todo
 ;; http://xahlee.info/js/css_colors.html
 ;; http://xahlee.info/js/css_color_names.html
@@ -1998,7 +1997,7 @@ This is called by emacs abbrev system."
 </body>
 </html>" nil :system t)
 
-    ("y-or-n-p" "(y-or-n-p \"PROMPT▮ \")" nil :system t))
+    )
 
   "abbrev table for `xah-html-mode'"
   ;; :regexp "\\_<\\([_-0-9A-Za-z]+\\)"
@@ -2020,11 +2019,18 @@ This is called by emacs abbrev system."
 
   (define-prefix-command 'xhm-single-keys-keymap)
 
+  ;; . p  g c
+  ;; e u  h t
+
   (define-key xhm-keymap (kbd "<menu> e") xhm-single-keys-keymap)
 
   (define-key xhm-single-keys-keymap (kbd ".") 'xhm-lines-to-html-list)
   (define-key xhm-single-keys-keymap (kbd "m") 'xhm-pre-source-code)
   (define-key xhm-single-keys-keymap (kbd "p") 'xhm-wrap-p-tag)
+  (define-key xhm-single-keys-keymap (kbd "l u") 'xhm-wrap-url)
+  (define-key xhm-single-keys-keymap (kbd "r ,") 'xhm-replace-html-chars-to-unicode)
+  (define-key xhm-single-keys-keymap (kbd "r .") 'xhm-replace-html-&<>-to-entities)
+
 
   (define-key xhm-single-keys-keymap (kbd "<backspace>") 'xhm-remove-html-tags)
   (define-key xhm-single-keys-keymap (kbd "3") 'xhm-update-title)
@@ -2035,16 +2041,12 @@ This is called by emacs abbrev system."
   (define-key xhm-single-keys-keymap (kbd "k") 'xhm-htmlize-keyboard-shortcut-notation)
   (define-key xhm-single-keys-keymap (kbd "l 3") 'xhm-source-url-linkify)
   (define-key xhm-single-keys-keymap (kbd "l s") 'xhm-make-link-defunct)
-  (define-key xhm-single-keys-keymap (kbd "l u") 'xhm-wrap-url)
   (define-key xhm-single-keys-keymap (kbd "l w") 'xhm-wikipedia-linkify)
-  (define-key xhm-single-keys-keymap (kbd "r ,") 'xhm-replace-html-chars-to-unicode)
-  (define-key xhm-single-keys-keymap (kbd "r .") 'xhm-replace-html-&<>-to-entities)
   (define-key xhm-single-keys-keymap (kbd "r e") 'xhm-htmlize-elisp-keywords)
   (define-key xhm-single-keys-keymap (kbd "r k") 'xhm-emacs-to-windows-kbd-notation)
   (define-key xhm-single-keys-keymap (kbd "r m") 'xhm-make-html-table)
   (define-key xhm-single-keys-keymap (kbd "t u") 'xhm-extract-url)
   (define-key xhm-single-keys-keymap (kbd "r v") 'xhm-make-html-table-undo)
-  (define-key xhm-single-keys-keymap (kbd "w") (lambda () (interactive) (xhm-wrap-html-tag "b" "w")))
   (define-key xhm-single-keys-keymap (kbd "x") 'xhm-rename-html-inline-image)
   (define-key xhm-single-keys-keymap (kbd "y") 'xhm-make-citation)
 
@@ -2100,6 +2102,7 @@ HTML5 keywords are colored.
             ) ) )
 
   (setq font-lock-defaults '((xhm-font-lock-keywords)))
+  (setq local-abbrev-table xhm-abbrev-table)
 
   (set-syntax-table xhm-syntax-table)
   (use-local-map xhm-keymap)
