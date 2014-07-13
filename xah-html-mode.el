@@ -1954,6 +1954,17 @@ This is called by emacs abbrev system."
 (define-abbrev-table 'xhm-abbrev-table
   '(
 
+    ("tla" "<div class=\"¤tla\"><a href=\"url\">text</a></div>")
+    ("8menu" "〖a ▸ b ▸ c〗")
+    ("8key" "【Alt+f】")
+    ("8song" "singer ❀ 〈title〉")
+    ("faq" "<div class=\"a\">
+<p class=\"q\">How to do this?</p>
+<p>this way</p>
+</div>
+
+")
+
     ("8c" "class=\"\"" nil :system t)
 
     ("8w" "width" nil :system t)
@@ -1962,6 +1973,7 @@ This is called by emacs abbrev system."
 
     ("css" "<link rel=\"stylesheet\" href=\"../lbasic.css\" />")
     ("style" "<style type=\"text/css\">\np {line-height:130%}\n</style>")
+    ("refresh" "<meta http-equiv=\"refresh\" content=\"0; url=http://example.com/\">")
 
     ;; todo
 ;; http://xahlee.info/js/css_colors.html
