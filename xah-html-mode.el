@@ -1186,7 +1186,11 @@ When called in lisp program, φhtml-text is the input string.
 This command extracts all text of the form
  <‹letter› … href/src=\"…\" …>
 on a single line, by regex. The quote may be single quote."
-  (interactive (list (thing-at-point 'paragraph) current-prefix-arg ))
+  (interactive (list 
+                (if (use-region-p)
+                    (progn (buffer-substring-no-properties (region-beginning) (region-end)))
+                  (progn (thing-at-point 'paragraph)))
+                current-prefix-arg ))
   (let ((urlList (list)))
     (with-temp-buffer
       (insert φhtml-text)
