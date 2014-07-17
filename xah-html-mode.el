@@ -52,6 +52,8 @@
 
 (defvar xah-html-mode-hook nil "Standard hook for `xah-html-mode'")
 
+
+
 (defcustom xhm-html5-tag-names nil
   "A alist of HTML5 tag names. For each element, the keys is tag names, value is a vector of one element, w means word, l means line, b means block, others are placeholder for unknown. The purpose of the value is to indicate the default way to wrap the tag around cursor. "
 ; todo: need to go the the list and look at the type carefully. Right now it's just quickly done. lots are “z”, for unkown. Also, some are self closing tags, current has mark of “n”.
@@ -421,7 +423,7 @@ This command does the inverse of `xhm-htmlize-precode'."
    (let* (
           (t55238 (xhm-get-precode-langCode))
           (list (elt t55238 1) (elt t55238 2)))))
-  (save-restriction 
+  (save-restriction
     (narrow-to-region φp1 φp2)
     (xhm-remove-span-tag-region (point-min) (point-max))
     (xhm-code-tag-to-brackets (point-min) (point-max))))
@@ -757,7 +759,7 @@ See also:
   (interactive
    (let ((bds (get-selection-or-unit 'block)))
      (list (elt bds 1) (elt bds 2) (if current-prefix-arg t nil))))
-  (save-excursion 
+  (save-excursion
     (if φentity-to-char-p
         (replace-pairs-region φp1 φp2 '( ["&amp;" "&"] ["&lt;" "<"] ["&gt;" ">"] ))
       (replace-pairs-region φp1 φp2 '( ["&" "&amp;"] ["<" "&lt;"] [">" "&gt;"] )))))
@@ -1009,7 +1011,7 @@ if `universal-argument' is called first, don't convert the html entities.
 
 When done, the cursor is placed at φp2.
 
-when called in lisp program, 
+when called in lisp program,
 φp1 φp2 are region begin/end.
 If φchange-entity-p is true, convert html entities to char.
 "
@@ -1020,12 +1022,12 @@ If φchange-entity-p is true, convert html entities to char.
   (save-restriction
     (narrow-to-region φp1 φp2)
     (replace-regexp-pairs-region (point-min) (point-max) '(["<code class=\"[^\"]+\">" "「"] ["<var class=\"[^\"]+\">" "‹"]))
-    (replace-pairs-region 
+    (replace-pairs-region
      (point-min) (point-max)
-     '( 
-       ["<code>" "「"] 
+     '(
+       ["<code>" "「"]
        ["</code>" "」"]
-       ["<var>" "‹"] 
+       ["<var>" "‹"]
        ["</var>" "›"] ))
     (when φchange-entity-p (xhm-replace-html-&<>-to-entities (point-min) (point-max) "ΦENTITY-TO-CHAR-P"))
     (goto-char (point-max))))
@@ -1172,45 +1174,43 @@ tempStr
         (goto-char ξfrom)
         (insert outputStr) )) ) )
 
-(defun xhm-extract-url (φhtml-text &optional φconvert-relative-URL?)
+(defun xhm-extract-url (φhtml-text &optional φconvert-relative-URL-p)
   "Returns a list of URLs in the HTML text string φhtml-text.
 
-When called interactively, use text selection as input, or current text block between blank lines. Output URLs in a buffer named 「*extract URL output*」, also copy output to `kill-ring'.
+When called interactively, use text selection as input, or current paragraph. output is copied to `kill-ring'.
 
-If `universal-argument' is called first, tries to convert relative URL to HTTP form.
+If `universal-argument' is called first, convert relative URL to full path.
 
-WARNING: this function extract all text of the form 「<a … href=\"…\" …>」 by a simple regex. It does not extract single quote form 「href='…'」 nor 「src=\"…\"」 , nor other considerations."
-  (interactive (list (elt (get-selection-or-unit 'block) 0) current-prefix-arg ) )
+When called in lisp program, φhtml-text is the input string.
+
+This command extracts all text of the form
+ <‹letter› … href/src=\"…\" …>
+on a single line, by regex. The quote may be single quote."
+  (interactive (list (thing-at-point 'paragraph) current-prefix-arg ))
   (let ((urlList (list)))
     (with-temp-buffer
       (insert φhtml-text)
       (goto-char 1)
-      (while (re-search-forward "<a.+?href=\"\\([^\"]+?\\)\".+?>" nil "NOERROR")
-        (setq urlList (cons (match-string 1) urlList))
-        )
-      (goto-char 1)
-      (while (re-search-forward "<img.+?src=\"\\([^\"]+?\\)\".+?>" nil "NOERROR")
-        (setq urlList (cons (match-string 1) urlList))
-        ) )
-(message "%S" urlList )
-    (setq urlList (reverse urlList) )
-    (when φconvert-relative-URL?
+      (while (re-search-forward
+              "<[[:alpha:]]+.+?\\(href\\|src\\)[[:blank:]]*=[[:blank:]]*\\([\"']\\)\\([-_/.[:alnum:]]+?\\)\\2.+?>" nil t)
+        (push (match-string 3) urlList)))
+    (setq urlList (reverse urlList))
+
+    (when φconvert-relative-URL-p
       (setq urlList
             (mapcar
              (lambda (ξx)
                (if (string-match "http" ξx )
                    (progn ξx)
-                 (progn (xahsite-filepath-to-url (xahsite-href-value-to-filepath ξx (buffer-file-name) )))
-                 ) )
-             urlList) ) )
+                 (progn
+                   ;; (xahsite-filepath-to-url (xahsite-href-value-to-filepath ξx (buffer-file-name)))
+                   (expand-file-name ξx (file-name-directory (buffer-file-name))))))
+             urlList)))
 
     (when (called-interactively-p 'any)
-      (with-output-to-temp-buffer "*extract URL output*"
-        (let ((printedResult (mapconcat 'identity urlList "\n")))
-          (princ printedResult)
-          (kill-new (mapconcat 'identity urlList "\n"))
-          (message "URLs placed in kill-ring.")
-          ) ) )
+      (let ((printedResult (mapconcat 'identity urlList "\n")))
+        (kill-new printedResult)
+        (message "%s" printedResult)))
     urlList ))
 
 (defun xhm-update-title ( φnewTitle)
@@ -1696,6 +1696,7 @@ Case shouldn't matter, except when it's emacs's key notation.
                        ["SPC" "<kbd>Space</kbd>"]
                        ["capslock" "<kbd>Caps Lock</kbd>"]
                        ["f-lock" "<kbd>F Lock</kbd>"]
+                       ["f lock" "<kbd>F Lock</kbd>"]
                        ["numlock" "<kbd>Num Lock</kbd>"]
                        ["scrolllock" "<kbd>Scroll Lock</kbd>"]
                        ["tab" "<kbd>Tab ↹</kbd>"]
@@ -2042,7 +2043,6 @@ This is called by emacs abbrev system."
   (define-key xhm-single-keys-keymap (kbd "l u") 'xhm-wrap-url)
   (define-key xhm-single-keys-keymap (kbd "r ,") 'xhm-replace-html-chars-to-unicode)
   (define-key xhm-single-keys-keymap (kbd "r .") 'xhm-replace-html-&<>-to-entities)
-
 
   (define-key xhm-single-keys-keymap (kbd "<backspace>") 'xhm-remove-html-tags)
   (define-key xhm-single-keys-keymap (kbd "3") 'xhm-update-title)
