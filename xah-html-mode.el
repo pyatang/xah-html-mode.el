@@ -765,17 +765,12 @@ See also:
       (replace-pairs-region φp1 φp2 '( ["&" "&amp;"] ["<" "&lt;"] [">" "&gt;"] )))))
 
 (defun xhm-replace-html-chars-to-unicode ()
-  "Replace HTML < > & to similar Unicode char.
+  "Replace HTML < > & to Unicode chars 〈 〉 ＆.
 This works on the current text selection or block of text.
-The characters replaced are:
- & ⇒ ＆
- < ⇒ 〈
- > ⇒ 〉
 
 See also:
 `xhm-replace-html-named-entities'
-`xhm-replace-html-&<>-to-entities'
-"
+`xhm-replace-html-&<>-to-entities'"
   (interactive)
   (let (bds p1 p2 myText)
     (setq bds (get-selection-or-unit 'block))
