@@ -1220,29 +1220,30 @@ Update the <title>…</title> and <h1>…</h1> of current buffer."
      (save-excursion
        (goto-char 1)
        (search-forward-regexp "<title>\\([^<]+?\\)</title>")
-       (setq oldTitle (match-string 1 ) )
-       )
-     (list (read-string "New title:" oldTitle nil oldTitle "INHERIT-INPUT-METHOD")) ) )
+       (setq oldTitle (match-string 1 )))
+     (list (read-string "New title:" oldTitle nil oldTitle "INHERIT-INPUT-METHOD"))))
   (let (p1 p2)
     (save-excursion
       (goto-char 1)
 
       (progn (search-forward "<title>")
-             (setq p1 (point) )
-             (search-forward "<")
-             (setq p2 (- (point) 1) )
+             (setq p1 (point))
+             (search-forward "</title>")
+             (search-backward "<")
+             (setq p2 (point))
              (delete-region p1 p2 )
              (goto-char p1)
-             (insert φnewTitle ) )
+             (insert φnewTitle ))
 
       (if (search-forward "<h1>")
           (progn
-            (setq p1 (point) )
-            (search-forward "<")
-            (setq p2 (- (point) 1) )
+            (setq p1 (point))
+            (search-forward "</h1>")
+            (search-backward "<")
+            (setq p2 (point))
             (delete-region p1 p2 )
             (goto-char p1)
-            (insert φnewTitle ) )
+            (insert φnewTitle ))
         (progn
           (message "<h1> tag not found. adding") ) ) ) ))
 
@@ -1965,14 +1966,16 @@ This is called by emacs abbrev system."
 
 ")
 
-    ("8c" "class=\"\"" nil :system t)
+    ("cdata" "<![CDATA[▮]]>" nil :system t)
+
+    ("cl" "class=\"\"" nil :system t)
 
     ("8w" "width" nil :system t)
     ("8h" "height" nil :system t)
     ("bgc" "background-color" nil :system t)
 
-    ("css" "<link rel=\"stylesheet\" href=\"../lbasic.css\" />")
-    ("style" "<style type=\"text/css\">\np {line-height:130%}\n</style>")
+    ("3css" "<link rel=\"stylesheet\" href=\"lbasic.css\" />")
+    ("3style" "<style type=\"text/css\">\np {line-height:130%}\n</style>")
     ("refresh" "<meta http-equiv=\"refresh\" content=\"0; url=http://example.com/\">")
 
     ;; todo
