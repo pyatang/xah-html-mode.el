@@ -774,8 +774,8 @@ See also:
   (interactive)
   (let (bds p1 p2 myText)
     (setq bds (get-selection-or-unit 'block))
-    (setq myText (elt bds 0) p1 (elt bds 1) p2 (elt bds 2)  )
-    (replace-pairs-region p1 p2 '( ["&" "＆"] ["<" "〈"] [">" "〉"] ) ) ) )
+    (setq myText (elt bds 0) p1 (elt bds 1) p2 (elt bds 2))
+    (replace-pairs-region p1 p2 '( ["&" "＆"] ["<" "〈"] [">" "〉"] ))))
 
 (defun xhm-replace-html-named-entities (φstring &optional φfrom φto)
   "Replace HTML entities to Unicode character.
