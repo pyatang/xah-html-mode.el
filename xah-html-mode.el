@@ -44,11 +44,15 @@
 
 (require 'xfrp_find_replace_pairs)
 (require 'xeu_elisp_util)
-
-(require 'ido)
-(require 'sgml-mode)
 (require 'htmlize)
-(require 'hi-lock) ; uses its face definitions
+
+
+(progn 
+  ;; part of emacs
+  (require 'ido)
+  (require 'sgml-mode)
+  (require 'hi-lock) ; uses its face definitions
+  )
 
 (defvar xah-html-mode-hook nil "Standard hook for `xah-html-mode'")
 
@@ -1378,9 +1382,9 @@ The anchor text may be of 4 possibilities, depending on value of `universal-argu
         ξurl domainName linkText resultLinkStr)
 
     (setq bds (get-selection-or-unit 'url))
-    (setq inputStr (elt bds 0) )
-    (setq p1-input (elt bds 1) )
-    (setq p2-input (elt bds 2) )
+    (setq inputStr (elt bds 0))
+    (setq p1-input (elt bds 1))
+    (setq p2-input (elt bds 2))
 
     ;; check if it's just plain URL or already in linked form 「<a href=…>…</a>」
     ;; If latter, you need to get the boundaries for the entire link too.
@@ -1393,33 +1397,30 @@ The anchor text may be of 4 possibilities, depending on value of `universal-argu
           (setq p2-url (- (point) 1))
 
           (goto-char p1-url)
-          (search-backward "<a" (- p1-url 30) )
+          (search-backward "<a" (- p1-url 30))
           (setq p1-tag (point))
           (goto-char p2-url)
           (search-forward "</a>" (+ p2-url 140))
-          (setq p2-tag (point))
-          )
+          (setq p2-tag (point)))
       (progn
         (setq p1-url p1-input)
         (setq p2-url p2-input)
         (setq p1-tag p1-input)
-        (setq p2-tag p2-input) ) )
+        (setq p2-tag p2-input)))
 
-    (setq ξurl (replace-regexp-in-string "&amp;" "&" (buffer-substring-no-properties p1-url p2-url) nil "LITERAL") ) ; in case it's already encoded. TODO this is only 99% correct.
+    (setq ξurl (replace-regexp-in-string "&amp;" "&" (buffer-substring-no-properties p1-url p2-url) nil "LITERAL")) ; in case it's already encoded. TODO this is only 99% correct.
 
     ;; get the domainName
     (setq domainName
           (progn
             (string-match "://\\([^\/]+?\\)/" ξurl)
-            (match-string 1 ξurl)
-            )
-          )
+            (match-string 1 ξurl)))
 
     (setq linkText
           (cond
-           ((equal prefixArgCode 1) ξurl)           ; full url
-           ((or (equal prefixArgCode 2) (equal prefixArgCode 4) (equal prefixArgCode '(4))) (concat domainName "…"))           ; ‹domain›…
-           ((equal prefixArgCode 3) "img src")           ; img src
+           ((equal prefixArgCode 1) ξurl) ; full url
+           ((or (equal prefixArgCode 2) (equal prefixArgCode 4) (equal prefixArgCode '(4))) (concat domainName "…")) ; ‹domain›…
+           ((equal prefixArgCode 3) "img src") ; img src
            (t (if
                   (or
                    (string-match "wikipedia\\.org.+jpg$" ξurl)
@@ -1427,25 +1428,21 @@ The anchor text may be of 4 possibilities, depending on value of `universal-argu
                    (string-match "wikipedia\\.org.+png$" ξurl)
                    (string-match "wikipedia\\.org.+PNG$" ξurl)
                    (string-match "wikipedia\\.org.+svg$" ξurl)
-                   (string-match "wikipedia\\.org.+SVG$" ξurl)
-                   )
+                   (string-match "wikipedia\\.org.+SVG$" ξurl))
                   "img src"
                 ξurl
-                ))        ; smart
-           )
-          )
+                )) ; smart
+           ))
 
     (setq ξurl (replace-regexp-in-string "&" "&amp;" ξurl))
     (setq resultLinkStr
           (format "<a class=\"sorc\" href=\"%s\" data-accessed=\"%s\">%s</a>"
                   ξurl (format-time-string "%Y-%m-%d") linkText
-                  )
-          )
+                  ))
 
     ;; delete URL and insert the link
     (delete-region p1-tag p2-tag)
-    (insert resultLinkStr)
-    ))
+    (insert resultLinkStr)))
 
 (defun xhm-wikipedia-url-linkify (φstring &optional φfrom-to-pair)
   "Make the URL at cursor point into a html link.
@@ -1813,11 +1810,11 @@ Case shouldn't matter, except when it's emacs's key notation.
 (defvar xhm-class-input-history nil "for input history of `xhm-wrap-html-tag'")
 (setq xhm-class-input-history (list) )
 
-(defun xhm-add-open/close-tag (φtag-name className φp1 φp2)
+(defun xhm-add-open/close-tag (φtag-name φclass-name φp1 φp2)
   "Add HTML open/close tags around region boundary φp1 φp2.
 This function does not `save-excursion'."
   (let* (
-         (classStr (if (or (equal className nil) (string= className "")) "" (format " class=\"%s\"" className)))
+         (classStr (if (or (equal φclass-name nil) (string= φclass-name "")) "" (format " class=\"%s\"" φclass-name)))
          (insStrLeft (format "<%s%s>" φtag-name classStr))
          (insStrRight (format "</%s>" φtag-name )))
 
@@ -1830,44 +1827,39 @@ This function does not `save-excursion'."
         (goto-char (+ φp2 (length insStrLeft)))
         (insert insStrRight )))))
 
-(defun xhm-wrap-html-tag (φtag-name &optional className)
+(defun xhm-wrap-html-tag (φtag-name &optional φclass-name)
   "Insert/wrap HTML tag to current text unit or text selection.
 When there's no text selection, the tag will be wrapped around current {word, line, text-block}, depending on the tag used.
 
 If current line or word is empty, then insert open/end tags and place cursor between them.
 If `universal-argument' is called first, then also prompt for a “class” attribute. Empty value means don't add the attribute."
-
   (interactive
    (list
     (ido-completing-read "HTML tag:" xhm-html5-tag-list "PREDICATE" "REQUIRE-MATCH" nil xhm-html-tag-input-history "div")
     (if current-prefix-arg
         (read-string "class:" nil xhm-class-input-history "")
-      nil ) ) )
+      nil )))
   (let (bds p1 p2
             lineWordBlock
             )
     (progn
-      (setq lineWordBlock (xhm-get-tag-type φtag-name) )
+      (setq lineWordBlock (xhm-get-tag-type φtag-name))
       (setq bds
             (cond
              ((equal lineWordBlock "w") (get-selection-or-unit 'word))
              ((equal lineWordBlock "l") (get-selection-or-unit 'line))
              ((equal lineWordBlock "b") (get-selection-or-unit 'block))
-             (t (get-selection-or-unit 'word))
-             ))
-      (setq p1 (elt bds 1) )
-      (setq p2 (elt bds 2) )
-      (xhm-add-open/close-tag φtag-name className p1 p2)
+             (t (get-selection-or-unit 'word))))
+      (setq p1 (elt bds 1))
+      (setq p2 (elt bds 2))
+      (xhm-add-open/close-tag φtag-name φclass-name p1 p2)
 
       (when ; put cursor between when input text is empty
           (and (equal p1 p2) (not (xhm-tag-self-closing? φtag-name)))
-          (progn (search-backward "</" ) )
-         )
- ) ) )
+        (progn (search-backward "</" ))))))
 
 (defun xhm-pre-source-code (&optional φlang-code)
-  "Insert/wrap a <pre class=\"‹φlang-code›\"> tags to text selection or current text block.
-"
+  "Insert/wrap a <pre class=\"‹φlang-code›\"> tags to text selection or current text block."
   (interactive
    (list
     (ido-completing-read "lang code:" (mapcar (lambda (x) (car x)) xhm-lang-name-map) "PREDICATE" "REQUIRE-MATCH" nil xhm-html-tag-input-history "code")))
@@ -1942,13 +1934,17 @@ This is heuristic based, does not remove ALL possible redundant whitespace."
 
 
 
+
+
 (defun xhm-abbrev-enable-function ()
   "Determine whether to expand abbrev.
 This is called by emacs abbrev system."
-  (let ((ξsyntax-state (syntax-ppss)))
-    (if (or (nth 3 ξsyntax-state) (nth 4 ξsyntax-state))
-        (progn nil)
-      t)))
+;; (let ((ξsyntax-state (syntax-ppss)))
+;;     (if (or (nth 3 ξsyntax-state) (nth 4 ξsyntax-state))
+;;         (progn nil)
+;;       t))
+t
+)
 
 (setq xhm-abbrev-table nil)
 
@@ -2018,8 +2014,17 @@ This is called by emacs abbrev system."
   ;; :regexp "\\_<\\([_-0-9A-Za-z]+\\)"
   ;; :regexp "\\([_-0-9A-Za-z]+\\)"
   :case-fixed t
-  :enable-function 'xhm-abbrev-enable-function
+
   )
+
+;; (symbol-plist 'xhm-abbrev-table)
+;; (get 'xhm-abbrev-table 'case-fixed)
+;; (abbrev-table-get xhm-abbrev-table :case-fixed)
+;; (abbrev-table-get xhm-abbrev-table :enable-function)
+;; (abbrev-table-get xhm-abbrev-table :parents)
+
+  ;; :enable-function 'xhm-abbrev-enable-function
+
 
 
 ;; keybinding
