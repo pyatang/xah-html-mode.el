@@ -1203,7 +1203,7 @@ on a single line, by regex. The quote may be single quote."
       (setq urlList
             (mapcar
              (lambda (ξx)
-               (if (string-match "http" ξx )
+               (if (string-match "^http" ξx )
                    (progn ξx)
                  (progn
                    ;; (xahsite-filepath-to-url (xahsite-href-value-to-filepath ξx (buffer-file-name)))
