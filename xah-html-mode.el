@@ -210,18 +210,18 @@
 
 (defvar xhm-css-property-names nil "a list of CSS property names.")
 (setq xhm-css-property-names
-'(
-"background" "background-color" "background-image" "background-position" "background-repeat" "border" "border-bottom" "border-collapse" "border-color" "border-left" "border-radius" "border-top" "box-shadow" "clear" "color" "content" "cursor" "direction" "display" "filter" "float" "font-family" "font-size" "font-style" "font-weight" "height" "line-height" "list-style" "list-style-image" "list-style-type" "margin" "margin-bottom" "margin-left" "margin-right" "margin-top" "max-width" "min-width" "opacity" "orphans" "overflow" "padding" "padding-left" "padding-right" "padding-top" "page-break-after" "page-break-inside" "position" "pre-wrap" "table" "table-cell" "text-align" "text-decoration" "unicode-bidi" "vertical-align" "white-space" "widows" "width" "word-wrap" "z-index"
-) )
+      '(
+        "background" "background-color" "background-image" "background-position" "background-repeat" "border" "border-bottom" "border-collapse" "border-color" "border-left" "border-radius" "border-top" "box-shadow" "clear" "color" "content" "cursor" "direction" "display" "filter" "float" "font-family" "font-size" "font-style" "font-weight" "height" "line-height" "list-style" "list-style-image" "list-style-type" "margin" "margin-bottom" "margin-left" "margin-right" "margin-top" "max-width" "min-width" "opacity" "orphans" "overflow" "padding" "padding-left" "padding-right" "padding-top" "page-break-after" "page-break-inside" "position" "pre-wrap" "table" "table-cell" "text-align" "text-decoration" "unicode-bidi" "vertical-align" "white-space" "widows" "width" "word-wrap" "z-index"
+        ))
 
 (defvar xhm-css-unit-names nil "a list of CSS unite names.")
-(setq xhm-css-unit-names '("px" "pt" "pc" "cm" "mm" "in" "em" "ex" "%") )
+(setq xhm-css-unit-names '("px" "pt" "pc" "cm" "mm" "in" "em" "ex" "%"))
 
 (defvar xhm-css-value-kwds nil "a list of CSS value names")
 (setq xhm-css-value-kwds
-'(
-"!important" "absolute" "alpha" "auto" "avoid" "block" "bold" "both" "bottom" "break-word" "center" "collapse" "dashed" "dotted" "embed" "fixed" "help" "hidden" "hsl" "hsla" "inherit" "inline" "inline-block" "italic" "large" "left" "ltr" "middle" "monospace" "no-repeat" "none" "normal" "nowrap" "pointer" "relative" "rgb" "rgba" "right" "rtl" "sans-serif" "serif" "small" "smaller" "solid" "square" "static" "thin" "top" "transparent" "underline" "url" "x-large" "xx-large"
-) )
+      '(
+        "!important" "absolute" "alpha" "auto" "avoid" "block" "bold" "both" "bottom" "break-word" "center" "collapse" "dashed" "dotted" "embed" "fixed" "help" "hidden" "hsl" "hsla" "inherit" "inline" "inline-block" "italic" "large" "left" "ltr" "middle" "monospace" "no-repeat" "none" "normal" "nowrap" "pointer" "relative" "rgb" "rgba" "right" "rtl" "sans-serif" "serif" "small" "smaller" "solid" "square" "static" "thin" "top" "transparent" "underline" "url" "x-large" "xx-large"
+        ))
 
 
 
@@ -234,64 +234,62 @@
 
 (defvar xhm-lang-name-map nil "a alist that maps lang name. Each element has this form 「(‹lang code› . [‹emacs major mode name› ‹file extension›])」")
 (setq xhm-lang-name-map
-'(
-           ("ahk" . ["ahk-mode" "ahk"])
+      '(
+        ("ahk" . ["ahk-mode" "ahk"])
 
-           ("code" . ["fundamental-mode" "txt"])
-           ("output" . ["fundamental-mode" "txt"])
+        ("code" . ["fundamental-mode" "txt"])
+        ("output" . ["fundamental-mode" "txt"])
 
-           ("bash" . ["sh-mode" "sh"])
-           ("bash-output" . ["fundamental-mode" "txt"])
-           ("unix-config" . ["conf-space-mode" "conf"])
-           ("cmd" . ["dos-mode" "bat"])
+        ("bash" . ["sh-mode" "sh"])
+        ("bash-output" . ["fundamental-mode" "txt"])
+        ("unix-config" . ["conf-space-mode" "conf"])
+        ("cmd" . ["dos-mode" "bat"])
 
-           ("bbcode" . ["xbbcode-mode" "bbcode"])
-           ("c" . ["c-mode" "c"])
-           ("cpp" . ["c++-mode" "cpp"])
-           ("common-lisp" . ["lisp-mode" "lisp"])
+        ("bbcode" . ["xbbcode-mode" "bbcode"])
+        ("c" . ["c-mode" "c"])
+        ("cpp" . ["c++-mode" "cpp"])
+        ("common-lisp" . ["lisp-mode" "lisp"])
 
-           ("org-mode" . ["org-mode" "org"])
+        ("org-mode" . ["org-mode" "org"])
 
-           ("clojure" . ["clojure-mode" "clj"])
-           ("css" . ["css-mode" "css"])
-           ("emacs-lisp" . ["xah-elisp-mode" "el"])
-           ("haskell" . ["haskell-mode" "hs"])
-           ("html" . ["html-mode" "html"])
-           ("mysql" . ["sql-mode" "sql"])
-           ("xml" . ["sgml-mode" "xml"])
-           ("html6" . ["xah-html6-mode" "html6"])
-           ("java" . ["java-mode" "java"])
-           ("js" . ["xah-js-mode" "js"])
-           ("nodejs" . ["xah-js-mode" "js"])
-           ("lsl" . ["xlsl-mode" "lsl"])
-           ("latex" . ["latex-mode" "txt"])
-           ("ocaml" . ["tuareg-mode" "ocaml"])
-           ("org" . ["org-mode" "org"])
-           ("perl" . ["cperl-mode" "pl"])
-           ("php" . ["php-mode" "php"])
-           ("povray" . ["pov-mode" "pov"])
-           ("powershell" . ["powershell-mode" "ps1"])
-           ("python" . ["python-mode" "py"])
-           ("python3" . ["python-mode" "py3"])
-           ("qi" . ["shen-mode" "qi"])
-           ("ruby" . ["ruby-mode" "rb"])
-           ("scala" . ["scala-mode" "scala"])
-           ("scheme" . ["scheme-mode" "scm"])
-           ("yasnippet" . ["snippet-mode" "yasnippet"])
-           ("vbs" . ["visual-basic-mode" "vbs"])
-           ("visualbasic" . ["visual-basic-mode" "vbs"])
-           ("mathematica" . ["fundamental-mode" "m"])
-           ("math" . ["fundamental-mode" "txt"])
+        ("clojure" . ["clojure-mode" "clj"])
+        ("css" . ["css-mode" "css"])
+        ("emacs-lisp" . ["xah-elisp-mode" "el"])
+        ("haskell" . ["haskell-mode" "hs"])
+        ("html" . ["html-mode" "html"])
+        ("mysql" . ["sql-mode" "sql"])
+        ("xml" . ["sgml-mode" "xml"])
+        ("html6" . ["xah-html6-mode" "html6"])
+        ("java" . ["java-mode" "java"])
+        ("js" . ["xah-js-mode" "js"])
+        ("nodejs" . ["xah-js-mode" "js"])
+        ("lsl" . ["xlsl-mode" "lsl"])
+        ("latex" . ["latex-mode" "txt"])
+        ("ocaml" . ["tuareg-mode" "ocaml"])
+        ("org" . ["org-mode" "org"])
+        ("perl" . ["cperl-mode" "pl"])
+        ("php" . ["php-mode" "php"])
+        ("povray" . ["pov-mode" "pov"])
+        ("powershell" . ["powershell-mode" "ps1"])
+        ("python" . ["python-mode" "py"])
+        ("python3" . ["python-mode" "py3"])
+        ("qi" . ["shen-mode" "qi"])
+        ("ruby" . ["ruby-mode" "rb"])
+        ("scala" . ["scala-mode" "scala"])
+        ("scheme" . ["scheme-mode" "scm"])
+        ("yasnippet" . ["snippet-mode" "yasnippet"])
+        ("vbs" . ["visual-basic-mode" "vbs"])
+        ("visualbasic" . ["visual-basic-mode" "vbs"])
+        ("mathematica" . ["fundamental-mode" "m"])
+        ("math" . ["fundamental-mode" "txt"])
 
-           ("slim" . ["slim-mode" "slim"])
-           ("yaml" . ["yaml-mode" "yaml"])
-           ("haml" . ["haml-mode" "haml"])
-           ("sass" . ["sass-mode" "sass"])
-           ("scss" . ["css-mode" "css"])
+        ("slim" . ["slim-mode" "slim"])
+        ("yaml" . ["yaml-mode" "yaml"])
+        ("haml" . ["haml-mode" "haml"])
+        ("sass" . ["sass-mode" "sass"])
+        ("scss" . ["css-mode" "css"])
 
-           ("vimrc" . ["vimrc-mode" "vim"])
-
-           ) )
+        ("vimrc" . ["vimrc-mode" "vim"])))
 
 (defvar xhm-lang-name-list nil "a list of langcode.")
 (setq xhm-lang-name-list (mapcar 'car xhm-lang-name-map))
@@ -359,16 +357,15 @@ This function requires the `htmlize-buffer' from 〔htmlize.el〕 by Hrvoje Niks
       (insert φsource-code-str)
       (funcall (intern φmajor-mode-name))
       (font-lock-fontify-buffer)
-      (setq htmlizeOutputBuffer (htmlize-buffer))
-      )
+      (setq htmlizeOutputBuffer (htmlize-buffer)))
     ;; extract the fontified source code in htmlize output
     (with-current-buffer htmlizeOutputBuffer
       (let (p1 p2 )
         (setq p1 (search-forward "<pre>"))
         (setq p2 (search-forward "</pre>"))
-        (setq resultStr (buffer-substring-no-properties (+ p1 1) (- p2 6))) ) )
+        (setq resultStr (buffer-substring-no-properties (+ p1 1) (- p2 6)))))
     (kill-buffer htmlizeOutputBuffer)
-    resultStr ) )
+    resultStr ))
 
 (defun xhm-langcode-to-major-mode-name (φlang-code φlang-code-map)
   "get the `major-mode' name associated with φlang-code."
@@ -548,7 +545,7 @@ This command does the inverse of `xhm-htmlize-precode'."
 (defun xhm-tag-self-closing? (φtag-name)
   "Return true if the tag is a self-closing tag, ⁖ br."
   (interactive)
-  (member φtag-name  xhm-html5-self-close-tags) )
+  (member φtag-name  xhm-html5-self-close-tags))
 
 (defun xhm-cursor-in-tag-markup? (&optional φbracketPositions)
   "Return true if cursor is inside a tag markup.
@@ -559,19 +556,16 @@ For example,
  `xhm-get-bracket-positions' is called to get it."
   (interactive)
   (let ( pl< pl> pr> pr< )
-      (when (not φbracketPositions)
-        (progn
-          (setq φbracketPositions (xhm-get-bracket-positions) )
-          (setq pl< (elt φbracketPositions 0) )
-          (setq pl> (elt φbracketPositions 1) )
-          (setq pr< (elt φbracketPositions 2) )
-          (setq pr> (elt φbracketPositions 3) )
-          )
-        )
-      (if (and (< pl> pl<) (< pr> pr<))
-          (progn (message "%s" "yes") t)
-        (progn (message "%s" "no") nil)
-        ) ) )
+    (when (not φbracketPositions)
+      (progn
+        (setq φbracketPositions (xhm-get-bracket-positions))
+        (setq pl< (elt φbracketPositions 0))
+        (setq pl> (elt φbracketPositions 1))
+        (setq pr< (elt φbracketPositions 2))
+        (setq pr> (elt φbracketPositions 3))))
+    (if (and (< pl> pl<) (< pr> pr<))
+        (progn (message "%s" "yes") t)
+      (progn (message "%s" "no") nil))))
 
 (defun xhm-end-tag? (&optional φbracketPositions)
   "Return t if cursor is inside a begin tag, else nil.
@@ -582,19 +576,16 @@ This function assumes your cursor is inside a tag, ⁖ <…▮…>
  `xhm-get-bracket-positions' is called to get it.
 "
   (let ( pl< pl> pr> pr< )
-      (when (not φbracketPositions)
-        (progn
-          (setq φbracketPositions (xhm-get-bracket-positions) )
-          (setq pl< (elt φbracketPositions 0) )
-          (setq pl> (elt φbracketPositions 1) )
-          (setq pr< (elt φbracketPositions 2) )
-          (setq pr> (elt φbracketPositions 3) )
-          )
-        )
-(goto-char pl<)
-(forward-char 1)
-(looking-at "/" )
-       ) )
+    (when (not φbracketPositions)
+      (progn
+        (setq φbracketPositions (xhm-get-bracket-positions))
+        (setq pl< (elt φbracketPositions 0))
+        (setq pl> (elt φbracketPositions 1))
+        (setq pr< (elt φbracketPositions 2))
+        (setq pr> (elt φbracketPositions 3))))
+    (goto-char pl<)
+    (forward-char 1)
+    (looking-at "/" )))
 
 (defun xhm-get-tag-name (&optional φleft<)
   "Return the tag name.
@@ -602,19 +593,16 @@ This function assumes your cursor is inside a tag, ⁖ <…▮…>
 "
   (let ( p1 p2 )
     (when (not φleft<)
-      (setq φleft< (search-backward "<") )
-      )
+      (setq φleft< (search-backward "<")))
     (goto-char φleft<)
     (forward-char 1)
     (when (looking-at "/" )
-      (forward-char 1)
-      )
-    (setq p1 (point) )
+      (forward-char 1))
+    (setq p1 (point))
     (search-forward-regexp " \\|>")
     (backward-char 1)
-    (setq p2 (point) )
-    (buffer-substring-no-properties p1 p2)
-    ) )
+    (setq p2 (point))
+    (buffer-substring-no-properties p1 p2)))
 
 (defun xhm-get-bracket-positions ()
   "Returns html angle bracket positions.
@@ -625,28 +613,27 @@ Returns a vector [ pl< pl> pr< pr> ]
 
 this command does not `save-excursion'. You need to call that.
 "
-    ;; search for current tag.
-    ;; find left nearest >, and right nearest <
-    ;; or left nearest <, and right nearest >
-    ;; determine if it's <…> or >…<.
-    (let (
-          (p-current (point))
-          pl< ; position of first < char to the left of cursor
-          pl>
-          pr<
-          pr>
-          )
-      (progn
-        (goto-char p-current)
-        (setq pl< (search-backward "<" nil "NOERROR") )
-        (goto-char p-current)
-        (setq pl> (search-backward ">" nil "NOERROR") )
-        (goto-char p-current)
-        (setq pr< (search-forward "<" nil "NOERROR") )
-        (goto-char p-current)
-        (setq pr> (search-forward ">" nil "NOERROR") )
-        (vector pl< pl> pr< pr>)
- ) ) )
+  ;; search for current tag.
+  ;; find left nearest >, and right nearest <
+  ;; or left nearest <, and right nearest >
+  ;; determine if it's <…> or >…<.
+  (let (
+        (p-current (point))
+        pl< ; position of first < char to the left of cursor
+        pl>
+        pr<
+        pr>
+        )
+    (progn
+      (goto-char p-current)
+      (setq pl< (search-backward "<" nil "NOERROR"))
+      (goto-char p-current)
+      (setq pl> (search-backward ">" nil "NOERROR"))
+      (goto-char p-current)
+      (setq pr< (search-forward "<" nil "NOERROR"))
+      (goto-char p-current)
+      (setq pr> (search-forward ">" nil "NOERROR"))
+      (vector pl< pl> pr< pr>))))
 
 (defun xhm-delete-tag ()
   "work in progress. do nothing.
@@ -669,13 +656,8 @@ Also delete the matching beginning/ending tag."
           (progn
             (if (xhm-end-tag?)
                 (progn (message "end %s" (xhm-get-tag-name)))
-              (progn (message "begin %s" (xhm-get-tag-name))
-                     )
-              )
-            )
-        (progn (message "%s" "cursor needs to be inside a tag.") )
-        )
-      ) ) )
+              (progn (message "begin %s" (xhm-get-tag-name)))))
+        (progn (message "%s" "cursor needs to be inside a tag."))))))
 
 (defun xhm-skip-tag-forward ()
   "Move cursor to the closing tag."
@@ -696,9 +678,9 @@ this is a quick 1 min hackjob, works only when there's no nesting."
   (let (p1 p2 oldTagName newTagName oldClassName newClassName)
     (search-backward "<" )
     (forward-char 1)
-    (setq p1 (point) )
-    (setq oldTagName (xhm-get-tag-name) )
-    (setq newTagName (ido-completing-read "HTML tag:" xhm-html5-tag-list "PREDICATE" "REQUIRE-MATCH" nil xhm-html-tag-input-history "span") )
+    (setq p1 (point))
+    (setq oldTagName (xhm-get-tag-name))
+    (setq newTagName (ido-completing-read "HTML tag:" xhm-html5-tag-list "PREDICATE" "REQUIRE-MATCH" nil xhm-html-tag-input-history "span"))
     (goto-char p1)
     (delete-char (length oldTagName))
     (insert newTagName)
@@ -709,26 +691,25 @@ this is a quick 1 min hackjob, works only when there's no nesting."
     (progn
       (goto-char p1)
       (search-forward ">")
-      (setq p2  (point) )
+      (setq p2  (point))
       (goto-char p1)
       (when
-(search-forward-regexp "class[ \n]*=[ \n]*\"" p2 "NOERROR")
-;(string-match "class[ \n]*=[ \n]*\"" (buffer-substring-no-properties p1 p2))
+          (search-forward-regexp "class[ \n]*=[ \n]*\"" p2 "NOERROR")
+  ;(string-match "class[ \n]*=[ \n]*\"" (buffer-substring-no-properties p1 p2))
         (progn
-               (setq p1 (point) )
-               (search-forward "\"")
-               (setq p2 (- (point) 1) )
-               (setq oldClassName (buffer-substring-no-properties p1 p2) )
-               (setq newClassName (read-string "new class name:") )
-               (if (string-equal newClassName "")
-                   (progn ; todo need to clean this up. don't use bunch of user functions
-                     (delete-region p1 p2 )
-                          (backward-kill-word 1)
-                          (delete-char -1)
-                          )
-                 (progn (delete-region p1 p2 )
-                      (goto-char p1)
-                      (insert newClassName) ) ) ) ) ) ))
+          (setq p1 (point))
+          (search-forward "\"")
+          (setq p2 (- (point) 1))
+          (setq oldClassName (buffer-substring-no-properties p1 p2))
+          (setq newClassName (read-string "new class name:"))
+          (if (string-equal newClassName "")
+              (progn ; todo need to clean this up. don't use bunch of user functions
+                (delete-region p1 p2 )
+                (backward-kill-word 1)
+                (delete-char -1))
+            (progn (delete-region p1 p2 )
+                   (goto-char p1)
+                   (insert newClassName))))))))
 
 ;; (defun xhm-split-tag ()
 ;;   "split a HTML element into 2 elements of the same tag, at cursor point.
@@ -801,32 +782,31 @@ See also:
   (interactive
    (if (region-active-p)
        (list nil (region-beginning) (region-end))
-     (let ((bds (get-selection-or-unit 'block)) )
-       (list nil (elt bds 1) (elt bds 2))) ) )
+     (let ((bds (get-selection-or-unit 'block)))
+       (list nil (elt bds 1) (elt bds 2)))))
 
-  (let (workOnString? inputStr outputStr)
-    (setq workOnString? (if φstring t nil))
-    (setq inputStr (if workOnString? φstring (buffer-substring-no-properties φfrom φto)))
+  (let (ξwork-on-string-p ξinput-str ξoutput-str)
+    (setq ξwork-on-string-p (if φstring t nil))
+    (setq ξinput-str (if ξwork-on-string-p φstring (buffer-substring-no-properties φfrom φto)))
 
-    (setq outputStr
+    (setq ξoutput-str
           (let ((case-fold-search nil))
-            (replace-pairs-in-string inputStr
- [
-  ["&nbsp;" " "] ["&ensp;" " "] ["&emsp;" " "] ["&thinsp;" " "]
+            (replace-pairs-in-string ξinput-str
+                                     [
+                                      ["&nbsp;" " "] ["&ensp;" " "] ["&emsp;" " "] ["&thinsp;" " "]
 
-  ["&rlm;" "‏"] ["&lrm;" "‎"] ["&zwj;" "‍"] ["&zwnj;" "‌"]
+                                      ["&rlm;" "‏"] ["&lrm;" "‎"] ["&zwj;" "‍"] ["&zwnj;" "‌"]
 
-  ["&iexcl;" "¡"] ["&cent;" "¢"] ["&pound;" "£"] ["&curren;" "¤"] ["&yen;" "¥"] ["&brvbar;" "¦"] ["&sect;" "§"] ["&uml;" "¨"] ["&copy;" "©"] ["&ordf;" "ª"] ["&laquo;" "«"] ["&not;" "¬"] ["&shy;" "­"] ["&reg;" "®"] ["&macr;" "¯"] ["&deg;" "°"] ["&plusmn;" "±"] ["&sup2;" "²"] ["&sup3;" "³"] ["&acute;" "´"] ["&micro;" "µ"] ["&para;" "¶"] ["&middot;" "·"] ["&cedil;" "¸"] ["&sup1;" "¹"] ["&ordm;" "º"] ["&raquo;" "»"] ["&frac14;" "¼"] ["&frac12;" "½"] ["&frac34;" "¾"] ["&iquest;" "¿"] ["&Agrave;" "À"] ["&Aacute;" "Á"] ["&Acirc;" "Â"] ["&Atilde;" "Ã"] ["&Auml;" "Ä"] ["&Aring;" "Å"] ["&AElig;" "Æ"] ["&Ccedil;" "Ç"] ["&Egrave;" "È"] ["&Eacute;" "É"] ["&Ecirc;" "Ê"] ["&Euml;" "Ë"] ["&Igrave;" "Ì"] ["&Iacute;" "Í"] ["&Icirc;" "Î"] ["&Iuml;" "Ï"] ["&ETH;" "Ð"] ["&Ntilde;" "Ñ"] ["&Ograve;" "Ò"] ["&Oacute;" "Ó"] ["&Ocirc;" "Ô"] ["&Otilde;" "Õ"] ["&Ouml;" "Ö"] ["&times;" "×"] ["&Oslash;" "Ø"] ["&Ugrave;" "Ù"] ["&Uacute;" "Ú"] ["&Ucirc;" "Û"] ["&Uuml;" "Ü"] ["&Yacute;" "Ý"] ["&THORN;" "Þ"] ["&szlig;" "ß"] ["&agrave;" "à"] ["&aacute;" "á"] ["&acirc;" "â"] ["&atilde;" "ã"] ["&auml;" "ä"] ["&aring;" "å"] ["&aelig;" "æ"] ["&ccedil;" "ç"] ["&egrave;" "è"] ["&eacute;" "é"] ["&ecirc;" "ê"] ["&euml;" "ë"] ["&igrave;" "ì"] ["&iacute;" "í"] ["&icirc;" "î"] ["&iuml;" "ï"] ["&eth;" "ð"] ["&ntilde;" "ñ"] ["&ograve;" "ò"] ["&oacute;" "ó"] ["&ocirc;" "ô"] ["&otilde;" "õ"] ["&ouml;" "ö"] ["&divide;" "÷"] ["&oslash;" "ø"] ["&ugrave;" "ù"] ["&uacute;" "ú"] ["&ucirc;" "û"] ["&uuml;" "ü"] ["&yacute;" "ý"] ["&thorn;" "þ"] ["&yuml;" "ÿ"] ["&fnof;" "ƒ"] ["&Alpha;" "Α"] ["&Beta;" "Β"] ["&Gamma;" "Γ"] ["&Delta;" "Δ"] ["&Epsilon;" "Ε"] ["&Zeta;" "Ζ"] ["&Eta;" "Η"] ["&Theta;" "Θ"] ["&Iota;" "Ι"] ["&Kappa;" "Κ"] ["&Lambda;" "Λ"] ["&Mu;" "Μ"] ["&Nu;" "Ν"] ["&Xi;" "Ξ"] ["&Omicron;" "Ο"] ["&Pi;" "Π"] ["&Rho;" "Ρ"] ["&Sigma;" "Σ"] ["&Tau;" "Τ"] ["&Upsilon;" "Υ"] ["&Phi;" "Φ"] ["&Chi;" "Χ"] ["&Psi;" "Ψ"] ["&Omega;" "Ω"] ["&alpha;" "α"] ["&beta;" "β"] ["&gamma;" "γ"] ["&delta;" "δ"] ["&epsilon;" "ε"] ["&zeta;" "ζ"] ["&eta;" "η"] ["&theta;" "θ"] ["&iota;" "ι"] ["&kappa;" "κ"] ["&lambda;" "λ"] ["&mu;" "μ"] ["&nu;" "ν"] ["&xi;" "ξ"] ["&omicron;" "ο"] ["&pi;" "π"] ["&rho;" "ρ"] ["&sigmaf;" "ς"] ["&sigma;" "σ"] ["&tau;" "τ"] ["&upsilon;" "υ"] ["&phi;" "φ"] ["&chi;" "χ"] ["&psi;" "ψ"] ["&omega;" "ω"] ["&thetasym;" "ϑ"] ["&upsih;" "ϒ"] ["&piv;" "ϖ"] ["&bull;" "•"] ["&hellip;" "…"] ["&prime;" "′"] ["&Prime;" "″"] ["&oline;" "‾"] ["&frasl;" "⁄"] ["&weierp;" "℘"] ["&image;" "ℑ"] ["&real;" "ℜ"] ["&trade;" "™"] ["&alefsym;" "ℵ"] ["&larr;" "←"] ["&uarr;" "↑"] ["&rarr;" "→"] ["&darr;" "↓"] ["&harr;" "↔"] ["&crarr;" "↵"] ["&lArr;" "⇐"] ["&uArr;" "⇑"] ["&rArr;" "⇒"] ["&dArr;" "⇓"] ["&hArr;" "⇔"] ["&forall;" "∀"] ["&part;" "∂"] ["&exist;" "∃"] ["&empty;" "∅"] ["&nabla;" "∇"] ["&isin;" "∈"] ["&notin;" "∉"] ["&ni;" "∋"] ["&prod;" "∏"] ["&sum;" "∑"] ["&minus;" "−"] ["&lowast;" "∗"] ["&radic;" "√"] ["&prop;" "∝"] ["&infin;" "∞"] ["&ang;" "∠"] ["&and;" "∧"] ["&or;" "∨"] ["&cap;" "∩"] ["&cup;" "∪"] ["&int;" "∫"] ["&there4;" "∴"] ["&sim;" "∼"] ["&cong;" "≅"] ["&asymp;" "≈"] ["&ne;" "≠"] ["&equiv;" "≡"] ["&le;" "≤"] ["&ge;" "≥"] ["&sub;" "⊂"] ["&sup;" "⊃"] ["&nsub;" "⊄"] ["&sube;" "⊆"] ["&supe;" "⊇"] ["&oplus;" "⊕"] ["&otimes;" "⊗"] ["&perp;" "⊥"] ["&sdot;" "⋅"] ["&lceil;" "⌈"] ["&rceil;" "⌉"] ["&lfloor;" "⌊"] ["&rfloor;" "⌋"] ["&lang;" "〈"] ["&rang;" "〉"] ["&loz;" "◊"] ["&spades;" "♠"] ["&clubs;" "♣"] ["&hearts;" "♥"] ["&diams;" "♦"] ["&quot;" "\""] ["&OElig;" "Œ"] ["&oelig;" "œ"] ["&Scaron;" "Š"] ["&scaron;" "š"] ["&Yuml;" "Ÿ"] ["&circ;" "ˆ"] ["&tilde;" "˜"] ["&ndash;" "–"] ["&mdash;" "—"] ["&lsquo;" "‘"] ["&rsquo;" "’"] ["&sbquo;" "‚"] ["&ldquo;" "“"] ["&rdquo;" "”"] ["&bdquo;" "„"] ["&dagger;" "†"] ["&Dagger;" "‡"] ["&permil;" "‰"] ["&lsaquo;" "‹"] ["&rsaquo;" "›"] ["&euro;" "€"]
-  ]
- )
-            )  )
+                                      ["&iexcl;" "¡"] ["&cent;" "¢"] ["&pound;" "£"] ["&curren;" "¤"] ["&yen;" "¥"] ["&brvbar;" "¦"] ["&sect;" "§"] ["&uml;" "¨"] ["&copy;" "©"] ["&ordf;" "ª"] ["&laquo;" "«"] ["&not;" "¬"] ["&shy;" "­"] ["&reg;" "®"] ["&macr;" "¯"] ["&deg;" "°"] ["&plusmn;" "±"] ["&sup2;" "²"] ["&sup3;" "³"] ["&acute;" "´"] ["&micro;" "µ"] ["&para;" "¶"] ["&middot;" "·"] ["&cedil;" "¸"] ["&sup1;" "¹"] ["&ordm;" "º"] ["&raquo;" "»"] ["&frac14;" "¼"] ["&frac12;" "½"] ["&frac34;" "¾"] ["&iquest;" "¿"] ["&Agrave;" "À"] ["&Aacute;" "Á"] ["&Acirc;" "Â"] ["&Atilde;" "Ã"] ["&Auml;" "Ä"] ["&Aring;" "Å"] ["&AElig;" "Æ"] ["&Ccedil;" "Ç"] ["&Egrave;" "È"] ["&Eacute;" "É"] ["&Ecirc;" "Ê"] ["&Euml;" "Ë"] ["&Igrave;" "Ì"] ["&Iacute;" "Í"] ["&Icirc;" "Î"] ["&Iuml;" "Ï"] ["&ETH;" "Ð"] ["&Ntilde;" "Ñ"] ["&Ograve;" "Ò"] ["&Oacute;" "Ó"] ["&Ocirc;" "Ô"] ["&Otilde;" "Õ"] ["&Ouml;" "Ö"] ["&times;" "×"] ["&Oslash;" "Ø"] ["&Ugrave;" "Ù"] ["&Uacute;" "Ú"] ["&Ucirc;" "Û"] ["&Uuml;" "Ü"] ["&Yacute;" "Ý"] ["&THORN;" "Þ"] ["&szlig;" "ß"] ["&agrave;" "à"] ["&aacute;" "á"] ["&acirc;" "â"] ["&atilde;" "ã"] ["&auml;" "ä"] ["&aring;" "å"] ["&aelig;" "æ"] ["&ccedil;" "ç"] ["&egrave;" "è"] ["&eacute;" "é"] ["&ecirc;" "ê"] ["&euml;" "ë"] ["&igrave;" "ì"] ["&iacute;" "í"] ["&icirc;" "î"] ["&iuml;" "ï"] ["&eth;" "ð"] ["&ntilde;" "ñ"] ["&ograve;" "ò"] ["&oacute;" "ó"] ["&ocirc;" "ô"] ["&otilde;" "õ"] ["&ouml;" "ö"] ["&divide;" "÷"] ["&oslash;" "ø"] ["&ugrave;" "ù"] ["&uacute;" "ú"] ["&ucirc;" "û"] ["&uuml;" "ü"] ["&yacute;" "ý"] ["&thorn;" "þ"] ["&yuml;" "ÿ"] ["&fnof;" "ƒ"] ["&Alpha;" "Α"] ["&Beta;" "Β"] ["&Gamma;" "Γ"] ["&Delta;" "Δ"] ["&Epsilon;" "Ε"] ["&Zeta;" "Ζ"] ["&Eta;" "Η"] ["&Theta;" "Θ"] ["&Iota;" "Ι"] ["&Kappa;" "Κ"] ["&Lambda;" "Λ"] ["&Mu;" "Μ"] ["&Nu;" "Ν"] ["&Xi;" "Ξ"] ["&Omicron;" "Ο"] ["&Pi;" "Π"] ["&Rho;" "Ρ"] ["&Sigma;" "Σ"] ["&Tau;" "Τ"] ["&Upsilon;" "Υ"] ["&Phi;" "Φ"] ["&Chi;" "Χ"] ["&Psi;" "Ψ"] ["&Omega;" "Ω"] ["&alpha;" "α"] ["&beta;" "β"] ["&gamma;" "γ"] ["&delta;" "δ"] ["&epsilon;" "ε"] ["&zeta;" "ζ"] ["&eta;" "η"] ["&theta;" "θ"] ["&iota;" "ι"] ["&kappa;" "κ"] ["&lambda;" "λ"] ["&mu;" "μ"] ["&nu;" "ν"] ["&xi;" "ξ"] ["&omicron;" "ο"] ["&pi;" "π"] ["&rho;" "ρ"] ["&sigmaf;" "ς"] ["&sigma;" "σ"] ["&tau;" "τ"] ["&upsilon;" "υ"] ["&phi;" "φ"] ["&chi;" "χ"] ["&psi;" "ψ"] ["&omega;" "ω"] ["&thetasym;" "ϑ"] ["&upsih;" "ϒ"] ["&piv;" "ϖ"] ["&bull;" "•"] ["&hellip;" "…"] ["&prime;" "′"] ["&Prime;" "″"] ["&oline;" "‾"] ["&frasl;" "⁄"] ["&weierp;" "℘"] ["&image;" "ℑ"] ["&real;" "ℜ"] ["&trade;" "™"] ["&alefsym;" "ℵ"] ["&larr;" "←"] ["&uarr;" "↑"] ["&rarr;" "→"] ["&darr;" "↓"] ["&harr;" "↔"] ["&crarr;" "↵"] ["&lArr;" "⇐"] ["&uArr;" "⇑"] ["&rArr;" "⇒"] ["&dArr;" "⇓"] ["&hArr;" "⇔"] ["&forall;" "∀"] ["&part;" "∂"] ["&exist;" "∃"] ["&empty;" "∅"] ["&nabla;" "∇"] ["&isin;" "∈"] ["&notin;" "∉"] ["&ni;" "∋"] ["&prod;" "∏"] ["&sum;" "∑"] ["&minus;" "−"] ["&lowast;" "∗"] ["&radic;" "√"] ["&prop;" "∝"] ["&infin;" "∞"] ["&ang;" "∠"] ["&and;" "∧"] ["&or;" "∨"] ["&cap;" "∩"] ["&cup;" "∪"] ["&int;" "∫"] ["&there4;" "∴"] ["&sim;" "∼"] ["&cong;" "≅"] ["&asymp;" "≈"] ["&ne;" "≠"] ["&equiv;" "≡"] ["&le;" "≤"] ["&ge;" "≥"] ["&sub;" "⊂"] ["&sup;" "⊃"] ["&nsub;" "⊄"] ["&sube;" "⊆"] ["&supe;" "⊇"] ["&oplus;" "⊕"] ["&otimes;" "⊗"] ["&perp;" "⊥"] ["&sdot;" "⋅"] ["&lceil;" "⌈"] ["&rceil;" "⌉"] ["&lfloor;" "⌊"] ["&rfloor;" "⌋"] ["&lang;" "〈"] ["&rang;" "〉"] ["&loz;" "◊"] ["&spades;" "♠"] ["&clubs;" "♣"] ["&hearts;" "♥"] ["&diams;" "♦"] ["&quot;" "\""] ["&OElig;" "Œ"] ["&oelig;" "œ"] ["&Scaron;" "Š"] ["&scaron;" "š"] ["&Yuml;" "Ÿ"] ["&circ;" "ˆ"] ["&tilde;" "˜"] ["&ndash;" "–"] ["&mdash;" "—"] ["&lsquo;" "‘"] ["&rsquo;" "’"] ["&sbquo;" "‚"] ["&ldquo;" "“"] ["&rdquo;" "”"] ["&bdquo;" "„"] ["&dagger;" "†"] ["&Dagger;" "‡"] ["&permil;" "‰"] ["&lsaquo;" "‹"] ["&rsaquo;" "›"] ["&euro;" "€"]
+                                      ]
+                                     )))
 
-    (if workOnString?
-        outputStr
+    (if ξwork-on-string-p
+        ξoutput-str
       (save-excursion
         (delete-region φfrom φto)
         (goto-char φfrom)
-        (insert outputStr) )) ) )
+        (insert ξoutput-str)))))
 
 (defun xhm-get-html-file-title (φfname)
   "Return FNAME <title> tag's text.
@@ -855,13 +835,13 @@ It will become:
 <li>human vocal range: <a href=\"http://en.wikipedia.org/wiki/Vocal_range\">Vocal range</a></li>
 </ul>"
   (interactive)
-  (let (bds p1 p2 inputStr resultStr)
+  (let (bds p1 p2 ξinput-str resultStr)
     (setq bds (get-selection-or-unit 'block))
-    (setq inputStr (elt bds 0) p1 (elt bds 1) p2 (elt bds 2))
+    (setq ξinput-str (elt bds 0) p1 (elt bds 1) p2 (elt bds 2))
     (save-excursion
       (setq resultStr
             (with-temp-buffer
-              (insert inputStr)
+              (insert ξinput-str)
               (delete-trailing-whitespace)
               (goto-char 1)
               (while
@@ -928,35 +908,33 @@ with “*” as separator, becomes
   (let (bds p1 p2 myStr)
 
     (setq bds (get-selection-or-unit 'block))
-    (setq myStr (elt bds 0) )
-    (setq p1 (elt bds 1) )
-    (setq p2 (elt bds 2) )
+    (setq myStr (elt bds 0))
+    (setq p1 (elt bds 1))
+    (setq p2 (elt bds 2))
     (delete-region p1 p2)
-    (insert (xhm-make-html-table-string myStr φsep) "\n")
-  ))
+    (insert (xhm-make-html-table-string myStr φsep) "\n")))
 
 (defun xhm-make-html-table-undo ()
   "inverse of `xhm-make-html-table'."
   (interactive)
   (let ( p1 p2 myStr)
-(search-backward "<table")
-    (setq p1 (point) )
-(search-forward "</table>")
-    (setq p2 (point) )
-;(replace-pairs-region p1 p2 [
-;])
+    (search-backward "<table")
+    (setq p1 (point))
+    (search-forward "</table>")
+    (setq p2 (point))
+  ;(replace-pairs-region p1 p2 [
+  ;])
 
-(replace-regexp-pairs-region p1 p2 [
-["<table \\([^>]+?\\)>" ""]
-["</th><th>" "•"]
-["</td><td>" "•"]
-["<tr>" ""]
-["</tr>" ""]
-["</table>" ""]
-]
- "FIXEDCASE" "LITERAL"
-)
-  ))
+    (replace-regexp-pairs-region p1 p2 [
+                                        ["<table \\([^>]+?\\)>" ""]
+                                        ["</th><th>" "•"]
+                                        ["</td><td>" "•"]
+                                        ["<tr>" ""]
+                                        ["</tr>" ""]
+                                        ["</table>" ""]
+                                        ]
+                                 "FIXEDCASE" "LITERAL"
+                                 )))
 
 (defun xhm-wikipedia-linkify ()
   "Make the current word or text selection into a Wikipedia link.
@@ -965,13 +943,13 @@ For Example: 「Emacs」 ⇒ 「<a href=\"http://en.wikipedia.org/wiki/Emacs\">E
   (interactive)
   (let (linkText bds p1 p2 wikiTerm resultStr)
     (setq bds (get-selection-or-unit 'url))
-    (setq linkText (elt bds 0) )
-    (setq p1 (aref bds 1) )
-    (setq p2 (aref bds 2) )
-    (setq wikiTerm (replace-regexp-in-string " " "_" linkText) )
+    (setq linkText (elt bds 0))
+    (setq p1 (aref bds 1))
+    (setq p2 (aref bds 2))
+    (setq wikiTerm (replace-regexp-in-string " " "_" linkText))
     (setq resultStr (concat "<a href=\"http://en.wikipedia.org/wiki/" wikiTerm "\">" linkText "</a>"))
     (delete-region p1 p2)
-    (insert resultStr) ))
+    (insert resultStr)))
 
 (defun xhm-remove-span-tag-region (φp1 φp2)
   "Delete HTML “span” tags in region.
@@ -1041,56 +1019,59 @@ WARNING: this command does not cover all HTML tags or convert all HTML entities.
   (interactive
    (if (region-active-p)
        (list nil (region-beginning) (region-end))
-     (let ((bds (get-selection-or-unit 'block)) )
-       (list nil (elt bds 1) (elt bds 2))) ) )
+     (let ((bds (get-selection-or-unit 'block)))
+       (list nil (elt bds 1) (elt bds 2)))))
 
-  (let (workOnString? inputStr outputStr)
-    (setq workOnString? (if φstring t nil))
-    (setq inputStr (if workOnString? φstring (buffer-substring-no-properties φfrom φto)))
-    (setq outputStr
-          (let ((case-fold-search t) (tempStr inputStr))
+  (let (ξwork-on-string-p ξinput-str ξoutput-str)
+    (setq ξwork-on-string-p (if φstring t nil))
+    (setq ξinput-str (if ξwork-on-string-p φstring (buffer-substring-no-properties φfrom φto)))
+    (setq ξoutput-str
+          (let ((case-fold-search t) (tempStr ξinput-str))
 
-(setq tempStr (replace-regexp-pairs-in-string tempStr '(
-["<script>\\([^\\<]+?\\)</script>" ""]
-["<[^>]+?>" ""]
-["</[a-z0-9]+>" ""]
-["&amp;" "&"]
-["&lt;" "<"]
-["&gt;" ">"]
-)
+            (setq tempStr 
+                  (replace-regexp-pairs-in-string 
+                   tempStr
+                   '(
+                     ["<script>\\([^\\<]+?\\)</script>" ""]
+                     ["<[^>]+?>" ""]
+                     ["</[a-z0-9]+>" ""]
+                     ["&amp;" "&"]
+                     ["&lt;" "<"]
+                     ["&gt;" ">"]
+                     )
 
-;; '(
-;; ["<!doctype html>" ""]
-;; ["<meta charset=\"utf-8\" />" ""]
-;; [" class=\"[-_a-z0-9]+\" *"  " "]
-;; [" id=\"[-_a-z0-9]+\" *"  " "]
-;; [" title=\"\\([^\"]+?\\)\" *"  " "]
-;; [" data-accessed=\"[-0-9]+\" *"  " "]
-;; [" width=\"[0-9]+%?\" *"  " "]
-;; [" height=\"[0-9]+%?\" *"  " "]
+                   ;; '(
+                   ;; ["<!doctype html>" ""]
+                   ;; ["<meta charset=\"utf-8\" />" ""]
+                   ;; [" class=\"[-_a-z0-9]+\" *"  " "]
+                   ;; [" id=\"[-_a-z0-9]+\" *"  " "]
+                   ;; [" title=\"\\([^\"]+?\\)\" *"  " "]
+                   ;; [" data-accessed=\"[-0-9]+\" *"  " "]
+                   ;; [" width=\"[0-9]+%?\" *"  " "]
+                   ;; [" height=\"[0-9]+%?\" *"  " "]
 
-;; ["<link rel=\"stylesheet\" href=\"\\([^\"]+?\\)\" />" ""]
-;; ["<a +href=\"\\([^\"]+?\\)\" *>\\([^<]+?\\)</a>" "\\2"]
-;; ["<img +src=\"\\([^\"]+?\\)\" +alt=\"\\([^\"]+?\\)\" */?>" ""]
+                   ;; ["<link rel=\"stylesheet\" href=\"\\([^\"]+?\\)\" />" ""]
+                   ;; ["<a +href=\"\\([^\"]+?\\)\" *>\\([^<]+?\\)</a>" "\\2"]
+                   ;; ["<img +src=\"\\([^\"]+?\\)\" +alt=\"\\([^\"]+?\\)\" */?>" ""]
 
-;; ["<[a-z0-9]+ */?>" ""]
-;; ["</[a-z0-9]+>" ""]
-;; ["&amp;" "&"]
-;; ["&lt;" "<"]
-;; ["&gt;" ">"]
-;; )
+                   ;; ["<[a-z0-9]+ */?>" ""]
+                   ;; ["</[a-z0-9]+>" ""]
+                   ;; ["&amp;" "&"]
+                   ;; ["&lt;" "<"]
+                   ;; ["&gt;" ">"]
+                   ;; )
 
-))
+                   ))
 
-tempStr
- ) )
+            tempStr
+            ))
 
-    (if workOnString?
-        outputStr
+    (if ξwork-on-string-p
+        ξoutput-str
       (save-excursion
         (delete-region φfrom φto)
         (goto-char φfrom)
-        (insert outputStr) )) ) )
+        (insert ξoutput-str)))))
 
 ;; (defun xhm-html-to-text (φstring &optional φfrom φto)
 ;; "Convert html to plain text on text selection or current text block."
@@ -1100,11 +1081,11 @@ tempStr
 ;;      (let ((bds (get-selection-or-unit 'block)) )
 ;;        (list nil (elt bds 1) (elt bds 2))) ) )
 
-;;   (let (workOnString? inputStr outputStr)
-;;     (setq workOnString? (if φstring t nil))
-;;     (setq inputStr (if workOnString? φstring (buffer-substring-no-properties φfrom φto)))
-;;     (setq outputStr
-;;           (let ((case-fold-search t) (tempStr inputStr))
+;;   (let (ξwork-on-string-p ξinput-str ξoutput-str)
+;;     (setq ξwork-on-string-p (if φstring t nil))
+;;     (setq ξinput-str (if ξwork-on-string-p φstring (buffer-substring-no-properties φfrom φto)))
+;;     (setq ξoutput-str
+;;           (let ((case-fold-search t) (tempStr ξinput-str))
 ;; (setq tempStr (replace-regexp-pairs-in-string tempStr '(
 ;; ["<script>\\([^\\<]+?\\)</script>" ""]
 ;; ["<li>" "<li>• " ]
@@ -1120,58 +1101,56 @@ tempStr
 ;; tempStr
 ;;  ) )
 
-;; (setq outputStr (xhm-remove-html-tags outputStr) )
+;; (setq ξoutput-str (xhm-remove-html-tags ξoutput-str) )
 
-;;     (if workOnString?
-;;         outputStr
+;;     (if ξwork-on-string-p
+;;         ξoutput-str
 ;;       (save-excursion
 ;;         (delete-region φfrom φto)
 ;;         (goto-char φfrom)
-;;         (insert outputStr) )) ) )
+;;         (insert ξoutput-str) )) ) )
 
 (defun xhm-html-to-text (φstring &optional φfrom φto)
-"Convert html to plain text on text selection or current text block."
+  "Convert html to plain text on text selection or current text block."
   (interactive
    (if (region-active-p)
        (list nil (region-beginning) (region-end))
-     (let ((bds (get-selection-or-unit 'block)) )
-       (list nil (elt bds 1) (elt bds 2))) ) )
+     (let ((bds (get-selection-or-unit 'block)))
+       (list nil (elt bds 1) (elt bds 2)))))
 
-  (let (workOnString? inputStr outputStr)
-    (setq workOnString? (if φstring t nil))
-    (setq inputStr (if workOnString? φstring (buffer-substring-no-properties φfrom φto)))
+  (let (ξwork-on-string-p ξinput-str ξoutput-str)
+    (setq ξwork-on-string-p (if φstring t nil))
+    (setq ξinput-str (if ξwork-on-string-p φstring (buffer-substring-no-properties φfrom φto)))
 
-    (setq outputStr
+    (setq ξoutput-str
           (with-temp-buffer
-            (insert inputStr)
+            (insert ξinput-str)
             (goto-char 1)
-            (let ((case-fold-search nil) )
+            (let ((case-fold-search nil))
               (replace-pairs-region 1 (point-max)
- '(
-   ["<script>\\([^\\<]+?\\)</script>" ""]
-   ["<li>" "<li>• " ]
-   ["<h2>" "────────── ────────── ────────── ────────── ──────────
+                                    '(
+                                      ["<script>\\([^\\<]+?\\)</script>" ""]
+                                      ["<li>" "<li>• " ]
+                                      ["<h2>" "────────── ────────── ────────── ────────── ──────────
 <h2>" ]
-   ["<h3>" "────────── ────────── ──────────
+                                      ["<h3>" "────────── ────────── ──────────
 <h3>" ]
-   ["<h4>" "────────── ──────────
+                                      ["<h4>" "────────── ──────────
 <h4>" ]
-   ["<a +href=\"\\([^\"]+?\\)\" *>\\([^<]+?\\)</a>" "\\2 〔 \\1 〕"]
-   ["<img +src=\"\\([^\"]+?\\)\" +alt=\"\\([^\"]+?\\)\" +width=\"[0-9]+\" +height=\"[0-9]+\" */?>" "〔IMAGE “\\2” \\1 〕"]
-   ))
-              )
+                                      ["<a +href=\"\\([^\"]+?\\)\" *>\\([^<]+?\\)</a>" "\\2 〔 \\1 〕"]
+                                      ["<img +src=\"\\([^\"]+?\\)\" +alt=\"\\([^\"]+?\\)\" +width=\"[0-9]+\" +height=\"[0-9]+\" */?>" "〔IMAGE “\\2” \\1 〕"]
+                                      )))
             ;; (xahsite-filepath-to-url (xahsite-href-value-to-filepath ξx (buffer-file-name) ))
-            (buffer-substring 1 (point-max))
-            ) )
+            (buffer-substring 1 (point-max))))
 
-(setq outputStr (xhm-remove-html-tags outputStr) )
+    (setq ξoutput-str (xhm-remove-html-tags ξoutput-str))
 
-    (if workOnString?
-        outputStr
+    (if ξwork-on-string-p
+        ξoutput-str
       (save-excursion
-        (delete-region ξfrom ξto)
-        (goto-char ξfrom)
-        (insert outputStr) )) ) )
+        (delete-region φfrom φto)
+        (goto-char φfrom)
+        (insert ξoutput-str)))))
 
 (defun xhm-extract-url (φhtml-text &optional φconvert-relative-URL-p)
   "Returns a list of URLs in the HTML text string φhtml-text.
@@ -1249,7 +1228,7 @@ Update the <title>…</title> and <h1>…</h1> of current buffer."
             (goto-char p1)
             (insert φnewTitle ))
         (progn
-          (message "<h1> tag not found. adding") ) ) ) ))
+          (message "<h1> tag not found. adding"))))))
 
 (defun xhm-make-citation ()
   "Reformat current text block or selection into a canonical citation format.
@@ -1271,30 +1250,27 @@ The order of lines for {title, author, date/time, url} needs not be in that orde
 "
   (interactive)
   (let* (
-    (bds (get-selection-or-unit 'block))
-    (inputText (elt bds 0) )
-    (p1 (elt bds 1) )
-    (p2 (elt bds 2) )
- myList ξtitle ξauthor ξdate ξurl )
+         (bds (get-selection-or-unit 'block))
+         (inputText (elt bds 0))
+         (p1 (elt bds 1))
+         (p2 (elt bds 2))
+         myList ξtitle ξauthor ξdate ξurl )
 
     (setq inputText (replace-regexp-in-string "^[[:space:]]*" "" inputText)) ; remove white space in front
 
-    (setq myList (split-string inputText "[[:space:]]*\n[[:space:]]*" t) )
+    (setq myList (split-string inputText "[[:space:]]*\n[[:space:]]*" t))
 
     (let (ξx (case-fold-search t))
       (while (> (length myList) 0)
-        (setq ξx (pop myList) )
+        (setq ξx (pop myList))
         (cond
          ((string-match "^https?://" ξx ) (setq ξurl ξx))
          ((string-match "^ *[bB]y " ξx ) (setq ξauthor ξx))
          ((string-match "^ *author[: ]" ξx ) (setq ξauthor ξx))
          ((is-datetimestamp-p ξx) (setq ξdate ξx))
-         (t (setq ξtitle ξx))
-         )
-        )
-      )
+         (t (setq ξtitle ξx)))))
 
-(message "title:「%s」\n author:「%s」\n date:「%s」\n url:「%s」" ξtitle ξauthor ξdate ξurl)
+    (message "title:「%s」\n author:「%s」\n date:「%s」\n url:「%s」" ξtitle ξauthor ξdate ξurl)
 
     (when (null ξtitle) (error "I can't find “title”"))
     (when (null ξauthor) (error "I can't find “author”"))
@@ -1338,8 +1314,8 @@ old version output:
     (save-excursion
       ;; get the boundary of opening tag
       (forward-char 3)
-      (search-backward "<a " ) (setq p1 (point) )
-      (search-forward "</a>") (setq p2 (point) )
+      (search-backward "<a " ) (setq p1 (point))
+      (search-forward "</a>") (setq p2 (point))
 
       ;; get wholeLinkStr
       (setq wholeLinkStr (buffer-substring-no-properties p1 p2))
@@ -1355,7 +1331,7 @@ old version output:
         (search-forward-regexp  "data-accessed=\"\\([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\\)\"")
         (setq accessedDate (match-string 1))
 
-        (setq newLinkStr (format "<s data-accessed=\"%s\" data-defunct-date=\"%s\">%s</s>" accessedDate (format-time-string "%Y-%m-%d") ξurl ) )))
+        (setq newLinkStr (format "<s data-accessed=\"%s\" data-defunct-date=\"%s\">%s</s>" accessedDate (format-time-string "%Y-%m-%d") ξurl ))))
 
     (delete-region p1 p2)
     (insert newLinkStr)))
@@ -1376,19 +1352,19 @@ The anchor text may be of 4 possibilities, depending on value of `universal-argu
 0 or any → smartly decide."
 
   (interactive "P")
-  (let (inputStr
+  (let (ξinput-str
         bds p1-input p2-input
         p1-url p2-url p1-tag p2-tag
         ξurl domainName linkText resultLinkStr)
 
     (setq bds (get-selection-or-unit 'url))
-    (setq inputStr (elt bds 0))
+    (setq ξinput-str (elt bds 0))
     (setq p1-input (elt bds 1))
     (setq p2-input (elt bds 2))
 
     ;; check if it's just plain URL or already in linked form 「<a href=…>…</a>」
     ;; If latter, you need to get the boundaries for the entire link too.
-    (if (string-match "href=\"" inputStr)
+    (if (string-match "href=\"" ξinput-str)
         (save-excursion
           (search-backward "href=" (- (point) 104)) ; search boundary as extra guard for error
           (forward-char 6)
@@ -1461,23 +1437,23 @@ When called in lisp code, if φstring is non-nil, returns a changed string.  If 
   (interactive
    (if (region-active-p)
        (list nil (vector (region-beginning) (region-end)))
-     (let ((bds (get-selection-or-unit 'url)) )
-       (list nil (vector (aref bds 1) (aref bds 2))) ) ) )
+     (let ((bds (get-selection-or-unit 'url)))
+       (list nil (vector (aref bds 1) (aref bds 2))))))
 
-  (let (ξwork_on_string? inputStr outputStr
-                      (ξfrom (elt φfrom-to-pair 0))
-                      (ξto (elt φfrom-to-pair 1)))
+  (let (ξwork_on_string? ξinput-str ξoutput-str
+                         (ξfrom (elt φfrom-to-pair 0))
+                         (ξto (elt φfrom-to-pair 1)))
     (setq ξwork_on_string? (if () t nil))
-    (setq inputStr (if ξwork_on_string? φstring (buffer-substring-no-properties ξfrom ξto)))
+    (setq ξinput-str (if ξwork_on_string? φstring (buffer-substring-no-properties ξfrom ξto)))
 
-    (setq outputStr (format "<a href=\"%s\">%s</a>" (url-percent-encode-string inputStr) (replace-regexp-in-string "_" " " (url-percent-decode-string (file-name-nondirectory inputStr) ) )) )
+    (setq ξoutput-str (format "<a href=\"%s\">%s</a>" (url-percent-encode-string ξinput-str) (replace-regexp-in-string "_" " " (url-percent-decode-string (file-name-nondirectory ξinput-str)))))
 
     (if ξwork_on_string?
-        outputStr
+        ξoutput-str
       (progn
         (delete-region ξfrom ξto)
         (goto-char ξfrom)
-        (insert outputStr) )) ) )
+        (insert ξoutput-str)))))
 
 (defun xhm-wrap-url (φstring &optional φfrom φto)
   "Make the URL at cursor point into a html link.
@@ -1488,21 +1464,20 @@ When called in lisp code, if φstring is non-nil, returns a changed string.  If 
   (interactive
    (if (region-active-p)
        (list nil (region-beginning) (region-end))
-     (let ((bds (unit-at-cursor 'glyphs)) )
-       (list nil (elt bds 1) (elt bds 2)) ) ) )
+     (let ((bds (unit-at-cursor 'glyphs)))
+       (list nil (elt bds 1) (elt bds 2)))))
 
-  (let (workOnString? inputStr outputStr)
-    (setq workOnString? (if φstring t nil))
-    (setq inputStr (if workOnString? φstring (buffer-substring-no-properties φfrom φto)))
-    (setq outputStr (concat "<a href=\"" (url-percent-encode-string inputStr) "\">" inputStr "</a>" )  )
+  (let (ξwork-on-string-p ξinput-str ξoutput-str)
+    (setq ξwork-on-string-p (if φstring t nil))
+    (setq ξinput-str (if ξwork-on-string-p φstring (buffer-substring-no-properties φfrom φto)))
+    (setq ξoutput-str (concat "<a href=\"" (url-percent-encode-string ξinput-str) "\">" ξinput-str "</a>" ))
 
-    (if workOnString?
-        outputStr
+    (if ξwork-on-string-p
+        ξoutput-str
       (save-excursion
         (delete-region φfrom φto)
         (goto-char φfrom)
-        (insert outputStr) )) )
-  )
+        (insert ξoutput-str)))))
 
 (defun xhm-wrap-p-tag ()
   "Add <p>…</p> tag to current text block or text selection.
@@ -1511,14 +1486,12 @@ If there's a text selection, wrap p around each text block (separated by 2 newli
   (let (bds p1 p2 inputText)
 
     (setq bds (get-selection-or-unit 'block))
-    (setq inputText (elt bds 0) )
-    (setq p1 (elt bds 1) )
-    (setq p2 (elt bds 2) )
+    (setq inputText (elt bds 0))
+    (setq p1 (elt bds 1))
+    (setq p2 (elt bds 2))
 
     (delete-region p1 p2 )
-    (insert "<p>" (replace-regexp-in-string "\n\n+" "</p>\n\n<p>" (trim-string inputText)) "</p>")
-    )
-  )
+    (insert "<p>" (replace-regexp-in-string "\n\n+" "</p>\n\n<p>" (trim-string inputText)) "</p>")))
 
 (defun xhm-emacs-to-windows-kbd-notation-string (φinput-string)
   "Change emacs keyboard-shortcut notation to Windows's notation.
@@ -1576,15 +1549,14 @@ When called interactively, work on text selection or text enclosed in 【…】.
 For detail on exactly which string are changed, see `xhm-emacs-to-windows-kbd-notation-string'.
 "
   (interactive
-   (let ((bds (get-selection-or-unit ["^【" "^】"])) )
-     (list (elt bds 1) (elt bds 2)) ) )
+   (let ((bds (get-selection-or-unit ["^【" "^】"])))
+     (list (elt bds 1) (elt bds 2))))
 
   (let (  (case-fold-search nil)
-          (inputStr (buffer-substring-no-properties φp1 φp2))
-          )
+          (ξinput-str (buffer-substring-no-properties φp1 φp2)))
     (delete-region φp1 φp2)
     (insert
-     (xhm-emacs-to-windows-kbd-notation-string inputStr) ) ) )
+     (xhm-emacs-to-windows-kbd-notation-string ξinput-str))))
 
 (defun xhm-htmlize-elisp-keywords (φp1 φp2)
   "Replace curly quoted elisp function/variable names to HTML markup.
@@ -1623,14 +1595,14 @@ Some issues:
     (t ; all other cases
      (list (point-min) (point-max)))))
   (let*
-      (inputStr
+      (ξinput-str
        resultStr
        (changedItems nil)
        (elispIdentifierRegex "\\([:-A-Za-z0-9]+\\)")
        (wantedRegex (concat "“" elispIdentifierRegex "”")))
-    (setq inputStr (buffer-substring-no-properties φp1 φp2))
+    (setq ξinput-str (buffer-substring-no-properties φp1 φp2))
     (setq resultStr
-          (let ( mStr (case-fold-search nil) (ξsomeStr inputStr))
+          (let ( mStr (case-fold-search nil) (ξsomeStr ξinput-str))
             (with-temp-buffer
               (insert ξsomeStr)
               (goto-char 1)
@@ -1770,15 +1742,14 @@ Case shouldn't matter, except when it's emacs's key notation.
                        ["↓" "<kbd>↓</kbd>"]
 
                        ["‹key›" "<kbd>‹key›</kbd>"]
-                       ])
-         )
+                       ]))
 
-    (let ((case-fold-search t) (case-replace nil) )
+    (let ((case-fold-search t) (case-replace nil))
       (save-restriction
         (narrow-to-region p1 p2)
-        (xhm-emacs-to-windows-kbd-notation (point-min) (point-max) )
+        (xhm-emacs-to-windows-kbd-notation (point-min) (point-max))
 
-(goto-char (point-min))
+        (goto-char (point-min))
 
         (replace-pairs-region (point-min) (point-max) replaceList)
         (replace-regexp-pairs-region
@@ -1792,8 +1763,7 @@ Case shouldn't matter, except when it's emacs's key notation.
 
           [" \\(.\\) " " <kbd>\\1</kbd> "]
           [" \\(.\\)】" " <kbd>\\1</kbd>】"]
-          ])
-        ) ) )
+          ]))))
 
   ;; test cases
   ;; 【Ctrl+x a】
@@ -1802,13 +1772,13 @@ Case shouldn't matter, except when it's emacs's key notation.
   )
 
 (defvar xhm-html-tag-input-history nil "for input history of `xhm-wrap-html-tag'")
-(setq xhm-tag-input-history (list) )
+(setq xhm-tag-input-history (list))
 
 (defvar xhm-class-input-history nil "for input history of `xhm-wrap-html-tag'")
-(setq xhm-class-input-history (list) )
+(setq xhm-class-input-history (list))
 
 (defvar xhm-class-input-history nil "for input history of `xhm-wrap-html-tag'")
-(setq xhm-class-input-history (list) )
+(setq xhm-class-input-history (list))
 
 (defun xhm-add-open/close-tag (φtag-name φclass-name φp1 φp2)
   "Add HTML open/close tags around region boundary φp1 φp2.
@@ -1902,14 +1872,12 @@ When cursor is in HTML link file path, e.g.  <img src=\"gki/macosxlogo.png\" > a
 When called in elisp program, wrap the tag at cursor position φp1."
   (interactive (list (point)))
   (let* (
-         (ξcodepoint (string-to-char (buffer-substring-no-properties φp1 (1+ φp1))) )
-         (ξname (get-char-code-property ξcodepoint 'name))
-         )
+         (ξcodepoint (string-to-char (buffer-substring-no-properties φp1 (1+ φp1))))
+         (ξname (get-char-code-property ξcodepoint 'name)))
     (goto-char φp1)
-    (insert (format "<mark class=\"unicode\" title=\"U+%X: %s\">" ξcodepoint ξname) )
+    (insert (format "<mark class=\"unicode\" title=\"U+%X: %s\">" ξcodepoint ξname))
     (forward-char 1)
-    (insert (format "</mark>") )
-    ) )
+    (insert (format "</mark>"))))
 
 (defun xhm-clean-whitespace ()
   "Delete redundant whitespace in HTML file.
@@ -2085,16 +2053,16 @@ HTML5 keywords are colored.
         (let (
               (htmlElementNamesRegex (regexp-opt xhm-html5-tag-list 'words))
               (htmlAttributeNamesRegexp (regexp-opt xhm-attribute-names 'words))
-              (cssPropertieNames (regexp-opt xhm-css-property-names 'words) )
-              (cssValueNames (regexp-opt xhm-css-value-kwds 'words) )
-              (cssColorNames (regexp-opt xhm-css-color-names 'words) )
-              (cssUnitNames (regexp-opt xhm-css-unit-names 'words) )
+              (cssPropertieNames (regexp-opt xhm-css-property-names 'words))
+              (cssValueNames (regexp-opt xhm-css-value-kwds 'words))
+              (cssColorNames (regexp-opt xhm-css-color-names 'words))
+              (cssUnitNames (regexp-opt xhm-css-unit-names 'words))
 
-;              (attriRegex " *= *\"\\([ -_a-z]*?\\)\"")
-;              (attriRegex " +\\(?:[ =\"-_a-z]*?\\)") ; one or more attributes
+  ;              (attriRegex " *= *\"\\([ -_a-z]*?\\)\"")
+  ;              (attriRegex " +\\(?:[ =\"-_a-z]*?\\)") ; one or more attributes
               (attriRegex " +\\(?:[^\n<>]*?\\)") ; one or more attributes
-;              (textNodeRegex "\\([ -_A-Za-z]+?\\)")
-;              (textNodeRegex "\\([ [:graph:]]+?\\)")
+  ;              (textNodeRegex "\\([ -_A-Za-z]+?\\)")
+  ;              (textNodeRegex "\\([ [:graph:]]+?\\)")
               (textNodeRegex "\\([^\n<]+?\\)") ; ← hack, to avoid multi-line
               )
           `(
@@ -2116,9 +2084,7 @@ HTML5 keywords are colored.
             (,cssPropertieNames . font-lock-type-face)
             (,cssValueNames . font-lock-keyword-face)
             (,cssColorNames . font-lock-preprocessor-face)
-            (,cssUnitNames . font-lock-reference-face)
-
-            ) ) )
+            (,cssUnitNames . font-lock-reference-face))))
 
   (setq font-lock-defaults '((xhm-font-lock-keywords)))
   (setq local-abbrev-table xhm-abbrev-table)
