@@ -809,15 +809,14 @@ See also:
         (insert ξoutput-str)))))
 
 (defun xhm-get-html-file-title (φfname)
-  "Return FNAME <title> tag's text.
+  "Return φfname <title> tag's text.
 Assumes that the file contains the string
 “<title>…</title>”."
   (with-temp-buffer
-      (insert-file-contents φfname nil nil nil t)
-      (goto-char 1)
-      (buffer-substring-no-properties
-       (search-forward "<title>") (- (search-forward "</title>") 8))
-      ))
+    (insert-file-contents φfname nil nil nil t)
+    (goto-char 1)
+    (buffer-substring-no-properties
+     (search-forward "<title>") (- (search-forward "</title>") 8))))
 
 (defun xhm-lines-to-html-list ()
   "Make the current block of lines into a HTML list.
