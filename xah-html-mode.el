@@ -1458,15 +1458,15 @@ When called in lisp code, if φstring is non-nil, returns a changed string.  If 
          (setq p2 (point))
          (list nil (vector p1 p2))))))
 
-  (let (ξwork_on_string? ξinput-str ξoutput-str
+  (let (ξwork-on-string-p ξinput-str ξoutput-str
                          (ξfrom (elt φfrom-to-pair 0))
                          (ξto (elt φfrom-to-pair 1)))
-    (setq ξwork_on_string? (if () t nil))
-    (setq ξinput-str (if ξwork_on_string? φstring (buffer-substring-no-properties ξfrom ξto)))
+    (setq ξwork-on-string-p (if () t nil))
+    (setq ξinput-str (if ξwork-on-string-p φstring (buffer-substring-no-properties ξfrom ξto)))
 
     (setq ξoutput-str (format "<a href=\"%s\">%s</a>" (url-percent-encode-string ξinput-str) (replace-regexp-in-string "_" " " (url-percent-decode-string (file-name-nondirectory ξinput-str)))))
 
-    (if ξwork_on_string?
+    (if ξwork-on-string-p
         ξoutput-str
       (progn
         (delete-region ξfrom ξto)
