@@ -46,8 +46,7 @@
 (require 'xeu_elisp_util)
 (require 'htmlize)
 
-
-(progn 
+(progn
   ;; part of emacs
   (require 'ido)
   (require 'sgml-mode)
@@ -445,26 +444,29 @@ This command does the inverse of `xhm-htmlize-precode'."
 (defun xhm-redo-syntax-coloring-buffer (&optional φlang-code)
   "redo all pre lang code syntax coloring in current html page."
   (interactive)
-  (let (ξlangCode p1 p2)
+  (let (ξlangCode p1 p2 (ξi 0))
 
     ;; (ξsearch-string
     ;;  (if φlang-code
     ;;      (progn (format "<pre class=\"\\([-A-Za-z0-9]+\\)\">" φlang-code))
     ;;    (progn "<pre class=\"\\([-A-Za-z0-9]+\\)\">")))
 
-    (goto-char (point-min))
-    (while
-        (re-search-forward "<pre class=\"\\([-A-Za-z0-9]+\\)\">" nil "NOERROR")
-      (setq ξlangCode (match-string 1))
-      (setq p1 (point))
-      (backward-char 1)
-      (xhm-skip-tag-forward)
-      (search-backward "</pre>")
-      (setq p2 (point))
-      (save-restriction
-        (narrow-to-region p1 p2)
-        (xhm-dehtmlize-precode (point-min) (point-max))
-        (xhm-htmlize-region (point-min) (point-max) (xhm-langcode-to-major-mode-name ξlangCode xhm-lang-name-map) t)))))
+    (save-excursion
+      (goto-char (point-min))
+      (while
+          (re-search-forward "<pre class=\"\\([-A-Za-z0-9]+\\)\">" nil "NOERROR")
+        (setq ξlangCode (match-string 1))
+        (setq p1 (point))
+        (backward-char 1)
+        (xhm-skip-tag-forward)
+        (search-backward "</pre>")
+        (setq p2 (point))
+        (save-restriction
+          (narrow-to-region p1 p2)
+          (xhm-dehtmlize-precode (point-min) (point-max))
+          (xhm-htmlize-region (point-min) (point-max) (xhm-langcode-to-major-mode-name ξlangCode xhm-lang-name-map) t)
+          (setq ξi (1+ ξi)))))
+    (message "xhm-redo-syntax-coloring-buffer %s redone" ξi)))
 
 
 ;; syntax table
@@ -1027,8 +1029,8 @@ WARNING: this command does not cover all HTML tags or convert all HTML entities.
     (setq ξoutput-str
           (let ((case-fold-search t) (tempStr ξinput-str))
 
-            (setq tempStr 
-                  (replace-regexp-pairs-in-string 
+            (setq tempStr
+                  (replace-regexp-pairs-in-string
                    tempStr
                    '(
                      ["<script>\\([^\\<]+?\\)</script>" ""]
@@ -1901,8 +1903,6 @@ This is heuristic based, does not remove ALL possible redundant whitespace."
 
 
 
-
-
 (defun xhm-abbrev-enable-function ()
   "Determine whether to expand abbrev.
 This is called by emacs abbrev system."
@@ -1940,6 +1940,8 @@ t
     ("3css" "<link rel=\"stylesheet\" href=\"lbasic.css\" />")
     ("3style" "<style type=\"text/css\">\np {line-height:130%}\n</style>")
     ("refresh" "<meta http-equiv=\"refresh\" content=\"0; url=http://example.com/\">")
+
+    ("iframe" "<iframe src=\"some.html\" width=\"200\" height=\"300\"></iframe>")
 
     ;; todo
 ;; http://xahlee.info/js/css_colors.html
@@ -1991,7 +1993,6 @@ t
 ;; (abbrev-table-get xhm-abbrev-table :parents)
 
   ;; :enable-function 'xhm-abbrev-enable-function
-
 
 
 ;; keybinding
