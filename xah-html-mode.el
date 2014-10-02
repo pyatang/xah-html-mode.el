@@ -34,7 +34,7 @@
 ;; 0.5.7, 2013-03-03 removed the id option in xhm-wrap-html-tag
 ;; 0.5.6, 2013-02-16 added xhm-replace-html-named-entities
 ;; 0.5.5, 2013-02-03 added xhm-replace-html-&<>-to-entities, xhm-replace-html-chars-to-unicode
-;; 0.5.4, 2013-01-26 lots additions and changes. added xhm-wrap-html-tag xhm-wrap-p-tag xhm-lines-to-html-list xhm-make-html-table xhm-wikipedia-linkify xhm-wrap-url xhm-wikipedia-url-linkify xhm-source-url-linkify xhm-make-link-defunct xhm-make-citation xhm-update-title xhm-extract-url xhm-remove-html-tags xhm-remove-span-tag-region xhm-htmlize-keyboard-shortcut-notation
+;; 0.5.4, 2013-01-26 lots additions and changes. added xhm-wrap-html-tag xhm-wrap-p-tag xhm-lines-to-html-list xhm-make-html-table xhm-word-to-wikipedia-linkify xhm-wrap-url xhm-wikipedia-url-linkify xhm-source-url-linkify xhm-make-link-defunct xhm-make-citation xhm-update-title xhm-extract-url xhm-remove-html-tags xhm-remove-span-tag-region xhm-htmlize-keyboard-shortcut-notation
 ;; 0.5.3, 2012-12-07 removed loading sgml-mode and all call to its functions. The sgml-mode seems to have bugs about keys. That is, global numberpad keys won't work.
 ;; 0.5.2, 2012-09-25 added a color for curly quoted text.
 ;; 0.5, 2012-05-13 fixed sgml-skip-tag-forward sgml-skip-tag-backward. But sgml-delete-tag still doesn't work.
@@ -937,16 +937,26 @@ with “*” as separator, becomes
                                  "FIXEDCASE" "LITERAL"
                                  )))
 
-(defun xhm-wikipedia-linkify ()
+(defun xhm-word-to-wikipedia-linkify ()
   "Make the current word or text selection into a Wikipedia link.
 
 For Example: 「Emacs」 ⇒ 「<a href=\"http://en.wikipedia.org/wiki/Emacs\">Emacs</a>」"
   (interactive)
-  (let (linkText bds p1 p2 wikiTerm resultStr)
-    (setq bds (get-selection-or-unit 'url))
-    (setq linkText (elt bds 0))
-    (setq p1 (aref bds 1))
-    (setq p2 (aref bds 2))
+  (let (linkText bds p0 p1 p2 wikiTerm resultStr)
+
+    (if (region-active-p)
+        (progn
+          (setq p1 (region-beginning))
+          (setq p2 (region-end)))
+      (progn
+        (setq p0 (point))
+        (skip-chars-backward "^ \t\n")
+        (setq p1 (point))
+        (goto-char p0)
+        (skip-chars-forward "^ \t\n")
+        (setq p2 (point))))
+
+    (setq linkText (buffer-substring-no-properties p1 p2))
     (setq wikiTerm (replace-regexp-in-string " " "_" linkText))
     (setq resultStr (concat "<a href=\"http://en.wikipedia.org/wiki/" wikiTerm "\">" linkText "</a>"))
     (delete-region p1 p2)
@@ -1438,8 +1448,15 @@ When called in lisp code, if φstring is non-nil, returns a changed string.  If 
   (interactive
    (if (region-active-p)
        (list nil (vector (region-beginning) (region-end)))
-     (let ((bds (get-selection-or-unit 'url)))
-       (list nil (vector (aref bds 1) (aref bds 2))))))
+     (let (p0 p1 p2)
+       (progn
+         (setq p0 (point))
+         (skip-chars-backward "^ \t\n")
+         (setq p1 (point))
+         (goto-char p0)
+         (skip-chars-forward "^ \t\n")
+         (setq p2 (point))
+         (list nil (vector p1 p2))))))
 
   (let (ξwork_on_string? ξinput-str ξoutput-str
                          (ξfrom (elt φfrom-to-pair 0))
@@ -2028,7 +2045,8 @@ t
   (define-key xhm-single-keys-keymap (kbd "k") 'xhm-htmlize-keyboard-shortcut-notation)
   (define-key xhm-single-keys-keymap (kbd "l 3") 'xhm-source-url-linkify)
   (define-key xhm-single-keys-keymap (kbd "l s") 'xhm-make-link-defunct)
-  (define-key xhm-single-keys-keymap (kbd "l w") 'xhm-wikipedia-linkify)
+  (define-key xhm-single-keys-keymap (kbd "l w") 'xhm-word-to-wikipedia-linkify)
+  (define-key xhm-single-keys-keymap (kbd "l g") 'xhm-wikipedia-url-linkify)
   (define-key xhm-single-keys-keymap (kbd "r e") 'xhm-htmlize-elisp-keywords)
   (define-key xhm-single-keys-keymap (kbd "r k") 'xhm-emacs-to-windows-kbd-notation)
   (define-key xhm-single-keys-keymap (kbd "r m") 'xhm-make-html-table)
