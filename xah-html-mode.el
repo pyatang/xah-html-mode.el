@@ -734,15 +734,11 @@ The string replaced are:
  < ⇒ &lt;
  > ⇒ &gt;
 
-if `universal-argument' is called, the replacement direction is
- reversed. That is &amp; ⇒ & etc.
+If `universal-argument' is called, the replacement direction is reversed. That is &amp; ⇒ & etc.
 
-when called in lisp program, φp1 φp2 are region begin/end. if φentity-to-char-p is true, change entities to chars instead.
+When called in lisp program, φp1 φp2 are region begin/end. if φentity-to-char-p is true, change entities to chars instead.
 
-See also:
-`xhm-replace-html-named-entities'
-`xhm-replace-html-chars-to-unicode'
-"
+See also: `xhm-replace-html-named-entities', `xhm-replace-html-chars-to-unicode'"
   (interactive
    (let ((bds (get-selection-or-unit 'block)))
      (list (elt bds 1) (elt bds 2) (if current-prefix-arg t nil))))
@@ -1257,8 +1253,7 @@ After execution, the lines will become
 
 If there's a text selection, use it for input, otherwise the input is a text block between blank lines.
 
-The order of lines for {title, author, date/time, url} needs not be in that order. Author should start with “by”.
-"
+The order of lines for {title, author, date/time, url} needs not be in that order. Author should start with “by”."
   (interactive)
   (let* (
          (bds (get-selection-or-unit 'block))
@@ -1304,8 +1299,11 @@ The order of lines for {title, author, date/time, url} needs not be in that orde
     (setq ξurl (with-temp-buffer (insert ξurl) (xhm-source-url-linkify 1) (buffer-string)))
 
     (delete-region p1 p2 )
-    (insert (concat "<cite>" ξtitle "</cite>") " " "<time>" ξdate "</time>"  " By " ξauthor ". @ " ξurl)
-    ))
+    (insert (concat "〔<cite>" ξtitle "</cite> ") 
+            "<time>" ξdate "</time>"
+            " By " ξauthor 
+            ". @ " ξurl
+            "〕")))
 
 (defun xhm-make-link-defunct ()
   "Make the html link under cursor to a defunct form.
@@ -1451,10 +1449,10 @@ When called in lisp code, if φstring is non-nil, returns a changed string.  If 
      (let (p0 p1 p2)
        (progn
          (setq p0 (point))
-         (skip-chars-backward "^ \t\n")
+         (skip-chars-backward "^ \t\n<>[]")
          (setq p1 (point))
          (goto-char p0)
-         (skip-chars-forward "^ \t\n")
+         (skip-chars-forward "^ \t\n<>[]")
          (setq p2 (point))
          (list nil (vector p1 p2))))))
 
@@ -1958,34 +1956,34 @@ t
     ("3style" "<style type=\"text/css\">\np {line-height:130%}\n</style>")
     ("refresh" "<meta http-equiv=\"refresh\" content=\"0; url=http://example.com/\">")
 
-    ("iframe" "<iframe src=\"some.html\" width=\"200\" height=\"300\"></iframe>")
+    ("8iframe" "<iframe src=\"some.html\" width=\"200\" height=\"300\"></iframe>")
 
     ;; todo
 ;; http://xahlee.info/js/css_colors.html
 ;; http://xahlee.info/js/css_color_names.html
-    ("white" "#ffffff" nil :system t)
-    ("silver" "#c0c0c0" nil :system t)
-    ("gray" "#808080" nil :system t)
-    ("black" "#000000" nil :system t)
-    ("red" "#ff0000" nil :system t)
-    ("maroon" "#800000" nil :system t)
-    ("yellow" "#ffff00" nil :system t)
-    ("olive" "#808000" nil :system t)
-    ("lime" "#00ff00" nil :system t)
-    ("green" "#008000" nil :system t)
-    ("aqua" "#00ffff" nil :system t)
-    ("teal" "#008080" nil :system t)
-    ("blue" "#0000ff" nil :system t)
-    ("navy" "#000080" nil :system t)
-    ("fuchsia" "#ff00ff" nil :system t)
-    ("purple" "#800080" nil :system t)
-    ("orange" "#ffa500" nil :system t)
-    ("hsl" "hsl(0,100%,50%)" nil :system t)
+    ("8white" "#ffffff" nil :system t)
+    ("8silver" "#c0c0c0" nil :system t)
+    ("8gray" "#808080" nil :system t)
+    ("8black" "#000000" nil :system t)
+    ("8red" "#ff0000" nil :system t)
+    ("8maroon" "#800000" nil :system t)
+    ("8yellow" "#ffff00" nil :system t)
+    ("8olive" "#808000" nil :system t)
+    ("8lime" "#00ff00" nil :system t)
+    ("8green" "#008000" nil :system t)
+    ("8aqua" "#00ffff" nil :system t)
+    ("8teal" "#008080" nil :system t)
+    ("8blue" "#0000ff" nil :system t)
+    ("8navy" "#000080" nil :system t)
+    ("8fuchsia" "#ff00ff" nil :system t)
+    ("8purple" "#800080" nil :system t)
+    ("8orange" "#ffa500" nil :system t)
+    ("8hsl" "hsl(0,100%,50%)" nil :system t)
 
-    ("html5" "<!DOCTYPE html>" nil :system t)
-    ("html4s" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">" nil :system t)
-    ("html4t" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">" nil :system t)
-    ("xhtml" "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">" nil :system t)
+    ("8html5" "<!DOCTYPE html>" nil :system t)
+    ("8html4s" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">" nil :system t)
+    ("8html4t" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">" nil :system t)
+    ("8xhtml" "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">" nil :system t)
     ("8html" "<!doctype html><html><head><meta charset=\"utf-8\" />
 <title>ttt</title>
 </head>
