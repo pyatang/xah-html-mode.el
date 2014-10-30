@@ -319,26 +319,35 @@ Returns a vector [langCode pos1 pos2], where pos1 pos2 are the boundary of the t
       (vector ξlangCode p1 p2))))
 
 (defun xhm-get-precode-make-new-file (φlang-name-map)
-  "Create a new file in current dir with text inside pre code block.
+  "Create a new file in current dir with content from text inside pre code block.
 For example, if the cursor is somewhere between the tags:
-<pre class=\"python\">print 7</pre>
+<pre class=\"ruby\">print 7</pre>
 
-after calling, a new file of name 「xx-‹random›.py」 is created in current dir, with content “print 7”.
+after calling, a new file of name 「xxtemp‹n›.rb」 is created in current dir, with content “print 7”. ‹n› is a integer.
 
 If there's a text selection, use that region as content."
   (interactive (list xhm-lang-name-map))
   (let* (
-        (ξxx (xhm-get-precode-langCode))
-        (ξlangCode (elt ξxx 0))
-        (p1 (elt ξxx 1))
-        (p2 (elt ξxx 2))
-        (ξtextContent (buffer-substring-no-properties p1 p2))
-        (ξyy (cdr (assoc ξlangCode φlang-name-map)))
-        (ξfileSuffix (elt ξyy 1)))
+         (ξxx (xhm-get-precode-langCode))
+         (ξlangCode (elt ξxx 0))
+         (p1 (elt ξxx 1))
+         (p2 (elt ξxx 2))
+         (ξtextContent (buffer-substring-no-properties p1 p2))
+         (ξyy (cdr (assoc ξlangCode φlang-name-map)))
+         (ξfileSuffix (elt ξyy 1))
+         (ξn 1)
+         ;; (format-time-string "%Y%m%d%M%S")
+         (ξfname (format "xxtemp%d.%s" ξn ξfileSuffix)))
+
+    (while
+        (file-exists-p ξfname)
+      (setq ξn (1+ ξn))
+      (setq ξfname (format "xxtemp%d.%s" ξn ξfileSuffix)))
+
     (progn
       (delete-region p1 p2 )
       (split-window-vertically)
-      (find-file (format "xx-testscript-%d.%s" (random 9008000 ) ξfileSuffix))
+      (find-file ξfname)
       (insert ξtextContent)
       (when (xhm-precode-htmlized-p (point-min) (point-max))
         (xhm-remove-span-tag-region (point-min) (point-max))))))
@@ -1299,9 +1308,9 @@ The order of lines for {title, author, date/time, url} needs not be in that orde
     (setq ξurl (with-temp-buffer (insert ξurl) (xhm-source-url-linkify 1) (buffer-string)))
 
     (delete-region p1 p2 )
-    (insert (concat "〔<cite>" ξtitle "</cite> ") 
+    (insert (concat "〔<cite>" ξtitle "</cite> ")
             "<time>" ξdate "</time>"
-            " By " ξauthor 
+            " By " ξauthor
             ". @ " ξurl
             "〕")))
 
