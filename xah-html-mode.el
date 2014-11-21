@@ -1893,15 +1893,18 @@ When cursor is in HTML link file path, e.g.  <img src=\"gki/macosxlogo.png\" > a
         (insert (xahsite-filepath-to-href-value φnew-file-path (or (buffer-file-name) default-directory)))))))
 
 (defun xhm-mark-unicode (φp1)
-  "Wrap 「<mark class=\"unicode\" title=\"U+…: ‹NAME›\"></mark>」 around current character.
-When called in elisp program, wrap the tag at cursor position φp1."
+  "Wrap a special <mark> tag  around the character before cursor.
+like this:
+ <mark class=\"unicode\" title=\"U+3B1: GREEK SMALL LETTER ALPHA\">α</mark>
+
+When called in elisp program, wrap the tag around charbefore position φp1."
   (interactive (list (point)))
   (let* (
-         (ξcodepoint (string-to-char (buffer-substring-no-properties φp1 (1+ φp1))))
+         (ξcodepoint (string-to-char (buffer-substring-no-properties (- φp1 1) φp1 )))
          (ξname (get-char-code-property ξcodepoint 'name)))
-    (goto-char φp1)
+    (goto-char (- φp1 1))
     (insert (format "<mark class=\"unicode\" title=\"U+%X: %s\">" ξcodepoint ξname))
-    (forward-char 1)
+    (right-char 1)
     (insert (format "</mark>"))))
 
 (defun xhm-clean-whitespace ()
