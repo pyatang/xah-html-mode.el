@@ -245,6 +245,7 @@
         ("cmd" . ["dos-mode" "bat"])
 
         ("bbcode" . ["xbbcode-mode" "bbcode"])
+        ("markdown" . ["markdown-mode" "md"])
         ("c" . ["c-mode" "c"])
         ("cpp" . ["c++-mode" "cpp"])
         ("common-lisp" . ["lisp-mode" "lisp"])
