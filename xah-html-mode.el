@@ -110,9 +110,9 @@
 
 ("nav" . ["b"])
 
-("rp" . ["z"])
-("rt" . ["z"])
-("ruby" . ["z"])
+("rp" . ["l"])
+("rt" . ["w"])
+("ruby" . ["l"])
 ("abbr" . ["w"])
 
 ("article" . ["b"])
@@ -2048,7 +2048,7 @@ t
   (define-key xhm-single-keys-keymap (kbd "r .") 'xhm-replace-html-&<>-to-entities)
 
   (define-key xhm-single-keys-keymap (kbd "<backspace>") 'xhm-remove-html-tags)
-  (define-key xhm-single-keys-keymap (kbd "3") 'xhm-update-title)
+  (define-key xhm-single-keys-keymap (kbd ",") 'xhm-update-title)
   (define-key xhm-single-keys-keymap (kbd "6") 'xhm-html-to-text)
   (define-key xhm-single-keys-keymap (kbd "7") 'xhm-toggle-syntax-coloring-markup)
   (define-key xhm-single-keys-keymap (kbd "8") 'xhm-get-precode-make-new-file)
