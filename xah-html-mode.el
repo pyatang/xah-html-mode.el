@@ -1467,12 +1467,15 @@ When called in lisp code, if φstring is non-nil, returns a changed string.  If 
          (list nil (vector p1 p2))))))
 
   (let (ξwork-on-string-p ξinput-str ξoutput-str
-                         (ξfrom (elt φfrom-to-pair 0))
-                         (ξto (elt φfrom-to-pair 1)))
+                          (ξfrom (elt φfrom-to-pair 0))
+                          (ξto (elt φfrom-to-pair 1)))
     (setq ξwork-on-string-p (if () t nil))
     (setq ξinput-str (if ξwork-on-string-p φstring (buffer-substring-no-properties ξfrom ξto)))
 
-    (setq ξoutput-str (format "<a href=\"%s\">%s</a>" (url-percent-encode-string ξinput-str) (replace-regexp-in-string "_" " " (url-percent-decode-string (file-name-nondirectory ξinput-str)))))
+    (setq ξoutput-str
+          (format "<a href=\"%s\">%s</a>" (url-percent-encode-string ξinput-str)
+                  (replace-regexp-in-string "_" " "
+                                            (url-percent-decode-string (file-name-nondirectory ξinput-str)))))
 
     (if ξwork-on-string-p
         ξoutput-str
@@ -1869,7 +1872,6 @@ If `universal-argument' is called first, then also prompt for a “class” attr
   "Replace current HTML inline image's file name.
 
 When cursor is in HTML link file path, e.g.  <img src=\"gki/macosxlogo.png\" > and this command is called, it'll prompt user for a new name. The link path will be changed to the new name, the corresponding file will also be renamed. The operation is aborted if a name exists."
-
   (interactive
    (let (
          (defaultInput (expand-file-name
@@ -1929,6 +1931,25 @@ This is heuristic based, does not remove ALL possible redundant whitespace."
           (while (search-forward-regexp " *<p>\n+" nil "noerror")
             (replace-match "<p>")))))))
 
+(defun xhm-decode-percent-encoded-uri (φp1 φp2)
+  "percent decode URI for text selection."
+  (interactive "r")
+  (let ((myStr (buffer-substring-no-properties φp1 φp2)))
+    (save-excursion
+      (save-restriction
+        (delete-region φp1 φp2 )
+        (insert (decode-coding-string (url-unhex-string myStr ) 'utf-8))))))
+
+(defun xhm-decode-percent-encoded-uri-js (φp1 φp2)
+  "Percent decode URI for text selection.
+Requires a node.js script. See source code.
+See also `xhm-decode-percent-encoded-uri'."
+  (interactive "r")
+  (let (scriptName)
+    (save-excursion
+      (setq scriptName (concat "/usr/bin/node ~/git/xahscripts/emacs_uri_decode.js"))
+      (shell-command-on-region φp1 φp2 scriptName nil "REPLACE" nil t))))
+
 
 
 (defun xhm-abbrev-enable-function ()
@@ -1950,7 +1971,7 @@ t
     ("8menu" "〖a ▸ b ▸ c〗")
     ("8key" "【Alt+f】")
     ("8song" "singer ❀ 〈title〉")
-    ("faq" "<div class=\"a\">
+    ("8faq" "<div class=\"question-box32371\">
 <p class=\"q\">How to do this?</p>
 <p>this way</p>
 </div>
@@ -2065,6 +2086,7 @@ t
   (define-key xhm-single-keys-keymap (kbd "r v") 'xhm-make-html-table-undo)
   (define-key xhm-single-keys-keymap (kbd "x") 'xhm-rename-html-inline-image)
   (define-key xhm-single-keys-keymap (kbd "y") 'xhm-make-citation)
+  (define-key xhm-single-keys-keymap (kbd "z") 'xhm-decode-percent-encoded-uri)
 
 )
 
