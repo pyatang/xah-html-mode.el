@@ -45,6 +45,7 @@
 (require 'xfrp_find_replace_pairs)
 (require 'xeu_elisp_util)
 (require 'htmlize)
+(require 'url-util)
 
 (progn
   ;; part of emacs
@@ -1473,9 +1474,9 @@ When called in lisp code, if φstring is non-nil, returns a changed string.  If 
     (setq ξinput-str (if ξwork-on-string-p φstring (buffer-substring-no-properties ξfrom ξto)))
 
     (setq ξoutput-str
-          (format "<a href=\"%s\">%s</a>" (url-percent-encode-string ξinput-str)
+          (format "<a href=\"%s\">%s</a>" (url-encode-url ξinput-str)
                   (replace-regexp-in-string "_" " "
-                                            (url-percent-decode-string (file-name-nondirectory ξinput-str)))))
+                                            (xhm-url-percent-decode-string (file-name-nondirectory ξinput-str)))))
 
     (if ξwork-on-string-p
         ξoutput-str
@@ -1499,7 +1500,7 @@ When called in lisp code, if φstring is non-nil, returns a changed string.  If 
   (let (ξwork-on-string-p ξinput-str ξoutput-str)
     (setq ξwork-on-string-p (if φstring t nil))
     (setq ξinput-str (if ξwork-on-string-p φstring (buffer-substring-no-properties φfrom φto)))
-    (setq ξoutput-str (concat "<a href=\"" (url-percent-encode-string ξinput-str) "\">" ξinput-str "</a>" ))
+    (setq ξoutput-str (concat "<a href=\"" (url-encode-url ξinput-str) "\">" ξinput-str "</a>" ))
 
     (if ξwork-on-string-p
         ξoutput-str
@@ -1931,6 +1932,19 @@ This is heuristic based, does not remove ALL possible redundant whitespace."
           (while (search-forward-regexp " *<p>\n+" nil "noerror")
             (replace-match "<p>")))))))
 
+(defun xhm-url-percent-decode-string (φstring)
+  "Returns URL percent-encoded
+
+Example:
+    http://en.wikipedia.org/wiki/Saint_Jerome_in_His_Study_%28D%C3%BCrer%29
+becomes
+    http://en.wikipedia.org/wiki/Saint_Jerome_in_His_Study_(Dürer)
+
+    http://zh.wikipedia.org/wiki/%E6%96%87%E6%9C%AC%E7%BC%96%E8%BE%91%E5%99%A8
+becomes
+    http://zh.wikipedia.org/wiki/文本编辑器"
+  (decode-coding-string (url-unhex-string φstring) 'utf-8))
+
 (defun xhm-decode-percent-encoded-uri (φp1 φp2)
   "percent decode URI for text selection."
   (interactive "r")
@@ -1938,7 +1952,7 @@ This is heuristic based, does not remove ALL possible redundant whitespace."
     (save-excursion
       (save-restriction
         (delete-region φp1 φp2 )
-        (insert (decode-coding-string (url-unhex-string myStr ) 'utf-8))))))
+        (insert (decode-coding-string (url-unhex-string myStr) 'utf-8))))))
 
 (defun xhm-decode-percent-encoded-uri-js (φp1 φp2)
   "Percent decode URI for text selection.
