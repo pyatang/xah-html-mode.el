@@ -2098,9 +2098,9 @@ t
   (define-key xhm-single-keys-keymap (kbd "r m") 'xhm-make-html-table)
   (define-key xhm-single-keys-keymap (kbd "t u") 'xhm-extract-url)
   (define-key xhm-single-keys-keymap (kbd "r v") 'xhm-make-html-table-undo)
+  (define-key xhm-single-keys-keymap (kbd "r z") 'xhm-decode-percent-encoded-uri)
   (define-key xhm-single-keys-keymap (kbd "x") 'xhm-rename-html-inline-image)
   (define-key xhm-single-keys-keymap (kbd "y") 'xhm-make-citation)
-  (define-key xhm-single-keys-keymap (kbd "z") 'xhm-decode-percent-encoded-uri)
 
 )
 
