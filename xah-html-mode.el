@@ -1450,7 +1450,7 @@ http://en.wikipedia.org/wiki/Emacs
 ⇒
 <a href=\"http://en.wikipedia.org/wiki/Emacs\">Emacs</a>.
 
-When called interactively, work on current URL or text selection.
+When called interactively, work on current URL or text selection (of a URL).
 
 When called in lisp code, if φstring is non-nil, returns a changed string.  If φstring nil, change the text in the region between positions in sequence φfrom-to-pair."
 
@@ -1945,9 +1945,12 @@ becomes
     http://zh.wikipedia.org/wiki/文本编辑器"
   (decode-coding-string (url-unhex-string φstring) 'utf-8))
 
-(defun xhm-decode-percent-encoded-uri (φp1 φp2)
-  "percent decode URI for text selection."
-  (interactive "r")
+(defun xhm-decode-percent-encoded-uri (&optional φp1 φp2)
+  "decode URI percent encoding of current line or selection."
+  (interactive 
+   (if (use-region-p)
+       (list (region-beginning) (region-end))
+     (list (line-beginning-position) (line-end-position))))
   (let ((myStr (buffer-substring-no-properties φp1 φp2)))
     (save-excursion
       (save-restriction
