@@ -2072,10 +2072,6 @@ t
   (define-key xhm-keymap (kbd "<tab>") 'xhm-wrap-html-tag)
 
   (define-prefix-command 'xhm-single-keys-keymap)
-
-  ;; . p  g c
-  ;; e u  h t
-
   (define-key xhm-keymap (kbd "<menu> e") xhm-single-keys-keymap)
 
   (define-key xhm-single-keys-keymap (kbd ".") 'xhm-lines-to-html-list)
