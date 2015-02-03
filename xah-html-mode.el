@@ -267,7 +267,6 @@
         ("lsl" . ["xlsl-mode" "lsl"])
         ("latex" . ["latex-mode" "txt"])
         ("ocaml" . ["tuareg-mode" "ocaml"])
-        ("org" . ["org-mode" "org"])
         ("perl" . ["cperl-mode" "pl"])
         ("php" . ["php-mode" "php"])
         ("povray" . ["pov-mode" "pov"])
