@@ -27,7 +27,7 @@
 ;; 0.6.4, 2013-04-29 added xhm-change-current-tag
 ;; 0.6.3, 2013-04-23 now xhm-wrap-html-tag will smartly decide to wrap tag around word or line or text block, depending on the tag given, when there's no text selection.
 ;; 0.6.2, 2013-04-22 now, ‘single curly quoted text’ also colored.
-;; 0.6.1, 2013-04-21 added xhm-pre-source-code.
+;; 0.6.1, 2013-04-21 added xhm-insert-wrap-source-code.
 ;; 0.6.0, 2013-04-17 added feature to htmlize <pre> code block. ⁖ xhm-htmlize-or-de-precode and xhm-get-precode-make-new-file. The function names may change in the future.
 ;; 0.5.9, 2013-04-10 added “xhm-emacs-to-windows-kbd-notation” and improved “xhm-htmlize-keyboard-shortcut-notation” to take emacs notation.
 ;; 0.5.8, 2013-03-19 now xhm-extract-url will also put result to kill-ring
@@ -46,6 +46,7 @@
 (require 'xeu_elisp_util)
 (require 'htmlize)
 (require 'url-util)
+(require 'browse-url)
 
 (progn
   ;; part of emacs
@@ -1857,7 +1858,7 @@ If `universal-argument' is called first, then also prompt for a “class” attr
           (and (equal p1 p2) (not (xhm-tag-self-closing? φtag-name)))
         (progn (search-backward "</" ))))))
 
-(defun xhm-pre-source-code (&optional φlang-code)
+(defun xhm-insert-wrap-source-code (&optional φlang-code)
   "Insert/wrap a <pre class=\"‹φlang-code›\"> tags to text selection or current text block."
   (interactive
    (list
@@ -1946,7 +1947,7 @@ becomes
 
 (defun xhm-decode-percent-encoded-uri (&optional φp1 φp2)
   "decode URI percent encoding of current line or selection."
-  (interactive 
+  (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
      (list (line-beginning-position) (line-end-position))))
@@ -1995,7 +1996,7 @@ t
 ")
 
     ("cdata" "<![CDATA[▮]]>" nil :system t)
-
+    ("--" "<hr />")
     ("cl" "class=\"\"" nil :system t)
 
     ("8w" "width" nil :system t)
@@ -2073,30 +2074,33 @@ t
   (define-prefix-command 'xhm-single-keys-keymap)
   (define-key xhm-keymap (kbd "<menu> e") xhm-single-keys-keymap)
 
-  (define-key xhm-single-keys-keymap (kbd ".") 'xhm-lines-to-html-list)
-  (define-key xhm-single-keys-keymap (kbd "m") 'xhm-pre-source-code)
-  (define-key xhm-single-keys-keymap (kbd "p") 'xhm-wrap-p-tag)
-  (define-key xhm-single-keys-keymap (kbd "l u") 'xhm-wrap-url)
-  (define-key xhm-single-keys-keymap (kbd "r ,") 'xhm-replace-html-chars-to-unicode)
-  (define-key xhm-single-keys-keymap (kbd "r .") 'xhm-replace-html-&<>-to-entities)
+  (define-key xhm-single-keys-keymap (kbd "c") 'xhm-lines-to-html-list)
+  (define-key xhm-single-keys-keymap (kbd "g") 'browse-url-of-buffer)
+  (define-key xhm-single-keys-keymap (kbd "m") 'xhm-insert-wrap-source-code)
 
   (define-key xhm-single-keys-keymap (kbd "<backspace>") 'xhm-remove-html-tags)
   (define-key xhm-single-keys-keymap (kbd ",") 'xhm-update-title)
+  (define-key xhm-single-keys-keymap (kbd "5") 'xhm-mark-unicode)
   (define-key xhm-single-keys-keymap (kbd "6") 'xhm-html-to-text)
   (define-key xhm-single-keys-keymap (kbd "7") 'xhm-toggle-syntax-coloring-markup)
   (define-key xhm-single-keys-keymap (kbd "8") 'xhm-get-precode-make-new-file)
   (define-key xhm-single-keys-keymap (kbd "9") 'xhm-redo-syntax-coloring-buffer)
-  (define-key xhm-single-keys-keymap (kbd "k") 'xhm-htmlize-keyboard-shortcut-notation)
   (define-key xhm-single-keys-keymap (kbd "l 3") 'xhm-source-url-linkify)
   (define-key xhm-single-keys-keymap (kbd "l s") 'xhm-make-link-defunct)
   (define-key xhm-single-keys-keymap (kbd "l w") 'xhm-word-to-wikipedia-linkify)
   (define-key xhm-single-keys-keymap (kbd "l g") 'xhm-wikipedia-url-linkify)
+  (define-key xhm-single-keys-keymap (kbd "h") 'xhm-wrap-url)
+  (define-key xhm-single-keys-keymap (kbd "r ,") 'xhm-replace-html-chars-to-unicode)
+  (define-key xhm-single-keys-keymap (kbd "r .") 'xhm-replace-html-&<>-to-entities)
   (define-key xhm-single-keys-keymap (kbd "r e") 'xhm-htmlize-elisp-keywords)
-  (define-key xhm-single-keys-keymap (kbd "r k") 'xhm-emacs-to-windows-kbd-notation)
+  (define-key xhm-single-keys-keymap (kbd "r j") 'xhm-emacs-to-windows-kbd-notation)
+  (define-key xhm-single-keys-keymap (kbd "r k") 'xhm-htmlize-keyboard-shortcut-notation)
   (define-key xhm-single-keys-keymap (kbd "r m") 'xhm-make-html-table)
-  (define-key xhm-single-keys-keymap (kbd "t u") 'xhm-extract-url)
   (define-key xhm-single-keys-keymap (kbd "r v") 'xhm-make-html-table-undo)
   (define-key xhm-single-keys-keymap (kbd "r z") 'xhm-decode-percent-encoded-uri)
+  (define-key xhm-single-keys-keymap (kbd "t") 'xhm-wrap-p-tag)
+  (define-key xhm-single-keys-keymap (kbd "n") nil)
+  (define-key xhm-single-keys-keymap (kbd "n u") 'xhm-extract-url)
   (define-key xhm-single-keys-keymap (kbd "x") 'xhm-rename-html-inline-image)
   (define-key xhm-single-keys-keymap (kbd "y") 'xhm-make-citation)
 
