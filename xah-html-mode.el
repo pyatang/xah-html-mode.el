@@ -2076,9 +2076,11 @@ t
 
   (define-key xhm-single-keys-keymap (kbd "c") 'xhm-lines-to-html-list)
   (define-key xhm-single-keys-keymap (kbd "g") 'browse-url-of-buffer)
+  (define-key xhm-single-keys-keymap (kbd "k") 'xhm-htmlize-keyboard-shortcut-notation)
   (define-key xhm-single-keys-keymap (kbd "m") 'xhm-insert-wrap-source-code)
 
   (define-key xhm-single-keys-keymap (kbd "<backspace>") 'xhm-remove-html-tags)
+  (define-key xhm-single-keys-keymap (kbd ".") 'xhm-decode-percent-encoded-uri)
   (define-key xhm-single-keys-keymap (kbd ",") 'xhm-update-title)
   (define-key xhm-single-keys-keymap (kbd "5") 'xhm-mark-unicode)
   (define-key xhm-single-keys-keymap (kbd "6") 'xhm-html-to-text)
@@ -2094,10 +2096,8 @@ t
   (define-key xhm-single-keys-keymap (kbd "r .") 'xhm-replace-html-&<>-to-entities)
   (define-key xhm-single-keys-keymap (kbd "r e") 'xhm-htmlize-elisp-keywords)
   (define-key xhm-single-keys-keymap (kbd "r j") 'xhm-emacs-to-windows-kbd-notation)
-  (define-key xhm-single-keys-keymap (kbd "r k") 'xhm-htmlize-keyboard-shortcut-notation)
   (define-key xhm-single-keys-keymap (kbd "r m") 'xhm-make-html-table)
   (define-key xhm-single-keys-keymap (kbd "r v") 'xhm-make-html-table-undo)
-  (define-key xhm-single-keys-keymap (kbd "r z") 'xhm-decode-percent-encoded-uri)
   (define-key xhm-single-keys-keymap (kbd "t") 'xhm-wrap-p-tag)
   (define-key xhm-single-keys-keymap (kbd "n") nil)
   (define-key xhm-single-keys-keymap (kbd "n u") 'xhm-extract-url)
