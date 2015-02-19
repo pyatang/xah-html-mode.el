@@ -200,25 +200,25 @@
 (setq xhm-attribute-names '( "id" "class" "style" "title" "href" "type" "rel" "http-equiv" "content" "charset" "alt" "src" "width" "height" "controls" "autoplay" "preload" "name" "value" "size" "async" "defer" ))
 
 (defcustom xhm-html5-self-close-tags nil
-  "a list of HTML5 self-closing tag name. "
+  "List of HTML5 self-closing tag name. "
   :group 'xah-html-mode )
 (setq xhm-html5-self-close-tags '( "area" "base" "br" "col" "command" "embed" "hr" "img" "input" "keygen" "link" "meta" "param" "source" "track" "wbr"))
 
-(defvar xhm-css-color-names nil "a list of CSS color names.")
+(defvar xhm-css-color-names nil "List of CSS color names.")
 (setq xhm-css-color-names
 '("aliceblue" "antiquewhite" "aqua" "aquamarine" "azure" "beige" "bisque" "black" "blanchedalmond" "blue" "blueviolet" "brown" "burlywood" "cadetblue" "chartreuse" "chocolate" "coral" "cornflowerblue" "cornsilk" "crimson" "cyan" "darkblue" "darkcyan" "darkgoldenrod" "darkgray" "darkgreen" "darkgrey" "darkkhaki" "darkmagenta" "darkolivegreen" "darkorange" "darkorchid" "darkred" "darksalmon" "darkseagreen" "darkslateblue" "darkslategray" "darkslategrey" "darkturquoise" "darkviolet" "deeppink" "deepskyblue" "dimgray" "dimgrey" "dodgerblue" "firebrick" "floralwhite" "forestgreen" "fuchsia" "gainsboro" "ghostwhite" "gold" "goldenrod" "gray" "green" "greenyellow" "grey" "honeydew" "hotpink" "indianred" "indigo" "ivory" "khaki" "lavender" "lavenderblush" "lawngreen" "lemonchiffon" "lightblue" "lightcoral" "lightcyan" "lightgoldenrodyellow" "lightgray" "lightgreen" "lightgrey" "lightpink" "lightsalmon" "lightseagreen" "lightskyblue" "lightslategray" "lightslategrey" "lightsteelblue" "lightyellow" "lime" "limegreen" "linen" "magenta" "maroon" "mediumaquamarine" "mediumblue" "mediumorchid" "mediumpurple" "mediumseagreen" "mediumslateblue" "mediumspringgreen" "mediumturquoise" "mediumvioletred" "midnightblue" "mintcream" "mistyrose" "moccasin" "navajowhite" "navy" "oldlace" "olive" "olivedrab" "orange" "orangered" "orchid" "palegoldenrod" "palegreen" "paleturquoise" "palevioletred" "papayawhip" "peachpuff" "peru" "pink" "plum" "powderblue" "purple" "red" "rosybrown" "royalblue" "saddlebrown" "salmon" "sandybrown" "seagreen" "seashell" "sienna" "silver" "skyblue" "slateblue" "slategray" "slategrey" "snow" "springgreen" "steelblue" "tan" "teal" "thistle" "tomato" "turquoise" "violet" "wheat" "white" "whitesmoke" "yellow" "yellowgreen")
  )
 
-(defvar xhm-css-property-names nil "a list of CSS property names.")
+(defvar xhm-css-property-names nil "List of CSS property names.")
 (setq xhm-css-property-names
       '(
         "background" "background-color" "background-image" "background-position" "background-repeat" "border" "border-bottom" "border-collapse" "border-color" "border-left" "border-radius" "border-top" "box-shadow" "clear" "color" "content" "cursor" "direction" "display" "filter" "float" "font-family" "font-size" "font-style" "font-weight" "height" "line-height" "list-style" "list-style-image" "list-style-type" "margin" "margin-bottom" "margin-left" "margin-right" "margin-top" "max-width" "min-width" "opacity" "orphans" "overflow" "padding" "padding-left" "padding-right" "padding-top" "page-break-after" "page-break-inside" "position" "pre-wrap" "table" "table-cell" "text-align" "text-decoration" "unicode-bidi" "vertical-align" "white-space" "widows" "width" "word-wrap" "z-index"
         ))
 
-(defvar xhm-css-unit-names nil "a list of CSS unite names.")
+(defvar xhm-css-unit-names nil "List of CSS unite names.")
 (setq xhm-css-unit-names '("px" "pt" "pc" "cm" "mm" "in" "em" "ex" "%"))
 
-(defvar xhm-css-value-kwds nil "a list of CSS value names")
+(defvar xhm-css-value-kwds nil "List of CSS value names")
 (setq xhm-css-value-kwds
       '(
         "!important" "absolute" "alpha" "auto" "avoid" "block" "bold" "both" "bottom" "break-word" "center" "collapse" "dashed" "dotted" "embed" "fixed" "help" "hidden" "hsl" "hsla" "inherit" "inline" "inline-block" "italic" "large" "left" "ltr" "middle" "monospace" "no-repeat" "none" "normal" "nowrap" "pointer" "relative" "rgb" "rgba" "right" "rtl" "sans-serif" "serif" "small" "smaller" "solid" "square" "static" "thin" "top" "transparent" "underline" "url" "x-large" "xx-large"
@@ -292,7 +292,7 @@
 
         ("vimrc" . ["vimrc-mode" "vim"])))
 
-(defvar xhm-lang-name-list nil "a list of langcode.")
+(defvar xhm-lang-name-list nil "List of langcode.")
 (setq xhm-lang-name-list (mapcar 'car xhm-lang-name-map))
 
 (defun xhm-precode-htmlized-p (φp1 φp2)
@@ -1987,7 +1987,7 @@ t
     ("tla" "<div class=\"¤tla\"><a href=\"url\">text</a></div>")
     ("8menu" "〖a ▸ b ▸ c〗")
     ("8key" "【Alt+f】")
-    ("8song" "singer ❀ 〈title〉")
+    ("8song" "singer ♪《title》")
     ("8faq" "<div class=\"question-box32371\">
 <p class=\"q\">How to do this?</p>
 <p>this way</p>
@@ -2108,50 +2108,55 @@ t
 
 
 
+(setq xhm-font-lock-keywords
+      (let (
+            (htmlElementNamesRegex (regexp-opt xhm-html5-tag-list))
+            (htmlAttributeNamesRegexp (regexp-opt xhm-attribute-names))
+            (cssPropertieNames (regexp-opt xhm-css-property-names 'words))
+            (cssValueNames (regexp-opt xhm-css-value-kwds 'words))
+            (cssColorNames (regexp-opt xhm-css-color-names 'words))
+            (cssUnitNames (regexp-opt xhm-css-unit-names 'words))
+
+  ;              (attriRegex " *= *\"\\([ -_a-z]*?\\)\"")
+  ;              (attriRegex " +\\(?:[ =\"-_a-z]*?\\)") ; one or more attributes
+            (attriRegex " +\\(?:[^\n<>]*?\\)") ; one or more attributes
+  ;              (textNodeRegex "\\([ -_A-Za-z]+?\\)")
+  ;              (textNodeRegex "\\([ [:graph:]]+?\\)")
+            (textNodeRegex "\\([^\n<]+?\\)") ; ← hack, to avoid multi-line
+            )
+        `(
+
+          ;; todo these multiline regex are bad. see elisp manual
+          ("<!--\\|-->" . font-lock-comment-delimiter-face)
+          (,(format "<!--%s-->" textNodeRegex) . (1 font-lock-comment-face))
+          (,(format "<h\\([1-6]\\)>%s</h\\1>" textNodeRegex) . (2 "bold"))
+          (,(format "“%s”" textNodeRegex) . (1 'xhm-curly“”-quoted-text-face))
+          (,(format "‘%s’" textNodeRegex) . (1 'xhm-curly‘’-quoted-text-face))
+          (,(format "<title>%s</title>" textNodeRegex) . (1 "bold"))
+          (,(format "<span%s>%s</span>" attriRegex textNodeRegex) . (1 "hi-pink"))
+          (,(format "<mark>%s</mark>" textNodeRegex) . (1 "hi-yellow"))
+          (,(format "<mark%s>%s</mark>" attriRegex textNodeRegex) . (1 "hi-yellow"))
+          (,(format "<b%s>%s</b>" attriRegex textNodeRegex) . (1 "bold"))
+
+          (,(concat "</\\(" htmlElementNamesRegex "\\) *>") . (1 font-lock-function-name-face))
+          (,(concat "<\\(" htmlElementNamesRegex "\\).*>") . (1 font-lock-function-name-face))
+ 
+          (,(concat " +\\(" htmlAttributeNamesRegexp "\\) *= *['\"]") . (1 font-lock-variable-name-face))
+
+          (,cssPropertieNames . font-lock-type-face)
+          (,cssValueNames . font-lock-keyword-face)
+          (,cssColorNames . font-lock-preprocessor-face)
+          (,cssUnitNames . font-lock-reference-face))))
+
+
 ;; define the mode
+
 (define-derived-mode xah-html-mode prog-mode
   "∑html"
   "A simple major mode for HTML5.
 HTML5 keywords are colored.
 
 \\{xhm-keymap}"
-
-  (setq xhm-font-lock-keywords
-        (let (
-              (htmlElementNamesRegex (regexp-opt xhm-html5-tag-list 'words))
-              (htmlAttributeNamesRegexp (regexp-opt xhm-attribute-names 'words))
-              (cssPropertieNames (regexp-opt xhm-css-property-names 'words))
-              (cssValueNames (regexp-opt xhm-css-value-kwds 'words))
-              (cssColorNames (regexp-opt xhm-css-color-names 'words))
-              (cssUnitNames (regexp-opt xhm-css-unit-names 'words))
-
-  ;              (attriRegex " *= *\"\\([ -_a-z]*?\\)\"")
-  ;              (attriRegex " +\\(?:[ =\"-_a-z]*?\\)") ; one or more attributes
-              (attriRegex " +\\(?:[^\n<>]*?\\)") ; one or more attributes
-  ;              (textNodeRegex "\\([ -_A-Za-z]+?\\)")
-  ;              (textNodeRegex "\\([ [:graph:]]+?\\)")
-              (textNodeRegex "\\([^\n<]+?\\)") ; ← hack, to avoid multi-line
-              )
-          `(
-
-            ;; todo these multiline regex are bad. see elisp manual
-            ("<!--\\|-->" . font-lock-comment-delimiter-face)
-            (,(format "<!--%s-->" textNodeRegex) . (1 font-lock-comment-face))
-            (,(format "<h\\([1-6]\\)>%s</h\\1>" textNodeRegex) . (2 "bold"))
-            (,(format "“%s”" textNodeRegex) . (1 'xhm-curly“”-quoted-text-face))
-            (,(format "‘%s’" textNodeRegex) . (1 'xhm-curly‘’-quoted-text-face))
-            (,(format "<title>%s</title>" textNodeRegex) . (1 "bold"))
-            (,(format "<span%s>%s</span>" attriRegex textNodeRegex) . (1 "hi-pink"))
-            (,(format "<mark>%s</mark>" textNodeRegex) . (1 "hi-yellow"))
-            (,(format "<mark%s>%s</mark>" attriRegex textNodeRegex) . (1 "hi-yellow"))
-            (,(format "<b%s>%s</b>" attriRegex textNodeRegex) . (1 "bold"))
-
-            (,htmlElementNamesRegex . font-lock-function-name-face)
-            (,htmlAttributeNamesRegexp . font-lock-variable-name-face)
-            (,cssPropertieNames . font-lock-type-face)
-            (,cssValueNames . font-lock-keyword-face)
-            (,cssColorNames . font-lock-preprocessor-face)
-            (,cssUnitNames . font-lock-reference-face))))
 
   (setq font-lock-defaults '((xhm-font-lock-keywords)))
   (setq local-abbrev-table xhm-abbrev-table)

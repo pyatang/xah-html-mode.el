@@ -1,0 +1,420 @@
+<!doctype html><html><head><meta charset="utf-8" />
+<meta name=viewport content="width=device-width, initial-scale=1">
+<meta name="keywords" content="Java, java tutorial, static class" />
+<link rel="stylesheet" href="../lbasic.css" />
+<style>
+body {font-family:sans-serif}
+
+#t5 {display:inline-block}
+#t5 ul {
+display:inline;
+line-height:2;
+padding:2px;
+margin:2px;
+border-radius:1em;
+border:thin solid #b42222;
+background-color:yellow;
+}
+#t5 li {display:inline;}
+#t5 ul li:before {content:"• "}
+
+#t5:before {content:"∑ ";font-family:serif;font-size:2em;color:#b42222}
+
+nav.n1 {display:inline-block;
+position:fixed;
+right:1px;
+top:1px;
+z-index:52;
+font-size:1.5em;
+max-width:301px;
+text-align:right;padding:2px;background-color:yellow;
+border-radius:2em;
+border:thin solid #b42222}
+nav.n1:before {
+content:"↑ back to ";
+}
+
+nav.n1 a[title="previous"], nav.n1 a[title="up"], nav.n1 a[title="next"] {font-size:2em}
+nav.n1 a[title="previous"]:before, nav.n1 a[title="up"]:before, nav.n1 a[title="next"]:before {content:""}
+
+#id1 {
+position:absolute;
+top:9em;
+right:2px;
+clear:both;
+
+display:inline-block;
+
+width:301px;
+max-width:301px;
+
+margin-left:2px;
+margin-right:0;
+text-align:right;
+}
+
+/* current viewport width is ≤ 999 px */
+@media (max-width:999px) {
+#id1 { display:none; }
+#t5 {margin-right:301px;}
+#t5 { display:none; }
+
+nav.n1 {display:inline;
+position:static;
+}
+}
+
+/* current viewport width is ≥ 1000 px */
+@media (min-width:1000px) {
+body {margin-right:304px}
+}
+
+body > p, article > p, section > p, blockquote > p {line-height:1.5}
+img {margin:1px}
+blockquote {padding-left:.5em;border-left:solid thin #000080;color:#000080}
+li {margin-bottom:.4rem}
+article {border:solid thin silver;margin:.5ex;padding:.5ex;border-radius:1ex}
+section {border:solid thin white;background-color:hsl(50,70%,80%);
+margin:.2rem;padding:.2rem;border-radius:1rem}
+time {font-family:monospace;white-space:nowrap}
+address {display:inline;font-style:normal}
+address:before {content:"By "}
+cite {font-style:normal;color:hsl(0,59%,32%)}
+cite:before,cite:after {color:initial}
+cite:before {content:"《"}
+cite:after {content:"》"}
+cite.book:before {content:"《"}
+cite.book:after {content:"》"}
+caption {background-color:hsl(0,0%,88%);border:solid thin black}
+footer {background-color:#fff8dc;text-align:center;clear:both}
+span.xsignet {font-family:serif;font-size:200%;color:#b42222}
+footer > div.cpr {font-size:80%}
+figure {margin:5px 5px}
+figure * {margin:0}
+figure > img {max-width:100%;height:auto;box-shadow:3px 3px 4px 3px gray}
+figcaption:last-child {margin-left:1rem}
+figcaption:last-child:before {content:"↑ "}
+kbd {padding-left:.25em;padding-right:.25em;font-family:sans-serif;border:solid 1px #c2c2c2;border-radius:4px;background-color:#f0f0f0;box-shadow:1px 1px silver}
+
+div.xgcse {display:inline-block;width:20em;height:2em}
+
+nav.page {
+display:inline-block;
+font-size:1.7rem;
+word-spacing:1ex;
+margin:.5rem;
+padding:.5rem;
+background-color:yellow;border-radius:3px;border:thin solid #b42222
+}
+nav.page:before {content:"Go to page:";word-spacing:normal;}
+nav.page a {text-decoration:underline}
+
+#top {display:table;padding:.5ex;margin:.5ex;background-color:#b42222}
+#top > p {padding:0;margin:0;color:white}
+#blogpanel664 {padding:.2rem;margin:.2rem;background-color:#faebd7;border:solid thin #faebd7;}
+#main {}
+
+div.date-α {display:table;background-color:silver;border-top:solid thin gray}
+
+div.rltd {
+display:table;
+margin:.5ex;
+padding:.5ex;
+border-radius:1rem;
+border:solid thin silver;
+background-color:hsl(195,48%,87%);
+}
+
+div.rltd > ul {margin:0}
+
+div.rltd:before {
+content:"See also";
+position:relative;
+top:-0.2rem;
+left:0;
+}
+
+div.section93509 {text-align:center;font-size:2rem}
+
+.ib-α {display:inline-block;border:solid thin hsl(269,39%,85%)}
+
+table.nrm {border-collapse:collapse;margin:1em;}
+table.nrm th, table.nrm td {padding:.25em;border:solid thin #808080}
+table.nrm th {background-color:#d7e4f2}
+
+div.¤xd {text-align:center;padding:.5em;font-size:110%;border:solid thin #ff0000;background-color:#f0e68c}
+
+div.¤ {text-align:center}
+div.¤ img, div.¤1n1 img {}
+div.¤, div.¤tla {display:table;padding:.25em;width:30ex;float:right;clear:right}
+div.¤:after, div.¤tla:after, div.dftad:after {font-size:smaller;content:"sponsor";color:gray}
+
+div.question-box32371 {
+border:solid thin silver;
+padding:.2rem;
+margin:.2rem;
+border-radius:.5rem;
+}
+p.q {
+display:inline-block;
+width:auto;
+margin:.1rem;
+padding-top:.2rem;
+padding:.2rem;
+border-radius:.5rem;
+box-shadow: 4px 4px 8px 2px hsl(1,90%,15%)
+}
+p.q:before {content:"❓ ";font-size:1.5em}
+
+b.b1 {font-size:200%;font-weight:normal}
+b.b2 {font-size:150%;font-weight:normal}
+b.b3 {font-size:110%;font-weight:normal}
+b.w {color:#8b0000} /* word. vocabulary */
+mark.b {background-color:hsl(190,60%,78%)}
+mark.r, strong.r {background-color:hsl(0,100%,83%)}
+mark.unicode {font-size:2.3em;font-family:serif;background-color:#faf0e6;border:solid thin hsl(92,46%,50%)}
+</style>
+<title>The “static” Keyword in Java</title>
+<script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','//www.google-analytics.com/analytics.js','ga');ga('create','UA-10884311-1','xahlee.info');ga('require','displayfeatures');ga('send','pageview');</script>
+</head>
+<body>
+
+<div>test simple tag 1</div>
+
+<p>test simple tag 2</p>
+
+<ul>
+<li>test list 1</li>
+<li>test list 2</li>
+<li>test list 3</li>
+</ul>
+
+<div>test tag name that are just text. p class div and all.</div>
+
+<div class="hh">tag name test p class div and all.</div>
+
+<div class="x34321">test simple attribute</div>
+<div  class="x34321">test simple attribute</div>
+<div  class="x34321" >test simple attribute</div>
+<div  class="">test simple attribute</div>
+
+<div class='x34321'>test simple attribute</div>
+<div  class='x34321'>test simple attribute</div>
+<div  class='x34321' >test simple attribute</div>
+<div  class=''>test simple attribute</div>
+
+<div class="hh" id="x95425" style="color red">multiple attributes</div>
+<div class='hh' id="x95425" style='color red'>multiple attributes 2</div>
+
+<hr />
+
+<p>test image</p>
+
+<figure>
+<img src="i/raspberry_pi_ultimate_starter_kit_2014-12-01.jpg" alt="raspberry pi ultimate starter kit 2014-12-01" width="1500" height="1500" />
+<figcaption>
+<a class="amz" href="http://www.amazon.com/dp/B00G1PNG54/?tag=xahh-20" title="CanaKit Raspberry Ultimate Starter Components">CanaKit Raspberry Ultimate Starter Components</a>
+</figcaption>
+</figure>
+
+<p>following should not be colored. id="x95425" style="color red" </p>
+
+<nav id="t5">
+<ul>
+<li><a href="../SpecialPlaneCurves_dir/specialPlaneCurves.html">Curves</a></li>
+<li><a href="../surface/gallery.html">Surfaces</a></li>
+<li><a href="../Wallpaper_dir/c0_WallPaper.html">Wallpaper Groups</a></li>
+<li><a href="../MathGraphicsGallery_dir/mathGraphicsGallery.html">Gallery</a></li>
+<li><a href="../math_software/mathPrograms.html">Math Software</a></li>
+<li><a href="../3d/index.html">POV-Ray</a></li>
+</ul>
+
+<button id="i54391" type="button">Random Page</button><script async src="../random_page.js"></script>
+<a href="https://twitter.com/xah_lee"> </a> <a href="https://plus.google.com/112757647855302148298"> </a> <a href="http://www.facebook.com/xahlee"> </a>
+<div class="xgcse"><script>(function(){var cx='partner-pub-5125343095650532:1853288892';var gcse=document.createElement('script');gcse.type='text/javascript';gcse.async=true;gcse.src=(document.location.protocol=='https:'?'https:':'http:')+'//www.google.com/cse/cse.js?cx='+cx;var s=document.getElementsByTagName('script')[0];s.parentNode.insertBefore(gcse,s);})();</script><gcse:searchbox-only></gcse:searchbox-only></div>
+</nav>
+
+<nav class="n1"><a href="java.html">Java Tutorial</a></nav>
+
+<aside id="id1">
+<script charset="utf-8" type="text/javascript">
+amzn_assoc_ad_type = "responsive_search_widget";
+amzn_assoc_tracking_id = "xahhome-20";
+amzn_assoc_marketplace = "amazon";
+amzn_assoc_region = "US";
+amzn_assoc_placement = "";
+amzn_assoc_search_type = "search_widget";
+amzn_assoc_width = "auto";
+amzn_assoc_height = "auto";
+amzn_assoc_default_search_category = "";
+amzn_assoc_default_search_key = "";
+amzn_assoc_theme = "light";
+amzn_assoc_bg_color = "FFFFFF";
+</script>
+<script src="http://z-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&Operation=GetScript&ID=OneJS&WS=1&MarketPlace=US"></script>
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- side300x600 -->
+<ins class="adsbygoogle"
+     style="display:inline-block;width:300px;height:600px"
+     data-ad-client="ca-pub-5125343095650532"
+     data-ad-slot="7031204381"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+<div class="pp93653">
+Buy xahlee.info for offline reading.
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+<input type="hidden" name="cmd" value="_xclick">
+<input type="hidden" name="business" value="JPHAB7F7QZRPC">
+<input type="hidden" name="lc" value="US">
+<input type="hidden" name="item_name" value="xahlee.info content">
+<input type="hidden" name="amount" value="49.00">
+<input type="hidden" name="currency_code" value="USD">
+<input type="hidden" name="button_subtype" value="services">
+<input type="hidden" name="no_note" value="0">
+<input type="hidden" name="cn" value="Add special instructions to the seller:">
+<input type="hidden" name="no_shipping" value="1">
+<input type="hidden" name="bn" value="PP-BuyNowBF:btn_buynowCC_LG.gif:NonHosted">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_buynowCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+</form>
+</div>
+</aside>
+
+<div class="ad66704">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- 728x90, created 8/12/09 -->
+<ins class="adsbygoogle"
+     style="display:inline-block;width:728px;height:90px"
+     data-ad-client="ca-pub-5125343095650532"
+     data-ad-slot="8521101965"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+
+<h1>The “static” Keyword in Java</h1>
+
+<div class="byline"><address class="author"><a href="https://plus.google.com/112757647855302148298?rel=author" rel="author">Xah Lee</a></address>, <time>2005-02-28</time>, …, <time>2015-02-16</time></div>
+
+<div id="share-buttons-97729"><div class="g-plusone" data-size="medium" data-annotation="none"></div></div><script defer src="../share_widgets.js"></script>
+
+<h2>Class Variable vs Instance Variable</h2>
+
+<h3>“static” Keyword = Class Variable</h3>
+
+<p>Variables can be declared with the <code>static</code> keyword. Example:</p>
+
+<pre class="java"><span class="keyword">static</span> <span class="type">int</span> <span class="variable-name">y</span> = 0;</pre>
+
+<p>When a variable is declared with the keyword <code>static</code>, its called a <strong>class variable</strong>.</p>
+
+<ul>
+<li>For a class variable, all instances of the class share the same copy of the variable.</li>
+<li>A class variable can be accessed directly with the class, without the need to create a instance. By the syntax <code><var class="d">Class name</var>.<var class="d">static var name</var></code>.</li>
+</ul>
+
+<h3>No “static” Keyword = Instance Variable</h3>
+
+<p>Without the “static” keyword, it's called <strong>instance variable</strong>, and each instance of the class has its own copy of the variable.</p>
+
+<p>In the following code, the class “T2” has two variables x and y. The y is declared with the keyword “static”. In the main class “T1”, we try to manipulate the variables x and y in “T2”, showing the differences of instance variable and class variable.</p>
+
+<pre class="java"><span class="keyword">class</span> <span class="type">T2</span> {
+    <span class="type">int</span> <span class="variable-name">x</span> = 0; <span class="comment-delimiter">// </span><span class="comment">instance variable
+</span>    <span class="keyword">static</span> <span class="type">int</span> <span class="variable-name">y</span> = 0; <span class="comment-delimiter">// </span><span class="comment">class variable
+</span>
+    <span class="type">void</span> <span class="function-name">setX</span> (<span class="type">int</span> <span class="variable-name">n</span>) { x = n;}
+    <span class="type">void</span> <span class="function-name">setY</span> (<span class="type">int</span> <span class="variable-name">n</span>) { y = n;}
+
+    <span class="type">int</span> <span class="function-name">getX</span> () { <span class="keyword">return</span> x;}
+    <span class="type">int</span> <span class="function-name">getY</span> () { <span class="keyword">return</span> y;}
+}
+
+<span class="keyword">class</span> <span class="type">T1</span> {
+    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">void</span> <span class="function-name">main</span>(<span class="type">String</span>[] <span class="variable-name">arg</span>) {
+        <span class="type">T2</span> <span class="variable-name">b1</span> = <span class="keyword">new</span> <span class="type">T2</span>();
+        <span class="type">T2</span> <span class="variable-name">b2</span> = <span class="keyword">new</span> <span class="type">T2</span>();
+
+        b1.setX(9);
+        b2.setX(10);
+
+        <span class="comment-delimiter">// </span><span class="comment">each b1 and b2 has separate copies of x
+</span>        System.out.println( b1.getX() );
+        System.out.println( b2.getX() );
+
+        <span class="comment-delimiter">// </span><span class="comment">class variable can be used directly without a instance of it.
+</span>        <span class="comment-delimiter">//</span><span class="comment">(if changed to T2.x, it won't compile)
+</span>        System.out.println( T2.y );
+        T2.y = 7;
+        System.out.println( T2.y );
+
+        <span class="comment-delimiter">// </span><span class="comment">class variable can be manipulated thru methods as usual
+</span>        b1.setY(T2.y+1);
+        System.out.println( b1.getY() );
+    }
+}</pre>
+
+<h2>Instance Method vs Class Methods</h2>
+
+<p>Methods can also be declared with the keyword “static”. When a method is declared static, it can be used without having to create a object first.  For example, you can define a collection of math functions in a class, all static, using them like functions. Example:</p>
+
+<pre class="java"><span class="comment-delimiter">// </span><span class="comment">A class with a static method
+</span><span class="keyword">class</span> <span class="type">M2</span> { <span class="keyword">static</span> <span class="type">int</span> <span class="function-name">triple</span> (<span class="type">int</span> <span class="variable-name">n</span>) {<span class="keyword">return</span> 3*n;}}
+
+<span class="keyword">class</span> <span class="type">M1</span> {
+    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">void</span> <span class="function-name">main</span>(<span class="type">String</span>[] <span class="variable-name">arg</span>) {
+
+        <span class="comment-delimiter">// </span><span class="comment">calling static methods without creating a instance
+</span>        System.out.println( M2.triple(4) );
+
+        <span class="comment-delimiter">// </span><span class="comment">calling static methods thru a instance is also allowed
+</span>        <span class="type">M2</span> <span class="variable-name">m1</span> = <span class="keyword">new</span> <span class="type">M2</span>();
+        System.out.println( m1.triple(5) );
+    }
+}</pre>
+
+<p>Methods declared with “static” keyword are called <strong>class methods</strong>. Otherwise they are <strong>instance methods</strong>.</p>
+
+<h3>Static Methods Cannot Access Non-Static Variables</h3>
+
+<p>Methods declared with “static” cannot access variables declared without “static”. The following gives a compilation error, unless x is also static.</p>
+
+<pre class="java"><span class="keyword">class</span> <span class="type">V2</span> {
+    <span class="type">int</span> <span class="variable-name">x</span> = 3;
+    <span class="keyword">static</span> <span class="type">int</span> <span class="function-name">returnIt</span> () { <span class="keyword">return</span> x;}
+}
+
+<span class="keyword">class</span> <span class="type">V1</span> {
+    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">void</span> <span class="function-name">main</span>(<span class="type">String</span>[] <span class="variable-name">arg</span>) {
+        System.out.println( V2.returnIt() );
+    }
+}</pre>
+
+<pre class="output">~ $ javac V1.java
+V1.java:3: error: non-static variable x cannot be referenced from a static context
+    static int returnIt () { return x;}
+                                    ^
+1 error
+~ $</pre>
+
+<p>Note: There's no such thing as static classs. “static” in front of class creates compilation error. However, there's a similar idea called abstract classes, with the keyword “abstract”. Abstract classes cannot be initialized.
+See: <a href="abstract_class.html">The “abstract” Keyword in Java</a>.</p>
+
+<div class="ads-bottom-65900">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- 728x90, created 8/12/09 -->
+<ins class="adsbygoogle"
+     style="display:inline-block;width:728px;height:90px"
+     data-ad-client="ca-pub-5125343095650532"
+     data-ad-slot="8521101965"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+
+<div id="disqus_thread"></div><script>(function(){var dsq=document.createElement('script');dsq.type='text/javascript';dsq.async=true;dsq.src='http://xahlee.disqus.com/embed.js';(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);})();</script><a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+<footer><span class="xsignet">∑</span> <a href="../index.html">Xah Code</a> <div class="cpr">© 1995, …, 2014 Xah Lee.</div></footer>
+
+<script>(function() { var po=document.createElement('script');po.type='text/javascript';po.async=true;po.src='https://apis.google.com/js/plusone.js';var s=document.getElementsByTagName('script')[0];s.parentNode.insertBefore(po,s);})();</script>
+
+</body></html>
