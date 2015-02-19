@@ -2139,7 +2139,7 @@ t
           (,(format "<b%s>%s</b>" attriRegex textNodeRegex) . (1 "bold"))
 
           (,(concat "</\\(" htmlElementNamesRegex "\\) *>") . (1 font-lock-function-name-face))
-          (,(concat "<\\(" htmlElementNamesRegex "\\).*>") . (1 font-lock-function-name-face))
+          (,(concat "<\\(" htmlElementNamesRegex "\\).*?>") . (1 font-lock-function-name-face))
  
           (,(concat " +\\(" htmlAttributeNamesRegexp "\\) *= *['\"]") . (1 font-lock-variable-name-face))
 
