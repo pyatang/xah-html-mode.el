@@ -1897,19 +1897,27 @@ When cursor is in HTML link file path, e.g.  <img src=\"gki/macosxlogo.png\" > a
         (insert (xahsite-filepath-to-href-value φnew-file-path (or (buffer-file-name) default-directory)))))))
 
 (defun xhm-mark-unicode (φp1)
-  "Wrap a special <mark> tag  around the character before cursor.
+  "Wrap a special <mark> tag around the character before cursor.
 like this:
  <mark class=\"unicode\" title=\"U+3B1: GREEK SMALL LETTER ALPHA\">α</mark>
+
+If the char is any of 「&」 「<」 「>」, then replace them with 「&amp;」「&lt;」「&gt;」.
 
 When called in elisp program, wrap the tag around charbefore position φp1."
   (interactive (list (point)))
   (let* (
          (ξcodepoint (string-to-char (buffer-substring-no-properties (- φp1 1) φp1 )))
-         (ξname (get-char-code-property ξcodepoint 'name)))
+         (ξname (get-char-code-property ξcodepoint 'name))
+         (ξchar (buffer-substring-no-properties (- φp1 1) φp1)))
     (goto-char (- φp1 1))
     (insert (format "<mark class=\"unicode\" title=\"U+%X: %s\">" ξcodepoint ξname))
     (right-char 1)
-    (insert (format "</mark>"))))
+    (insert (format "</mark>"))
+
+    (cond
+     ((string-equal ξchar "&") (search-backward "<" ) (insert "amp;"))
+     ((string-equal ξchar "<") (search-backward "<" ) (delete-char -1) (insert "&lt;"))
+     ((string-equal ξchar ">") (search-backward "<" ) (delete-char -1) (insert "&gt;")))))
 
 (defun xhm-clean-whitespace ()
   "Delete redundant whitespace in HTML file.
@@ -2144,6 +2152,10 @@ t
           (,(concat " +\\(" htmlAttributeNamesRegexp "\\) *= *['\"]") . (1 font-lock-variable-name-face))
 
           (,cssPropertieNames . font-lock-type-face)
+          ;; (,(concat ":\\(" cssValueNames " *\\)+") . (1 font-lock-keyword-face))
+          ;; (,(concat ": *\\(" cssValueNames "\\)") . (1 font-lock-keyword-face))
+          ;; (,(concat "\\(" cssValueNames "\\).*?;") . (1 font-lock-keyword-face))
+          ;; (,(concat ":.*?\\(" cssValueNames "\\).*?;") . (1 font-lock-keyword-face))
           (,cssValueNames . font-lock-keyword-face)
           (,cssColorNames . font-lock-preprocessor-face)
           (,cssUnitNames . font-lock-reference-face))))
