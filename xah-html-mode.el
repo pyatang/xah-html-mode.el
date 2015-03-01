@@ -2077,7 +2077,7 @@ t
   (define-key xhm-keymap (kbd "<C-right>") 'xhm-skip-tag-forward)
   (define-key xhm-keymap (kbd "<C-left>") 'xhm-skip-tag-backward)
 
-  (define-key xhm-keymap (kbd "<tab>") 'xhm-wrap-html-tag)
+  (define-key xhm-keymap (kbd "TAB") 'xhm-wrap-html-tag)
 
   (define-prefix-command 'xhm-single-keys-keymap)
   (define-key xhm-keymap (kbd "<menu> e") xhm-single-keys-keymap)
