@@ -1179,9 +1179,13 @@ If `universal-argument' is called first, convert relative URL to full path.
 
 When called in lisp program, φhtml-text is the input string.
 
-This command extracts all text of the form
- <‹letter› … href/src=\"…\" …>
-on a single line, by regex. The quote may be single quote."
+This command extracts all text of the forms
+ <‹letter› … href=\"…\" …>
+ <‹letter› … src=\"…\" …>
+on a single line, by regex. The quote may be single quote.
+
+URL `http://ergoemacs.org/emacs/elisp_extract_url_command.html'
+Version 2015-03-11"
   (interactive (list
                 (if (use-region-p)
                     (progn (buffer-substring-no-properties (region-beginning) (region-end)))
