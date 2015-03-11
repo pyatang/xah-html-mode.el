@@ -1170,14 +1170,13 @@ WARNING: this command does not cover all HTML tags or convert all HTML entities.
         (goto-char φfrom)
         (insert ξoutput-str)))))
 
-(defun xhm-extract-url (φhtml-text &optional φconvert-relative-URL-p)
-  "Returns a list of URLs in the HTML text string φhtml-text.
 
-When called interactively, use text selection as input, or current paragraph. output is copied to `kill-ring'.
+(defun xhm-extract-url ( φp1 φp2 &optional φconvert-relative-url-p)
+  "Extract URLs in current block or region to `kill-ring'.
 
 If `universal-argument' is called first, convert relative URL to full path.
 
-When called in lisp program, φhtml-text is the input string.
+When called in lisp program, φp1 φp2. is region begin end positions.
 
 This command extracts all text of the forms
  <‹letter› … href=\"…\" …>
@@ -1186,22 +1185,35 @@ on a single line, by regex. The quote may be single quote.
 
 URL `http://ergoemacs.org/emacs/elisp_extract_url_command.html'
 Version 2015-03-11"
-  (interactive (list
-                (if (use-region-p)
-                    (progn (buffer-substring-no-properties (region-beginning) (region-end)))
-                  (progn (thing-at-point 'paragraph)))
-                current-prefix-arg ))
-  (let ((urlList (list)))
+  (interactive
+   (let (p1 p2)
+     ;; set region boundary p1 p2
+     (if (use-region-p)
+         (progn (setq p1 (region-beginning))
+                (setq p2 (region-end)))
+       (save-excursion
+         (if (re-search-backward "\n[ \t]*\n" nil "NOERROR")
+             (progn (re-search-forward "\n[ \t]*\n")
+                    (setq p1 (point)))
+           (setq p1 (point)))
+         (if (re-search-forward "\n[ \t]*\n" nil "NOERROR")
+             (progn (re-search-backward "\n[ \t]*\n")
+                    (setq p2 (point)))
+           (setq p2 (point)))))
+     (list p1 p2 current-prefix-arg)))
+
+  (let ((ξregionText (buffer-substring-no-properties φp1 φp2))
+        (ξurlList (list)))
     (with-temp-buffer
-      (insert φhtml-text)
+      (insert ξregionText)
       (goto-char 1)
       (while (re-search-forward
               "<[[:alpha:]]+.+?\\(href\\|src\\)[[:blank:]]*=[[:blank:]]*\\([\"']\\)\\([^\2]+?\\)\\2.+?>" nil t)
-        (push (match-string 3) urlList)))
-    (setq urlList (reverse urlList))
+        (push (match-string 3) ξurlList)))
+    (setq ξurlList (reverse ξurlList))
 
-    (when φconvert-relative-URL-p
-      (setq urlList
+    (when φconvert-relative-url-p
+      (setq ξurlList
             (mapcar
              (lambda (ξx)
                (if (string-match "^http" ξx )
@@ -1209,13 +1221,13 @@ Version 2015-03-11"
                  (progn
                    ;; (xahsite-filepath-to-url (xahsite-href-value-to-filepath ξx (buffer-file-name)))
                    (expand-file-name ξx (file-name-directory (buffer-file-name))))))
-             urlList)))
+             ξurlList)))
 
     (when (called-interactively-p 'any)
-      (let ((printedResult (mapconcat 'identity urlList "\n")))
-        (kill-new printedResult)
-        (message "%s" printedResult)))
-    urlList ))
+      (let ((ξprintedResult (mapconcat 'identity ξurlList "\n")))
+        (kill-new ξprintedResult)
+        (message "%s" ξprintedResult)))
+    ξurlList ))
 
 (defun xhm-update-title ( φnewTitle)
   "Update a HTML article's title and h1 tags.
