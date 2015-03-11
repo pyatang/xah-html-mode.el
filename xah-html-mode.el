@@ -1176,12 +1176,12 @@ WARNING: this command does not cover all HTML tags or convert all HTML entities.
 
 If `universal-argument' is called first, convert relative URL to full path.
 
-When called in lisp program, φp1 φp2. is region begin end positions.
-
 This command extracts all text of the forms
  <‹letter› … href=\"…\" …>
  <‹letter› … src=\"…\" …>
-on a single line, by regex. The quote may be single quote.
+that is on a a single line, by regex. The quote may be single quote.
+
+When called in lisp program, φp1 φp2. is region begin end positions. Returns a list.
 
 URL `http://ergoemacs.org/emacs/elisp_extract_url_command.html'
 Version 2015-03-11"
