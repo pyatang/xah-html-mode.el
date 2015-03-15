@@ -817,15 +817,18 @@ See also:
         (goto-char φfrom)
         (insert ξoutput-str)))))
 
-(defun xhm-get-html-file-title (φfname)
+(defun xhm-get-html-file-title (φfname &optional φno-error-p)
   "Return φfname <title> tag's text.
-Assumes that the file contains the string
-“<title>…</title>”."
+Assumes that the file contains the string “<title>…</title>”. If not, and if φno-error-p is true, then return nil."
   (with-temp-buffer
     (insert-file-contents φfname nil nil nil t)
     (goto-char 1)
-    (buffer-substring-no-properties
-     (search-forward "<title>") (- (search-forward "</title>") 8))))
+    (if (search-forward "<title>" nil φno-error-p)
+        (buffer-substring-no-properties
+         (point)
+         (- (search-forward "</title>") 8))
+      nil
+      )))
 
 (defun xhm-lines-to-html-list ()
   "Make the current block of lines into a HTML list.
@@ -1169,7 +1172,6 @@ WARNING: this command does not cover all HTML tags or convert all HTML entities.
         (delete-region φfrom φto)
         (goto-char φfrom)
         (insert ξoutput-str)))))
-
 
 (defun xhm-extract-url ( φp1 φp2 &optional φconvert-relative-url-p)
   "Extract URLs in current block or region to `kill-ring'.
@@ -2164,7 +2166,7 @@ t
 
           (,(concat "</\\(" htmlElementNamesRegex "\\) *>") . (1 font-lock-function-name-face))
           (,(concat "<\\(" htmlElementNamesRegex "\\).*?>") . (1 font-lock-function-name-face))
- 
+
           (,(concat " +\\(" htmlAttributeNamesRegexp "\\) *= *['\"]") . (1 font-lock-variable-name-face))
 
           (,cssPropertieNames . font-lock-type-face)
