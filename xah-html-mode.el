@@ -278,6 +278,7 @@
         ("ruby" . ["ruby-mode" "rb"])
         ("scala" . ["scala-mode" "scala"])
         ("scheme" . ["scheme-mode" "scm"])
+        ("prolog" . ["prolog-mode" "prolog"])
         ("yasnippet" . ["snippet-mode" "yasnippet"])
         ("vbs" . ["visual-basic-mode" "vbs"])
         ("visualbasic" . ["visual-basic-mode" "vbs"])
