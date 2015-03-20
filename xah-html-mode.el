@@ -1308,7 +1308,7 @@ The order of lines for {title, author, date/time, url} needs not be in that orde
          ((string-match "^https?://" ξx ) (setq ξurl ξx))
          ((string-match "^ *[bB]y " ξx ) (setq ξauthor ξx))
          ((string-match "^ *author[: ]" ξx ) (setq ξauthor ξx))
-         ((is-datetimestamp-p ξx) (setq ξdate ξx))
+         ((xah-is-datetimestamp-p ξx) (setq ξdate ξx))
          (t (setq ξtitle ξx)))))
 
     (message "title:「%s」\n author:「%s」\n date:「%s」\n url:「%s」" ξtitle ξauthor ξdate ξurl)
