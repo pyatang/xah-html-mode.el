@@ -1209,9 +1209,14 @@ Version 2015-03-11"
         (ξurlList (list)))
     (with-temp-buffer
       (insert ξregionText)
+
+      (goto-char 1)
+      (while (re-search-forward "<" nil t)
+        (replace-match "\n<" "FIXEDCASE" "LITERAL"))
+
       (goto-char 1)
       (while (re-search-forward
-              "<[[:alpha:]]+.+?\\(href\\|src\\)[[:blank:]]*=[[:blank:]]*\\([\"']\\)\\([^\2]+?\\)\\2.+?>" nil t)
+              "<[A-Za-z]+.+?\\(href\\|src\\)[[:blank:]]*?=[[:blank:]]*?\\([\"']\\)\\([^\"']+?\\)\\2" nil t)
         (push (match-string 3) ξurlList)))
     (setq ξurlList (reverse ξurlList))
 
