@@ -1174,7 +1174,7 @@ WARNING: this command does not cover all HTML tags or convert all HTML entities.
         (goto-char φfrom)
         (insert ξoutput-str)))))
 
-(defun xhm-extract-url ( φp1 φp2 &optional φconvert-relative-url-p)
+(defun xhm-extract-url (φp1 φp2 &optional φconvert-relative-url-p)
   "Extract URLs in current block or region to `kill-ring'.
 
 If `universal-argument' is called first, convert relative URL to full path.
@@ -1187,7 +1187,7 @@ that is on a a single line, by regex. The quote may be single quote.
 When called in lisp program, φp1 φp2. is region begin end positions. Returns a list.
 
 URL `http://ergoemacs.org/emacs/elisp_extract_url_command.html'
-Version 2015-03-11"
+Version 2015-03-20"
   (interactive
    (let (p1 p2)
      ;; set region boundary p1 p2
