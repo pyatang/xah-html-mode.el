@@ -13,35 +13,6 @@
 ;; home page: http://ergoemacs.org/emacs/xah-html-mode.html
 ;; beta stage. Mostly just used by me. There are about 20 functions that act on HTML. They have inline doc.
 
-;;; HISTORY
-
-;; 2014-06-16 renamed xhm-htmlize-or-de-precode to xhm-toggle-syntax-coloring-markup. lots of other changes.
-;; 0.8, 2014-06-14 added keybindings, and some style cleanup.
-;; 0.7.1, 2014-03-18 added a “main” tag to “xhm-wrap-html-tag”.
-;; 0.7.0, 2014-01-26 xhm-wrap-html-tag now will always do a class. (no need for prefix arg anymore). Also, now the default tag is “div” instead of “span”
-;; 0.6.9, 2014-01-11 xhm-make-link-defunct behavier changed slightly. See inline doc.
-;; 0.6.8, 2014-01-11 added xhm-html-to-text. modified xhm-remove-html-tags.
-;; 0.6.7, 2014-01-10 bug-fix on xhm-extract-url. Now, if the url start with 「http」, don't result in 「http://http://」
-;; 0.6.6, 2013-06-20 critical bug-fix on xhm-htmlize-or-de-precode. Before, it'll just remove html entities for & < >.
-;; 0.6.5, 2013-05-10 improved on “xhm-make-citation”
-;; 0.6.4, 2013-04-29 added xhm-change-current-tag
-;; 0.6.3, 2013-04-23 now xhm-wrap-html-tag will smartly decide to wrap tag around word or line or text block, depending on the tag given, when there's no text selection.
-;; 0.6.2, 2013-04-22 now, ‘single curly quoted text’ also colored.
-;; 0.6.1, 2013-04-21 added xhm-insert-wrap-source-code.
-;; 0.6.0, 2013-04-17 added feature to htmlize <pre> code block. ⁖ xhm-htmlize-or-de-precode and xhm-get-precode-make-new-file. The function names may change in the future.
-;; 0.5.9, 2013-04-10 added “xhm-emacs-to-windows-kbd-notation” and improved “xhm-htmlize-keyboard-shortcut-notation” to take emacs notation.
-;; 0.5.8, 2013-03-19 now xhm-extract-url will also put result to kill-ring
-;; 0.5.7, 2013-03-03 removed the id option in xhm-wrap-html-tag
-;; 0.5.6, 2013-02-16 added xhm-replace-html-named-entities
-;; 0.5.5, 2013-02-03 added xhm-replace-html-&<>-to-entities, xhm-replace-html-chars-to-unicode
-;; 0.5.4, 2013-01-26 lots additions and changes. added xhm-wrap-html-tag xhm-wrap-p-tag xhm-lines-to-html-list xhm-make-html-table xhm-word-to-wikipedia-linkify xhm-wrap-url xhm-wikipedia-url-linkify xhm-source-url-linkify xhm-make-link-defunct xhm-make-citation xhm-update-title xhm-extract-url xhm-remove-html-tags xhm-remove-span-tag-region xhm-htmlize-keyboard-shortcut-notation
-;; 0.5.3, 2012-12-07 removed loading sgml-mode and all call to its functions. The sgml-mode seems to have bugs about keys. That is, global numberpad keys won't work.
-;; 0.5.2, 2012-09-25 added a color for curly quoted text.
-;; 0.5, 2012-05-13 fixed sgml-skip-tag-forward sgml-skip-tag-backward. But sgml-delete-tag still doesn't work.
-;; 0.4, 2012-05-13 added sgml-delete-tag sgml-skip-tag-forward sgml-skip-tag-backward.
-;; 0.3, 2012-05-13 added comment handling. improved syntax coloring. Added keymap and syntax table."
-;; 0.2, 2012-05-12 first version
-
 (require 'xfrp_find_replace_pairs)
 (require 'xeu_elisp_util)
 (require 'htmlize)
@@ -1547,70 +1518,75 @@ If there's a text selection, wrap p around each text block (separated by 2 newli
     (delete-region p1 p2 )
     (insert "<p>" (replace-regexp-in-string "\n\n+" "</p>\n\n<p>" (trim-string inputText)) "</p>")))
 
-(defun xhm-emacs-to-windows-kbd-notation-string (φinput-string)
-  "Change emacs keyboard-shortcut notation to Windows's notation.
+(defun xhm-emacs-to-windows-kbd-notation (φp1 φp2)
+  "Change emacs key notation to Windows's notation on text selection or current line.
+
 For example:
  「C-h f」⇒ 「Ctrl+h f」
- 「M-a」⇒ 「Meta+a」
+ 「M-a」⇒ 「Alt+a」
  「<f9> <f8>」 ⇒ 「F9 F8」
 
-This command will do most emacs syntax correctly, but not 100% correct.
-"
-  (let ((case-fold-search nil))
-    (replace-regexp-pairs-in-string φinput-string
-                                    [
-                                     ["C-\\(.\\)" "Ctrl+\\1"]
-                                     ["M-\\(.\\)" "Meta+\\1"]
-                                     ["S-\\(.\\)" "Shift+\\1"]
-                                     ["s-\\(.\\)" "Super+\\1"]
-                                     ["H-\\(.\\)" "Hyper+\\1"]
+This command will do most emacs syntax correctly, but not 100% correct, especially on notations like <C-M-down>. But works if it's written as C-M-<down>
 
-                                     ["<prior>" "PageUp"]
-                                     ["<next>" "PageDown"]
-                                     ["<home>" "Home"]
-                                     ["<end>" "End"]
-
-                                     ["<f1>" "F1"] ["<f2>" "F2"] ["<f3>" "F3"] ["<f4>" "F4"] ["<f5>" "F5"] ["<f6>" "F6"] ["<f7>" "F7"] ["<f8>" "F8"] ["<f9>" "F9"] ["<f10>" "F10"] ["<f11>" "F11"] ["<f12>" "F12"]
-
-                                     ["RET" "Enter"]
-                                     ["<return>" "Return"]
-                                     ["TAB" "Tab"]
-                                     ["<tab>" "Tab"]
-
-                                     ["<right>" "→"]
-                                     ["<left>" "←"]
-                                     ["<up>" "↑"]
-                                     ["<down>" "↓"]
-
-                                     ["<insert>" "Insert"]
-                            ["<delete>" "Delete"]
-
-                            ["<backspace>" "Backspace"]
-                            ["DEL" "Delete"]
-                            ]
- "FIXEDCASE"))
- )
-
-(defun xhm-emacs-to-windows-kbd-notation (φp1 φp2)
-  "Change emacs key notation to Windows's notation.
-
-For example:
- 【C-h f】⇒ 【Ctrl+h f】
- 【M-a】⇒ 【Meta+a】
-
-When called interactively, work on text selection or text enclosed in 【…】.
-
-For detail on exactly which string are changed, see `xhm-emacs-to-windows-kbd-notation-string'.
-"
+When called non-interactively, φp1 φp2 are region begin end positions.
+Version 2015-04-08."
   (interactive
-   (let ((bds (get-selection-or-unit ["^【" "^】"])))
-     (list (elt bds 1) (elt bds 2))))
+   (if (use-region-p)
+       (list (region-beginning) (region-end))
+     (list (line-beginning-position) (line-end-position))))
+  (save-restriction
+    (narrow-to-region φp1 φp2)
+    (goto-char (point-min))
+    (let ((case-fold-search t))
+      (mapc
+       (lambda (ξx)
+         (goto-char (point-min))
+         (while
+             (search-forward (aref ξx 0) nil t)
+           (replace-match (aref ξx 1) 'FIXEDCASE)))
+       [
+        ["<prior>" "PageUp"]
+        ["<next>" "PageDown"]
+        ["<home>" "Home"]
+        ["<end>" "End"]
+        ["<f1>" "F1"] ["<f2>" "F2"] ["<f3>" "F3"] ["<f4>" "F4"] ["<f5>" "F5"] ["<f6>" "F6"] ["<f7>" "F7"] ["<f8>" "F8"] ["<f9>" "F9"] ["<f10>" "F10"] ["<f11>" "F11"] ["<f12>" "F12"]
+        ["<return>" "Return"]
+        ["<tab>" "Tab"]
+        ["<escape>" "Esc"]
+        ["<right>" "→"]
+        ["<left>" "←"]
+        ["<up>" "↑"]
+        ["<down>" "↓"]
+        ["<insert>" "Insert"]
+        ["<delete>" "Delete"]
+        ["<backspace>" "Backspace"]
+        ["<menu>" "Menu"]
+        ]))
 
-  (let (  (case-fold-search nil)
-          (ξinput-str (buffer-substring-no-properties φp1 φp2)))
-    (delete-region φp1 φp2)
-    (insert
-     (xhm-emacs-to-windows-kbd-notation-string ξinput-str))))
+    (let ((case-fold-search t))
+      (mapc
+       (lambda (ξx)
+         (goto-char (point-min))
+         (while
+             (search-forward-regexp (aref ξx 0) nil t)
+           (replace-match (aref ξx 1) 'FIXEDCASE)))
+       [
+        ["<C-\\(.\\)>" "C-<\\1>"]
+        ["<C-s-\\(.\\)>" "C-s-<\\1>"]
+        ["<M-\\(.\\)>" "M-<\\1>"]
+        ["<M-s-\\(.\\)>" "M-s-<\\1>"]
+        ["\\bC-\\(.\\)" "Ctrl+\\1"]
+        ["\\bM-\\(.\\)" "Alt+\\1"]
+        ["\\bA-\\(.\\)" "Alt+\\1"]
+        ["\\bS-\\(.\\)" "Shift+\\1"]
+        ["\\bs-\\(.\\)" "Super+\\1"]
+        ["\\bH-\\(.\\)" "Hyper+\\1"]
+        ["\\bRET\\b" "Enter"]
+        ["\\bSPC\\b" "Space"]
+        ["\\bTAB\\b" "Tab"]
+        ["\\bESC\\b" "Esc"]
+        ["\\bDEL\\b" "Delete"]
+        ]))))
 
 (defun xhm-htmlize-elisp-keywords (φp1 φp2)
   "Replace curly quoted elisp function/variable names to HTML markup.
@@ -1681,133 +1657,151 @@ Some issues:
         (with-output-to-temp-buffer "*changed items*"
           (mapcar (lambda (x) (princ x) (princ "\n")) (reverse changedItems)))))))
 
-(defun xhm-htmlize-keyboard-shortcut-notation ()
-  "Wrap a “kbd” tag around keyboard keys on text selection or current line.
-Example: 【ctrl+w】 ⇒ 【<kbd>Ctrl</kbd>+<kbd>w</kbd>】
-Emacs's key notation also supported. Example: 【C-x t】 ⇒ 【<kbd>Ctrl</kbd>+<kbd>x</kbd> <kbd>t</kbd>】
-Same for Alt, Shift, Cmd, Win, Enter, Return, Home… and other strings.
-Case shouldn't matter, except when it's emacs's key notation.
-"
-  (interactive)
+(defun xhm-htmlize-keyboard-shortcut-notation (φp1 φp2)
+  "Markup keyboard shortcut notation in HTML tag, on text selection or current line.
+Example:
+ C-w ⇒ <kbd>Ctrl</kbd>+<kbd>w</kbd>
+ ctrl+w ⇒ <kbd>Ctrl</kbd>+<kbd>w</kbd>
+
+When called non-interactively, φp1 φp2 are region begin end positions.
+
+Version 2015-04-08"
+  (interactive
+   (if (use-region-p)
+       (list (region-beginning) (region-end))
+     (list (line-beginning-position) (line-end-position))))
   (let* (
-         (bds (get-selection-or-unit 'line))
-         (p1 (elt bds 1))
-         (p2 (elt bds 2))
-         (replaceList [
-                       ;; case in find string shouldn't matter.
-                       ["ctrl" "<kbd>Ctrl</kbd>"]
-                       ["control" "<kbd>Ctrl</kbd>"]
-                       ["altgr" "<kbd>AltGr</kbd>"]
-                       ["compose" "<kbd>⎄ Compose</kbd>"]
-                       ["alt" "<kbd>Alt</kbd>"]
-                       ["shift" "<kbd>⇧ Shift</kbd>"]
-                       ["cmd" "<kbd>⌘ Cmd</kbd>"]
-                       ["option" "<kbd>⌥ Opt</kbd>"]
-                       ["opt" "<kbd>⌥ Opt</kbd>"]
-                       ["win" "<kbd>❖ Win</kbd>"]
-                       ["menu" "<kbd>▤ Menu</kbd>"]
-                       ["meta" "<kbd>◆ Meta</kbd>"]
-                       ["super" "<kbd>❖ Super</kbd>"]
-                       ["hyper" "<kbd>Hyper</kbd>"]
+         (ξreplaceList [
+                        ;; case must match
+                        ["Ctrl" "<kbd>Ctrl</kbd>"]
+                        ["Control" "<kbd>Ctrl</kbd>"]
+                        ["AltGr" "<kbd>AltGr</kbd>"]
+                        ["Compose" "<kbd>⎄ Compose</kbd>"]
+                        ["Alt" "<kbd>Alt</kbd>"]
+                        ["Shift" "<kbd>⇧ Shift</kbd>"]
+                        ["Cmd" "<kbd>⌘ Cmd</kbd>"]
+                        ["Option" "<kbd>⌥ Opt</kbd>"]
+                        ["Opt" "<kbd>⌥ Opt</kbd>"]
+                        ["Win" "<kbd>❖ Win</kbd>"]
+                        ["Menu" "<kbd>▤ Menu</kbd>"]
+                        ["Meta" "<kbd>◆ Meta</kbd>"]
+                        ["Super" "<kbd>❖ Super</kbd>"]
+                        ["Hyper" "<kbd>Hyper</kbd>"]
 
-                       ["return" "<kbd>Return ↩</kbd>"]
-                       ["enter" "<kbd>Enter ↵</kbd>"]
-                       ["backspace" "<kbd>⌫ Backspace</kbd>"]
-                       ["delete" "<kbd>⌦ Delete</kbd>"]
-                       ["del" "<kbd>⌦ Delete</kbd>"]
-                       ["space" "<kbd>Space</kbd>"]
-                       ["SPC" "<kbd>Space</kbd>"]
-                       ["capslock" "<kbd>Caps Lock</kbd>"]
-                       ["f-lock" "<kbd>F Lock</kbd>"]
-                       ["f lock" "<kbd>F Lock</kbd>"]
-                       ["numlock" "<kbd>Num Lock</kbd>"]
-                       ["scrolllock" "<kbd>Scroll Lock</kbd>"]
-                       ["tab" "<kbd>Tab ↹</kbd>"]
-                       ["esc" "<kbd>Esc</kbd>"]
+                        ["Return" "<kbd>Return ↩</kbd>"]
+                        ["Enter" "<kbd>Enter ↵</kbd>"]
+                        ["Backspace" "<kbd>⌫ Backspace</kbd>"]
+                        ["Delete" "<kbd>⌦ Delete</kbd>"]
+                        ["DEL" "<kbd>⌦ Delete</kbd>"]
+                        ["Space" "<kbd>Space</kbd>"]
+                        ["Caps Lock" "<kbd>Caps Lock</kbd>"]
+                        ["capslock" "<kbd>Caps Lock</kbd>"]
+                        ["f-lock" "<kbd>F Lock</kbd>"]
+                        ["f lock" "<kbd>F Lock</kbd>"]
+                        ["numlock" "<kbd>Num Lock</kbd>"]
+                        ["Num Lock" "<kbd>Num Lock</kbd>"]
 
-                       ["Home" "<kbd>↖ Home</kbd>"]
-                       ["End" "<kbd>↘ End</kbd>"]
-                       ["PageUp" "<kbd>⇞ Page △</kbd>"]
-                       ["Page Up" "<kbd>⇞ Page △</kbd>"]
-                       ["PgUp" "<kbd>⇞ Page △</kbd>"]
-                       ["PageDown" "<kbd>⇟ Page ▽</kbd>"]
-                       ["Page Down" "<kbd>⇟ Page ▽</kbd>"]
-                       ["PgDn" "<kbd>⇟ Page ▽</kbd>"]
-                       ["insert" "<kbd>Insert</kbd>"]
-                       ["ins" "<kbd>Insert</kbd>"]
-                       ["pause" "<kbd>Pause</kbd>"]
-                       ["PrtScn" "<kbd>PrtScn</kbd>"]
-                       ["prtsc" "<kbd>PrtScn</kbd>"]
-                       ["prntscr" "<kbd>PrtScn</kbd>"]
-                       ["scrlk" "<kbd>Scroll Lock</kbd>"]
-                       ["Fn" "<kbd>Fn</kbd>"]
+                        ["Tab" "<kbd>Tab ↹</kbd>"]
+                        ["Esc" "<kbd>Esc</kbd>"]
+                        ["Home" "<kbd>↖ Home</kbd>"]
+                        ["End" "<kbd>↘ End</kbd>"]
+                        ["Page Up" "<kbd>⇞ Page △</kbd>"]
+                        ["pageup" "<kbd>⇞ Page △</kbd>"]
+                        ["PgUp" "<kbd>⇞ Page △</kbd>"]
+                        ["Page Down" "<kbd>⇟ Page ▽</kbd>"]
+                        ["pagedown" "<kbd>⇟ Page ▽</kbd>"]
+                        ["PgDn" "<kbd>⇟ Page ▽</kbd>"]
+                        ["Insert" "<kbd>Insert</kbd>"]
+                        ["INS" "<kbd>Insert</kbd>"]
+                        ["Pause" "<kbd>Pause</kbd>"]
+                        ["Break" "<kbd>Pause</kbd>"]
+                        ["PrtScn" "<kbd>PrtScn</kbd>"]
+                        ["printscreen" "<kbd>PrtScn</kbd>"]
+                        ["scrlk" "<kbd>Scroll Lock</kbd>"]
+                        ["ScrLk" "<kbd>Scroll Lock</kbd>"]
+                        ["scrolllock" "<kbd>Scroll Lock</kbd>"]
+                        ["Fn" "<kbd>Fn</kbd>"]
 
-                       ["copy" "<kbd>Copy</kbd>"]
-                       ["cut" "<kbd>✂ Cut</kbd>"]
-                       ["paste" "<kbd>Paste</kbd>"]
-                       ["undo" "<kbd>⎌ Undo</kbd>"]
-                       ["redo" "<kbd>↷</kbd>"]
+                        ["Copy" "<kbd>Copy</kbd>"]
+                        ["Cut" "<kbd>✂ Cut</kbd>"]
+                        ["Paste" "<kbd>Paste</kbd>"]
+                        ["Undo" "<kbd>⎌ Undo</kbd>"]
+                        ["Redo" "<kbd>↷</kbd>"]
 
-                       ["F10" "<kbd>F10</kbd>"]
-                       ["F11" "<kbd>F11</kbd>"]
-                       ["F12" "<kbd>F12</kbd>"]
-                       ["F13" "<kbd>F13</kbd>"]
-                       ["F14" "<kbd>F14</kbd>"]
-                       ["F15" "<kbd>F15</kbd>"]
-                       ["F16" "<kbd>F16</kbd>"]
-                       ["F17" "<kbd>F17</kbd>"]
-                       ["F18" "<kbd>F18</kbd>"]
-                       ["F19" "<kbd>F19</kbd>"]
-                       ["F20" "<kbd>F20</kbd>"]
-                       ["F21" "<kbd>F21</kbd>"]
-                       ["F22" "<kbd>F22</kbd>"]
-                       ["F23" "<kbd>F23</kbd>"]
-                       ["F24" "<kbd>F24</kbd>"]
+                        ["F10" "<kbd>F10</kbd>"]
+                        ["F11" "<kbd>F11</kbd>"]
+                        ["F12" "<kbd>F12</kbd>"]
+                        ["F13" "<kbd>F13</kbd>"]
+                        ["F14" "<kbd>F14</kbd>"]
+                        ["F15" "<kbd>F15</kbd>"]
+                        ["F16" "<kbd>F16</kbd>"]
+                        ["F17" "<kbd>F17</kbd>"]
+                        ["F18" "<kbd>F18</kbd>"]
+                        ["F19" "<kbd>F19</kbd>"]
+                        ["F20" "<kbd>F20</kbd>"]
+                        ["F21" "<kbd>F21</kbd>"]
+                        ["F22" "<kbd>F22</kbd>"]
+                        ["F23" "<kbd>F23</kbd>"]
+                        ["F24" "<kbd>F24</kbd>"]
 
-                       ["F1" "<kbd>F1</kbd>"]
-                       ["F2" "<kbd>F2</kbd>"]
-                       ["F3" "<kbd>F3</kbd>"]
-                       ["F4" "<kbd>F4</kbd>"]
-                       ["F5" "<kbd>F5</kbd>"]
-                       ["F6" "<kbd>F6</kbd>"]
-                       ["F7" "<kbd>F7</kbd>"]
-                       ["F8" "<kbd>F8</kbd>"]
-                       ["F9" "<kbd>F9</kbd>"]
+                        ["F1" "<kbd>F1</kbd>"]
+                        ["F2" "<kbd>F2</kbd>"]
+                        ["F3" "<kbd>F3</kbd>"]
+                        ["F4" "<kbd>F4</kbd>"]
+                        ["F5" "<kbd>F5</kbd>"]
+                        ["F6" "<kbd>F6</kbd>"]
+                        ["F7" "<kbd>F7</kbd>"]
+                        ["F8" "<kbd>F8</kbd>"]
+                        ["F9" "<kbd>F9</kbd>"]
 
-                       ["kp0" "<kbd>Keypad 0</kbd>"]
-                       ["kp1" "<kbd>Keypad 1</kbd>"]
-                       ["kp2" "<kbd>Keypad 2</kbd>"]
-                       ["kp3" "<kbd>Keypad 3</kbd>"]
-                       ["kp4" "<kbd>Keypad 4</kbd>"]
-                       ["kp5" "<kbd>Keypad 5</kbd>"]
-                       ["kp6" "<kbd>Keypad 6</kbd>"]
-                       ["kp7" "<kbd>Keypad 7</kbd>"]
-                       ["kp8" "<kbd>Keypad 8</kbd>"]
-                       ["kp9" "<kbd>Keypad 9</kbd>"]
+                        ["kp0" "<kbd>Keypad 0</kbd>"]
+                        ["kp1" "<kbd>Keypad 1</kbd>"]
+                        ["kp2" "<kbd>Keypad 2</kbd>"]
+                        ["kp3" "<kbd>Keypad 3</kbd>"]
+                        ["kp4" "<kbd>Keypad 4</kbd>"]
+                        ["kp5" "<kbd>Keypad 5</kbd>"]
+                        ["kp6" "<kbd>Keypad 6</kbd>"]
+                        ["kp7" "<kbd>Keypad 7</kbd>"]
+                        ["kp8" "<kbd>Keypad 8</kbd>"]
+                        ["kp9" "<kbd>Keypad 9</kbd>"]
 
-                       ["kp+" "<kbd>Keypad +</kbd>"]
-                       ["kp-" "<kbd>Keypad -</kbd>"]
-                       ["kp*" "<kbd>Keypad *</kbd>"]
-                       ["kp/" "<kbd>Keypad /</kbd>"]
+                        ["kp+" "<kbd>Keypad +</kbd>"]
+                        ["kp-" "<kbd>Keypad -</kbd>"]
+                        ["kp*" "<kbd>Keypad *</kbd>"]
+                        ["kp/" "<kbd>Keypad /</kbd>"]
 
-                       ["←" "<kbd>←</kbd>"]
-                       ["→" "<kbd>→</kbd>"]
-                       ["↑" "<kbd>↑</kbd>"]
-                       ["↓" "<kbd>↓</kbd>"]
+                        ["Left" "<kbd>←</kbd>"]
+                        ["Right" "<kbd>→</kbd>"]
+                        ["Up" "<kbd>↑</kbd>"]
+                        ["Down" "<kbd>↓</kbd>"]
 
-                       ["‹key›" "<kbd>‹key›</kbd>"]
-                       ]))
+                        ["←" "<kbd>←</kbd>"]
+                        ["→" "<kbd>→</kbd>"]
+                        ["↑" "<kbd>↑</kbd>"]
+                        ["↓" "<kbd>↓</kbd>"]
 
-    (let ((case-fold-search t) (case-replace nil))
-      (save-restriction
-        (narrow-to-region p1 p2)
-        (xhm-emacs-to-windows-kbd-notation (point-min) (point-max))
+                        ["‹key›" "<kbd>‹key›</kbd>"]
+                        ]))
 
-        (goto-char (point-min))
+    (save-restriction
+      (narrow-to-region φp1 φp2)
+      (xhm-emacs-to-windows-kbd-notation (point-min) (point-max))
 
-        (replace-pairs-region (point-min) (point-max) replaceList)
-        (replace-regexp-pairs-region
-         (point-min) (point-max)
+      (let ((case-fold-search t))
+        (mapc
+         (lambda (ξx)
+           (goto-char (point-min))
+           (while
+               (search-forward (aref ξx 0) nil t)
+             (replace-match (aref ξx 1) 'FIXEDCASE 'LITERAL)))
+         ξreplaceList)
+
+        (mapc
+         (lambda (ξx)
+           (goto-char (point-min))
+           (while
+               (search-forward-regexp (aref ξx 0) nil t)
+             (replace-match (aref ξx 1) 'FIXEDCASE)))
          [
           ["\+\\([^<]\\) \\(.\\) \\(.\\)\\'" "+<kbd>\\1</kbd> <kbd>\\2</kbd> <kbd>\\3</kbd>"]
           ["\+\\([^<]\\) \\([A-Za-z0-0]\\)\\'" "+<kbd>\\1</kbd> <kbd>\\2</kbd>"]
