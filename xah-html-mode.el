@@ -1022,7 +1022,7 @@ WARNING: this command does not cover all HTML tags or convert all HTML entities.
           (let ((case-fold-search t) (tempStr ξinput-str))
 
             (setq tempStr
-                  (replace-regexp-pairs-in-string
+                  (xah-replace-regexp-pairs-in-string
                    tempStr
                    '(
                      ["<script>\\([^\\<]+?\\)</script>" ""]
@@ -1079,7 +1079,7 @@ WARNING: this command does not cover all HTML tags or convert all HTML entities.
 ;;     (setq ξinput-str (if ξwork-on-string-p φstring (buffer-substring-no-properties φfrom φto)))
 ;;     (setq ξoutput-str
 ;;           (let ((case-fold-search t) (tempStr ξinput-str))
-;; (setq tempStr (replace-regexp-pairs-in-string tempStr '(
+;; (setq tempStr (xah-replace-regexp-pairs-in-string tempStr '(
 ;; ["<script>\\([^\\<]+?\\)</script>" ""]
 ;; ["<li>" "<li>• " ]
 ;; ["<h2>" "────────── ────────── ────────── ────────── ──────────
