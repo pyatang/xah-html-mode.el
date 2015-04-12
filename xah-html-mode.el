@@ -727,8 +727,8 @@ See also: `xhm-replace-html-named-entities', `xhm-replace-html-chars-to-unicode'
      (list (elt ξbds 1) (elt ξbds 2) (if current-prefix-arg t nil))))
   (save-excursion
     (if φentity-to-char-p
-        (replace-pairs-region φp1 φp2 '( ["&amp;" "&"] ["&lt;" "<"] ["&gt;" ">"] ))
-      (replace-pairs-region φp1 φp2 '( ["&" "&amp;"] ["<" "&lt;"] [">" "&gt;"] )))))
+        (xah-replace-pairs-region φp1 φp2 '( ["&amp;" "&"] ["&lt;" "<"] ["&gt;" ">"] ))
+      (xah-replace-pairs-region φp1 φp2 '( ["&" "&amp;"] ["<" "&lt;"] [">" "&gt;"] )))))
 
 (defun xhm-replace-html-chars-to-unicode ()
   "Replace HTML < > & to Unicode chars 〈 〉 ＆.
@@ -741,7 +741,7 @@ See also:
   (let (ξbds ξp1 ξp2 myText)
     (setq ξbds (get-selection-or-unit 'block))
     (setq myText (elt ξbds 0) ξp1 (elt ξbds 1) ξp2 (elt ξbds 2))
-    (replace-pairs-region ξp1 ξp2 '( ["&" "＆"] ["<" "〈"] [">" "〉"] ))))
+    (xah-replace-pairs-region ξp1 ξp2 '( ["&" "＆"] ["<" "〈"] [">" "〉"] ))))
 
 (defun xhm-replace-html-named-entities (φstring &optional φfrom φto)
   "Replace HTML entities to Unicode character.
@@ -772,7 +772,7 @@ See also:
 
     (setq ξoutput-str
           (let ((case-fold-search nil))
-            (replace-pairs-in-string ξinput-str
+            (xah-replace-pairs-in-string ξinput-str
                                      [
                                       ["&nbsp;" " "] ["&ensp;" " "] ["&emsp;" " "] ["&thinsp;" " "]
 
@@ -905,10 +905,10 @@ with “*” as separator, becomes
     (setq ξp1 (point))
     (search-forward "</table>")
     (setq ξp2 (point))
-  ;(replace-pairs-region ξp1 ξp2 [
+  ;(xah-replace-pairs-region ξp1 ξp2 [
   ;])
 
-    (replace-regexp-pairs-region ξp1 ξp2 [
+    (xah-replace-regexp-pairs-region ξp1 ξp2 [
                                         ["<table \\([^>]+?\\)>" ""]
                                         ["</th><th>" "•"]
                                         ["</td><td>" "•"]
@@ -957,8 +957,8 @@ When done, the cursor is placed at φp2."
   (interactive "r")
   (save-restriction
     (narrow-to-region φp1 φp2)
-    (replace-regexp-pairs-region (point-min) (point-max) '(["<span class=\"[^\"]+\">" ""]))
-    (replace-pairs-region (point-min) (point-max) '( ["</span>" ""] ))
+    (xah-replace-regexp-pairs-region (point-min) (point-max) '(["<span class=\"[^\"]+\">" ""]))
+    (xah-replace-pairs-region (point-min) (point-max) '( ["</span>" ""] ))
     (xhm-replace-html-&<>-to-entities (point-min) (point-max) "ΦENTITY-TO-CHAR-P")
     (goto-char (point-max))))
 
@@ -991,8 +991,8 @@ If φchange-entity-p is true, convert html entities to char.
 
   (save-restriction
     (narrow-to-region φp1 φp2)
-    (replace-regexp-pairs-region (point-min) (point-max) '(["<code class=\"[^\"]+\">" "「"] ["<var class=\"[^\"]+\">" "‹"]))
-    (replace-pairs-region
+    (xah-replace-regexp-pairs-region (point-min) (point-max) '(["<code class=\"[^\"]+\">" "「"] ["<var class=\"[^\"]+\">" "‹"]))
+    (xah-replace-pairs-region
      (point-min) (point-max)
      '(
        ["<code>" "「"]
@@ -1120,7 +1120,7 @@ WARNING: this command does not cover all HTML tags or convert all HTML entities.
             (insert ξinput-str)
             (goto-char 1)
             (let ((case-fold-search nil))
-              (replace-pairs-region 1 (point-max)
+              (xah-replace-pairs-region 1 (point-max)
                                     '(
                                       ["<script>\\([^\\<]+?\\)</script>" ""]
                                       ["<li>" "<li>• " ]
@@ -1291,7 +1291,7 @@ The order of lines for {title, author, date/time, url} needs not be in that orde
 
     (setq ξtitle (trim-string ξtitle))
     (setq ξtitle (replace-regexp-in-string "^\"\\(.+\\)\"$" "\\1" ξtitle))
-    (setq ξtitle (replace-pairs-in-string ξtitle '(["’" "'"] ["&" "＆"] )))
+    (setq ξtitle (xah-replace-pairs-in-string ξtitle '(["’" "'"] ["&" "＆"] )))
 
     (setq ξauthor (trim-string ξauthor))
     (setq ξauthor (replace-regexp-in-string "\\. " " " ξauthor)) ; remove period in Initals
