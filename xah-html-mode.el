@@ -1537,7 +1537,7 @@ Version 2015-04-08."
   (save-restriction
     (narrow-to-region φp1 φp2)
     (goto-char (point-min))
-    (let ((case-fold-search t))
+    (let ((case-fold-search nil))
       (mapc
        (lambda (ξx)
          (goto-char (point-min))
@@ -1563,7 +1563,7 @@ Version 2015-04-08."
         ["<menu>" "Menu"]
         ]))
 
-    (let ((case-fold-search t))
+    (let ((case-fold-search nil))
       (mapc
        (lambda (ξx)
          (goto-char (point-min))
@@ -1787,7 +1787,7 @@ Version 2015-04-08"
       (narrow-to-region φp1 φp2)
       (xhm-emacs-to-windows-kbd-notation (point-min) (point-max))
 
-      (let ((case-fold-search t))
+      (let ((case-fold-search nil))
         (mapc
          (lambda (ξx)
            (goto-char (point-min))
@@ -1936,6 +1936,35 @@ When called in elisp program, wrap the tag around charbefore position φp1."
      ((string-equal ξchar "&") (search-backward "<" ) (insert "amp;"))
      ((string-equal ξchar "<") (search-backward "<" ) (delete-char -1) (insert "&lt;"))
      ((string-equal ξchar ">") (search-backward "<" ) (delete-char -1) (insert "&gt;")))))
+
+(defun xhm-markup-ruby (φp1 φp2)
+  "Wrap ruby tag, e.g. <ruby class=\"ruby88\">衷 <rt>Zhōng</rt></ruby> on current line or selection.
+On the line, chars inside paren are wrapped with “rt” tag.
+For example
+ 衷 (Zhōng)
+becomes
+ <ruby class=\"ruby88\">衷 <rt>Zhōng</rt></ruby>
+
+When called by elisp code, φp1 φp2 are region begin/end positions."
+  (interactive
+   (if (use-region-p)
+       (list (region-beginning) (region-end))
+     (list (line-beginning-position) (line-end-position))))
+  (let ()
+    (save-restriction
+      (narrow-to-region φp1 φp2)
+      (progn
+        (goto-char (point-min))
+        (while (search-forward "(" nil 'NOERROR)
+          (replace-match "<rt>")))
+      (progn
+        (goto-char (point-min))
+        (while (search-forward ")" nil 'NOERROR)
+          (replace-match "</rt>")))
+      (goto-char (point-min))
+      (insert "<ruby class=\"ruby88\">")
+      (goto-char (point-max))
+      (insert "</ruby>"))))
 
 (defun xhm-clean-whitespace ()
   "Delete redundant whitespace in HTML file.
@@ -2108,6 +2137,7 @@ t
   (define-key xhm-single-keys-keymap (kbd "DEL") 'xhm-remove-html-tags)
   (define-key xhm-single-keys-keymap (kbd ".") 'xhm-decode-percent-encoded-uri)
   (define-key xhm-single-keys-keymap (kbd ",") 'xhm-update-title)
+  (define-key xhm-single-keys-keymap (kbd "4") 'xhm-markup-ruby)
   (define-key xhm-single-keys-keymap (kbd "5") 'xhm-mark-unicode)
   (define-key xhm-single-keys-keymap (kbd "6") 'xhm-html-to-text)
   (define-key xhm-single-keys-keymap (kbd "7") 'xhm-toggle-syntax-coloring-markup)
