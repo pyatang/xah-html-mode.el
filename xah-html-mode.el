@@ -1629,7 +1629,7 @@ Some issues:
        resultStr
        (changedItems nil)
        (elispIdentifierRegex "\\([:-A-Za-z0-9]+\\)")
-       (wantedRegex (concat "“" elispIdentifierRegex "”")))
+       (wantedRegex (concat "「" elispIdentifierRegex "」")))
     (setq ξinput-str (buffer-substring-no-properties φp1 φp2))
     (setq resultStr
           (let ( mStr (case-fold-search nil) (ξsomeStr ξinput-str))
@@ -1781,20 +1781,16 @@ Version 2015-04-08"
                         ["↓" "<kbd>↓</kbd>"]
 
                         ["‹key›" "<kbd>‹key›</kbd>"]
+
                         ]))
 
     (save-restriction
       (narrow-to-region φp1 φp2)
       (xhm-emacs-to-windows-kbd-notation (point-min) (point-max))
 
+    (xah-replace-pairs-region (point-min) (point-max) ξreplaceList)
+
       (let ((case-fold-search nil))
-        (mapc
-         (lambda (ξx)
-           (goto-char (point-min))
-           (while
-               (search-forward (aref ξx 0) nil t)
-             (replace-match (aref ξx 1) 'FIXEDCASE 'LITERAL)))
-         ξreplaceList)
 
         (mapc
          (lambda (ξx)
