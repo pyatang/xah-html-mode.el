@@ -709,9 +709,8 @@ this is a quick 1 min hackjob, works only when there's no nesting."
 ;;   (interactive)
 ;;   )
 
-(defun xhm-replace-html-&<>-to-entities (φp1 φp2 &optional φentity-to-char-p)
-  "Replace HTML chars & < > to HTML entities.
-This works on the current text selection or text block.
+(defun xhm-replace-html-chars-to-entities (φp1 φp2 &optional φentity-to-char-p)
+  "Replace HTML chars & < > to HTML entities on current line or selection.
 The string replaced are:
  & ⇒ &amp;
  < ⇒ &lt;
@@ -719,75 +718,85 @@ The string replaced are:
 
 If `universal-argument' is called, the replacement direction is reversed. That is &amp; ⇒ & etc.
 
-When called in lisp program, φp1 φp2 are region begin/end. if φentity-to-char-p is true, change entities to chars instead.
+When called in lisp code, φp1 φp2 are region begin/end positions. If φentity-to-char-p is true, change entities to chars instead.
 
-See also: `xhm-replace-html-named-entities', `xhm-replace-html-chars-to-unicode'"
+See also: `xhm-replace-html-named-entities', `xhm-replace-html-chars-to-unicode'
+
+URL `http://ergoemacs.org/emacs/elisp_replace_html_entities_command.html'
+Version 2015-04-23"
   (interactive
-   (let ((ξbds (get-selection-or-unit 'block)))
-     (list (elt ξbds 1) (elt ξbds 2) (if current-prefix-arg t nil))))
-  (save-excursion
-    (if φentity-to-char-p
-        (xah-replace-pairs-region φp1 φp2 '( ["&amp;" "&"] ["&lt;" "<"] ["&gt;" ">"] ))
-      (xah-replace-pairs-region φp1 φp2 '( ["&" "&amp;"] ["<" "&lt;"] [">" "&gt;"] )))))
+   (if (use-region-p)
+       (list (region-beginning) (region-end) (if current-prefix-arg t nil))
+     (list (line-beginning-position) (line-end-position) (if current-prefix-arg t nil))))
+  (if φentity-to-char-p
+      (xah-replace-pairs-region φp1 φp2 '( ["&amp;" "&"] ["&lt;" "<"] ["&gt;" ">"] ))
+    (xah-replace-pairs-region φp1 φp2 '( ["&" "&amp;"] ["<" "&lt;"] [">" "&gt;"] ))))
 
-(defun xhm-replace-html-chars-to-unicode ()
-  "Replace HTML < > & to Unicode chars 〈 〉 ＆.
-This works on the current text selection or block of text.
+(defun xhm-replace-html-chars-to-unicode (φp1 φp2)
+  "Replace HTML < > & to Unicode chars 〈 〉 ＆ on the current line or text selection.
+
+When called in lisp code, φp1 φp2 are region begin/end positions. If φentity-to-char-p is true, change entities to chars instead.
 
 See also:
 `xhm-replace-html-named-entities'
-`xhm-replace-html-&<>-to-entities'"
-  (interactive)
-  (let (ξbds ξp1 ξp2 myText)
-    (setq ξbds (get-selection-or-unit 'block))
-    (setq myText (elt ξbds 0) ξp1 (elt ξbds 1) ξp2 (elt ξbds 2))
-    (xah-replace-pairs-region ξp1 ξp2 '( ["&" "＆"] ["<" "〈"] [">" "〉"] ))))
+`xhm-replace-html-chars-to-entities'
 
-(defun xhm-replace-html-named-entities (φstring &optional φfrom φto)
-  "Replace HTML entities to Unicode character.
+URL `http://ergoemacs.org/emacs/elisp_replace_html_entities_command.html'
+Version 2015-04-23"
+  (interactive
+   (if (use-region-p)
+       (list (region-beginning) (region-end))
+     (list (line-beginning-position) (line-end-position))))
+  (save-restriction
+    (narrow-to-region φp1 φp2)
+    (goto-char (point-min))
+    (while (search-forward "&" nil t) (replace-match "＆" nil t))
+    (goto-char (point-min))
+    (while (search-forward "<" nil t) (replace-match "〈" nil t))
+    (goto-char (point-min))
+    (while (search-forward ">" nil t) (replace-match "〉" nil t))))
+
+(defun xhm-replace-html-named-entities (φp1 φp2)
+  "Replace HTML entities to Unicode character in current line or selection.
 For example, “&copy;” becomes “©”.
-
-When called interactively, work on current text block or text selection. (a “text block” is text between blank lines)
-
-When called in lisp code, if φstring is non-nil, returns a changed string.  If φstring nil, change the text in the region between positions φfrom φto.
 
 The following HTML Entities are not replaced:
  &amp; &
  &lt; <
  &gt; >
 
+When called in lisp code, φp1 φp2 are begin/end positions.
+
 See also:
-`xhm-replace-html-&<>-to-entities'
+`xhm-replace-html-chars-to-entities'
 `xhm-replace-html-chars-to-unicode'
-"
+
+URL `http://ergoemacs.org/emacs/elisp_replace_html_entities_command.html'
+Version 2015-04-23"
   (interactive
-   (if (region-active-p)
-       (list nil (region-beginning) (region-end))
-     (let ((ξbds (get-selection-or-unit 'block)))
-       (list nil (elt ξbds 1) (elt ξbds 2)))))
-
-  (let (ξwork-on-string-p ξinput-str ξoutput-str)
-    (setq ξwork-on-string-p (if φstring t nil))
-    (setq ξinput-str (if ξwork-on-string-p φstring (buffer-substring-no-properties φfrom φto)))
-
-    (setq ξoutput-str
-          (let ((case-fold-search nil))
-            (xah-replace-pairs-in-string ξinput-str
-                                     [
-                                      ["&nbsp;" " "] ["&ensp;" " "] ["&emsp;" " "] ["&thinsp;" " "]
-
-                                      ["&rlm;" "‏"] ["&lrm;" "‎"] ["&zwj;" "‍"] ["&zwnj;" "‌"]
-
-                                      ["&iexcl;" "¡"] ["&cent;" "¢"] ["&pound;" "£"] ["&curren;" "¤"] ["&yen;" "¥"] ["&brvbar;" "¦"] ["&sect;" "§"] ["&uml;" "¨"] ["&copy;" "©"] ["&ordf;" "ª"] ["&laquo;" "«"] ["&not;" "¬"] ["&shy;" "­"] ["&reg;" "®"] ["&macr;" "¯"] ["&deg;" "°"] ["&plusmn;" "±"] ["&sup2;" "²"] ["&sup3;" "³"] ["&acute;" "´"] ["&micro;" "µ"] ["&para;" "¶"] ["&middot;" "·"] ["&cedil;" "¸"] ["&sup1;" "¹"] ["&ordm;" "º"] ["&raquo;" "»"] ["&frac14;" "¼"] ["&frac12;" "½"] ["&frac34;" "¾"] ["&iquest;" "¿"] ["&Agrave;" "À"] ["&Aacute;" "Á"] ["&Acirc;" "Â"] ["&Atilde;" "Ã"] ["&Auml;" "Ä"] ["&Aring;" "Å"] ["&AElig;" "Æ"] ["&Ccedil;" "Ç"] ["&Egrave;" "È"] ["&Eacute;" "É"] ["&Ecirc;" "Ê"] ["&Euml;" "Ë"] ["&Igrave;" "Ì"] ["&Iacute;" "Í"] ["&Icirc;" "Î"] ["&Iuml;" "Ï"] ["&ETH;" "Ð"] ["&Ntilde;" "Ñ"] ["&Ograve;" "Ò"] ["&Oacute;" "Ó"] ["&Ocirc;" "Ô"] ["&Otilde;" "Õ"] ["&Ouml;" "Ö"] ["&times;" "×"] ["&Oslash;" "Ø"] ["&Ugrave;" "Ù"] ["&Uacute;" "Ú"] ["&Ucirc;" "Û"] ["&Uuml;" "Ü"] ["&Yacute;" "Ý"] ["&THORN;" "Þ"] ["&szlig;" "ß"] ["&agrave;" "à"] ["&aacute;" "á"] ["&acirc;" "â"] ["&atilde;" "ã"] ["&auml;" "ä"] ["&aring;" "å"] ["&aelig;" "æ"] ["&ccedil;" "ç"] ["&egrave;" "è"] ["&eacute;" "é"] ["&ecirc;" "ê"] ["&euml;" "ë"] ["&igrave;" "ì"] ["&iacute;" "í"] ["&icirc;" "î"] ["&iuml;" "ï"] ["&eth;" "ð"] ["&ntilde;" "ñ"] ["&ograve;" "ò"] ["&oacute;" "ó"] ["&ocirc;" "ô"] ["&otilde;" "õ"] ["&ouml;" "ö"] ["&divide;" "÷"] ["&oslash;" "ø"] ["&ugrave;" "ù"] ["&uacute;" "ú"] ["&ucirc;" "û"] ["&uuml;" "ü"] ["&yacute;" "ý"] ["&thorn;" "þ"] ["&yuml;" "ÿ"] ["&fnof;" "ƒ"] ["&Alpha;" "Α"] ["&Beta;" "Β"] ["&Gamma;" "Γ"] ["&Delta;" "Δ"] ["&Epsilon;" "Ε"] ["&Zeta;" "Ζ"] ["&Eta;" "Η"] ["&Theta;" "Θ"] ["&Iota;" "Ι"] ["&Kappa;" "Κ"] ["&Lambda;" "Λ"] ["&Mu;" "Μ"] ["&Nu;" "Ν"] ["&Xi;" "Ξ"] ["&Omicron;" "Ο"] ["&Pi;" "Π"] ["&Rho;" "Ρ"] ["&Sigma;" "Σ"] ["&Tau;" "Τ"] ["&Upsilon;" "Υ"] ["&Phi;" "Φ"] ["&Chi;" "Χ"] ["&Psi;" "Ψ"] ["&Omega;" "Ω"] ["&alpha;" "α"] ["&beta;" "β"] ["&gamma;" "γ"] ["&delta;" "δ"] ["&epsilon;" "ε"] ["&zeta;" "ζ"] ["&eta;" "η"] ["&theta;" "θ"] ["&iota;" "ι"] ["&kappa;" "κ"] ["&lambda;" "λ"] ["&mu;" "μ"] ["&nu;" "ν"] ["&xi;" "ξ"] ["&omicron;" "ο"] ["&pi;" "π"] ["&rho;" "ρ"] ["&sigmaf;" "ς"] ["&sigma;" "σ"] ["&tau;" "τ"] ["&upsilon;" "υ"] ["&phi;" "φ"] ["&chi;" "χ"] ["&psi;" "ψ"] ["&omega;" "ω"] ["&thetasym;" "ϑ"] ["&upsih;" "ϒ"] ["&piv;" "ϖ"] ["&bull;" "•"] ["&hellip;" "…"] ["&prime;" "′"] ["&Prime;" "″"] ["&oline;" "‾"] ["&frasl;" "⁄"] ["&weierp;" "℘"] ["&image;" "ℑ"] ["&real;" "ℜ"] ["&trade;" "™"] ["&alefsym;" "ℵ"] ["&larr;" "←"] ["&uarr;" "↑"] ["&rarr;" "→"] ["&darr;" "↓"] ["&harr;" "↔"] ["&crarr;" "↵"] ["&lArr;" "⇐"] ["&uArr;" "⇑"] ["&rArr;" "⇒"] ["&dArr;" "⇓"] ["&hArr;" "⇔"] ["&forall;" "∀"] ["&part;" "∂"] ["&exist;" "∃"] ["&empty;" "∅"] ["&nabla;" "∇"] ["&isin;" "∈"] ["&notin;" "∉"] ["&ni;" "∋"] ["&prod;" "∏"] ["&sum;" "∑"] ["&minus;" "−"] ["&lowast;" "∗"] ["&radic;" "√"] ["&prop;" "∝"] ["&infin;" "∞"] ["&ang;" "∠"] ["&and;" "∧"] ["&or;" "∨"] ["&cap;" "∩"] ["&cup;" "∪"] ["&int;" "∫"] ["&there4;" "∴"] ["&sim;" "∼"] ["&cong;" "≅"] ["&asymp;" "≈"] ["&ne;" "≠"] ["&equiv;" "≡"] ["&le;" "≤"] ["&ge;" "≥"] ["&sub;" "⊂"] ["&sup;" "⊃"] ["&nsub;" "⊄"] ["&sube;" "⊆"] ["&supe;" "⊇"] ["&oplus;" "⊕"] ["&otimes;" "⊗"] ["&perp;" "⊥"] ["&sdot;" "⋅"] ["&lceil;" "⌈"] ["&rceil;" "⌉"] ["&lfloor;" "⌊"] ["&rfloor;" "⌋"] ["&lang;" "〈"] ["&rang;" "〉"] ["&loz;" "◊"] ["&spades;" "♠"] ["&clubs;" "♣"] ["&hearts;" "♥"] ["&diams;" "♦"] ["&quot;" "\""] ["&OElig;" "Œ"] ["&oelig;" "œ"] ["&Scaron;" "Š"] ["&scaron;" "š"] ["&Yuml;" "Ÿ"] ["&circ;" "ˆ"] ["&tilde;" "˜"] ["&ndash;" "–"] ["&mdash;" "—"] ["&lsquo;" "‘"] ["&rsquo;" "’"] ["&sbquo;" "‚"] ["&ldquo;" "“"] ["&rdquo;" "”"] ["&bdquo;" "„"] ["&dagger;" "†"] ["&Dagger;" "‡"] ["&permil;" "‰"] ["&lsaquo;" "‹"] ["&rsaquo;" "›"] ["&euro;" "€"]
-                                      ]
-                                     )))
-
-    (if ξwork-on-string-p
-        ξoutput-str
-      (save-excursion
-        (delete-region φfrom φto)
-        (goto-char φfrom)
-        (insert ξoutput-str)))))
+   (if (use-region-p)
+       (list (region-beginning) (region-end))
+     (list (line-beginning-position) (line-end-position))))
+  (let (
+        (ξreplaceMap
+         [
+          ["&nbsp;" " "] ["&ensp;" " "] ["&emsp;" " "] ["&thinsp;" " "]
+          ["&rlm;" "‏"] ["&lrm;" "‎"] ["&zwj;" "‍"] ["&zwnj;" "‌"]
+          ["&iexcl;" "¡"] ["&cent;" "¢"] ["&pound;" "£"] ["&curren;" "¤"] ["&yen;" "¥"] ["&brvbar;" "¦"] ["&sect;" "§"] ["&uml;" "¨"] ["&copy;" "©"] ["&ordf;" "ª"] ["&laquo;" "«"] ["&not;" "¬"] ["&shy;" "­"] ["&reg;" "®"] ["&macr;" "¯"] ["&deg;" "°"] ["&plusmn;" "±"] ["&sup2;" "²"] ["&sup3;" "³"] ["&acute;" "´"] ["&micro;" "µ"] ["&para;" "¶"] ["&middot;" "·"] ["&cedil;" "¸"] ["&sup1;" "¹"] ["&ordm;" "º"] ["&raquo;" "»"] ["&frac14;" "¼"] ["&frac12;" "½"] ["&frac34;" "¾"] ["&iquest;" "¿"]
+["&Agrave;" "À"] ["&Aacute;" "Á"] ["&Acirc;" "Â"] ["&Atilde;" "Ã"] ["&Auml;" "Ä"] ["&Aring;" "Å"] ["&AElig;" "Æ"] ["&Ccedil;" "Ç"] ["&Egrave;" "È"] ["&Eacute;" "É"] ["&Ecirc;" "Ê"] ["&Euml;" "Ë"] ["&Igrave;" "Ì"] ["&Iacute;" "Í"] ["&Icirc;" "Î"] ["&Iuml;" "Ï"] ["&ETH;" "Ð"] ["&Ntilde;" "Ñ"] ["&Ograve;" "Ò"] ["&Oacute;" "Ó"] ["&Ocirc;" "Ô"] ["&Otilde;" "Õ"] ["&Ouml;" "Ö"] ["&times;" "×"] ["&Oslash;" "Ø"] ["&Ugrave;" "Ù"] ["&Uacute;" "Ú"] ["&Ucirc;" "Û"] ["&Uuml;" "Ü"] ["&Yacute;" "Ý"] ["&THORN;" "Þ"] ["&szlig;" "ß"] ["&agrave;" "à"] ["&aacute;" "á"] ["&acirc;" "â"] ["&atilde;" "ã"] ["&auml;" "ä"] ["&aring;" "å"] ["&aelig;" "æ"] ["&ccedil;" "ç"] ["&egrave;" "è"] ["&eacute;" "é"] ["&ecirc;" "ê"] ["&euml;" "ë"] ["&igrave;" "ì"] ["&iacute;" "í"] ["&icirc;" "î"] ["&iuml;" "ï"] ["&eth;" "ð"] ["&ntilde;" "ñ"] ["&ograve;" "ò"] ["&oacute;" "ó"] ["&ocirc;" "ô"] ["&otilde;" "õ"] ["&ouml;" "ö"]
+["&divide;" "÷"] ["&oslash;" "ø"] ["&ugrave;" "ù"] ["&uacute;" "ú"] ["&ucirc;" "û"] ["&uuml;" "ü"] ["&yacute;" "ý"] ["&thorn;" "þ"] ["&yuml;" "ÿ"] ["&fnof;" "ƒ"]
+["&Alpha;" "Α"] ["&Beta;" "Β"] ["&Gamma;" "Γ"] ["&Delta;" "Δ"] ["&Epsilon;" "Ε"] ["&Zeta;" "Ζ"] ["&Eta;" "Η"] ["&Theta;" "Θ"] ["&Iota;" "Ι"] ["&Kappa;" "Κ"] ["&Lambda;" "Λ"] ["&Mu;" "Μ"] ["&Nu;" "Ν"] ["&Xi;" "Ξ"] ["&Omicron;" "Ο"] ["&Pi;" "Π"] ["&Rho;" "Ρ"] ["&Sigma;" "Σ"] ["&Tau;" "Τ"] ["&Upsilon;" "Υ"] ["&Phi;" "Φ"] ["&Chi;" "Χ"] ["&Psi;" "Ψ"] ["&Omega;" "Ω"] ["&alpha;" "α"] ["&beta;" "β"] ["&gamma;" "γ"] ["&delta;" "δ"] ["&epsilon;" "ε"] ["&zeta;" "ζ"] ["&eta;" "η"] ["&theta;" "θ"] ["&iota;" "ι"] ["&kappa;" "κ"] ["&lambda;" "λ"] ["&mu;" "μ"] ["&nu;" "ν"] ["&xi;" "ξ"] ["&omicron;" "ο"] ["&pi;" "π"] ["&rho;" "ρ"] ["&sigmaf;" "ς"] ["&sigma;" "σ"] ["&tau;" "τ"] ["&upsilon;" "υ"] ["&phi;" "φ"] ["&chi;" "χ"] ["&psi;" "ψ"] ["&omega;" "ω"] ["&thetasym;" "ϑ"] ["&upsih;" "ϒ"] ["&piv;" "ϖ"]
+ ["&bull;" "•"] ["&hellip;" "…"] ["&prime;" "′"] ["&Prime;" "″"] ["&oline;" "‾"] ["&frasl;" "⁄"] ["&weierp;" "℘"] ["&image;" "ℑ"] ["&real;" "ℜ"] ["&trade;" "™"] ["&alefsym;" "ℵ"] ["&larr;" "←"] ["&uarr;" "↑"] ["&rarr;" "→"] ["&darr;" "↓"] ["&harr;" "↔"] ["&crarr;" "↵"] ["&lArr;" "⇐"] ["&uArr;" "⇑"] ["&rArr;" "⇒"] ["&dArr;" "⇓"] ["&hArr;" "⇔"] ["&forall;" "∀"] ["&part;" "∂"] ["&exist;" "∃"] ["&empty;" "∅"] ["&nabla;" "∇"] ["&isin;" "∈"] ["&notin;" "∉"] ["&ni;" "∋"] ["&prod;" "∏"] ["&sum;" "∑"] ["&minus;" "−"] ["&lowast;" "∗"] ["&radic;" "√"] ["&prop;" "∝"] ["&infin;" "∞"] ["&ang;" "∠"] ["&and;" "∧"] ["&or;" "∨"] ["&cap;" "∩"] ["&cup;" "∪"] ["&int;" "∫"] ["&there4;" "∴"] ["&sim;" "∼"] ["&cong;" "≅"] ["&asymp;" "≈"] ["&ne;" "≠"] ["&equiv;" "≡"] ["&le;" "≤"] ["&ge;" "≥"] ["&sub;" "⊂"] ["&sup;" "⊃"] ["&nsub;" "⊄"] ["&sube;" "⊆"] ["&supe;" "⊇"] ["&oplus;" "⊕"] ["&otimes;" "⊗"] ["&perp;" "⊥"] ["&sdot;" "⋅"] ["&lceil;" "⌈"] ["&rceil;" "⌉"] ["&lfloor;" "⌊"] ["&rfloor;" "⌋"] ["&lang;" "〈"] ["&rang;" "〉"] ["&loz;" "◊"] ["&spades;" "♠"] ["&clubs;" "♣"] ["&hearts;" "♥"] ["&diams;" "♦"] ["&quot;" "\""] ["&OElig;" "Œ"] ["&oelig;" "œ"] ["&Scaron;" "Š"] ["&scaron;" "š"] ["&Yuml;" "Ÿ"] ["&circ;" "ˆ"] ["&tilde;" "˜"] ["&ndash;" "–"] ["&mdash;" "—"] ["&lsquo;" "‘"] ["&rsquo;" "’"] ["&sbquo;" "‚"] ["&ldquo;" "“"] ["&rdquo;" "”"] ["&bdquo;" "„"] ["&dagger;" "†"] ["&Dagger;" "‡"] ["&permil;" "‰"] ["&lsaquo;" "‹"] ["&rsaquo;" "›"] ["&euro;" "€"]
+          ]))
+    (save-restriction
+      (narrow-to-region φp1 φp2)
+      (let ( (case-fold-search nil))
+        (mapc
+         (lambda (ξx)
+           (goto-char (point-min))
+           (while (search-forward (elt ξx 0) nil t)
+             (replace-match (elt ξx 1) 'FIXEDCASE 'LITERAL)))
+         ξreplaceMap)))))
 
 (defun xhm-get-html-file-title (φfname &optional φno-error-p)
   "Return φfname <title> tag's text.
@@ -959,7 +968,7 @@ When done, the cursor is placed at φp2."
     (narrow-to-region φp1 φp2)
     (xah-replace-regexp-pairs-region (point-min) (point-max) '(["<span class=\"[^\"]+\">" ""]))
     (xah-replace-pairs-region (point-min) (point-max) '( ["</span>" ""] ))
-    (xhm-replace-html-&<>-to-entities (point-min) (point-max) "ΦENTITY-TO-CHAR-P")
+    (xhm-replace-html-chars-to-entities (point-min) (point-max) "ΦENTITY-TO-CHAR-P")
     (goto-char (point-max))))
 
 (defun xhm-code-tag-to-brackets (φp1 φp2 &optional φchange-entity-p)
@@ -999,7 +1008,7 @@ If φchange-entity-p is true, convert html entities to char.
        ["</code>" "」"]
        ["<var>" "‹"]
        ["</var>" "›"] ))
-    (when φchange-entity-p (xhm-replace-html-&<>-to-entities (point-min) (point-max) "ΦENTITY-TO-CHAR-P"))
+    (when φchange-entity-p (xhm-replace-html-chars-to-entities (point-min) (point-max) "ΦENTITY-TO-CHAR-P"))
     (goto-char (point-max))))
 
 (defun xhm-remove-html-tags (φstring &optional φfrom φto)
@@ -2145,7 +2154,8 @@ t
   (define-key xhm-single-keys-keymap (kbd "l g") 'xhm-wikipedia-url-linkify)
   (define-key xhm-single-keys-keymap (kbd "h") 'xhm-wrap-url)
   (define-key xhm-single-keys-keymap (kbd "r u") 'xhm-replace-html-chars-to-unicode)
-  (define-key xhm-single-keys-keymap (kbd "r e") 'xhm-replace-html-&<>-to-entities)
+  (define-key xhm-single-keys-keymap (kbd "r e") 'xhm-replace-html-chars-to-entities)
+  (define-key xhm-single-keys-keymap (kbd "r p") 'xhm-replace-html-named-entities)
   (define-key xhm-single-keys-keymap (kbd "r .") 'xhm-htmlize-elisp-keywords)
   (define-key xhm-single-keys-keymap (kbd "r j") 'xhm-emacs-to-windows-kbd-notation)
   (define-key xhm-single-keys-keymap (kbd "r m") 'xhm-make-html-table)
