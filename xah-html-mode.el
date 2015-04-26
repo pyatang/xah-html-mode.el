@@ -2132,7 +2132,6 @@ t
   (define-key xhm-keymap (kbd "TAB") 'xhm-wrap-html-tag)
 
   (define-prefix-command 'xhm-single-keys-keymap)
-  (define-key xhm-keymap (kbd "<menu> e") xhm-single-keys-keymap)
 
   (define-key xhm-single-keys-keymap (kbd "c") 'xhm-lines-to-html-list)
   (define-key xhm-single-keys-keymap (kbd "g") 'browse-url-of-buffer)
@@ -2164,9 +2163,7 @@ t
   (define-key xhm-single-keys-keymap (kbd "n") nil)
   (define-key xhm-single-keys-keymap (kbd "n u") 'xhm-extract-url)
   (define-key xhm-single-keys-keymap (kbd "x") 'xhm-rename-html-inline-image)
-  (define-key xhm-single-keys-keymap (kbd "y") 'xhm-make-citation)
-
-)
+  (define-key xhm-single-keys-keymap (kbd "y") 'xhm-make-citation))
 
 
 
@@ -2228,6 +2225,12 @@ HTML5 keywords are colored.
   (setq local-abbrev-table xhm-abbrev-table)
 
   (set-syntax-table xhm-syntax-table)
+
+  (if (or
+       (not (boundp 'xfk-major-mode-lead-key))
+       (null 'xfk-major-mode-lead-key))
+      (define-key xhm-keymap (kbd "<menu> e") xhm-single-keys-keymap)
+    (define-key xhm-keymap xfk-major-mode-lead-key xhm-single-keys-keymap))
   (use-local-map xhm-keymap)
 
   (set (make-local-variable 'comment-start) "<!-- ")
