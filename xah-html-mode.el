@@ -1627,7 +1627,7 @@ Some issues:
    (if (use-region-p)
        (list (region-beginning) (region-end))
      (list (line-beginning-position) (line-end-position))))
-  (let ((ξchangedItems '()))
+  (let ((ξchangedItems '()) ξmStr)
     (save-excursion
       (save-restriction
         (narrow-to-region φp1 φp2)
