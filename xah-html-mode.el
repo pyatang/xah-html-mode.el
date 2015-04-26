@@ -718,7 +718,8 @@ The string replaced are:
 
 If `universal-argument' is called, the replacement direction is reversed. That is &amp; ⇒ & etc.
 
-When called in lisp code, φp1 φp2 are region begin/end positions. If φentity-to-char-p is true, change entities to chars instead.
+When called in lisp code, φp1 φp2 are region begin/end positions.
+If φentity-to-char-p is true, change entities to chars instead.
 
 See also: `xhm-replace-html-named-entities', `xhm-replace-html-chars-to-unicode'
 
@@ -735,7 +736,8 @@ Version 2015-04-23"
 (defun xhm-replace-html-chars-to-unicode (φp1 φp2)
   "Replace HTML < > & to Unicode chars 〈 〉 ＆ on the current line or text selection.
 
-When called in lisp code, φp1 φp2 are region begin/end positions. If φentity-to-char-p is true, change entities to chars instead.
+When called in lisp code, φp1 φp2 are region begin/end positions.
+If φentity-to-char-p is true, change entities to chars instead.
 
 See also:
 `xhm-replace-html-named-entities'
@@ -765,7 +767,7 @@ The following HTML Entities are not replaced:
  &lt; <
  &gt; >
 
-When called in lisp code, φp1 φp2 are begin/end positions.
+When called in lisp code, φp1 φp2 are region begin/end positions.
 
 See also:
 `xhm-replace-html-chars-to-entities'
@@ -1164,7 +1166,8 @@ This command extracts all text of the forms
  <‹letter› … src=\"…\" …>
 that is on a a single line, by regex. The quote may be single quote.
 
-When called in lisp program, φp1 φp2. is region begin end positions. Returns a list.
+When called in lisp code, φp1 φp2 are region begin/end positions.
+Returns a list.
 
 URL `http://ergoemacs.org/emacs/elisp_extract_url_command.html'
 Version 2015-03-20"
@@ -1537,7 +1540,7 @@ For example:
 
 This command will do most emacs syntax correctly, but not 100% correct, especially on notations like <C-M-down>. But works if it's written as C-M-<down>
 
-When called non-interactively, φp1 φp2 are region begin end positions.
+When called in lisp code, φp1 φp2 are region begin/end positions.
 Version 2015-04-08."
   (interactive
    (if (use-region-p)
@@ -1598,25 +1601,19 @@ Version 2015-04-08."
         ]))))
 
 (defun xhm-htmlize-elisp-keywords (φp1 φp2)
-  "Replace curly quoted elisp function/variable names to HTML markup.
+  "Replace 「square-bracketed」 elisp names to HTML markup, in current line or text selection.
 
 Example:
- Call “sort-lines” to sort.
-    ⇓
- Call <code class=\"elisp-ƒ\">sort-lines</code> to sort.
+ 「sort-lines」
+    becomes
+  <code class=\"elisp-ƒ\">sort-lines</code>
 
- Set “fill-column”
-    ⇓
- Set <var class=\"elisp\">fill-column</var>
-
-Works on text selection or current text block.
-
-When called in lisp program, the arguments φp1 φp2 are region positions.
+When called in lisp code, φp1 φp2 are region begin/end positions.
 
 Note: a word is changed only if all of the following are true:
 
-• The symbol string is tightly enclosed in double curly quotes, e.g. “sort-lines” but not “use sort-lines”.
-• `fboundp' or `boundp' returns true (for function and variable.).
+• The symbol string is tightly enclosed in double curly quotes, e.g. 「sort-lines」 but not 「use sort-lines」.
+• `fboundp' or `boundp' returns true.
 • symbol string's char contains only alphanumeric or hyphen, even though elisp identifier allows many other chars. e.g. `yas/reload-all', `color-cie-ε'.
 
 This command also makes a report of changed items.
@@ -1626,45 +1623,96 @@ Some issues:
 • Some words are common in other lang, e.g. “while”, “print”, “string”, unix “find”, “grep”, HTML's “kbd” tag, etc. But they are also built-in elisp symbols. This command will tag them, but you may not want that.
 
 • Some function/variable are from 3rd party libs, and some are not bundled with GNU emacs , e.g. 「'cl」, 「'htmlize」. They may or may not be tagged depending whether they've been loaded."
-  ;; (interactive (let ((ξbds (get-selection-or-unit 'block))) (list (elt ξbds 1) (elt ξbds 2) ) ) )
   (interactive
-   (cond
-    ((equal current-prefix-arg nil) ; universal-argument not called
-     (let ((ξbds (get-selection-or-unit 'block))) (list (elt ξbds 1) (elt ξbds 2))))
-    (t ; all other cases
-     (list (point-min) (point-max)))))
-  (let*
-      (ξinput-str
-       resultStr
-       (changedItems nil)
-       (elispIdentifierRegex "\\([:-A-Za-z0-9]+\\)")
-       (wantedRegex (concat "「" elispIdentifierRegex "」")))
-    (setq ξinput-str (buffer-substring-no-properties φp1 φp2))
-    (setq resultStr
-          (let ( mStr (case-fold-search nil) (ξsomeStr ξinput-str))
-            (with-temp-buffer
-              (insert ξsomeStr)
-              (goto-char 1)
-              (while (search-forward-regexp wantedRegex (point-max) t)
-                (setq mStr (match-string 1))
-                (cond
-                 ((fboundp (intern mStr))
-                  (progn
-                    (setq changedItems (cons (format "ƒ %s" mStr) changedItems ))
-                    (replace-match (concat "<code class=\"elisp-ƒ\">" mStr "</code>") t t)))
-                 ((boundp (intern mStr))
-                  (progn
-                    (setq changedItems (cons (format "υ %s" mStr) changedItems ))
-                    (replace-match (concat "<var class=\"elisp\">" mStr "</var>") t t)))
-                 (t "do nothing")))
-              (buffer-string))))
-    (if (equal (length changedItems) 0)
-        (progn (message "%s" "No change needed."))
-      (progn
-        (delete-region φp1 φp2)
-        (insert resultStr)
-        (with-output-to-temp-buffer "*changed items*"
-          (mapcar (lambda (x) (princ x) (princ "\n")) (reverse changedItems)))))))
+   (if (use-region-p)
+       (list (region-beginning) (region-end))
+     (list (line-beginning-position) (line-end-position))))
+  (let ((ξchangedItems '()))
+    (save-excursion
+      (save-restriction
+        (narrow-to-region φp1 φp2)
+        (progn
+          (goto-char (point-min))
+          (while (search-forward-regexp
+                  "「\\([:-A-Za-z0-9]+\\)」"
+                  (point-max) t)
+            (setq ξmStr (match-string 1))
+            (cond
+             ((fboundp (intern ξmStr))
+              (progn
+                (push (format "ƒ %s" ξmStr) ξchangedItems)
+                (replace-match (concat "<code class=\"elisp-ƒ\">" ξmStr "</code>") t t)))
+             ((boundp (intern ξmStr))
+              (progn
+                (push (format "υ %s" ξmStr) ξchangedItems)
+                (replace-match (concat "<var class=\"elisp\">" ξmStr "</var>") t t)))
+             (t "do nothing"))))))
+    (mapcar
+     (lambda (ξx)
+       (princ ξx)
+       (terpri))
+     (reverse ξchangedItems))))
+
+(defun xhm-brackets-to-html (φp1 φp2)
+  "Replace bracketed text to HTML markup in current line or text selection.
+
+• 「…」 → <code>…</code>
+• 〈…〉 → <cite>…</cite>
+• 《…》 → <cite class=\"book\">…</cite>
+• 〔…〕 → <code class=\"path-α\">\\1</code>
+•  ‹…› → <var class=\"d\">…</var>
+• 〔<…〕 → 〔➤ <…〕
+
+When called in lisp code, φp1 φp2 are region begin/end positions.
+"
+  (interactive
+   (if (use-region-p)
+       (list (region-beginning) (region-end))
+     (list (line-beginning-position) (line-end-position))))
+  (let ((ξchangedItems '()))
+    (save-excursion
+      (save-restriction
+        (narrow-to-region φp1 φp2)
+
+        (goto-char (point-min))
+        (while (search-forward-regexp "「\\([^」]+?\\)」" nil t)
+          (xhm-htmlize-elisp-keywords (point-min) (point-max)))
+
+        (goto-char (point-min))
+        (while (search-forward-regexp "「\\([^」]+?\\)」" nil t)
+          (push (match-string-no-properties 1) ξchangedItems)
+          (replace-match "<code>\\1</code>" t))
+
+        (goto-char (point-min))
+        (while (search-forward-regexp "〈\\([^〉]+?\\)〉" nil t)
+          (push (match-string-no-properties 1) ξchangedItems)
+          (replace-match "<cite>\\1</cite>" t))
+
+        (goto-char (point-min))
+        (while (search-forward-regexp "《\\([^》]+?\\)》" nil t)
+          (push (match-string-no-properties 1) ξchangedItems)
+          (replace-match "<cite class=\"book\">\\1</cite>" t))
+
+        (goto-char (point-min))
+        (while (search-forward-regexp "‹\\([^›]+?\\)›" nil t)
+          (push (match-string-no-properties 1) ξchangedItems)
+          (replace-match "<var class=\"d\">\\1</var>" t))
+
+        (goto-char (point-min))
+        (while (search-forward-regexp "〔<a href=" nil t)
+          (push (match-string-no-properties 1) ξchangedItems)
+          (replace-match "〔➤ <a href=" t))
+
+        (goto-char (point-min))
+        (while (search-forward-regexp "〔\\([ -_/\\:~.A-Za-z0-9%]+?\\)〕" nil t)
+          (push (match-string-no-properties 1) ξchangedItems)
+          (replace-match "<code class=\"path-α\">\\1</code>" t))))
+
+    (mapcar
+     (lambda (ξx)
+       (princ ξx)
+       (terpri))
+     (reverse ξchangedItems))))
 
 (defun xhm-htmlize-keyboard-shortcut-notation (φp1 φp2)
   "Markup keyboard shortcut notation in HTML tag, on text selection or current line.
@@ -1672,7 +1720,7 @@ Example:
  C-w ⇒ <kbd>Ctrl</kbd>+<kbd>w</kbd>
  ctrl+w ⇒ <kbd>Ctrl</kbd>+<kbd>w</kbd>
 
-When called non-interactively, φp1 φp2 are region begin end positions.
+When called in lisp code, φp1 φp2 are region begin/end positions.
 
 Version 2015-04-08"
   (interactive
@@ -1950,7 +1998,8 @@ For example
 becomes
  <ruby class=\"ruby88\">衷 <rt>Zhōng</rt></ruby>
 
-When called by elisp code, φp1 φp2 are region begin/end positions."
+When called in lisp code, φp1 φp2 are region begin/end positions.
+"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -2156,6 +2205,7 @@ t
   (define-key xhm-single-keys-keymap (kbd "r e") 'xhm-replace-html-chars-to-entities)
   (define-key xhm-single-keys-keymap (kbd "r p") 'xhm-replace-html-named-entities)
   (define-key xhm-single-keys-keymap (kbd "r .") 'xhm-htmlize-elisp-keywords)
+  (define-key xhm-single-keys-keymap (kbd "r t") 'xhm-brackets-to-html)
   (define-key xhm-single-keys-keymap (kbd "r j") 'xhm-emacs-to-windows-kbd-notation)
   (define-key xhm-single-keys-keymap (kbd "r m") 'xhm-make-html-table)
   (define-key xhm-single-keys-keymap (kbd "r v") 'xhm-make-html-table-undo)
