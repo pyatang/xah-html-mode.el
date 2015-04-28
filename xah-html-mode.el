@@ -13,16 +13,16 @@
 ;; home page: http://ergoemacs.org/emacs/xah-html-mode.html
 ;; beta stage. Mostly just used by me. There are about 20 functions that act on HTML. They have inline doc.
 
-(require 'xfrp_find_replace_pairs)
+(require 'xah-replace-pairs)
 (require 'xeu_elisp_util)
 (require 'htmlize)
-(require 'url-util)
-(require 'browse-url)
 
 (progn
   ;; part of emacs
   (require 'ido)
   (require 'sgml-mode)
+  (require 'browse-url)
+  (require 'url-util)
   (require 'hi-lock) ; uses its face definitions
   )
 
