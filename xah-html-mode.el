@@ -31,7 +31,7 @@
 
 
 (defcustom xah-html-html5-tag-names nil
-  "A alist of HTML5 tag names. For each element, the keys is tag names, value is a vector of one element, w means word, l means line, b means block, others are placeholder for unknown. The purpose of the value is to indicate the default way to wrap the tag around cursor. "
+  "A alist of HTML5 tag names. For each element, the key is tag name, value is a vector of one element of string: “w” means word, “l” means line, “b” means block, others are placeholder for unknown. The purpose of the value is to indicate the default way to wrap the tag around cursor. "
 ; todo: need to go the the list and look at the type carefully. Right now it's just quickly done. lots are “z”, for unkown. Also, some are self closing tags, current has mark of “n”.
 :group 'xah-html-mode
 )
@@ -143,7 +143,7 @@
 ("section" . ["b"])
 ("select" . ["z"])
 ("source" . ["z"])
-("style" . ["z"])
+("style" . ["l"])
 ("summary" . ["z"])
 ("table" . ["b"])
 ("tbody" . ["z"])
@@ -1309,7 +1309,7 @@ The order of lines for {title, author, date/time, url} needs not be in that orde
     (setq ξauthor (upcase-initials (downcase ξauthor)))
 
     (setq ξdate (trim-string ξdate))
-    (setq ξdate (fix-datetimestamp ξdate))
+    (setq ξdate (xah-fix-datetime-stamp ξdate))
 
     (setq ξurl (trim-string ξurl))
     (setq ξurl (with-temp-buffer (insert ξurl) (xah-html-source-url-linkify 1) (buffer-string)))
