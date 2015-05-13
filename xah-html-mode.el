@@ -1192,7 +1192,6 @@ WARNING: this command does not cover all HTML tags or convert all HTML entities.
                                       ["<a +href=\"\\([^\"]+?\\)\" *>\\([^<]+?\\)</a>" "\\2 〔 \\1 〕"]
                                       ["<img +src=\"\\([^\"]+?\\)\" +alt=\"\\([^\"]+?\\)\" +width=\"[0-9]+\" +height=\"[0-9]+\" */?>" "〔IMAGE “\\2” \\1 〕"]
                                       )))
-            ;; (xahsite-filepath-to-url (xahsite-href-value-to-filepath ξx (buffer-file-name) ))
             (buffer-substring 1 (point-max))))
 
     (setq ξoutput-str (xah-html-remove-html-tags ξoutput-str))
@@ -1258,7 +1257,6 @@ Version 2015-03-20"
                (if (string-match "^http" ξx )
                    (progn ξx)
                  (progn
-                   ;; (xahsite-filepath-to-url (xahsite-href-value-to-filepath ξx (buffer-file-name)))
                    (expand-file-name ξx (file-name-directory (buffer-file-name))))))
              ξurlList)))
 
@@ -1988,33 +1986,6 @@ If `universal-argument' is called first, then also prompt for a “class” attr
     (setq ξp2 (elt ξbds 2))
     (xah-html-add-open/close-tag "pre" φlang-code ξp1 ξp2)))
 
-(defun xah-html-rename-html-inline-image (φnew-file-path)
-  "Replace current HTML inline image's file name.
-
-When cursor is in HTML link file path, e.g.  <img src=\"gki/macosxlogo.png\" > and this command is called, it'll prompt user for a new name. The link path will be changed to the new name, the corresponding file will also be renamed. The operation is aborted if a name exists."
-  (interactive
-   (let (
-         (defaultInput (expand-file-name
-                        (elt (get-selection-or-unit 'filepath) 0)
-                        (file-name-directory (or (buffer-file-name) default-directory )))))
-     (list (read-string "New name: " defaultInput nil defaultInput ))))
-  (let* (
-         (ξbds (get-selection-or-unit 'filepath))
-         (ξinputPath (elt ξbds 0))
-         (ξp1 (aref ξbds 1))
-         (ξp2 (aref ξbds 2))
-         (ξffp (local-url-to-file-path (expand-file-name ξinputPath (file-name-directory (or (buffer-file-name) default-directory ))))) ;full path
-         ;; (setq ξffp (windows-style-path-to-unix (local-url-to-file-path ξffp)))
-         )
-
-    (if (file-exists-p φnew-file-path)
-        (progn (error "file 「%s」 exist." φnew-file-path ))
-      (progn
-        (rename-file ξffp φnew-file-path )
-        (message "rename to %s" φnew-file-path)
-        (delete-region ξp1 ξp2)
-        (insert (xahsite-filepath-to-href-value φnew-file-path (or (buffer-file-name) default-directory)))))))
-
 (defun xah-html-mark-unicode (φp1)
   "Wrap a special <mark> tag around the character before cursor.
 like this:
@@ -2260,7 +2231,6 @@ t
   (define-key xah-html-single-keys-keymap (kbd "t") 'xah-html-wrap-p-tag)
   (define-key xah-html-single-keys-keymap (kbd "n") nil)
   (define-key xah-html-single-keys-keymap (kbd "n u") 'xah-html-extract-url)
-  (define-key xah-html-single-keys-keymap (kbd "x") 'xah-html-rename-html-inline-image)
   (define-key xah-html-single-keys-keymap (kbd "y") 'xah-html-make-citation))
 
 
