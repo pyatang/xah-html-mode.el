@@ -1869,9 +1869,8 @@ Some issues:
 When called in lisp code, φp1 φp2 are region begin/end positions.
 "
   (interactive
-   (if (use-region-p)
-       (list (region-beginning) (region-end))
-     (list (line-beginning-position) (line-end-position))))
+   (let ((bds (xah-html--get-thing-or-selection 'block)))
+     (list (elt bds 1) (elt bds 2))))
   (let ((ξchangedItems '()))
     (save-excursion
       (save-restriction
