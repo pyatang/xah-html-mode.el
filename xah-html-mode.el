@@ -197,7 +197,7 @@ Example usage:
 )
 (setq xah-html-html5-tag-names
 '(
-  ;; most frequently used should be on top. todo: reorder based on user. do a cache or such, look at ido-switch-buffer
+  ;; most frequently used should be on top. todo: reorder based on use. do a cache or such, look at ido-switch-buffer
 
 ("div" . ["b"])
 ("span" . ["w"])
@@ -213,7 +213,7 @@ Example usage:
 ("var" . ["w"])
 ("sub" . ["z"])
 ("sup" . ["z"])
-("small" . ["z"])
+("small" . ["w"])
 ("time" . ["w"])
 ("kbd" . ["w"])
 ("li" . ["l"])
@@ -314,9 +314,9 @@ Example usage:
 ("thead" . ["z"])
 ("title" . ["l"])
 ("tr" . ["b"])
-("u" . ["z"])
+("u" . ["w"])
 ("ul" . ["b"])
-("video" . ["z"])
+("video" . ["l"])
 ("wbr" . ["z"])
 
 )
@@ -493,7 +493,7 @@ If there's a text selection, use that region as content."
 The purpose is to syntax color source code in HTML.
 This function requires the `htmlize-buffer' from 〔htmlize.el〕 by Hrvoje Niksic."
   (interactive)
-  (let (htmlizeOutputBuffer resultStr)
+  (let (htmlizeOutputBuffer ξresultStr)
     ;; put code in a temp buffer, set the mode, fontify
     (with-temp-buffer
       (insert φsource-code-str)
@@ -505,9 +505,9 @@ This function requires the `htmlize-buffer' from 〔htmlize.el〕 by Hrvoje Niks
       (let (ξp1 ξp2 )
         (setq ξp1 (search-forward "<pre>"))
         (setq ξp2 (search-forward "</pre>"))
-        (setq resultStr (buffer-substring-no-properties (+ ξp1 1) (- ξp2 6)))))
+        (setq ξresultStr (buffer-substring-no-properties (+ ξp1 1) (- ξp2 6)))))
     (kill-buffer htmlizeOutputBuffer)
-    resultStr ))
+    ξresultStr ))
 
 (defun xah-html-langcode-to-major-mode-name (φlang-code φlang-code-map)
   "get the `major-mode' name associated with φlang-code."
@@ -1038,11 +1038,11 @@ It will become:
 <li>human vocal range: <a href=\"http://en.wikipedia.org/wiki/Vocal_range\">Vocal range</a></li>
 </ul>"
   (interactive)
-  (let (ξbds ξp1 ξp2 ξinput-str resultStr)
+  (let (ξbds ξp1 ξp2 ξinput-str ξresultStr)
     (setq ξbds (xah-html--get-thing-or-selection 'block))
     (setq ξinput-str (elt ξbds 0) ξp1 (elt ξbds 1) ξp2 (elt ξbds 2))
     (save-excursion
-      (setq resultStr
+      (setq ξresultStr
             (with-temp-buffer
               (insert ξinput-str)
               (delete-trailing-whitespace)
@@ -1069,7 +1069,7 @@ It will become:
 
               (buffer-string))))
     (delete-region ξp1 ξp2)
-    (insert resultStr)))
+    (insert ξresultStr)))
 
 (defun xah-html-make-html-table-string (φtextBlock φdelimiter)
   "Transform the string TEXTBLOCK into a HTML marked up table.
@@ -1825,7 +1825,7 @@ Some issues:
 
 • Some words are common in other lang, e.g. “while”, “print”, “string”, unix “find”, “grep”, HTML's “kbd” tag, etc. But they are also built-in elisp symbols. This command will tag them, but you may not want that.
 
-• Some function/variable are from 3rd party libs, and some are not bundled with GNU emacs , e.g. 「'cl」, 「'htmlize」. They may or may not be tagged depending whether they've been loaded."
+• Some function/variable are from 3rd party libs, and some are not bundled with GNU emacs , e.g. 「'htmlize」. They may or may not be tagged depending whether they've been loaded."
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -1876,9 +1876,9 @@ When called in lisp code, φp1 φp2 are region begin/end positions.
       (save-restriction
         (narrow-to-region φp1 φp2)
 
-        (goto-char (point-min))
-        (while (search-forward-regexp "「\\([^」]+?\\)」" nil t)
-          (xah-html-htmlize-elisp-keywords (point-min) (point-max)))
+        ;; (goto-char (point-min))
+        ;; (while (search-forward-regexp "「\\([^」]+?\\)」" nil t)
+        ;;   (xah-html-htmlize-elisp-keywords (point-min) (point-max)))
 
         (goto-char (point-min))
         (while (search-forward-regexp "「\\([^」]+?\\)」" nil t)
@@ -2174,7 +2174,7 @@ becomes
  <ruby class=\"ruby88\">衷 <rt>Zhōng</rt></ruby>
 
 When called in lisp code, φp1 φp2 are region begin/end positions.
-"
+Version 2015-06-21"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -2267,17 +2267,6 @@ t
 
 (define-abbrev-table 'xah-html-abbrev-table
   '(
-
-    ("tla" "<div class=\"¤tla\"><a href=\"url\">text</a></div>")
-    ("8menu" "〖a ▸ b ▸ c〗")
-    ("8key" "【Alt+f】")
-    ("8song" "singer ♪《title》")
-    ("8faq" "<div class=\"question-box32371\">
-<p class=\"q\">How to do this?</p>
-<p>this way</p>
-</div>
-
-")
 
     ("cdata" "<![CDATA[▮]]>" nil :system t)
     ("--" "<hr />")
@@ -2436,8 +2425,8 @@ t
           (,cssUnitNames . font-lock-reference-face))))
 
 
-;; define the mode
 
+;;;autoload
 (define-derived-mode xah-html-mode prog-mode
   "∑html"
   "A simple major mode for HTML5.
