@@ -1,17 +1,22 @@
-;;; xah-html-mode.el --- Major mode for editing pure html5. -*- coding: utf-8 -*-
+;;; xah-html-mode.el --- Major mode for editing pure html5.
 
-;; Copyright © 2012 by Xah Lee
+;; Copyright © 2013-2015, by Xah Lee
 
-;; Author: Xah Lee <xah@xahlee.org> ( http://xahlee.org/ )
-;; Created: 2012-05-12
-;; Keywords: languages, convenience
+;; Author: Xah Lee ( http://xahlee.org/ )
+;; Version: 2.0.0
+;; Created: 12 May 2012
+;; Keywords: languages, html, web
+;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
 
-;; You can redistribute this program and/or modify it. Please give credit and link. Thanks.
+;; This file is not part of GNU Emacs.
+
+;;; License:
+
+;; You can redistribute this program and/or modify it under the terms of the GNU General Public License version 2.
 
 ;;; Commentary:
 ;; Major mode for editing pure HTML5 files.
 ;; home page: http://ergoemacs.org/emacs/xah-html-mode.html
-;; beta stage. Mostly just used by me. There are about 20 functions that act on HTML. They have inline doc.
 
 (require 'xah-replace-pairs)
 (require 'htmlize)
@@ -408,6 +413,7 @@ Example usage:
         ("qi" . ["shen-mode" "qi"])
         ("ruby" . ["ruby-mode" "rb"])
         ("scala" . ["scala-mode" "scala"])
+        ("apl" . ["gnu-apl-mode" "apl"])
         ("scheme" . ["scheme-mode" "scm"])
         ("prolog" . ["prolog-mode" "prolog"])
         ("yasnippet" . ["snippet-mode" "yasnippet"])
@@ -2454,3 +2460,9 @@ HTML5 keywords are colored.
   )
 
 (provide 'xah-html-mode)
+
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
+;;; xah-html-mode.el ends here
