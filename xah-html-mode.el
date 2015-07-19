@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 2.0.1
+;; Version: 2.0.2
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -2171,23 +2171,33 @@ When called in elisp program, wrap the tag around charbefore position φp1."
      ((string-equal ξchar "<") (search-backward "<" ) (delete-char -1) (insert "&lt;"))
      ((string-equal ξchar ">") (search-backward "<" ) (delete-char -1) (insert "&gt;")))))
 
-(defun xah-html-markup-ruby (φp1 φp2)
-  "Wrap ruby tag, e.g. <ruby class=\"ruby88\">衷 <rt>Zhōng</rt></ruby> on current line or selection.
-On the line, chars inside paren are wrapped with “rt” tag.
+(defun xah-html-markup-ruby (&optional φbegin φend)
+  "Wrap HTML ruby tag on current line or selection.
+Chars inside paren are wrapped with “rt” tag.
 For example
  衷 (Zhōng)
 becomes
  <ruby class=\"ruby88\">衷 <rt>Zhōng</rt></ruby>
 
-When called in lisp code, φp1 φp2 are region begin/end positions.
-Version 2015-06-21"
-  (interactive
-   (if (use-region-p)
-       (list (region-beginning) (region-end))
-     (list (line-beginning-position) (line-end-position))))
-  (let ()
+When called in lisp code, φbegin φend are region begin/end positions.
+Version 2015-07-19"
+  (interactive)
+  (progn
+    (if (null φbegin)
+        (progn
+          (if (use-region-p)
+              (progn
+                (setq φbegin (region-beginning))
+                (setq φend (region-end)))
+            (progn
+              (setq φbegin (line-beginning-position))
+              (setq φend (line-end-position)))))
+      (progn
+        (setq φbegin (line-beginning-position))
+        (setq φend (line-end-position))))
+
     (save-restriction
-      (narrow-to-region φp1 φp2)
+      (narrow-to-region φbegin φend)
       (progn
         (goto-char (point-min))
         (while (search-forward "(" nil 'NOERROR)
