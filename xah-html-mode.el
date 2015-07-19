@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 2.0.0
+;; Version: 2.0.1
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -2275,7 +2275,8 @@ t
   '(
 
     ("cdata" "<![CDATA[▮]]>" nil :system t)
-    ("--" "<hr />")
+    ("hr" "<hr />")
+    ("br" "<br />")
     ("cl" "class=\"\"" nil :system t)
 
     ("8w" "width" nil :system t)
