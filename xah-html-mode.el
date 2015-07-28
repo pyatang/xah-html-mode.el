@@ -2297,43 +2297,43 @@ t
     ("br" "<br />")
     ("cl" "class=\"\"" nil :system t)
 
-    ("8w" "width" nil :system t)
-    ("8h" "height" nil :system t)
+    ("w" "width" nil :system t)
+    ("h" "height" nil :system t)
     ("bgc" "background-color" nil :system t)
 
-    ("3css" "<link rel=\"stylesheet\" href=\"lbasic.css\" />")
-    ("3style" "<style type=\"text/css\">\np {line-height:130%}\n</style>")
+    ("css" "<link rel=\"stylesheet\" href=\"lbasic.css\" />")
+    ("style" "<style type=\"text/css\">\np {line-height:130%}\n</style>")
     ("refresh" "<meta http-equiv=\"refresh\" content=\"0; url=http://example.com/\">")
 
-    ("8iframe" "<iframe src=\"some.html\" width=\"200\" height=\"300\"></iframe>")
+    ("iframe" "<iframe src=\"some.html\" width=\"200\" height=\"300\"></iframe>")
 
     ;; todo
 ;; http://xahlee.info/js/css_colors.html
 ;; http://xahlee.info/js/css_color_names.html
-    ("8white" "#ffffff" nil :system t)
-    ("8silver" "#c0c0c0" nil :system t)
-    ("8gray" "#808080" nil :system t)
-    ("8black" "#000000" nil :system t)
-    ("8red" "#ff0000" nil :system t)
-    ("8maroon" "#800000" nil :system t)
-    ("8yellow" "#ffff00" nil :system t)
-    ("8olive" "#808000" nil :system t)
-    ("8lime" "#00ff00" nil :system t)
-    ("8green" "#008000" nil :system t)
-    ("8aqua" "#00ffff" nil :system t)
-    ("8teal" "#008080" nil :system t)
-    ("8blue" "#0000ff" nil :system t)
-    ("8navy" "#000080" nil :system t)
-    ("8fuchsia" "#ff00ff" nil :system t)
-    ("8purple" "#800080" nil :system t)
-    ("8orange" "#ffa500" nil :system t)
-    ("8hsl" "hsl(0,100%,50%)" nil :system t)
+    ("white" "#ffffff" nil :system t)
+    ("silver" "#c0c0c0" nil :system t)
+    ("gray" "#808080" nil :system t)
+    ("black" "#000000" nil :system t)
+    ("red" "#ff0000" nil :system t)
+    ("maroon" "#800000" nil :system t)
+    ("yellow" "#ffff00" nil :system t)
+    ("olive" "#808000" nil :system t)
+    ("lime" "#00ff00" nil :system t)
+    ("green" "#008000" nil :system t)
+    ("aqua" "#00ffff" nil :system t)
+    ("teal" "#008080" nil :system t)
+    ("blue" "#0000ff" nil :system t)
+    ("navy" "#000080" nil :system t)
+    ("fuchsia" "#ff00ff" nil :system t)
+    ("purple" "#800080" nil :system t)
+    ("orange" "#ffa500" nil :system t)
+    ("hsl" "hsl(0,100%,50%)" nil :system t)
 
-    ("8html5" "<!DOCTYPE html>" nil :system t)
-    ("8html4s" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">" nil :system t)
-    ("8html4t" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">" nil :system t)
-    ("8xhtml" "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">" nil :system t)
-    ("8html" "<!doctype html><html><head><meta charset=\"utf-8\" />
+    ("html5" "<!DOCTYPE html>" nil :system t)
+    ("html4s" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">" nil :system t)
+    ("html4t" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">" nil :system t)
+    ("xhtml" "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">" nil :system t)
+    ("html" "<!doctype html><html><head><meta charset=\"utf-8\" />
 <title>ttt</title>
 </head>
 <body>
