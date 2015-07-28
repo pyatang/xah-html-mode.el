@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 2.0.2
+;; Version: 2.0.3
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -1145,8 +1145,13 @@ with “*” as separator, becomes
 
 (defun xah-html-word-to-wikipedia-linkify ()
   "Make the current word or text selection into a Wikipedia link.
-For Example: 「Emacs」 ⇒ 「<a href=\"http://en.wikipedia.org/wiki/Emacs\">Emacs</a>」
-Version 2015-05-16"
+For Example:
+ Emacs
+becomes
+ <a href=\"http://en.wikipedia.org/wiki/Emacs\">Emacs</a>
+
+URL `http://ergoemacs.org/emacs/elisp_html_word_to_wikipedia_linkify.html'
+Version 2015-07-27"
   (interactive)
   (let (ξp0 ξp1 ξp2 ξlinkText)
     (if (region-active-p)
@@ -1160,7 +1165,8 @@ Version 2015-05-16"
         (goto-char ξp0)
         (skip-chars-forward "^ \t\n")
         (setq ξp2 (point))))
-    (setq ξlinkText (buffer-substring-no-properties ξp1 ξp2))
+    (setq ξlinkText
+          (replace-regexp-in-string "_" " " (buffer-substring-no-properties ξp1 ξp2)))
     (delete-region ξp1 ξp2)
     (insert (concat "<a href=\"http://en.wikipedia.org/wiki/"
                     (replace-regexp-in-string " " "_" ξlinkText)
@@ -2172,15 +2178,17 @@ When called in elisp program, wrap the tag around charbefore position φp1."
      ((string-equal ξchar ">") (search-backward "<" ) (delete-char -1) (insert "&gt;")))))
 
 (defun xah-html-markup-ruby (&optional φbegin φend)
-  "Wrap HTML ruby tag on current line or selection.
+  "Wrap HTML ruby annotation tag on current line or selection.
 Chars inside paren are wrapped with “rt” tag.
 For example
- 衷 (Zhōng)
+ abc (xyz)
 becomes
- <ruby class=\"ruby88\">衷 <rt>Zhōng</rt></ruby>
+ <ruby class=\"ruby88\">abc <rt>xyz</rt></ruby>
 
 When called in lisp code, φbegin φend are region begin/end positions.
-Version 2015-07-19"
+
+URL `http://ergoemacs.org/emacs/elisp_html-ruby-annotation-markup.html'
+Version 2015-07-27"
   (interactive)
   (progn
     (if (null φbegin)
