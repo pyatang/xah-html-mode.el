@@ -692,7 +692,7 @@ This command does the inverse of `xah-html-htmlize-precode'."
 
 
 
-(defun xah-html-tag-self-closing? (φtag-name)
+(defun xah-html-tag-self-closing-p (φtag-name)
   "Return true if the tag is a self-closing tag, ⁖ br."
   (interactive)
   (member φtag-name  xah-html-html5-self-close-tags))
@@ -2095,25 +2095,25 @@ Version 2015-04-08"
 (defvar xah-html-class-input-history nil "for input history of `xah-html-wrap-html-tag'")
 (setq xah-html-class-input-history (list))
 
-(defun xah-html-add-open/close-tag (φtag-name φclass-name φp1 φp2)
+(defun xah-html-add-open-close-tags (φtag-name φclass-name φp1 φp2)
   "Add HTML open/close tags around region boundary φp1 φp2.
 This function does not `save-excursion'."
   (let* (
-         (classStr (if (or (equal φclass-name nil) (string= φclass-name "")) "" (format " class=\"%s\"" φclass-name)))
-         (insStrLeft (format "<%s%s>" φtag-name classStr))
-         (insStrRight (format "</%s>" φtag-name )))
+         (ξclass-str (if (or (null φclass-name) (string= φclass-name "")) "" (format " class=\"%s\"" φclass-name)))
+         (ξstr-left (format "<%s%s>" φtag-name ξclass-str))
+         (ξstr-right (format "</%s>" φtag-name )))
 
     (goto-char φp1)
 
-    (if (xah-html-tag-self-closing? φtag-name)
-        (progn (insert (format "<%s%s />" φtag-name classStr)))
+    (if (xah-html-tag-self-closing-p φtag-name)
+        (progn (insert (format "<%s%s />" φtag-name ξclass-str)))
       (progn
-        (insert insStrLeft )
-        (goto-char (+ φp2 (length insStrLeft)))
-        (insert insStrRight )))))
+        (insert ξstr-left )
+        (goto-char (+ φp2 (length ξstr-left)))
+        (insert ξstr-right )))))
 
 (defun xah-html-wrap-html-tag (φtag-name &optional φclass-name)
-  "Insert/wrap HTML tag to current text unit or text selection.
+  "Insert HTML open/close tags to current text unit or text selection.
 When there's no text selection, the tag will be wrapped around current {word, line, text-block}, depending on the tag used.
 
 If current line or word is empty, then insert open/end tags and place cursor between them.
@@ -2137,10 +2137,10 @@ If `universal-argument' is called first, then also prompt for a “class” attr
              (t (xah-html--get-thing-or-selection 'word))))
       (setq ξp1 (elt ξbds 1))
       (setq ξp2 (elt ξbds 2))
-      (xah-html-add-open/close-tag φtag-name φclass-name ξp1 ξp2)
+      (xah-html-add-open-close-tags φtag-name φclass-name ξp1 ξp2)
 
       (when ; put cursor between when input text is empty
-          (and (equal ξp1 ξp2) (not (xah-html-tag-self-closing? φtag-name)))
+          (and (equal ξp1 ξp2) (not (xah-html-tag-self-closing-p φtag-name)))
         (progn (search-backward "</" ))))))
 
 (defun xah-html-insert-wrap-source-code (&optional φlang-code)
@@ -2152,7 +2152,7 @@ If `universal-argument' is called first, then also prompt for a “class” attr
     (setq ξbds (xah-html--get-thing-or-selection 'block))
     (setq ξp1 (elt ξbds 1))
     (setq ξp2 (elt ξbds 2))
-    (xah-html-add-open/close-tag "pre" φlang-code ξp1 ξp2)))
+    (xah-html-add-open-close-tags "pre" φlang-code ξp1 ξp2)))
 
 (defun xah-html-mark-unicode (φp1)
   "Wrap a special <mark> tag around the character before cursor.
