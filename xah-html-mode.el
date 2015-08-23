@@ -463,34 +463,58 @@ Returns a vector [langCode pos1 pos2], where pos1 pos2 are the boundary of the t
 For example, if the cursor is somewhere between the tags:
 <pre class=\"ruby\">print 7</pre>
 
-after calling, a new file of name 「xxtemp‹n›.rb」 is created in current dir, with content “print 7”. ‹n› is a integer.
+after calling, a new file of name
+xxtemp.201508234945.8292.rb
+  is created in current dir, with content “print 7”.
+The numbers in the file name are datestamp and a random integer.
+If file already exist, emacs will ask to overwrite.
 
-If there's a text selection, use that region as content."
+If there's a text selection, use that region as content.
+Version 2015-08-23"
   (interactive (list xah-html-lang-name-map))
   (let* (
-         (ξxx (xah-html-get-precode-langCode))
-         (ξlangCode (elt ξxx 0))
-         (ξp1 (elt ξxx 1))
-         (ξp2 (elt ξxx 2))
+         (ξlangcodeinfo (xah-html-get-precode-langCode))
+         (ξlangCode (elt ξlangcodeinfo 0))
+         (ξp1 (elt ξlangcodeinfo 1))
+         (ξp2 (elt ξlangcodeinfo 2))
          (ξtextContent (buffer-substring-no-properties ξp1 ξp2))
-         (ξyy (cdr (assoc ξlangCode φlang-name-map)))
-         (ξfileSuffix (elt ξyy 1))
-         (ξn 1)
-         ;; (format-time-string "%Y%m%d%M%S")
-         (ξfname (format "xxtemp%d.%s" ξn ξfileSuffix)))
-
-    (while
-        (file-exists-p ξfname)
-      (setq ξn (1+ ξn))
-      (setq ξfname (format "xxtemp%d.%s" ξn ξfileSuffix)))
+         (ξfileSuffix (elt (cdr (assoc ξlangCode φlang-name-map)) 1))
+         (ξmajorMode (elt (cdr (assoc ξlangCode φlang-name-map)) 0))
+         ξfname
+         (ξbuf (generate-new-buffer "untitled")))
 
     (progn
+      (split-window-below)
       (delete-region ξp1 ξp2 )
-      (split-window-vertically)
-      (find-file ξfname)
+      (switch-to-buffer ξbuf)
+      (funcall (intern ξmajorMode))
+      (setq buffer-offer-save t)
       (insert ξtextContent)
       (when (xah-html-precode-htmlized-p (point-min) (point-max))
-        (xah-html-remove-span-tag-region (point-min) (point-max))))))
+        (xah-html-remove-span-tag-region (point-min) (point-max))))
+
+    (if (equal ξfileSuffix "java")
+        (progn
+          (goto-char (point-min))
+          (if (search-forward-regexp "public class \\([A-Za-z0-9]+\\) [\n ]*{" nil 'NOERROR)
+              (progn
+                (setq ξfname
+                      (format "%s.java" (match-string 1))))
+            (progn (setq ξfname
+                         (format "%s.%s.%d.%s"
+                                 "xxtemp"
+                                 (format-time-string "%Y%m%d%M%S")
+                                 (random 99999)
+                                 ξfileSuffix)))))
+      (progn
+        (setq ξfname
+              (format "%s.%s.%d.%s"
+                      "xxtemp"
+                      (format-time-string "%Y%m%d%M%S")
+                      (random 99999)
+                      ξfileSuffix))))
+    (write-file ξfname "CONFIRM")
+    (goto-char (point-min))))
 
 
 
@@ -2301,39 +2325,39 @@ t
     ("h" "height" nil :system t)
     ("bgc" "background-color" nil :system t)
 
-    ("css" "<link rel=\"stylesheet\" href=\"lbasic.css\" />")
-    ("style" "<style type=\"text/css\">\np {line-height:130%}\n</style>")
-    ("refresh" "<meta http-equiv=\"refresh\" content=\"0; url=http://example.com/\">")
+    ("1css" "<link rel=\"stylesheet\" href=\"lbasic.css\" />")
+    ("1style" "<style type=\"text/css\">\np {line-height:130%}\n</style>")
+    ("1refresh" "<meta http-equiv=\"refresh\" content=\"0; url=http://example.com/\">")
 
     ("iframe" "<iframe src=\"some.html\" width=\"200\" height=\"300\"></iframe>")
 
     ;; todo
 ;; http://xahlee.info/js/css_colors.html
 ;; http://xahlee.info/js/css_color_names.html
-    ("white" "#ffffff" nil :system t)
-    ("silver" "#c0c0c0" nil :system t)
-    ("gray" "#808080" nil :system t)
-    ("black" "#000000" nil :system t)
-    ("red" "#ff0000" nil :system t)
-    ("maroon" "#800000" nil :system t)
-    ("yellow" "#ffff00" nil :system t)
-    ("olive" "#808000" nil :system t)
-    ("lime" "#00ff00" nil :system t)
-    ("green" "#008000" nil :system t)
-    ("aqua" "#00ffff" nil :system t)
-    ("teal" "#008080" nil :system t)
-    ("blue" "#0000ff" nil :system t)
-    ("navy" "#000080" nil :system t)
-    ("fuchsia" "#ff00ff" nil :system t)
-    ("purple" "#800080" nil :system t)
-    ("orange" "#ffa500" nil :system t)
+    ("1white" "#ffffff" nil :system t)
+    ("1silver" "#c0c0c0" nil :system t)
+    ("1gray" "#808080" nil :system t)
+    ("1black" "#000000" nil :system t)
+    ("1red" "#ff0000" nil :system t)
+    ("1maroon" "#800000" nil :system t)
+    ("1yellow" "#ffff00" nil :system t)
+    ("1olive" "#808000" nil :system t)
+    ("1lime" "#00ff00" nil :system t)
+    ("1green" "#008000" nil :system t)
+    ("1aqua" "#00ffff" nil :system t)
+    ("1teal" "#008080" nil :system t)
+    ("1blue" "#0000ff" nil :system t)
+    ("1navy" "#000080" nil :system t)
+    ("1fuchsia" "#ff00ff" nil :system t)
+    ("1purple" "#800080" nil :system t)
+    ("1orange" "#ffa500" nil :system t)
     ("hsl" "hsl(0,100%,50%)" nil :system t)
 
-    ("html5" "<!DOCTYPE html>" nil :system t)
+    ("1html5" "<!DOCTYPE html>" nil :system t)
     ("html4s" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">" nil :system t)
     ("html4t" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">" nil :system t)
     ("xhtml" "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">" nil :system t)
-    ("html" "<!doctype html><html><head><meta charset=\"utf-8\" />
+    ("1html" "<!doctype html><html><head><meta charset=\"utf-8\" />
 <title>ttt</title>
 </head>
 <body>
