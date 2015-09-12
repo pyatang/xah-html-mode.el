@@ -1573,8 +1573,8 @@ It becomes:
 
  <s data-accessed=\"2006-03-11\" data-defunct-date=\"2014-01-11\">http://www.math.ca/cgi/kabol/search.pl</s>
 
-old version output:
-<s class=\"deadurl\" title=\"accessed:2008-12-26; defunct:2008-12-26; http://example.com\">…</s>"
+URL `http://ergoemacs.org/emacs/elisp_html-linkify.html'
+Version 2015-09-12"
   (interactive)
   (let (ξp1 ξp2 ξwholeLinkStr ξnewLinkStr ξurl ξaccessedDate)
     (save-excursion
@@ -1602,7 +1602,7 @@ old version output:
     (delete-region ξp1 ξp2)
     (insert ξnewLinkStr)))
 
-(defun xah-html-source-url-linkify (prefixArgCode)
+(defun xah-html-source-url-linkify (φprefixArg)
   "Make URL at cursor point into a html link.
 If there's a text selection, use the text selection as input.
 
@@ -1615,18 +1615,29 @@ The anchor text may be of 4 possibilities, depending on value of `universal-argu
 1 → 「‹full url›」
 2 or 4 → 「‹domain›…」
 3 → 「img src」
-0 or any → smartly decide."
+0 or any → smartly decide.
 
+URL `http://ergoemacs.org/emacs/elisp_html-linkify.html'
+Version 2015-09-12"
   (interactive "P")
-  (let (ξinput-str
-        ξbds ξp1-input ξp2-input
-        ξp1-url ξp2-url ξp1-tag ξp2-tag
-        ξurl ξdomainName ξlinkText ξresultLinkStr)
+  (let* (
+         ξboundaries
+         ξp1-input
+         ξp2-input
+         ξinput-str
+         ξp1-url ξp2-url ξp1-tag ξp2-tag
+         ξurl ξdomainName ξlinkText )
 
-    (setq ξbds (xah-html--get-thing-or-selection 'url))
-    (setq ξinput-str (elt ξbds 0))
-    (setq ξp1-input (elt ξbds 1))
-    (setq ξp2-input (elt ξbds 2))
+    (if (use-region-p)
+        (progn
+          (setq ξp1-input (region-beginning))
+          (setq ξp2-input (region-end))
+          (setq ξinput-str (buffer-substring-no-properties ξp1-input ξp2-input)))
+      (progn
+        (setq ξboundaries (bounds-of-thing-at-point 'url))
+        (setq ξp1-input (car ξboundaries))
+        (setq ξp2-input (cdr ξboundaries))
+        (setq ξinput-str (buffer-substring-no-properties ξp1-input ξp2-input))))
 
     ;; check if it's just plain URL or already in linked form 「<a href=…>…</a>」
     ;; If latter, you need to get the boundaries for the entire link too.
@@ -1652,7 +1663,7 @@ The anchor text may be of 4 possibilities, depending on value of `universal-argu
 
     (setq ξurl (replace-regexp-in-string "&amp;" "&" (buffer-substring-no-properties ξp1-url ξp2-url) nil "LITERAL")) ; in case it's already encoded. TODO this is only 99% correct.
 
-    ;; get the ξdomainName
+    ;; get the domain name
     (setq ξdomainName
           (progn
             (string-match "://\\([^\/]+?\\)/" ξurl)
@@ -1660,9 +1671,9 @@ The anchor text may be of 4 possibilities, depending on value of `universal-argu
 
     (setq ξlinkText
           (cond
-           ((equal prefixArgCode 1) ξurl) ; full url
-           ((or (equal prefixArgCode 2) (equal prefixArgCode 4) (equal prefixArgCode '(4))) (concat ξdomainName "…")) ; ‹domain›…
-           ((equal prefixArgCode 3) "img src") ; img src
+           ((equal φprefixArg 1) ξurl) ; full url
+           ((or (equal φprefixArg 2) (equal φprefixArg 4) (equal φprefixArg '(4))) (concat ξdomainName "…")) ; ‹domain›…
+           ((equal φprefixArg 3) "img src") ; img src
            (t (if
                   (or
                    (string-match "wikipedia\\.org.+jpg$" ξurl)
@@ -1677,14 +1688,13 @@ The anchor text may be of 4 possibilities, depending on value of `universal-argu
            ))
 
     (setq ξurl (replace-regexp-in-string "&" "&amp;" ξurl))
-    (setq ξresultLinkStr
-          (format "<a class=\"sorc\" href=\"%s\" data-accessed=\"%s\">%s</a>"
-                  ξurl (format-time-string "%Y-%m-%d") ξlinkText
-                  ))
 
     ;; delete URL and insert the link
     (delete-region ξp1-tag ξp2-tag)
-    (insert ξresultLinkStr)))
+    (insert (format
+             "<a class=\"sorc\" href=\"%s\" data-accessed=\"%s\">%s</a>"
+             ξurl (format-time-string "%Y-%m-%d") ξlinkText
+             ))))
 
 (defun xah-html-wikipedia-url-linkify (φstring &optional φfrom-to-pair)
   "Make the URL at cursor point into a html link.
