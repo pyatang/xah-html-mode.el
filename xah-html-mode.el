@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 2.0.3
+;; Version: 2.0.4
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -1138,19 +1138,19 @@ with “*” as separator, becomes
 <tr><td>this</td><td>and</td><td>that</td></tr>
 </table>"
   (interactive "sEnter string pattern for column separation:")
-  (let (ξbds ξp1 ξp2 myStr)
+  (let (ξbds ξp1 ξp2 ξstr)
 
     (setq ξbds (xah-html--get-thing-or-selection 'block))
-    (setq myStr (elt ξbds 0))
+    (setq ξstr (elt ξbds 0))
     (setq ξp1 (elt ξbds 1))
     (setq ξp2 (elt ξbds 2))
     (delete-region ξp1 ξp2)
-    (insert (xah-html-make-html-table-string myStr φsep) "\n")))
+    (insert (xah-html-make-html-table-string ξstr φsep) "\n")))
 
 (defun xah-html-make-html-table-undo ()
   "inverse of `xah-html-make-html-table'."
   (interactive)
-  (let ( ξp1 ξp2 myStr)
+  (let ( ξp1 ξp2 ξstr)
     (search-backward "<table")
     (setq ξp1 (point))
     (search-forward "</table>")
@@ -1620,7 +1620,7 @@ The anchor text may be of 4 possibilities, depending on value of `universal-argu
 URL `http://ergoemacs.org/emacs/elisp_html-linkify.html'
 Version 2015-09-12"
   (interactive "P")
-  (let* (
+  (let (
          ξboundaries
          ξp1-input
          ξp2-input
@@ -1696,50 +1696,101 @@ Version 2015-09-12"
              ξurl (format-time-string "%Y-%m-%d") ξlinkText
              ))))
 
-(defun xah-html-wikipedia-url-linkify (φstring &optional φfrom-to-pair)
-  "Make the URL at cursor point into a html link.
-
+(defun xah-html-wikipedia-url-linkify ()
+  "Change Wikipedia URL under cursor into a HTML link.
 If there is a text selection, use that as input.
 
 Example:
 http://en.wikipedia.org/wiki/Emacs
 ⇒
-<a href=\"http://en.wikipedia.org/wiki/Emacs\">Emacs</a>.
+<a class=\"wikipedia-69128\" href=\"http://en.wikipedia.org/wiki/Emacs\" data-accessed=\"2015-09-14\">Emacs</a>.
 
-When called interactively, work on current URL or text selection (of a URL).
-
-When called in lisp code, if φstring is non-nil, returns a changed string.  If φstring nil, change the text in the region between positions in sequence φfrom-to-pair."
-
-  (interactive
-   (if (region-active-p)
-       (list nil (vector (region-beginning) (region-end)))
-     (let (ξp0 ξp1 ξp2)
-       (progn
-         (setq ξp0 (point))
-         (skip-chars-backward "^ \t\n<>[]")
-         (setq ξp1 (point))
-         (goto-char ξp0)
-         (skip-chars-forward "^ \t\n<>[]")
-         (setq ξp2 (point))
-         (list nil (vector ξp1 ξp2))))))
-
-  (let (ξwork-on-string-p ξinput-str ξoutput-str
-                          (ξfrom (elt φfrom-to-pair 0))
-                          (ξto (elt φfrom-to-pair 1)))
-    (setq ξwork-on-string-p (if () t nil))
-    (setq ξinput-str (if ξwork-on-string-p φstring (buffer-substring-no-properties ξfrom ξto)))
-
-    (setq ξoutput-str
-          (format "<a href=\"%s\">%s</a>" (url-encode-url ξinput-str)
-                  (replace-regexp-in-string "_" " "
-                                            (xah-html-url-percent-decode-string (file-name-nondirectory ξinput-str)))))
-
-    (if ξwork-on-string-p
+Version 2015-09-14."
+  (interactive)
+  (let (ξboundaries
+        ξp1 ξp2
+        ξinput-str
+        ξlinkText
         ξoutput-str
+        )
+    (if (use-region-p)
+        (progn
+          (setq ξp1 (region-beginning))
+          (setq ξp1 (region-end)))
       (progn
-        (delete-region ξfrom ξto)
-        (goto-char ξfrom)
-        (insert ξoutput-str)))))
+        (let (ξp0)
+          (progn
+            (setq ξp0 (point))
+            (skip-chars-backward "^ \t\n<>[]")
+            (setq ξp1 (point))
+            (goto-char ξp0)
+            (skip-chars-forward "^ \t\n<>[]")
+            (setq ξp2 (point))))
+
+        ;; (setq ξboundaries (bounds-of-thing-at-point 'url))
+        ;; (setq ξp1 (car ξboundaries))
+        ;; (setq ξp2 (cdr ξboundaries))
+        ))
+    (setq ξinput-str (buffer-substring-no-properties ξp1 ξp2))
+    (require 'url-util)
+    (setq ξlinkText
+          (replace-regexp-in-string
+           "_" " "
+           (decode-coding-string (url-unhex-string (file-name-nondirectory ξinput-str)) 'utf-8)))
+    (setq ξoutput-str
+          (format
+           "<a class=\"wikipedia-69128\" href=\"%s\" data-accessed=\"%s\">%s</a>"
+           (url-encode-url ξinput-str)
+           (format-time-string "%Y-%m-%d")
+           ξlinkText
+           ))
+    (progn
+      (delete-region ξp1 ξp2)
+      (insert ξoutput-str))))
+
+;; (defun xah-html-wikipedia-url-linkify-old (φstring &optional φfrom-to-pair)
+;;   "Make the URL at cursor point into a html link.
+
+;; If there is a text selection, use that as input.
+
+;; Example:
+;; http://en.wikipedia.org/wiki/Emacs
+;; ⇒
+;; <a href=\"http://en.wikipedia.org/wiki/Emacs\">Emacs</a>.
+
+;; When called interactively, work on current URL or text selection (of a URL).
+
+;; When called in lisp code, if φstring is non-nil, returns a changed string.  If φstring nil, change the text in the region between positions in sequence φfrom-to-pair."
+
+;;   (interactive
+;;    (if (region-active-p)
+;;        (list nil (vector (region-beginning) (region-end)))
+;;      (let (ξp0 ξp1 ξp2)
+;;        (progn
+;;          (setq ξp0 (point))
+;;          (skip-chars-backward "^ \t\n<>[]")
+;;          (setq ξp1 (point))
+;;          (goto-char ξp0)
+;;          (skip-chars-forward "^ \t\n<>[]")
+;;          (setq ξp2 (point))
+;;          (list nil (vector ξp1 ξp2))))))
+;;   (let (ξwork-on-string-p ξinput-str ξoutput-str
+;;                           (ξfrom (elt φfrom-to-pair 0))
+;;                           (ξto (elt φfrom-to-pair 1)))
+;;     (setq ξwork-on-string-p (if () t nil))
+;;     (setq ξinput-str (if ξwork-on-string-p φstring (buffer-substring-no-properties ξfrom ξto)))
+
+;;     (setq ξoutput-str
+;;           (format "<a href=\"%s\">%s</a>" (url-encode-url ξinput-str)
+;;                   (replace-regexp-in-string "_" " "
+;;                                             (xah-html-url-percent-decode-string (file-name-nondirectory ξinput-str)))))
+
+;;     (if ξwork-on-string-p
+;;         ξoutput-str
+;;       (progn
+;;         (delete-region ξfrom ξto)
+;;         (goto-char ξfrom)
+;;         (insert ξoutput-str)))))
 
 (defun xah-html-wrap-url (φstring &optional φfrom φto)
   "Make the URL at cursor point into a html link.
@@ -2275,39 +2326,86 @@ This is heuristic based, does not remove ALL possible redundant whitespace."
             (replace-match "<p>")))))))
 
 (defun xah-html-url-percent-decode-string (φstring)
-  "Returns URL percent-encoded
+  "Returns φstring URL percent-encoded
 
 Example:
     http://en.wikipedia.org/wiki/Saint_Jerome_in_His_Study_%28D%C3%BCrer%29
 becomes
     http://en.wikipedia.org/wiki/Saint_Jerome_in_His_Study_(Dürer)
 
+Example:
     http://zh.wikipedia.org/wiki/%E6%96%87%E6%9C%AC%E7%BC%96%E8%BE%91%E5%99%A8
 becomes
-    http://zh.wikipedia.org/wiki/文本编辑器"
+    http://zh.wikipedia.org/wiki/文本编辑器
+
+To encode, use `url-encode-url' in url-util.el.
+
+URL `http://ergoemacs.org/emacs/elisp_decode_uri_percent_encoding.html'
+Version 2015-09-14"
+  (require 'url-util)
   (decode-coding-string (url-unhex-string φstring) 'utf-8))
 
-(defun xah-html-decode-percent-encoded-uri (&optional φp1 φp2)
-  "decode URI percent encoding of current line or selection."
-  (interactive
-   (if (use-region-p)
-       (list (region-beginning) (region-end))
-     (list (line-beginning-position) (line-end-position))))
-  (let ((myStr (buffer-substring-no-properties φp1 φp2)))
-    (save-excursion
-      (save-restriction
-        (delete-region φp1 φp2 )
-        (insert (decode-coding-string (url-unhex-string myStr) 'utf-8))))))
+(defun xah-html-decode-percent-encoded-url ()
+  "Decode percent encoded URI of URI under cursor or selection.
 
-(defun xah-html-decode-percent-encoded-uri-js (φp1 φp2)
-  "Percent decode URI for text selection.
-Requires a node.js script. See source code.
-See also `xah-html-decode-percent-encoded-uri'."
-  (interactive "r")
-  (let (scriptName)
-    (save-excursion
-      (setq scriptName (concat "/usr/bin/node ~/git/xahscripts/emacs_uri_decode.js"))
-      (shell-command-on-region φp1 φp2 scriptName nil "REPLACE" nil t))))
+Example:
+    http://en.wikipedia.org/wiki/Saint_Jerome_in_His_Study_%28D%C3%BCrer%29
+becomes
+    http://en.wikipedia.org/wiki/Saint_Jerome_in_His_Study_(Dürer)
+
+Example:
+    http://zh.wikipedia.org/wiki/%E6%96%87%E6%9C%AC%E7%BC%96%E8%BE%91%E5%99%A8
+becomes
+    http://zh.wikipedia.org/wiki/文本编辑器
+
+For string version, see `xah-html-url-percent-decode-string'.
+To encode, see `xah-html-encode-percent-encoded-url'.
+URL `http://ergoemacs.org/emacs/elisp_decode_uri_percent_encoding.html'
+Version 2015-09-14."
+  (interactive)
+  (let (ξboundaries ξp1 ξp2 ξinput-str)
+    (if (use-region-p)
+        (progn
+          (setq ξp1 (region-beginning))
+          (setq ξp2 (region-end)))
+      (progn
+        (setq ξboundaries (bounds-of-thing-at-point 'url))
+        (setq ξp1 (car ξboundaries))
+        (setq ξp2 (cdr ξboundaries))))
+    (setq ξinput-str (buffer-substring-no-properties ξp1 ξp2))
+    (require 'url-util)
+    (delete-region ξp1 ξp2)
+    (insert (decode-coding-string (url-unhex-string ξinput-str) 'utf-8))))
+
+(defun xah-html-encode-percent-encoded-url ()
+  "Percent encode URL under cursor or selection.
+
+Example:
+    http://en.wikipedia.org/wiki/Saint_Jerome_in_His_Study_(Dürer)
+becomes
+    http://en.wikipedia.org/wiki/Saint_Jerome_in_His_Study_(D%C3%BCrer)
+
+Example:
+    http://zh.wikipedia.org/wiki/文本编辑器
+becomes
+    http://zh.wikipedia.org/wiki/%E6%96%87%E6%9C%AC%E7%BC%96%E8%BE%91%E5%99%A8
+
+URL `http://ergoemacs.org/emacs/elisp_decode_uri_percent_encoding.html'
+Version 2015-09-14."
+  (interactive)
+  (let (ξboundaries ξp1 ξp2 ξinput-str)
+    (if (use-region-p)
+        (progn
+          (setq ξp1 (region-beginning))
+          (setq ξp2 (region-end)))
+      (progn
+        (setq ξboundaries (bounds-of-thing-at-point 'url))
+        (setq ξp1 (car ξboundaries))
+        (setq ξp2 (cdr ξboundaries))))
+    (setq ξinput-str (buffer-substring-no-properties ξp1 ξp2))
+    (require 'url-util)
+    (delete-region ξp1 ξp2)
+    (insert (url-encode-url ξinput-str))))
 
 
 
@@ -2411,7 +2509,7 @@ t
   (define-key xah-html-single-keys-keymap (kbd "m") 'xah-html-insert-wrap-source-code)
 
   (define-key xah-html-single-keys-keymap (kbd "DEL") 'xah-html-remove-html-tags)
-  (define-key xah-html-single-keys-keymap (kbd ".") 'xah-html-decode-percent-encoded-uri)
+  (define-key xah-html-single-keys-keymap (kbd ".") 'xah-html-decode-percent-encoded-url)
   (define-key xah-html-single-keys-keymap (kbd "3") 'xah-html-update-title)
   (define-key xah-html-single-keys-keymap (kbd "4") 'xah-html-markup-ruby)
   (define-key xah-html-single-keys-keymap (kbd "5") 'xah-html-mark-unicode)
