@@ -1716,7 +1716,7 @@ Version 2015-09-14."
     (if (use-region-p)
         (progn
           (setq ξp1 (region-beginning))
-          (setq ξp1 (region-end)))
+          (setq ξp2 (region-end)))
       (progn
         (let (ξp0)
           (progn
