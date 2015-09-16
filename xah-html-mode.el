@@ -1705,12 +1705,13 @@ http://en.wikipedia.org/wiki/Emacs
 ⇒
 <a class=\"wikipedia-69128\" href=\"http://en.wikipedia.org/wiki/Emacs\" data-accessed=\"2015-09-14\">Emacs</a>.
 
+URL `http://ergoemacs.org/emacs/elisp_html_wikipedia_url_linkify.html'
 Version 2015-09-14."
   (interactive)
   (let (ξboundaries
         ξp1 ξp2
         ξinput-str
-        ξlinkText
+        ξlink-text
         ξoutput-str
         )
     (if (use-region-p)
@@ -1733,7 +1734,7 @@ Version 2015-09-14."
         ))
     (setq ξinput-str (buffer-substring-no-properties ξp1 ξp2))
     (require 'url-util)
-    (setq ξlinkText
+    (setq ξlink-text
           (replace-regexp-in-string
            "_" " "
            (decode-coding-string (url-unhex-string (file-name-nondirectory ξinput-str)) 'utf-8)))
@@ -1742,7 +1743,7 @@ Version 2015-09-14."
            "<a class=\"wikipedia-69128\" href=\"%s\" data-accessed=\"%s\">%s</a>"
            (url-encode-url ξinput-str)
            (format-time-string "%Y-%m-%d")
-           ξlinkText
+           ξlink-text
            ))
     (progn
       (delete-region ξp1 ξp2)
