@@ -44,7 +44,8 @@
   "Return t if φinput-string is a date/time stamp, else nil.
 This is based on heuristic, so it's not 100% correct.
 If the string contains any month names, weekday names, or of the form dddd-dd-dd, dddd-dd-dddd, dddd-dd-dd, or using slash, then it's considered a date.
-"
+
+2015-09-27 issue: if a sentence “You May Do So”, it's be thought as date. Similar for containing word “March”."
   (cond
          ((string-match (regexp-opt (append xah-html--month-full-names xah-html--month-abbrev-names xah-html--weekday-names) 'words) φinput-string) t)
          ;; mm/dd/yyyy
@@ -1496,7 +1497,6 @@ Update the <title>…</title> and <h1>…</h1> of current buffer."
 
 (defun xah-html-make-citation ()
   "Reformat current text block or selection into a canonical citation format.
-
 For example, place cursor somewhere in the following block:
 
 Circus Maximalist
@@ -1506,7 +1506,7 @@ http://www.time.com/time/magazine/article/0,9171,981408,00.html
 
 After execution, the lines will become
 
-<cite>Circus Maximalist</cite> <time>1994-09-12</time> By Paul Gray. @ <a href=\"http://www.time.com/time/magazine/article/0,9171,981408,00.html\">Source www.time.com</a>
+〔<cite>Circus Maximalist</cite> <time>1994-09-12</time> By Paul Gray. @ <a href=\"http://www.time.com/time/magazine/article/0,9171,981408,00.html\">Source www.time.com</a>〕
 
 If there's a text selection, use it for input, otherwise the input is a text block between blank lines.
 
@@ -1514,18 +1514,17 @@ The order of lines for {title, author, date/time, url} needs not be in that orde
   (interactive)
   (let* (
          (ξbds (xah-html--get-thing-or-selection 'block))
-         (inputText (elt ξbds 0))
+         ;; (ξinputText (replace-regexp-in-string "^[[:space:]]*" "" (elt ξbds 0))) ; remove white space in front
+         (ξinputText (elt ξbds 0))
          (ξp1 (elt ξbds 1))
          (ξp2 (elt ξbds 2))
-         myList ξtitle ξauthor ξdate ξurl )
+         (ξmyList (split-string ξinputText "[[:space:]]*\n[[:space:]]*" t "[[:space:]]*"))
+         ξtitle ξauthor ξdate ξurl )
 
-    (setq inputText (replace-regexp-in-string "^[[:space:]]*" "" inputText)) ; remove white space in front
-
-    (setq myList (split-string inputText "[[:space:]]*\n[[:space:]]*" t))
-
-    (let (ξx (case-fold-search t))
-      (while (> (length myList) 0)
-        (setq ξx (pop myList))
+       ;; set title, date, url, author, 
+    (let (ξx (case-fold-search nil))
+      (while (> (length ξmyList) 0)
+        (setq ξx (pop ξmyList))
         (cond
          ((string-match "^https?://" ξx ) (setq ξurl ξx))
          ((string-match "^ *[bB]y " ξx ) (setq ξauthor ξx))
@@ -1533,12 +1532,10 @@ The order of lines for {title, author, date/time, url} needs not be in that orde
          ((xah-html--is-datetimestamp-p ξx) (setq ξdate ξx))
          (t (setq ξtitle ξx)))))
 
-    (message "title:「%s」\n author:「%s」\n date:「%s」\n url:「%s」" ξtitle ξauthor ξdate ξurl)
-
-    (when (null ξtitle) (error "I can't find “title”"))
-    (when (null ξauthor) (error "I can't find “author”"))
-    (when (null ξdate) (error "I can't find “date”"))
-    (when (null ξurl) (error "I can't find “url”"))
+    (when (null ξtitle) (error "I can't find “title” %s" ξtitle))
+    (when (null ξauthor) (error "I can't find “author” %s" ξauthor))
+    (when (null ξdate) (error "I can't find “date” %s" ξdate))
+    (when (null ξurl) (error "I can't find “url” %s" ξurl))
 
     (setq ξtitle (xah-html--trim-string ξtitle))
     (setq ξtitle (replace-regexp-in-string "^\"\\(.+\\)\"$" "\\1" ξtitle))
@@ -1821,15 +1818,15 @@ When called in lisp code, if φstring is non-nil, returns a changed string.  If 
   "Add <p>…</p> tag to current text block or text selection.
 If there's a text selection, wrap p around each text block (separated by 2 newline chars.)"
   (interactive)
-  (let (ξbds ξp1 ξp2 inputText)
+  (let (ξbds ξp1 ξp2 ξinputText)
 
     (setq ξbds (xah-html--get-thing-or-selection 'block))
-    (setq inputText (elt ξbds 0))
+    (setq ξinputText (elt ξbds 0))
     (setq ξp1 (elt ξbds 1))
     (setq ξp2 (elt ξbds 2))
 
     (delete-region ξp1 ξp2 )
-    (insert "<p>" (replace-regexp-in-string "\n\n+" "</p>\n\n<p>" (xah-html--trim-string inputText)) "</p>")))
+    (insert "<p>" (replace-regexp-in-string "\n\n+" "</p>\n\n<p>" (xah-html--trim-string ξinputText)) "</p>")))
 
 (defun xah-html-emacs-to-windows-kbd-notation (φp1 φp2)
   "Change emacs key notation to Windows's notation on text selection or current line.
