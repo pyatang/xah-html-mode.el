@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 2.0.4
+;; Version: 2.1.4
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -416,6 +416,7 @@ Example usage:
         ("scala" . ["scala-mode" "scala"])
         ("apl" . ["gnu-apl-mode" "apl"])
         ("scheme" . ["scheme-mode" "scm"])
+        ("racket" . ["racket-mode" "rkt"])
         ("prolog" . ["prolog-mode" "prolog"])
         ("yasnippet" . ["snippet-mode" "yasnippet"])
         ("vbs" . ["visual-basic-mode" "vbs"])
