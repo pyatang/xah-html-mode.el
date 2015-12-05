@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 2.1.4
+;; Version: 2.2.4
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -406,7 +406,7 @@ Example usage:
         ("latex" . ["latex-mode" "txt"])
         ("ocaml" . ["tuareg-mode" "ocaml"])
         ("perl" . ["cperl-mode" "pl"])
-        ("php" . ["php-mode" "php"])
+        ("php" . ["xah-php-mode" "php"])
         ("povray" . ["pov-mode" "pov"])
         ("powershell" . ["powershell-mode" "ps1"])
         ("python" . ["python-mode" "py"])
@@ -907,7 +907,7 @@ The string replaced are:
  < ⇒ &lt;
  > ⇒ &gt;
 
-If `universal-argument' is called, the replacement direction is reversed. That is &amp; ⇒ & etc.
+If `universal-argument' is called, the replacement direction is reversed.
 
 When called in lisp code, φp1 φp2 are region begin/end positions.
 If φentity-to-char-p is true, change entities to chars instead.
@@ -915,7 +915,7 @@ If φentity-to-char-p is true, change entities to chars instead.
 See also: `xah-html-replace-html-named-entities', `xah-html-replace-html-chars-to-unicode'
 
 URL `http://ergoemacs.org/emacs/elisp_replace_html_entities_command.html'
-Version 2015-04-23"
+Version 2015-12-05"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end) (if current-prefix-arg t nil))
@@ -924,30 +924,40 @@ Version 2015-04-23"
       (xah-replace-pairs-region φp1 φp2 '( ["&amp;" "&"] ["&lt;" "<"] ["&gt;" ">"] ))
     (xah-replace-pairs-region φp1 φp2 '( ["&" "&amp;"] ["<" "&lt;"] [">" "&gt;"] ))))
 
-(defun xah-html-replace-html-chars-to-unicode (φp1 φp2)
-  "Replace HTML < > & to Unicode chars 〈 〉 ＆ on the current line or text selection.
+(defun xah-html-replace-html-chars-to-unicode (φp1 φp2 &optional φfullwidth-to-ascii-p)
+  "Replace chars <>& to fullwidth version ＜＞＆ in current line or text selection.
+
+If `universal-argument' is called, the replacement direction is reversed.
 
 When called in lisp code, φp1 φp2 are region begin/end positions.
-If φentity-to-char-p is true, change entities to chars instead.
+If φfullwidth-to-ascii-p is true, change entities to chars instead.
 
-See also:
-`xah-html-replace-html-named-entities'
-`xah-html-replace-html-chars-to-entities'
+See also: `xah-html-replace-html-named-entities', `xah-html-replace-html-chars-to-unicode'
 
 URL `http://ergoemacs.org/emacs/elisp_replace_html_entities_command.html'
 Version 2015-04-23"
-  (interactive
+(interactive
    (if (use-region-p)
-       (list (region-beginning) (region-end))
-     (list (line-beginning-position) (line-end-position))))
+       (list (region-beginning) (region-end) current-prefix-arg)
+     (list (line-beginning-position) (line-end-position) current-prefix-arg)))
+
   (save-restriction
     (narrow-to-region φp1 φp2)
-    (goto-char (point-min))
-    (while (search-forward "&" nil t) (replace-match "＆" nil t))
-    (goto-char (point-min))
-    (while (search-forward "<" nil t) (replace-match "〈" nil t))
-    (goto-char (point-min))
-    (while (search-forward ">" nil t) (replace-match "〉" nil t))))
+    (if φfullwidth-to-ascii-p
+        (progn
+          (goto-char (point-min))
+          (while (search-forward "＆" nil t) (replace-match "&" nil t))
+          (goto-char (point-min))
+          (while (search-forward "＜" nil t) (replace-match "<" nil t))
+          (goto-char (point-min))
+          (while (search-forward "＞" nil t) (replace-match ">" nil t)))
+      (progn
+        (goto-char (point-min))
+        (while (search-forward "&" nil t) (replace-match "＆" nil t))
+        (goto-char (point-min))
+        (while (search-forward "<" nil t) (replace-match "＜" nil t))
+        (goto-char (point-min))
+        (while (search-forward ">" nil t) (replace-match "＞" nil ))))))
 
 (defun xah-html-replace-html-named-entities (φp1 φp2)
   "Replace HTML entities to Unicode character in current line or selection.
@@ -1522,7 +1532,7 @@ The order of lines for {title, author, date/time, url} needs not be in that orde
          (ξmyList (split-string ξinputText "[[:space:]]*\n[[:space:]]*" t "[[:space:]]*"))
          ξtitle ξauthor ξdate ξurl )
 
-       ;; set title, date, url, author, 
+       ;; set title, date, url, author,
     (let (ξx (case-fold-search nil))
       (while (> (length ξmyList) 0)
         (setq ξx (pop ξmyList))
