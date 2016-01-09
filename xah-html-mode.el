@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 2.2.4
+;; Version: 2.3.4
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -1975,8 +1975,8 @@ Some issues:
 When called in lisp code, φp1 φp2 are region begin/end positions.
 "
   (interactive
-   (let ((bds (xah-html--get-thing-or-selection 'block)))
-     (list (elt bds 1) (elt bds 2))))
+   (let ((ξboundaries (xah-html--get-thing-or-selection 'block)))
+     (list (elt ξboundaries 1) (elt ξboundaries 2))))
   (let ((ξchangedItems '()))
     (save-excursion
       (save-restriction
@@ -2093,42 +2093,11 @@ Version 2015-04-08"
                         ["Undo" "<kbd>⎌ Undo</kbd>"]
                         ["Redo" "<kbd>↷</kbd>"]
 
-                        ["F10" "<kbd>F10</kbd>"]
-                        ["F11" "<kbd>F11</kbd>"]
-                        ["F12" "<kbd>F12</kbd>"]
-                        ["F13" "<kbd>F13</kbd>"]
-                        ["F14" "<kbd>F14</kbd>"]
-                        ["F15" "<kbd>F15</kbd>"]
-                        ["F16" "<kbd>F16</kbd>"]
-                        ["F17" "<kbd>F17</kbd>"]
-                        ["F18" "<kbd>F18</kbd>"]
-                        ["F19" "<kbd>F19</kbd>"]
-                        ["F20" "<kbd>F20</kbd>"]
-                        ["F21" "<kbd>F21</kbd>"]
-                        ["F22" "<kbd>F22</kbd>"]
-                        ["F23" "<kbd>F23</kbd>"]
-                        ["F24" "<kbd>F24</kbd>"]
+                        ["F10" "<kbd>F10</kbd>"] ["F11" "<kbd>F11</kbd>"] ["F12" "<kbd>F12</kbd>"] ["F13" "<kbd>F13</kbd>"] ["F14" "<kbd>F14</kbd>"] ["F15" "<kbd>F15</kbd>"] ["F16" "<kbd>F16</kbd>"] ["F17" "<kbd>F17</kbd>"] ["F18" "<kbd>F18</kbd>"] ["F19" "<kbd>F19</kbd>"] ["F20" "<kbd>F20</kbd>"] ["F21" "<kbd>F21</kbd>"] ["F22" "<kbd>F22</kbd>"] ["F23" "<kbd>F23</kbd>"] ["F24" "<kbd>F24</kbd>"]
 
-                        ["F1" "<kbd>F1</kbd>"]
-                        ["F2" "<kbd>F2</kbd>"]
-                        ["F3" "<kbd>F3</kbd>"]
-                        ["F4" "<kbd>F4</kbd>"]
-                        ["F5" "<kbd>F5</kbd>"]
-                        ["F6" "<kbd>F6</kbd>"]
-                        ["F7" "<kbd>F7</kbd>"]
-                        ["F8" "<kbd>F8</kbd>"]
-                        ["F9" "<kbd>F9</kbd>"]
+                        ["F1" "<kbd>F1</kbd>"] ["F2" "<kbd>F2</kbd>"] ["F3" "<kbd>F3</kbd>"] ["F4" "<kbd>F4</kbd>"] ["F5" "<kbd>F5</kbd>"] ["F6" "<kbd>F6</kbd>"] ["F7" "<kbd>F7</kbd>"] ["F8" "<kbd>F8</kbd>"] ["F9" "<kbd>F9</kbd>"]
 
-                        ["kp0" "<kbd>Keypad 0</kbd>"]
-                        ["kp1" "<kbd>Keypad 1</kbd>"]
-                        ["kp2" "<kbd>Keypad 2</kbd>"]
-                        ["kp3" "<kbd>Keypad 3</kbd>"]
-                        ["kp4" "<kbd>Keypad 4</kbd>"]
-                        ["kp5" "<kbd>Keypad 5</kbd>"]
-                        ["kp6" "<kbd>Keypad 6</kbd>"]
-                        ["kp7" "<kbd>Keypad 7</kbd>"]
-                        ["kp8" "<kbd>Keypad 8</kbd>"]
-                        ["kp9" "<kbd>Keypad 9</kbd>"]
+                        ["kp0" "<kbd>Keypad 0</kbd>"] ["kp1" "<kbd>Keypad 1</kbd>"] ["kp2" "<kbd>Keypad 2</kbd>"] ["kp3" "<kbd>Keypad 3</kbd>"] ["kp4" "<kbd>Keypad 4</kbd>"] ["kp5" "<kbd>Keypad 5</kbd>"] ["kp6" "<kbd>Keypad 6</kbd>"] ["kp7" "<kbd>Keypad 7</kbd>"] ["kp8" "<kbd>Keypad 8</kbd>"] ["kp9" "<kbd>Keypad 9</kbd>"]
 
                         ["kp+" "<kbd>Keypad +</kbd>"]
                         ["kp-" "<kbd>Keypad -</kbd>"]
@@ -2156,7 +2125,6 @@ Version 2015-04-08"
     (xah-replace-pairs-region (point-min) (point-max) ξreplaceList)
 
       (let ((case-fold-search nil))
-
         (mapc
          (lambda (ξx)
            (goto-char (point-min))
@@ -2193,18 +2161,18 @@ Version 2015-04-08"
   "Add HTML open/close tags around region boundary φp1 φp2.
 This function does not `save-excursion'."
   (let* (
-         (ξclass-str (if (or (null φclass-name) (string= φclass-name "")) "" (format " class=\"%s\"" φclass-name)))
+         (ξclass-str (if (null φclass-name)
+                         ""
+                       (format " class=\"\"" )))
          (ξstr-left (format "<%s%s>" φtag-name ξclass-str))
          (ξstr-right (format "</%s>" φtag-name )))
-
     (goto-char φp1)
-
     (if (xah-html-tag-self-closing-p φtag-name)
-        (progn (insert (format "<%s%s />" φtag-name ξclass-str)))
+        (insert (format "<%s%s />" φtag-name ξclass-str))
       (progn
         (insert ξstr-left )
         (goto-char (+ φp2 (length ξstr-left)))
-        (insert ξstr-right )))))
+        (insert ξstr-right)))))
 
 (defun xah-html-wrap-html-tag (φtag-name &optional φclass-name)
   "Insert HTML open/close tags to current text unit or text selection.
@@ -2218,23 +2186,35 @@ If `universal-argument' is called first, then also prompt for a “class” attr
     (if current-prefix-arg
         (read-string "class:" nil xah-html-class-input-history "")
       nil )))
-  (let (ξbds ξp1 ξp2
-            lineWordBlock
-            )
+  (let (ξbds ξp1 ξp2 ξp3 ξp4 ξwrap-type )
     (progn
-      (setq lineWordBlock (xah-html-get-tag-type φtag-name))
+      (setq ξwrap-type (xah-html-get-tag-type φtag-name))
       (setq ξbds
             (cond
-             ((equal lineWordBlock "w") (xah-html--get-thing-or-selection 'word))
-             ((equal lineWordBlock "l") (xah-html--get-thing-or-selection 'line))
-             ((equal lineWordBlock "b") (xah-html--get-thing-or-selection 'block))
+             ((equal ξwrap-type "w") (xah-html--get-thing-or-selection 'word))
+             ((equal ξwrap-type "l") (xah-html--get-thing-or-selection 'line))
+             ((equal ξwrap-type "b") (xah-html--get-thing-or-selection 'block))
              (t (xah-html--get-thing-or-selection 'word))))
-      (setq ξp1 (elt ξbds 1))
-      (setq ξp2 (elt ξbds 2))
-      (xah-html-add-open-close-tags φtag-name φclass-name ξp1 ξp2)
-
+      (setq ξp1 (elt ξbds 1)
+            ξp2 (elt ξbds 2))
+      (if (not (or
+                (string-equal φtag-name "pre")
+                (string-equal φtag-name "code")))
+          (save-excursion ; trim whitespace
+            (save-restriction 
+              (narrow-to-region ξp1 ξp2)
+              (goto-char (point-min))
+              (delete-horizontal-space)
+              (setq ξp3 (point))
+              (goto-char (point-max))
+              (delete-horizontal-space)
+              (setq ξp4 (point))))
+        (progn
+          (setq ξp3 ξp1)
+          (setq ξp4 ξp2)))
+      (xah-html-add-open-close-tags φtag-name φclass-name ξp3 ξp4)
       (when ; put cursor between when input text is empty
-          (and (equal ξp1 ξp2) (not (xah-html-tag-self-closing-p φtag-name)))
+          (and (equal ξp3 ξp4) (not (xah-html-tag-self-closing-p φtag-name)))
         (progn (search-backward "</" ))))))
 
 (defun xah-html-insert-wrap-source-code (&optional φlang-code)
