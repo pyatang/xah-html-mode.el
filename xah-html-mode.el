@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 2.3.4
+;; Version: 2.3.5
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -2163,7 +2163,7 @@ This function does not `save-excursion'."
   (let* (
          (ξclass-str (if (null φclass-name)
                          ""
-                       (format " class=\"\"" )))
+                       (format " class=\"%s\"" φclass-name)))
          (ξstr-left (format "<%s%s>" φtag-name ξclass-str))
          (ξstr-right (format "</%s>" φtag-name )))
     (goto-char φp1)
