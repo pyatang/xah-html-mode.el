@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 2.3.5
+;; Version: 2.3.6
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -1554,7 +1554,7 @@ The order of lines for {title, author, date/time, url} needs not be in that orde
 
     (setq ξauthor (xah-html--trim-string ξauthor))
     (setq ξauthor (replace-regexp-in-string "\\. " " " ξauthor)) ; remove period in Initals
-    (setq ξauthor (replace-regexp-in-string "[Bb]y +" "" ξauthor))
+    (setq ξauthor (replace-regexp-in-string "^ *[Bb]y +" "" ξauthor))
     (setq ξauthor (upcase-initials (downcase ξauthor)))
 
     (setq ξdate (xah-html--trim-string ξdate))
