@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 2.3.6
+;; Version: 2.3.7
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -1972,6 +1972,8 @@ Some issues:
 •  ‹…› → <var class=\"d\">…</var>
 • 〔<…〕 → 〔➤ <…〕
 
+Changes are reported to message buffer with char position.
+
 When called in lisp code, φp1 φp2 are region begin/end positions.
 "
   (interactive
@@ -1988,32 +1990,32 @@ When called in lisp code, φp1 φp2 are region begin/end positions.
 
         (goto-char (point-min))
         (while (search-forward-regexp "「\\([^」]+?\\)」" nil t)
-          (push (match-string-no-properties 1) ξchangedItems)
+          (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) ξchangedItems)
           (replace-match "<code>\\1</code>" t))
 
         (goto-char (point-min))
         (while (search-forward-regexp "〈\\([^〉]+?\\)〉" nil t)
-          (push (match-string-no-properties 1) ξchangedItems)
+          (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) ξchangedItems)
           (replace-match "<cite>\\1</cite>" t))
 
         (goto-char (point-min))
         (while (search-forward-regexp "《\\([^》]+?\\)》" nil t)
-          (push (match-string-no-properties 1) ξchangedItems)
+          (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) ξchangedItems)
           (replace-match "<cite class=\"book\">\\1</cite>" t))
 
         (goto-char (point-min))
         (while (search-forward-regexp "‹\\([^›]+?\\)›" nil t)
-          (push (match-string-no-properties 1) ξchangedItems)
+          (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) ξchangedItems)
           (replace-match "<var class=\"d\">\\1</var>" t))
 
         (goto-char (point-min))
         (while (search-forward-regexp "〔<a href=" nil t)
-          (push (match-string-no-properties 1) ξchangedItems)
+          (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) ξchangedItems)
           (replace-match "〔➤ <a href=" t))
 
         (goto-char (point-min))
         (while (search-forward-regexp "〔\\([ -_/\\:~.A-Za-z0-9%]+?\\)〕" nil t)
-          (push (match-string-no-properties 1) ξchangedItems)
+          (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) ξchangedItems)
           (replace-match "<code class=\"path-α\">\\1</code>" t))))
 
     (mapcar
