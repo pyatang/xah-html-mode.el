@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 2.3.7
+;; Version: 2.3.8
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -392,9 +392,10 @@ Example usage:
         ("org-mode" . ["org-mode" "org"])
 
         ("clojure" . ["clojure-mode" "clj"])
-        ("css" . ["css-mode" "css"])
+        ("css" . ["xah-css-mode" "css"])
         ("emacs-lisp" . ["xah-elisp-mode" "el"])
         ("haskell" . ["haskell-mode" "hs"])
+        ("golang" . ["go-mode" "go"])
         ("html" . ["html-mode" "html"])
         ("mysql" . ["sql-mode" "sql"])
         ("xml" . ["sgml-mode" "xml"])
@@ -428,7 +429,7 @@ Example usage:
         ("yaml" . ["yaml-mode" "yaml"])
         ("haml" . ["haml-mode" "haml"])
         ("sass" . ["sass-mode" "sass"])
-        ("scss" . ["css-mode" "css"])
+        ("scss" . ["xah-css-mode" "css"])
 
         ("vimrc" . ["vimrc-mode" "vim"])))
 
@@ -2508,6 +2509,7 @@ t
   (define-key xah-html-single-keys-keymap (kbd "7") 'xah-html-toggle-syntax-coloring-markup)
   (define-key xah-html-single-keys-keymap (kbd "8") 'xah-html-get-precode-make-new-file)
   (define-key xah-html-single-keys-keymap (kbd "9") 'xah-html-redo-syntax-coloring-buffer)
+  (define-key xah-html-single-keys-keymap (kbd "0") 'xah-html-extract-url)
   (define-key xah-html-single-keys-keymap (kbd "l 3") 'xah-html-source-url-linkify)
   (define-key xah-html-single-keys-keymap (kbd "l s") 'xah-html-make-link-defunct)
   (define-key xah-html-single-keys-keymap (kbd "l w") 'xah-html-word-to-wikipedia-linkify)
@@ -2523,7 +2525,6 @@ t
   (define-key xah-html-single-keys-keymap (kbd "r v") 'xah-html-make-html-table-undo)
   (define-key xah-html-single-keys-keymap (kbd "t") 'xah-html-wrap-p-tag)
   (define-key xah-html-single-keys-keymap (kbd "n") nil)
-  (define-key xah-html-single-keys-keymap (kbd "n u") 'xah-html-extract-url)
   (define-key xah-html-single-keys-keymap (kbd "y") 'xah-html-make-citation))
 
 
