@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 2.3.8
+;; Version: 2.3.9
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -405,7 +405,7 @@ Example usage:
         ("nodejs" . ["xah-js-mode" "js"])
         ("lsl" . ["xlsl-mode" "lsl"])
         ("latex" . ["latex-mode" "txt"])
-        ("ocaml" . ["tuareg-mode" "ocaml"])
+        ("ocaml" . ["tuareg-mode" "ml"])
         ("perl" . ["cperl-mode" "pl"])
         ("php" . ["xah-php-mode" "php"])
         ("povray" . ["pov-mode" "pov"])
