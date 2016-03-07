@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 2.3.9
+;; Version: 2.4.9
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -391,7 +391,8 @@ Example usage:
 
         ("org-mode" . ["org-mode" "org"])
 
-        ("clojure" . ["clojure-mode" "clj"])
+        ;; ("clojure" . ["clojure-mode" "clj"])
+        ("clojure" . ["xah-clojure-mode" "clj"])
         ("css" . ["xah-css-mode" "css"])
         ("emacs-lisp" . ["xah-elisp-mode" "el"])
         ("haskell" . ["haskell-mode" "hs"])
@@ -642,6 +643,35 @@ This command does the inverse of `xah-html-htmlize-precode'."
           (xah-html-htmlize-region (point-min) (point-max) (xah-html-langcode-to-major-mode-name ξlangCode xah-html-lang-name-map) t)
           (setq ξi (1+ ξi)))))
     (message "xah-html-redo-syntax-coloring-buffer %s redone" ξi)))
+
+(defun xah-html-open-local-link ()
+  "Open the link under cursor, if it is a local file. Else call `newline'.
+Version 2016-03-07"
+  (interactive)
+  (if (xah-html-point-in-src-or-href-q)
+      (find-file-at-point (ffap-file-at-point))
+    (newline)))
+
+(defun xah-html-point-in-src-or-href-q ()
+  "Return true if curser is inside a string of src or href.
+Version 2016-03-07"
+  (interactive)
+  (let ((in-string-q (nth 3 (syntax-ppss))))
+    (if in-string-q
+        (save-excursion
+          (skip-chars-backward "^\"")
+          (backward-char)
+          (if (string-match "=" (char-to-string (char-before)))
+              (progn
+                (backward-char 1)
+                (if (or
+                     (string-match "href" (current-word))
+                     (string-match "src" (current-word)))
+                    (progn t)
+                  (progn nil)))
+            nil))
+      nil
+      )))
 
 
 ;; syntax table
@@ -2204,7 +2234,7 @@ If `universal-argument' is called first, then also prompt for a “class” attr
                 (string-equal φtag-name "pre")
                 (string-equal φtag-name "code")))
           (save-excursion ; trim whitespace
-            (save-restriction 
+            (save-restriction
               (narrow-to-region ξp1 ξp2)
               (goto-char (point-min))
               (delete-horizontal-space)
@@ -2490,6 +2520,7 @@ t
   (setq xah-html-keymap (make-sparse-keymap))
   (define-key xah-html-keymap (kbd "<C-right>") 'xah-html-skip-tag-forward)
   (define-key xah-html-keymap (kbd "<C-left>") 'xah-html-skip-tag-backward)
+  (define-key xah-html-keymap (kbd "RET") 'xah-html-open-local-link)
 
   (define-key xah-html-keymap (kbd "TAB") 'xah-html-wrap-html-tag)
 
