@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 2.4.9
+;; Version: 2.5.9
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -649,7 +649,10 @@ This command does the inverse of `xah-html-htmlize-precode'."
 Version 2016-03-07"
   (interactive)
   (if (xah-html-point-in-src-or-href-q)
-      (find-file-at-point (ffap-file-at-point))
+      (let ((ξfilepath (aref (xah-html--get-thing-at-cursor 'filepath) 0)))
+        (if (file-exists-p ξfilepath)
+            (find-file ξfilepath)
+          (message "file no exist at %s" ξfilepath)))
     (newline)))
 
 (defun xah-html-point-in-src-or-href-q ()
