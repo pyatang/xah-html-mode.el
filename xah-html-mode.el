@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 2.5.9
+;; Version: 2.6.9
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -1100,19 +1100,23 @@ Assumes that the file contains the string “<title>…</title>”. If not, and 
 
 (defun xah-html-lines-to-html-list ()
   "Make the current block of lines into a HTML list.
-Any URL in the line will be turned into links.
+
+If `universal-argument' is called first, use ordered list <ol> instead of <ul>.
 
 Example:
 If your cursor is in the following block of text:
 
-Castratos are castrated males made for singing: http://en.wikipedia.org/wiki/Castrato , record of the last castrato: http://www.archive.org/details/AlessandroMoreschi
-human vocal range: http://en.wikipedia.org/wiki/Vocal_range
+cat
+dog
 
-It will become:
+becomes:
+
 <ul>
-<li>Castratos are castrated males made for singing: <a href=\"http://en.wikipedia.org/wiki/Castrato\">Castrato</a> , record of the last castrato: <a href=\"http://www.archive.org/details/AlessandroMoreschi\">http://www.archive.org/details/AlessandroMoreschi</a></li>
-<li>human vocal range: <a href=\"http://en.wikipedia.org/wiki/Vocal_range\">Vocal range</a></li>
-</ul>"
+<li>cat</li>
+<li>dog</li>
+</ul>
+Version 2016-03-19
+"
   (interactive)
   (let (ξbds ξp1 ξp2 ξinput-str ξresultStr)
     (setq ξbds (xah-html--get-thing-or-selection 'block))
@@ -1138,10 +1142,17 @@ It will become:
               (beginning-of-line) (insert "<li>")
               (end-of-line) (insert "</li>")
 
-              (goto-char 1)
-              (insert "<ul>\n")
-              (goto-char (point-max))
-              (insert "\n</ul>")
+              (if current-prefix-arg
+                  (progn
+                    (goto-char 1)
+                    (insert "<ol>\n")
+                    (goto-char (point-max))
+                    (insert "\n</ol>"))
+                (progn
+                  (goto-char 1)
+                  (insert "<ul>\n")
+                  (goto-char (point-max))
+                  (insert "\n</ul>")))
 
               (buffer-string))))
     (delete-region ξp1 ξp2)
