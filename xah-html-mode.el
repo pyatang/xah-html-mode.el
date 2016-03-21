@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 2.6.9
+;; Version: 2.7.0
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -2056,7 +2056,7 @@ When called in lisp code, φp1 φp2 are region begin/end positions.
         (goto-char (point-min))
         (while (search-forward-regexp "〔<a href=" nil t)
           (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) ξchangedItems)
-          (replace-match "〔➤ <a href=" t))
+          (replace-match "〔➤see <a href=" t))
 
         (goto-char (point-min))
         (while (search-forward-regexp "〔\\([ -_/\\:~.A-Za-z0-9%]+?\\)〕" nil t)
