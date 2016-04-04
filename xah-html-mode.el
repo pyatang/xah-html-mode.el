@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 2.8.2
+;; Version: 3.8.2
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -332,13 +332,34 @@ Example usage:
 (setq xah-html-html5-tag-list (mapcar (lambda (x) (car x)) xah-html-html5-tag-names))
 
 (defcustom xah-html-attribute-names nil
-  "HTML5 attribute names."
+  "HTML attribute names."
 :group 'xah-html-mode)
-(setq xah-html-attribute-names '( "id" "class" "style" "title" "href" "type" "rel" "http-equiv" "content" "charset" "alt" "src" "width" "height" "controls" "autoplay" "preload" "name" "value" "size" "async" "defer"
+(setq xah-html-attribute-names '( "id" "class" "style" "title" "href" "type" "rel" "http-equiv" "content" "charset" "alt" "src" "width" "height"
+  "preload" "name" "value" "size"
+"maxlength"
+"rows"
+"cols"
 
-"checked"
-"multiple"
+"enctype"
+"method"
+"action"
  ))
+
+(defcustom xah-html-boolean-attribute-names nil
+  "HTML boolean attribute names."
+:group 'xah-html-mode)
+(setq
+ xah-html-boolean-attribute-names
+ '(
+ 
+  "controls"
+   "autoplay"
+   "loop"
+   "async"
+   "defer"
+   "checked"
+   "multiple"
+   ))
 
 (defcustom xah-html-html5-self-close-tags nil
   "List of HTML5 self-closing tag name. "
@@ -401,7 +422,7 @@ Example usage:
         ("emacs-lisp" . ["xah-elisp-mode" "el"])
         ("haskell" . ["haskell-mode" "hs"])
         ("golang" . ["go-mode" "go"])
-        ("html" . ["html-mode" "html"])
+        ("html" . ["xah-html-mode" "html"])
         ("mysql" . ["sql-mode" "sql"])
         ("xml" . ["sgml-mode" "xml"])
         ("html6" . ["xah-html6-mode" "html6"])
@@ -2602,6 +2623,7 @@ t
       (let (
             (htmlElementNamesRegex (regexp-opt xah-html-html5-tag-list))
             (htmlAttributeNamesRegexp (regexp-opt xah-html-attribute-names))
+            (htmlBooleanAttributeNamesRegexp (regexp-opt xah-html-boolean-attribute-names))
             (cssPropertieNames (regexp-opt xah-html-css-property-names 'words))
             (cssValueNames (regexp-opt xah-html-css-value-kwds 'words))
             (cssColorNames (regexp-opt xah-html-css-color-names 'words))
@@ -2632,6 +2654,8 @@ t
           (,(concat "<\\(" htmlElementNamesRegex "\\).*?>") . (1 font-lock-function-name-face))
 
           (,(concat " +\\(" htmlAttributeNamesRegexp "\\) *= *['\"]") . (1 font-lock-variable-name-face))
+
+          (,htmlBooleanAttributeNamesRegexp . font-lock-variable-name-face)
 
           (,cssPropertieNames . font-lock-type-face)
           ;; (,(concat ":\\(" cssValueNames " *\\)+") . (1 font-lock-keyword-face))
