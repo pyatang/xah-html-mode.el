@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 2.7.0
+;; Version: 2.8.1
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -644,15 +644,33 @@ This command does the inverse of `xah-html-htmlize-precode'."
           (setq ξi (1+ ξi)))))
     (message "xah-html-redo-syntax-coloring-buffer %s redone" ξi)))
 
+;; (defun xah-html-open-local-link ()
+;;   "Open the link under cursor or insert newline.
+;; If cursor is on a src=… or href=…, then if it a file path, open file, if http, open in browser.
+;; Else call `newline'.
+;; Version 2016-03-22"
+;;   (interactive)
+;;   (if (xah-html-point-in-src-or-href-q)
+;;       (let ((ξsrcValue (aref (xah-html--get-thing-at-cursor 'filepath) 0)))
+;;         (if (string-match "^http" ξsrcValue)
+;;             (browse-url ξsrcValue)
+;;           (find-file ξsrcValue)))
+;;     (newline)))
+
 (defun xah-html-open-local-link ()
-  "Open the link under cursor, if it is a local file. Else call `newline'.
-Version 2016-03-07"
+  "Open the link under cursor or insert newline.
+If cursor is on a src=… or href=…, then if it a file path, open file, if http, open in browser.
+Else call `newline'.
+Version 2016-03-22"
   (interactive)
   (if (xah-html-point-in-src-or-href-q)
-      (let ((ξfilepath (aref (xah-html--get-thing-at-cursor 'filepath) 0)))
-        (if (file-exists-p ξfilepath)
-            (find-file ξfilepath)
-          (message "file no exist at %s" ξfilepath)))
+      (let ((ξsrcValue (aref (xah-html--get-thing-at-cursor 'filepath) 0)))
+        (if (string-match "^http" ξsrcValue)
+            (browse-url ξsrcValue)
+          (if (file-exists-p ξsrcValue)
+            (find-file ξsrcValue)
+            (when (y-or-n-p (format "file no exist at 「%s」. Create new?" ξsrcValue))
+              (find-file ξsrcValue)))))
     (newline)))
 
 (defun xah-html-point-in-src-or-href-q ()
@@ -1579,11 +1597,13 @@ The order of lines for {title, author, date/time, url} needs not be in that orde
 
        ;; set title, date, url, author,
     (let (ξx (case-fold-search nil))
+;; the whole thing here is not optimal implementation. data structure should be hash or so. easier... basically, we have n items, and we need to identify them into n things. that is, pairing them up. Now, some items are easily recognized with 100% certainty. We pair those first. Then, in the end, we'll have 2 or so items that we need to identify, but by then, the items are few, and we can easily distinguish them. So, for this, we need a data structure such that we can easily remove item for those we already identified.
       (while (> (length ξmyList) 0)
         (setq ξx (pop ξmyList))
+(message "「%s」" ξx)
         (cond
-         ((string-match "^https?://" ξx ) (setq ξurl ξx))
-         ((string-match "^ *[bB]y " ξx ) (setq ξauthor ξx))
+         ((string-match "^https?://" ξx) (setq ξurl ξx))
+         ((string-match "^ *[bB]y " ξx) (setq ξauthor ξx))
          ((string-match "^ *author[: ]" ξx ) (setq ξauthor ξx))
          ((xah-html--is-datetimestamp-p ξx) (setq ξdate ξx))
          (t (setq ξtitle ξx)))))
@@ -2622,7 +2642,7 @@ t
 
 ;;;autoload
 (define-derived-mode xah-html-mode prog-mode
-  "∑html"
+                     "∑html"
   "A simple major mode for HTML5.
 HTML5 keywords are colored.
 
@@ -2633,19 +2653,19 @@ HTML5 keywords are colored.
 
   (set-syntax-table xah-html-syntax-table)
 
-  (if (or
-       (not (boundp 'xfk-major-mode-lead-key))
-       (null 'xfk-major-mode-lead-key))
-      (define-key xah-html-keymap (kbd "<menu> e") xah-html-single-keys-keymap)
-    (define-key xah-html-keymap xfk-major-mode-lead-key xah-html-single-keys-keymap))
+  (define-key xah-html-keymap
+    (if (boundp 'xah-major-mode-lead-key)
+        xah-major-mode-lead-key
+      (kbd "C-c C-c"))
+    xah-html-single-keys-keymap)
+
   (use-local-map xah-html-keymap)
 
   (set (make-local-variable 'comment-start) "<!-- ")
   (set (make-local-variable 'comment-end) " -->")
 
   ;;  (setq mode-name "xah-html")
-  (run-mode-hooks 'xah-html-mode-hook)
-  )
+  (run-mode-hooks 'xah-html-mode-hook))
 
 (provide 'xah-html-mode)
 
