@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 2.8.1
+;; Version: 2.8.2
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -334,7 +334,11 @@ Example usage:
 (defcustom xah-html-attribute-names nil
   "HTML5 attribute names."
 :group 'xah-html-mode)
-(setq xah-html-attribute-names '( "id" "class" "style" "title" "href" "type" "rel" "http-equiv" "content" "charset" "alt" "src" "width" "height" "controls" "autoplay" "preload" "name" "value" "size" "async" "defer" ))
+(setq xah-html-attribute-names '( "id" "class" "style" "title" "href" "type" "rel" "http-equiv" "content" "charset" "alt" "src" "width" "height" "controls" "autoplay" "preload" "name" "value" "size" "async" "defer"
+
+"checked"
+"multiple"
+ ))
 
 (defcustom xah-html-html5-self-close-tags nil
   "List of HTML5 self-closing tag name. "
