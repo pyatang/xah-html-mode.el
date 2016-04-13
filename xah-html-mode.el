@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 3.8.2
+;; Version: 3.8.3
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -351,7 +351,6 @@ Example usage:
 (setq
  xah-html-boolean-attribute-names
  '(
- 
   "controls"
    "autoplay"
    "loop"
@@ -359,6 +358,7 @@ Example usage:
    "defer"
    "checked"
    "multiple"
+   "selected"
    ))
 
 (defcustom xah-html-html5-self-close-tags nil
@@ -2614,7 +2614,6 @@ t
   (define-key xah-html-single-keys-keymap (kbd "r m") 'xah-html-make-html-table)
   (define-key xah-html-single-keys-keymap (kbd "r v") 'xah-html-make-html-table-undo)
   (define-key xah-html-single-keys-keymap (kbd "t") 'xah-html-wrap-p-tag)
-  (define-key xah-html-single-keys-keymap (kbd "n") nil)
   (define-key xah-html-single-keys-keymap (kbd "y") 'xah-html-make-citation))
 
 
@@ -2655,7 +2654,7 @@ t
 
           (,(concat " +\\(" htmlAttributeNamesRegexp "\\) *= *['\"]") . (1 font-lock-variable-name-face))
 
-          (,htmlBooleanAttributeNamesRegexp . font-lock-variable-name-face)
+          (,htmlBooleanAttributeNamesRegexp . font-lock-constant-face)
 
           (,cssPropertieNames . font-lock-type-face)
           ;; (,(concat ":\\(" cssValueNames " *\\)+") . (1 font-lock-keyword-face))
