@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 3.8.3
+;; Version: 3.8.4
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -2279,35 +2279,44 @@ If `universal-argument' is called first, then also prompt for a “class” attr
         (read-string "class:" nil xah-html-class-input-history "")
       nil )))
   (let (ξbds ξp1 ξp2 ξp3 ξp4 ξwrap-type )
-    (progn
-      (setq ξwrap-type (xah-html-get-tag-type φtag-name))
-      (setq ξbds
-            (cond
-             ((equal ξwrap-type "w") (xah-html--get-thing-or-selection 'word))
-             ((equal ξwrap-type "l") (xah-html--get-thing-or-selection 'line))
-             ((equal ξwrap-type "b") (xah-html--get-thing-or-selection 'block))
-             (t (xah-html--get-thing-or-selection 'word))))
-      (setq ξp1 (elt ξbds 1)
-            ξp2 (elt ξbds 2))
-      (if (not (or
-                (string-equal φtag-name "pre")
-                (string-equal φtag-name "code")))
-          (save-excursion ; trim whitespace
-            (save-restriction
-              (narrow-to-region ξp1 ξp2)
-              (goto-char (point-min))
-              (delete-horizontal-space)
-              (setq ξp3 (point))
-              (goto-char (point-max))
-              (delete-horizontal-space)
-              (setq ξp4 (point))))
-        (progn
-          (setq ξp3 ξp1)
-          (setq ξp4 ξp2)))
-      (xah-html-add-open-close-tags φtag-name φclass-name ξp3 ξp4)
-      (when ; put cursor between when input text is empty
-          (and (equal ξp3 ξp4) (not (xah-html-tag-self-closing-p φtag-name)))
-        (progn (search-backward "</" ))))))
+    (setq ξwrap-type (xah-html-get-tag-type φtag-name))
+    (setq ξbds
+          (cond
+           ((equal ξwrap-type "w") (xah-html--get-thing-or-selection 'word))
+           ((equal ξwrap-type "l") (xah-html--get-thing-or-selection 'line))
+           ((equal ξwrap-type "b") (xah-html--get-thing-or-selection 'block))
+           (t (xah-html--get-thing-or-selection 'word))))
+    (setq ξp1 (elt ξbds 1)
+          ξp2 (elt ξbds 2))
+
+    (save-excursion
+      (save-restriction
+        (narrow-to-region ξp1 ξp2)
+        (when ; trim whitespace
+            (and
+             (or
+              (equal ξwrap-type "l")
+              (equal ξwrap-type "b"))
+             (not (or
+                   (string-equal φtag-name "pre")
+                   (string-equal φtag-name "code"))))
+          (progn
+            (goto-char (point-min))
+            (delete-horizontal-space)
+            (goto-char (point-max))
+            (delete-horizontal-space)))
+
+        ;; add blank at start/end
+        (when (equal ξwrap-type "b")
+          (progn
+            (goto-char (point-min))
+            (insert "\n")
+            (goto-char (point-max))
+            (insert "\n")))
+        (xah-html-add-open-close-tags φtag-name φclass-name (point-min) (point-max))))
+    (when ; put cursor between when input text is empty
+        (and (equal ξp1 ξp2) (not (xah-html-tag-self-closing-p φtag-name)))
+      (progn (search-backward "</" )))))
 
 (defun xah-html-insert-wrap-source-code (&optional φlang-code)
   "Insert/wrap a <pre class=\"‹φlang-code›\"> tags to text selection or current text block."
@@ -2585,13 +2594,8 @@ t
 
   (define-prefix-command 'xah-html-single-keys-keymap)
 
-  (define-key xah-html-single-keys-keymap (kbd "c") 'xah-html-lines-to-html-list)
-  (define-key xah-html-single-keys-keymap (kbd "g") 'browse-url-of-buffer)
-  (define-key xah-html-single-keys-keymap (kbd "k") 'xah-html-htmlize-keyboard-shortcut-notation)
-  (define-key xah-html-single-keys-keymap (kbd "m") 'xah-html-insert-wrap-source-code)
-
-  (define-key xah-html-single-keys-keymap (kbd "DEL") 'xah-html-remove-html-tags)
   (define-key xah-html-single-keys-keymap (kbd ".") 'xah-html-decode-percent-encoded-url)
+  (define-key xah-html-single-keys-keymap (kbd "0") 'xah-html-extract-url)
   (define-key xah-html-single-keys-keymap (kbd "3") 'xah-html-update-title)
   (define-key xah-html-single-keys-keymap (kbd "4") 'xah-html-markup-ruby)
   (define-key xah-html-single-keys-keymap (kbd "5") 'xah-html-mark-unicode)
@@ -2599,17 +2603,22 @@ t
   (define-key xah-html-single-keys-keymap (kbd "7") 'xah-html-toggle-syntax-coloring-markup)
   (define-key xah-html-single-keys-keymap (kbd "8") 'xah-html-get-precode-make-new-file)
   (define-key xah-html-single-keys-keymap (kbd "9") 'xah-html-redo-syntax-coloring-buffer)
-  (define-key xah-html-single-keys-keymap (kbd "0") 'xah-html-extract-url)
+  (define-key xah-html-single-keys-keymap (kbd "DEL") 'xah-html-remove-html-tags)
+  (define-key xah-html-single-keys-keymap (kbd "c") 'xah-html-lines-to-html-list)
+  (define-key xah-html-single-keys-keymap (kbd "g") 'xah-html-brackets-to-html)
+  (define-key xah-html-single-keys-keymap (kbd "h") 'xah-html-wrap-url)
+  (define-key xah-html-single-keys-keymap (kbd "k") 'xah-html-htmlize-keyboard-shortcut-notation)
+  (define-key xah-html-single-keys-keymap (kbd "m") 'xah-html-insert-wrap-source-code)
+  (define-key xah-html-single-keys-keymap (kbd "p") 'browse-url-of-buffer)
+
   (define-key xah-html-single-keys-keymap (kbd "l 3") 'xah-html-source-url-linkify)
   (define-key xah-html-single-keys-keymap (kbd "l s") 'xah-html-make-link-defunct)
   (define-key xah-html-single-keys-keymap (kbd "l w") 'xah-html-word-to-wikipedia-linkify)
   (define-key xah-html-single-keys-keymap (kbd "l g") 'xah-html-wikipedia-url-linkify)
-  (define-key xah-html-single-keys-keymap (kbd "h") 'xah-html-wrap-url)
   (define-key xah-html-single-keys-keymap (kbd "r u") 'xah-html-replace-html-chars-to-unicode)
   (define-key xah-html-single-keys-keymap (kbd "r e") 'xah-html-replace-html-chars-to-entities)
   (define-key xah-html-single-keys-keymap (kbd "r p") 'xah-html-replace-html-named-entities)
   (define-key xah-html-single-keys-keymap (kbd "r .") 'xah-html-htmlize-elisp-keywords)
-  (define-key xah-html-single-keys-keymap (kbd "r t") 'xah-html-brackets-to-html)
   (define-key xah-html-single-keys-keymap (kbd "r j") 'xah-html-emacs-to-windows-kbd-notation)
   (define-key xah-html-single-keys-keymap (kbd "r m") 'xah-html-make-html-table)
   (define-key xah-html-single-keys-keymap (kbd "r v") 'xah-html-make-html-table-undo)
