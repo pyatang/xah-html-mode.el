@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 3.8.4
+;; Version: 3.8.5
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -2271,14 +2271,16 @@ This function does not `save-excursion'."
 When there's no text selection, the tag will be wrapped around current {word, line, text-block}, depending on the tag used.
 
 If current line or word is empty, then insert open/end tags and place cursor between them.
-If `universal-argument' is called first, then also prompt for a “class” attribute. Empty value means don't add the attribute."
+If `universal-argument' is called first, then also prompt for a “class” attribute. Empty value means don't add the attribute.
+Version 2016-04-24
+"
   (interactive
    (list
     (ido-completing-read "HTML tag:" xah-html-html5-tag-list "PREDICATE" "REQUIRE-MATCH" nil xah-html-html-tag-input-history "div")
     (if current-prefix-arg
         (read-string "class:" nil xah-html-class-input-history "")
       nil )))
-  (let (ξbds ξp1 ξp2 ξp3 ξp4 ξwrap-type )
+  (let (ξbds ξp1 ξp2 ξwrap-type )
     (setq ξwrap-type (xah-html-get-tag-type φtag-name))
     (setq ξbds
           (cond
@@ -2289,34 +2291,37 @@ If `universal-argument' is called first, then also prompt for a “class” attr
     (setq ξp1 (elt ξbds 1)
           ξp2 (elt ξbds 2))
 
-    (save-excursion
-      (save-restriction
-        (narrow-to-region ξp1 ξp2)
-        (when ; trim whitespace
-            (and
-             (or
-              (equal ξwrap-type "l")
-              (equal ξwrap-type "b"))
-             (not (or
-                   (string-equal φtag-name "pre")
-                   (string-equal φtag-name "code"))))
-          (progn
-            (goto-char (point-min))
-            (delete-horizontal-space)
-            (goto-char (point-max))
-            (delete-horizontal-space)))
+    (save-restriction
+      (narrow-to-region ξp1 ξp2)
+      (when ; trim whitespace
+          (and
+           (not (use-region-p))
+           (or
+            (equal ξwrap-type "l")
+            (equal ξwrap-type "b"))
+           (not (or
+                 (string-equal φtag-name "pre")
+                 (string-equal φtag-name "code"))))
+        (progn
+          (goto-char (point-min))
+          (delete-horizontal-space)
+          (goto-char (point-max))
+          (delete-horizontal-space)))
 
-        ;; add blank at start/end
-        (when (equal ξwrap-type "b")
-          (progn
-            (goto-char (point-min))
-            (insert "\n")
-            (goto-char (point-max))
-            (insert "\n")))
-        (xah-html-add-open-close-tags φtag-name φclass-name (point-min) (point-max))))
+      ;; add blank at start/end
+      (when (equal ξwrap-type "b")
+        (progn
+          (goto-char (point-min))
+          (insert "\n")
+          (goto-char (point-max))
+          (insert "\n")))
+      (xah-html-add-open-close-tags φtag-name φclass-name (point-min) (point-max)))
+
     (when ; put cursor between when input text is empty
-        (and (equal ξp1 ξp2) (not (xah-html-tag-self-closing-p φtag-name)))
-      (progn (search-backward "</" )))))
+        (not (xah-html-tag-self-closing-p φtag-name))
+      (when (and
+             (= ξp1 ξp2))
+        (search-backward "</" )))))
 
 (defun xah-html-insert-wrap-source-code (&optional φlang-code)
   "Insert/wrap a <pre class=\"‹φlang-code›\"> tags to text selection or current text block."
@@ -2595,7 +2600,7 @@ t
   (define-prefix-command 'xah-html-single-keys-keymap)
 
   (define-key xah-html-single-keys-keymap (kbd ".") 'xah-html-decode-percent-encoded-url)
-  (define-key xah-html-single-keys-keymap (kbd "0") 'xah-html-extract-url)
+  (define-key xah-html-single-keys-keymap (kbd "d") 'xah-html-extract-url)
   (define-key xah-html-single-keys-keymap (kbd "3") 'xah-html-update-title)
   (define-key xah-html-single-keys-keymap (kbd "4") 'xah-html-markup-ruby)
   (define-key xah-html-single-keys-keymap (kbd "5") 'xah-html-mark-unicode)
