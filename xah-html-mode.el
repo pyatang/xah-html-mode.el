@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 3.8.5
+;; Version: 3.8.6
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -280,8 +280,8 @@ Example usage:
 ("dfn" . ["z"])
 ("embed" . ["l"])
 ("fieldset" . ["z"])
-("figcaption" . ["l"])
 ("figure" . ["b"])
+("figcaption" . ["l"])
 ("footer" . ["b"])
 ("form" . ["l"])
 ("head" . ["b"])
@@ -1780,7 +1780,7 @@ Version 2015-09-12"
                    (string-match "wikipedia\\.org.+PNG$" ξurl)
                    (string-match "wikipedia\\.org.+svg$" ξurl)
                    (string-match "wikipedia\\.org.+SVG$" ξurl))
-                  "img src"
+                  "image source"
                 ξurl
                 )) ; smart
            ))
