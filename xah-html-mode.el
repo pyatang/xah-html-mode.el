@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 3.8.6
+;; Version: 3.9.6
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -39,6 +39,8 @@
 (defvar xah-html--month-abbrev-names (mapcar (lambda (x) (substring x 0 3)) xah-html--month-full-names) "list of English month 3-letter abbrev names.")
 
 (defvar xah-html--weekday-names '("Monday" "Tuesday" "Wednesday" "Thursday" "Friday" "Saturday" "Sunday") "list of English weekday full names.")
+
+;; 'ada-mode 'antlr-mode 'archive-mode 'asm-mode 'autoconf-mode 'awk-mode 'bat-mode 'bibtex-mode 'bibtex-style-mode 'bovine-grammar-mode 'c++-mode 'c-mode 'change-log-mode 'clojure-mode 'clojurec-mode 'clojurescript-mode 'clojurex-mode 'compilation-mode 'conf-colon-mode 'conf-javaprop-mode 'conf-mode 'conf-mode-maybe 'conf-ppd-mode 'conf-space-mode 'conf-unix-mode 'conf-xdefaults-mode 'css-mode 'dcl-mode 'delphi-mode 'diff-mode 'dns-mode 'doc-view-mode-maybe 'doctex-mode 'dsssl-mode 'ebrowse-tree-mode 'elisp-byte-code-mode 'emacs-lisp-mode 'f90-mode 'fortran-mode 'fundamental-mode 'gdb-script-mode 'git-rebase-mode 'go-mode 'html-mode 'icon-mode 'idl-mode 'idlwave-mode 'image-mode 'java-mode 'javascript-mode 'latex-mode 'ld-script-mode 'lisp-mode 'm2-mode 'm4-mode 'mail-mode 'makefile-automake-mode 'makefile-gmake-mode 'makefile-imake-mode 'makefile-makepp-mode 'markdown-mode 'metafont-mode 'metapost-mode 'mixal-mode 'nroff-mode 'objc-mode 'org-mode 'pascal-mode 'perl-mode 'pike-mode 'prolog-mode 'ps-mode 'python-mode 'rst-mode 'ruby-mode 'scheme-mode 'scribe-mode 'scss-mode 'ses-mode 'sgml-mode 'sh-mode 'shell-script-mode 'sieve-mode 'simula-mode 'snmp-mode 'snmpv2-mode 'sql-mode 'srecode-template-mode 'tar-mode 'tcl-mode 'tex-mode 'texinfo-mode 'text-mode 'tuareg-mode 'vera-mode 'verilog-mode 'vhdl-mode 'vimrc-mode 'wisent-grammar-mode 'xah-clojure-mode 'xah-css-mode 'xah-elisp-mode 'xah-html-mode 'xah-js-mode 'xah-php-mode 'xml-mode
 
 (defun xah-html--is-datetimestamp-p (φinput-string)
   "Return t if φinput-string is a date/time stamp, else nil.
@@ -462,6 +464,9 @@ Example usage:
 (defvar xah-html-lang-name-list nil "List of langcode.")
 (setq xah-html-lang-name-list (mapcar 'car xah-html-lang-name-map))
 
+(defvar xah-html-lang-mode-list nil "List of supported language mode names.")
+(setq xah-html-lang-mode-list (mapcar (lambda (x) (aref (cdr x) 0)) xah-html-lang-name-map))
+
 (defun xah-html-precode-htmlized-p (φp1 φp2)
   "Return true if region φp1 φp2 is htmlized code.
 WARNING: it just losely check if it contains span tag."
@@ -602,7 +607,7 @@ This function requires the `htmlize-buffer' from 〔htmlize.el〕 by Hrvoje Niks
   (interactive
    (list (region-beginning)
          (region-end)
-         (ido-completing-read "Chose mode for coloring:" (mapcar 'cdr auto-mode-alist))))
+         (ido-completing-read "Chose mode for coloring:" xah-html-lang-mode-list)))
   (let* (
          (ξinput-str (buffer-substring-no-properties φp1 φp2))
          (ξout-str
@@ -637,10 +642,8 @@ This command does the inverse of `xah-html-htmlize-precode'."
          (ξp1 (elt ξt34342 1))
          (ξp2 (elt ξt34342 2)))
     (if (xah-html-precode-htmlized-p ξp1 ξp2)
-        (progn
-          (xah-html-dehtmlize-precode ξp1 ξp2))
-      (progn
-        (xah-html-htmlize-precode φlang-name-map)))))
+        (xah-html-dehtmlize-precode ξp1 ξp2)
+      (xah-html-htmlize-precode φlang-name-map))))
 
 (defun xah-html-redo-syntax-coloring-buffer (&optional φlang-code)
   "redo all pre lang code syntax coloring in current html page."
@@ -2555,6 +2558,8 @@ t
     ("1purple" "#800080" nil :system t)
     ("1orange" "#ffa500" nil :system t)
     ("hsl" "hsl(0,100%,50%)" nil :system t)
+
+    ("og" "<meta property=\"og:image\" content=\"http://ergoemacs.org/emacs/i/geek_vs_non_geek_repetitive_tasks.png\" />" nil :system t)
 
     ("1html5" "<!DOCTYPE html>" nil :system t)
     ("html4s" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">" nil :system t)
