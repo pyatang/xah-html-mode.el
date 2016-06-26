@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 3.9.6
+;; Version: 3.9.7
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -342,6 +342,7 @@ Example usage:
 "rows"
 "cols"
 
+"target"
 "enctype"
 "method"
 "action"
