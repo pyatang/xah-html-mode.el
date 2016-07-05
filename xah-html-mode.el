@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 3.9.7
+;; Version: 3.9.8
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -1807,8 +1807,10 @@ http://en.wikipedia.org/wiki/Emacs
 ⇒
 <a class=\"wikipedia-69128\" href=\"http://en.wikipedia.org/wiki/Emacs\" data-accessed=\"2015-09-14\">Emacs</a>.
 
+Works the same way for links to wiktionary, e.g. https://en.wiktionary.org/wiki/%E4%BA%86
+
 URL `http://ergoemacs.org/emacs/elisp_html_wikipedia_url_linkify.html'
-Version 2015-09-14."
+Version 2016-06-29."
   (interactive)
   (let (ξboundaries
         ξp1 ξp2
@@ -2713,6 +2715,8 @@ HTML5 keywords are colored.
 
   ;;  (setq mode-name "xah-html")
   (run-mode-hooks 'xah-html-mode-hook))
+
+(add-to-list 'auto-mode-alist '("\\.html\\'" . xah-html-mode))
 
 (provide 'xah-html-mode)
 
