@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 3.9.8
+;; Version: 4.0.0
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -1460,7 +1460,8 @@ WARNING: this command does not cover all HTML tags or convert all HTML entities.
 ;;         (insert ξoutput-str) )) ) )
 
 (defun xah-html-html-to-text (φstring &optional φfrom φto)
-  "Convert html to plain text on text selection or current text block."
+  "Convert html to plain text on text selection or current text block.
+Version 2016-07-08."
   (interactive
    (if (region-active-p)
        (list nil (region-beginning) (region-end))
@@ -1471,25 +1472,45 @@ WARNING: this command does not cover all HTML tags or convert all HTML entities.
     (setq ξwork-on-string-p (if φstring t nil))
     (setq ξinput-str (if ξwork-on-string-p φstring (buffer-substring-no-properties φfrom φto)))
 
-    (setq ξoutput-str
-          (with-temp-buffer
-            (insert ξinput-str)
-            (goto-char 1)
-            (let ((case-fold-search nil))
-              (xah-replace-pairs-region 1 (point-max)
-                                    '(
-                                      ["<script>\\([^\\<]+?\\)</script>" ""]
-                                      ["<li>" "<li>• " ]
-                                      ["<h2>" "────────── ────────── ────────── ────────── ──────────
-<h2>" ]
-                                      ["<h3>" "────────── ────────── ──────────
-<h3>" ]
-                                      ["<h4>" "────────── ──────────
-<h4>" ]
-                                      ["<a +href=\"\\([^\"]+?\\)\" *>\\([^<]+?\\)</a>" "\\2 〔 \\1 〕"]
-                                      ["<img +src=\"\\([^\"]+?\\)\" +alt=\"\\([^\"]+?\\)\" +width=\"[0-9]+\" +height=\"[0-9]+\" */?>" "〔IMAGE “\\2” \\1 〕"]
-                                      )))
-            (buffer-substring 1 (point-max))))
+    (setq
+     ξoutput-str
+     (with-temp-buffer
+       (insert ξinput-str)
+       (goto-char 1)
+       (let ((case-fold-search nil))
+
+         (xah-replace-regexp-pairs-region
+          (point-min)
+          (point-max)
+          [
+           ["<var class=\"d\">\\([^<]+?\\)</var>" "‹\\1›"]
+            ["<script>\\([^\\<]+?\\)</script>" ""]
+            ["<a +href=\"\\([^\"]+?\\)\" *>\\([^<]+?\\)</a>" "\\2 〔 \\1 〕"]
+            ["<img +src=\"\\([^\"]+?\\)\" +alt=\"\\([^\"]+?\\)\" +width=\"[0-9]+\" +height=\"[0-9]+\" */?>" "〔IMAGE “\\2” \\1 〕"]
+           ]
+          'FIXEDCASE-P )
+
+         (xah-replace-pairs-region
+          1
+          (point-max)
+          '(
+            ;; todo. something wrong here. not supposed to be regex
+            ["<li>" "<li>• " ]
+            ["</li>" "" ]
+            ["<code>" "「" ]
+            ["</code>" "」" ]
+            ["<h2>" "────────── ────────── ────────── ────────── ──────────" ]
+            ["</h2>" "" ]
+            ["<h3>" "────────── ────────── ──────────" ]
+            ["</h3>" "" ]
+            ["<h4>" "────────── ──────────" ]
+            ["</h4>" "" ]
+            ["<h5>" "──────────" ]
+            ["</h5>" "" ]
+            ["<h6>" "──────────" ]
+            ["</h6>" "" ]
+            )))
+       (buffer-substring 1 (point-max))))
 
     (setq ξoutput-str (xah-html-remove-html-tags ξoutput-str))
 
@@ -2071,7 +2092,7 @@ Some issues:
 Changes are reported to message buffer with char position.
 
 When called in lisp code, φp1 φp2 are region begin/end positions.
-"
+Version 2016-07-08"
   (interactive
    (let ((ξboundaries (xah-html--get-thing-or-selection 'block)))
      (list (elt ξboundaries 1) (elt ξboundaries 2))))
@@ -2079,15 +2100,18 @@ When called in lisp code, φp1 φp2 are region begin/end positions.
     (save-excursion
       (save-restriction
         (narrow-to-region φp1 φp2)
-
-        ;; (goto-char (point-min))
-        ;; (while (search-forward-regexp "「\\([^」]+?\\)」" nil t)
-        ;;   (xah-html-htmlize-elisp-keywords (point-min) (point-max)))
-
-        (goto-char (point-min))
-        (while (search-forward-regexp "「\\([^」]+?\\)」" nil t)
-          (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) ξchangedItems)
-          (replace-match "<code>\\1</code>" t))
+        (let (ξms)
+          (goto-char (point-min))
+          (while (search-forward-regexp "「\\([^」]+?\\)」" nil t)
+            (setq ξms (match-string-no-properties 1))
+            (push (concat (number-to-string (point)) " " ξms) ξchangedItems)
+            (replace-match "")
+            (insert (concat "<code>"
+                            (with-temp-buffer
+                              (insert ξms )
+                              (xah-html-replace-html-chars-to-entities (point-min) (point-max))
+                              (buffer-string))
+                            "</code>"))))
 
         (goto-char (point-min))
         (while (search-forward-regexp "〈\\([^〉]+?\\)〉" nil t)
