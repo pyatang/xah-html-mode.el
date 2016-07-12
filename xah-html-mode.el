@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 4.1.0
+;; Version: 4.1.1
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -799,9 +799,17 @@ Version 2016-03-07"
 
 (defface xah-html-span-f
   '(
-    (t :foreground "pink"))
+    (t :background "pink"))
   "face for span tag content."
   :group 'xah-html-mode )
+
+;; temp for debugging
+(face-spec-set
+ 'xah-html-span-f
+ '(
+   (t :background "pink"))
+ 'face-defface-spec
+ )
 
 (defface xah-html-mark-f
   '(
@@ -1154,7 +1162,9 @@ Version 2015-04-23"
 
 (defun xah-html-get-html-file-title (fname &optional no-error-p)
   "Return fname <title> tag's text.
-Assumes that the file contains the string “<title>…</title>”. If not, and if no-error-p is true, then return nil."
+Assumes that the file contains the string “<title>…</title>”. If not, and if no-error-p is true, then return nil.
+
+Version 2016-07-12"
   (with-temp-buffer
     (insert-file-contents fname nil nil nil t)
     (goto-char 1)
@@ -2574,6 +2584,7 @@ t
     ("hr" "<hr />")
     ("br" "<br />")
     ("cl" "class=\"\"" nil :system t)
+    ("id" "id=\"\"" nil :system t)
 
     ("w" "width" nil :system t)
     ("h" "height" nil :system t)
@@ -2738,13 +2749,15 @@ t
 
 
 
-;;;autoload
+;;;###autoload
 (define-derived-mode
     xah-html-mode
     prog-mode
-    "∑html"
+    "ξhtml"
   "A simple major mode for HTML5.
 HTML5 keywords are colored.
+
+URL `http://ergoemacs.org/emacs/xah-html-mode.html'
 
 \\{xah-html-mode-map}"
 
