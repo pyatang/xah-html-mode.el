@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 4.1.1
+;; Version: 4.1.2
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -936,13 +936,11 @@ Also delete the matching beginning/ending tag."
     ;;    to do this, first determine the name of the tag. ⁖ the “p” in  <p …>, then search the matching tag.
     ;; if so, O shit, it's complex. Need to determine if one of the nested has the same tag name. and and …
     ;; if not, then we can proceed. Just find the closing tag and delete it. Also the beginning.
-    (let ( )
-      (if (xah-html-cursor-in-tag-markup?)
-          (progn
-            (if (xah-html-end-tag?)
-                (progn (message "end %s" (xah-html-get-tag-name)))
-              (progn (message "begin %s" (xah-html-get-tag-name)))))
-        (progn (message "%s" "cursor needs to be inside a tag."))))))
+    (if (xah-html-cursor-in-tag-markup?)
+        (if (xah-html-end-tag?)
+            (progn (message "end %s" (xah-html-get-tag-name)))
+          (progn (message "begin %s" (xah-html-get-tag-name))))
+      (message "%s" "cursor needs to be inside a tag."))))
 
 (defun xah-html-skip-tag-forward ()
   "Move cursor to the closing tag."
@@ -1530,15 +1528,15 @@ Version 2016-07-08."
             ["<code>" "「" ]
             ["<code class=\"elisp-ƒ\">" "「" ]
             ["</code>" "」" ]
-            ["<h2>" "────────── ────────── ────────── ────────── ──────────" ]
+            ["<h2>" "────────── ────────── ────────── ────────── ──────────\n" ]
             ["</h2>" "" ]
-            ["<h3>" "────────── ────────── ──────────" ]
+            ["<h3>" "────────── ────────── ──────────\n" ]
             ["</h3>" "" ]
-            ["<h4>" "────────── ──────────" ]
+            ["<h4>" "────────── ──────────\n" ]
             ["</h4>" "" ]
-            ["<h5>" "──────────" ]
+            ["<h5>" "──────────\n" ]
             ["</h5>" "" ]
-            ["<h6>" "──────────" ]
+            ["<h6>" "──────────\n" ]
             ["</h6>" "" ]
             )))
        (buffer-substring 1 (point-max))))
@@ -1552,7 +1550,7 @@ Version 2016-07-08."
         (goto-char from)
         (insert -output-str)))))
 
-(defun xah-html-extract-url (p1 p2 &optional convert-relative-url-p)
+(defun xah-html-extract-url (*begin *end &optional *full-path-p)
   "Extract URLs in current block or region to `kill-ring'.
 
 If `universal-argument' is called first, convert relative URL to full path.
@@ -1562,11 +1560,11 @@ This command extracts all text of the forms
  <‹letter› … src=\"…\" …>
 that is on a a single line, by regex. The quote may be single quote.
 
-When called in lisp code, p1 p2 are region begin/end positions.
+When called in lisp code, *begin *end are region begin/end positions.
 Returns a list.
 
 URL `http://ergoemacs.org/emacs/elisp_extract_url_command.html'
-Version 2015-03-20"
+Version 2016-07-19"
   (interactive
    (let (-p1 -p2)
      ;; set region boundary -p1 -p2
@@ -1584,7 +1582,7 @@ Version 2015-03-20"
            (setq -p2 (point)))))
      (list -p1 -p2 current-prefix-arg)))
 
-  (let ((-regionText (buffer-substring-no-properties p1 p2))
+  (let ((-regionText (buffer-substring-no-properties *begin *end))
         (-urlList (list)))
     (with-temp-buffer
       (insert -regionText)
@@ -1599,7 +1597,7 @@ Version 2015-03-20"
         (push (match-string 3) -urlList)))
     (setq -urlList (reverse -urlList))
 
-    (when convert-relative-url-p
+    (when *full-path-p
       (setq -urlList
             (mapcar
              (lambda (-x)
@@ -2327,7 +2325,7 @@ This function does not `save-excursion'."
         (goto-char (+ p2 (length -str-left)))
         (insert -str-right)))))
 
-(defun xah-html-wrap-html-tag (tag-name &optional class-name)
+(defun xah-html-wrap-html-tag (*tag-name &optional *class-name)
   "Insert HTML open/close tags to current text unit or text selection.
 When there's no text selection, the tag will be wrapped around current {word, line, text-block}, depending on the tag used.
 
@@ -2342,7 +2340,7 @@ Version 2016-04-24
         (read-string "class:" nil xah-html-class-input-history "")
       nil )))
   (let (-bds -p1 -p2 -wrap-type )
-    (setq -wrap-type (xah-html-get-tag-type tag-name))
+    (setq -wrap-type (xah-html-get-tag-type *tag-name))
     (setq -bds
           (cond
            ((equal -wrap-type "w") (xah-html--get-thing-or-selection 'word))
@@ -2361,8 +2359,8 @@ Version 2016-04-24
             (equal -wrap-type "l")
             (equal -wrap-type "b"))
            (not (or
-                 (string-equal tag-name "pre")
-                 (string-equal tag-name "code"))))
+                 (string-equal *tag-name "pre")
+                 (string-equal *tag-name "code"))))
         (progn
           (goto-char (point-min))
           (delete-horizontal-space)
@@ -2376,10 +2374,10 @@ Version 2016-04-24
           (insert "\n")
           (goto-char (point-max))
           (insert "\n")))
-      (xah-html-add-open-close-tags tag-name class-name (point-min) (point-max)))
+      (xah-html-add-open-close-tags *tag-name *class-name (point-min) (point-max)))
 
     (when ; put cursor between when input text is empty
-        (not (xah-html-tag-self-closing-p tag-name))
+        (not (xah-html-tag-self-closing-p *tag-name))
       (when (and
              (= -p1 -p2))
         (search-backward "</" )))))
