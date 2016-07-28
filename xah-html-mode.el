@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 4.1.2
+;; Version: 4.1.3
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -690,11 +690,11 @@ This command does the inverse of `xah-html-htmlize-precode'."
   "Open the link under cursor or insert newline.
 If cursor is on a src=… or href=…, then if it a file path, open file, if http, open in browser.
 Else call `newline'.
-Version 2016-03-22"
+Version 2016-07-28"
   (interactive)
   (if (xah-html-point-in-src-or-href-q)
       (let ((-srcValue (aref (xah-html--get-thing-at-cursor 'filepath) 0)))
-        (if (string-match "^http" -srcValue)
+        (if (string-match "^http:\\|^https:" -srcValue)
             (browse-url -srcValue)
           (if (file-exists-p -srcValue)
             (find-file -srcValue)
@@ -1564,7 +1564,7 @@ When called in lisp code, *begin *end are region begin/end positions.
 Returns a list.
 
 URL `http://ergoemacs.org/emacs/elisp_extract_url_command.html'
-Version 2016-07-19"
+Version 2016-07-28"
   (interactive
    (let (-p1 -p2)
      ;; set region boundary -p1 -p2
@@ -1601,7 +1601,7 @@ Version 2016-07-19"
       (setq -urlList
             (mapcar
              (lambda (-x)
-               (if (string-match "^http" -x )
+               (if (string-match "^http:\\|^https:" -x )
                    (progn -x)
                  (progn
                    (expand-file-name -x (file-name-directory (buffer-file-name))))))
@@ -2233,6 +2233,7 @@ Version 2015-04-08"
                         ["Break" "<kbd>Pause</kbd>"]
                         ["PrtScn" "<kbd>PrtScn</kbd>"]
                         ["printscreen" "<kbd>PrtScn</kbd>"]
+                        ["sysrq" "<kbd>SysRq</kbd>"]
                         ["scrlk" "<kbd>Scroll Lock</kbd>"]
                         ["ScrLk" "<kbd>Scroll Lock</kbd>"]
                         ["scrolllock" "<kbd>Scroll Lock</kbd>"]
