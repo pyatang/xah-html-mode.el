@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 4.1.3
+;; Version: 4.2.0
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -249,7 +249,7 @@ Example usage:
 ("cite" . ["l"])
 ("code" . ["l"])
 
-("nav" . ["l"])
+("nav" . ["b"])
 
 ("rp" . ["l"])
 ("rt" . ["w"])
@@ -1754,7 +1754,7 @@ Version 2015-09-12"
     (delete-region -p1 -p2)
     (insert -newLinkStr)))
 
-(defun xah-html-source-url-linkify (prefixArg)
+(defun xah-html-source-url-linkify (*prefixArg)
   "Make URL at cursor point into a html link.
 If there's a text selection, use the text selection as input.
 
@@ -1823,9 +1823,9 @@ Version 2015-09-12"
 
     (setq -linkText
           (cond
-           ((equal prefixArg 1) -url) ; full url
-           ((or (equal prefixArg 2) (equal prefixArg 4) (equal prefixArg '(4))) (concat -domainName "…")) ; ‹domain›…
-           ((equal prefixArg 3) "img src") ; img src
+           ((equal *prefixArg 1) -url) ; full url
+           ((or (equal *prefixArg 2) (equal *prefixArg 4) (equal *prefixArg '(4))) (concat -domainName "…")) ; ‹domain›…
+           ((equal *prefixArg 3) "img src") ; img src
            (t (if
                   (or
                    (string-match "wikipedia\\.org.+jpg$" -url)
@@ -2589,41 +2589,41 @@ t
     ("h" "height" nil :system t)
     ("bgc" "background-color" nil :system t)
 
-    ("1css" "<link rel=\"stylesheet\" href=\"lbasic.css\" />")
-    ("1style" "<style type=\"text/css\">\np {line-height:130%}\n</style>")
-    ("1refresh" "<meta http-equiv=\"refresh\" content=\"0; url=http://example.com/\">")
+    ("zcss" "<link rel=\"stylesheet\" href=\"lbasic.css\" />")
+    ("zstyle" "<style type=\"text/css\">\np {line-height:130%}\n</style>")
+    ("zrefresh" "<meta http-equiv=\"refresh\" content=\"0; url=http://example.com/\">")
 
     ("iframe" "<iframe src=\"some.html\" width=\"200\" height=\"300\"></iframe>")
 
     ;; todo
 ;; http://xahlee.info/js/css_colors.html
 ;; http://xahlee.info/js/css_color_names.html
-    ("1white" "#ffffff" nil :system t)
-    ("1silver" "#c0c0c0" nil :system t)
-    ("1gray" "#808080" nil :system t)
-    ("1black" "#000000" nil :system t)
-    ("1red" "#ff0000" nil :system t)
-    ("1maroon" "#800000" nil :system t)
-    ("1yellow" "#ffff00" nil :system t)
-    ("1olive" "#808000" nil :system t)
-    ("1lime" "#00ff00" nil :system t)
-    ("1green" "#008000" nil :system t)
-    ("1aqua" "#00ffff" nil :system t)
-    ("1teal" "#008080" nil :system t)
-    ("1blue" "#0000ff" nil :system t)
-    ("1navy" "#000080" nil :system t)
-    ("1fuchsia" "#ff00ff" nil :system t)
-    ("1purple" "#800080" nil :system t)
-    ("1orange" "#ffa500" nil :system t)
+    ("zwhite" "#ffffff" nil :system t)
+    ("zsilver" "#c0c0c0" nil :system t)
+    ("zgray" "#808080" nil :system t)
+    ("zblack" "#000000" nil :system t)
+    ("zred" "#ff0000" nil :system t)
+    ("zmaroon" "#800000" nil :system t)
+    ("zyellow" "#ffff00" nil :system t)
+    ("zolive" "#808000" nil :system t)
+    ("zlime" "#00ff00" nil :system t)
+    ("zgreen" "#008000" nil :system t)
+    ("zaqua" "#00ffff" nil :system t)
+    ("zteal" "#008080" nil :system t)
+    ("zblue" "#0000ff" nil :system t)
+    ("znavy" "#000080" nil :system t)
+    ("zfuchsia" "#ff00ff" nil :system t)
+    ("zpurple" "#800080" nil :system t)
+    ("zorange" "#ffa500" nil :system t)
     ("hsl" "hsl(0,100%,50%)" nil :system t)
 
     ("og" "<meta property=\"og:image\" content=\"http://ergoemacs.org/emacs/i/geek_vs_non_geek_repetitive_tasks.png\" />" nil :system t)
 
-    ("1html5" "<!DOCTYPE html>" nil :system t)
+    ("zhtml5" "<!DOCTYPE html>" nil :system t)
     ("html4s" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">" nil :system t)
     ("html4t" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">" nil :system t)
     ("xhtml" "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">" nil :system t)
-    ("1html" "<!doctype html><html><head><meta charset=\"utf-8\" />
+    ("zhtml" "<!doctype html><html><head><meta charset=\"utf-8\" />
 <title>ttt</title>
 </head>
 <body>
@@ -2692,6 +2692,8 @@ t
   (define-key xah-html-mode-no-chord-map (kbd "r v") 'xah-html-make-html-table-undo)
   (define-key xah-html-mode-no-chord-map (kbd "t") 'xah-html-wrap-p-tag)
   (define-key xah-html-mode-no-chord-map (kbd "y") 'xah-html-make-citation)
+
+
 
   ;; define separate, so that user can override the lead key
   (define-key xah-html-mode-map (kbd "C-c C-c") xah-html-mode-no-chord-map)
