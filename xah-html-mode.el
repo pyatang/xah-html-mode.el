@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 4.2.0
+;; Version: 4.3.0
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -398,7 +398,11 @@ Example usage:
     (assoc tag-name xah-html-html5-tag-names)
     ) 0))
 
-(defvar xah-html-lang-name-map nil "a alist that maps lang name. Each element has this form 「(‹lang code› . [‹emacs major mode name› ‹file extension›])」")
+(defvar xah-html-lang-name-map nil "a alist that maps lang name. Each element has this form
+ (‹lang code› . [‹emacs major mode name› ‹file extension›])
+For example:
+ (\"emacs-lisp\" . [\"xah-elisp-mode\" \"el\"])")
+
 (setq xah-html-lang-name-map
       '(
         ("ahk" . ["ahk-mode" "ahk"])
@@ -423,6 +427,7 @@ Example usage:
         ("clojure" . ["xah-clojure-mode" "clj"])
         ("css" . ["xah-css-mode" "css"])
         ("emacs-lisp" . ["xah-elisp-mode" "el"])
+        ("dart" . ["dart-mode" "dart"])
         ("haskell" . ["haskell-mode" "hs"])
         ("golang" . ["go-mode" "go"])
         ("html" . ["xah-html-mode" "html"])
@@ -468,12 +473,12 @@ Example usage:
 (defvar xah-html-lang-mode-list nil "List of supported language mode names.")
 (setq xah-html-lang-mode-list (mapcar (lambda (x) (aref (cdr x) 0)) xah-html-lang-name-map))
 
-(defun xah-html-precode-htmlized-p (p1 p2)
+(defun xah-html-precode-htmlized-p (*begin *end )
   "Return true if region p1 p2 is htmlized code.
 WARNING: it just losely check if it contains span tag."
   (progn
-    (goto-char p1)
-    (re-search-forward "<span class=" p2 "NOERROR")))
+    (goto-char *begin)
+    (re-search-forward "<span class=" *end "NOERROR")))
 
 (defun xah-html-get-precode-langCode ()
   "Get the langCode and position boundary of current HTML pre block.
@@ -623,15 +628,15 @@ This function requires the `htmlize-buffer' from 〔htmlize.el〕 by Hrvoje Niks
         (delete-region p1 p2)
         (insert -out-str)))))
 
-(defun xah-html-dehtmlize-precode (p1 p2)
+(defun xah-html-dehtmlize-precode (*begin *end)
   "Delete span tags between pre tags.
 Note: only span tags of the form 「<span class=\"…\">…</span>」 are deleted.
 This command does the inverse of `xah-html-htmlize-precode'."
   (interactive
-   (let* ( (t55238 (xah-html-get-precode-langCode)))
-     (list (elt t55238 1) (elt t55238 2))))
+   (let* ( (-xx (xah-html-get-precode-langCode)))
+     (list (elt -xx 1) (elt -xx 2))))
   (save-restriction
-    (narrow-to-region p1 p2)
+    (narrow-to-region *begin *end)
     (xah-html-remove-span-tag-region (point-min) (point-max))
     (xah-html-code-tag-to-brackets (point-min) (point-max))))
 
@@ -1007,37 +1012,92 @@ this is a quick 1 min hackjob, works only when there's no nesting."
 ;;   (interactive)
 ;;   )
 
-(defun xah-html-replace-html-chars-to-entities (p1 p2 &optional entity-to-char-p)
+;; (defun xah-html-replace-html-chars-to-entities (p1 p2 &optional entity-to-char-p)
+;;   "Replace HTML chars & < > to HTML entities on current line or selection.
+;; The string replaced are:
+;;  & ⇒ &amp;
+;;  < ⇒ &lt;
+;;  > ⇒ &gt;
+
+;; If `universal-argument' is called, the replacement direction is reversed.
+
+;; When called in lisp code, p1 p2 are region begin/end positions.
+;; If entity-to-char-p is true, change entities to chars instead.
+
+;; See also: `xah-html-replace-html-named-entities', `xah-html-replace-html-chars-to-unicode'
+
+;; URL `http://ergoemacs.org/emacs/elisp_replace_html_entities_command.html'
+;; Version 2015-12-05"
+;;   (interactive
+;;    (if (use-region-p)
+;;        (list (region-beginning) (region-end) (if current-prefix-arg t nil))
+;;      (list (line-beginning-position) (line-end-position) (if current-prefix-arg t nil))))
+;;   (if entity-to-char-p
+;;       (xah-replace-pairs-region p1 p2 '( ["&amp;" "&"] ["&lt;" "<"] ["&gt;" ">"] ))
+;;     (xah-replace-pairs-region p1 p2 '( ["&" "&amp;"] ["<" "&lt;"] [">" "&gt;"] ))))
+
+(defun xah-html-replace-html-chars-to-entities (*begin *end &optional *entity-to-char-p)
   "Replace HTML chars & < > to HTML entities on current line or selection.
 The string replaced are:
  & ⇒ &amp;
  < ⇒ &lt;
  > ⇒ &gt;
 
+Print to message buffer occurrences of replacement (if any), with position.
+
 If `universal-argument' is called, the replacement direction is reversed.
 
-When called in lisp code, p1 p2 are region begin/end positions.
-If entity-to-char-p is true, change entities to chars instead.
+When called in lisp code, *begin *end are region begin/end positions. If entity-to-char-p is true, change entities to chars instead.
 
 See also: `xah-html-replace-html-named-entities', `xah-html-replace-html-chars-to-unicode'
 
 URL `http://ergoemacs.org/emacs/elisp_replace_html_entities_command.html'
-Version 2015-12-05"
+Version 2016-09-02"
   (interactive
-   (if (use-region-p)
-       (list (region-beginning) (region-end) (if current-prefix-arg t nil))
-     (list (line-beginning-position) (line-end-position) (if current-prefix-arg t nil))))
-  (if entity-to-char-p
-      (xah-replace-pairs-region p1 p2 '( ["&amp;" "&"] ["&lt;" "<"] ["&gt;" ">"] ))
-    (xah-replace-pairs-region p1 p2 '( ["&" "&amp;"] ["<" "&lt;"] [">" "&gt;"] ))))
+   (list
+    ;; These are done separately here
+    ;; so that command-history will record these expressions
+    ;; rather than the values they had this time.
+    ;; 2016-07-06 note, if you add a else, it won't work
+    (if (use-region-p) (region-beginning))
+    (if (use-region-p) (region-end))
+    (if current-prefix-arg t nil)))
 
-(defun xah-html-replace-html-chars-to-unicode (p1 p2 &optional fullwidth-to-ascii-p)
+  (if (null *begin) (setq *begin (line-beginning-position)))
+  (if (null *end) (setq *end (line-end-position)))
+
+  (let ((-changedItems '())
+        (-findReplaceMap
+         (if *entity-to-char-p
+             ;; this to prevent creating a replacement sequence out of blue
+             [
+              ["&amp;" "螽⛫1"] ["&lt;" "螽⛫2"] ["&gt;" "螽⛫3"]
+              ["螽⛫1" "&"] ["螽⛫2" "<"] ["螽⛫3" ">"]
+              ]
+           [ ["&" "&amp;"] ["<" "&lt;"] [">" "&gt;"] ]
+           )))
+    (save-excursion
+      (save-restriction
+        (narrow-to-region *begin *end)
+        (let ( (case-fold-search nil))
+          (mapc
+           (lambda (-x)
+             (goto-char (point-min))
+             (while (search-forward (elt -x 0) nil t)
+               (push (format "%s %s" (point) -x) -changedItems)
+               (replace-match (elt -x 1) 'FIXEDCASE 'LITERAL)))
+           -findReplaceMap))))
+    (mapcar
+     (lambda (-x) (princ -x) (terpri))
+     (reverse -changedItems))))
+
+(defun xah-html-replace-html-chars-to-unicode (*begin *end &optional *fullwidth-to-ascii-p)
   "Replace chars <>& to fullwidth version ＜＞＆ in current line or text selection.
 
 If `universal-argument' is called, the replacement direction is reversed.
 
-When called in lisp code, p1 p2 are region begin/end positions.
-If fullwidth-to-ascii-p is true, change entities to chars instead.
+When called in lisp code, *begin *end are region begin/end positions.
+If *fullwidth-to-ascii-p is true, change entities to chars instead.
 
 See also: `xah-html-replace-html-named-entities', `xah-html-replace-html-chars-to-unicode'
 
@@ -1049,8 +1109,8 @@ Version 2015-04-23"
      (list (line-beginning-position) (line-end-position) current-prefix-arg)))
 
   (save-restriction
-    (narrow-to-region p1 p2)
-    (if fullwidth-to-ascii-p
+    (narrow-to-region *begin *end)
+    (if *fullwidth-to-ascii-p
         (progn
           (goto-char (point-min))
           (while (search-forward "＆" nil t) (replace-match "&" nil t))
@@ -1066,7 +1126,7 @@ Version 2015-04-23"
         (goto-char (point-min))
         (while (search-forward ">" nil t) (replace-match "＞" nil ))))))
 
-(defun xah-html-replace-html-named-entities (p1 p2)
+(defun xah-html-replace-html-named-entities (*begin *end)
   "Replace HTML entities to Unicode character in current line or selection.
 For example, “&copy;” becomes “©”.
 
@@ -1075,7 +1135,7 @@ The following HTML Entities are not replaced:
  &lt; <
  &gt; >
 
-When called in lisp code, p1 p2 are region begin/end positions.
+When called in lisp code, *begin *end are region begin/end positions.
 
 See also:
 `xah-html-replace-html-chars-to-entities'
@@ -1149,7 +1209,7 @@ Version 2015-04-23"
           ["&lsaquo;" "‹"] ["&rsaquo;" "›"] ["&euro;" "€"]
           ]))
     (save-restriction
-      (narrow-to-region p1 p2)
+      (narrow-to-region *begin *end)
       (let ( (case-fold-search nil))
         (mapc
          (lambda (-x)
@@ -1328,7 +1388,7 @@ Version 2015-07-27"
                     (replace-regexp-in-string " " "_" -linkText)
                     "\">" -linkText "</a>"))))
 
-(defun xah-html-remove-span-tag-region (p1 p2)
+(defun xah-html-remove-span-tag-region (*begin *end)
   "Delete HTML “span” tags in region.
 And the following HTML entities are changed:
  &amp; ⇒ &
@@ -1337,16 +1397,16 @@ And the following HTML entities are changed:
 
 Note: only span tags of the form 「<span class=\"…\">…</span>」 are deleted.
 
-When done, the cursor is placed at p2."
+When done, the cursor is placed at *end."
   (interactive "r")
   (save-restriction
-    (narrow-to-region p1 p2)
+    (narrow-to-region *begin *end)
     (xah-replace-regexp-pairs-region (point-min) (point-max) '(["<span class=\"[^\"]+\">" ""]))
     (xah-replace-pairs-region (point-min) (point-max) '( ["</span>" ""] ))
     (xah-html-replace-html-chars-to-entities (point-min) (point-max) "ENTITY-TO-CHAR-P")
     (goto-char (point-max))))
 
-(defun xah-html-code-tag-to-brackets (p1 p2 &optional change-entity-p)
+(defun xah-html-code-tag-to-brackets (*begin *end &optional *change-entity-p)
   "Change HTML code tags to brackets in text selection or current text block.
 
  <code>…</code>
@@ -1363,18 +1423,18 @@ The html entities &amp; &lt; &gt; are changed to & < >.
 
 if `universal-argument' is called first, don't convert the html entities.
 
-When done, the cursor is placed at p2.
+When done, the cursor is placed at *end.
 
 when called in lisp program,
-p1 p2 are region begin/end.
-If change-entity-p is true, convert html entities to char.
+*begin *end are region begin/end.
+If *change-entity-p is true, convert html entities to char.
 "
   (interactive
    (let ((-bds (xah-html--get-thing-or-selection 'block)))
      (list (elt -bds 1) (elt -bds 2) (if current-prefix-arg nil t))))
 
   (save-restriction
-    (narrow-to-region p1 p2)
+    (narrow-to-region *begin *end)
     (xah-replace-regexp-pairs-region (point-min) (point-max) '(["<code class=\"[^\"]+\">" "「"] ["<var class=\"[^\"]+\">" "‹"]))
     (xah-replace-pairs-region
      (point-min) (point-max)
@@ -1383,7 +1443,7 @@ If change-entity-p is true, convert html entities to char.
        ["</code>" "」"]
        ["<var>" "‹"]
        ["</var>" "›"] ))
-    (when change-entity-p (xah-html-replace-html-chars-to-entities (point-min) (point-max) "ENTITY-TO-CHAR-P"))
+    (when *change-entity-p (xah-html-replace-html-chars-to-entities (point-min) (point-max) "ENTITY-TO-CHAR-P"))
     (goto-char (point-max))))
 
 (defun xah-html-remove-html-tags (string &optional from to)
@@ -1985,7 +2045,7 @@ If there's a text selection, wrap p around each text block (separated by 2 newli
     (delete-region -p1 -p2 )
     (insert "<p>" (replace-regexp-in-string "\n\n+" "</p>\n\n<p>" (xah-html--trim-string -inputText)) "</p>")))
 
-(defun xah-html-emacs-to-windows-kbd-notation (p1 p2)
+(defun xah-html-emacs-to-windows-kbd-notation (*begin *end)
   "Change emacs key notation to Windows's notation on text selection or current line.
 
 For example:
@@ -1995,14 +2055,14 @@ For example:
 
 This command will do most emacs syntax correctly, but not 100% correct, especially on notations like <C-M-down>. But works if it's written as C-M-<down>
 
-When called in lisp code, p1 p2 are region begin/end positions.
+When called in lisp code, *begin *end are region begin/end positions.
 Version 2015-04-08."
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
      (list (line-beginning-position) (line-end-position))))
   (save-restriction
-    (narrow-to-region p1 p2)
+    (narrow-to-region *begin *end)
     (goto-char (point-min))
     (let ((case-fold-search nil))
       (mapc
@@ -2055,7 +2115,7 @@ Version 2015-04-08."
         ["\\bDEL\\b" "Delete"]
         ]))))
 
-(defun xah-html-htmlize-elisp-keywords (p1 p2)
+(defun xah-html-htmlize-elisp-keywords (*begin *end)
   "Replace 「square-bracketed」 elisp names to HTML markup, in current line or text selection.
 
 Example:
@@ -2063,7 +2123,7 @@ Example:
     becomes
   <code class=\"elisp-ƒ\">sort-lines</code>
 
-When called in lisp code, p1 p2 are region begin/end positions.
+When called in lisp code, *begin *end are region begin/end positions.
 
 Note: a word is changed only if all of the following are true:
 
@@ -2085,7 +2145,7 @@ Some issues:
   (let ((-changedItems '()) -mStr)
     (save-excursion
       (save-restriction
-        (narrow-to-region p1 p2)
+        (narrow-to-region *begin *end)
         (progn
           (goto-char (point-min))
           (while (search-forward-regexp
@@ -2108,9 +2168,10 @@ Some issues:
        (terpri))
      (reverse -changedItems))))
 
-(defun xah-html-brackets-to-html (p1 p2)
+(defun xah-html-brackets-to-html (*begin *end)
   "Replace bracketed text to HTML markup in current line or text selection.
 
+• 「emacs-lisp-function-name」 → <code class=\"elisp-ƒ\">emacs-lisp-function-name</code>
 • 「…」 → <code>…</code>
 • 〈…〉 → <cite>…</cite>
 • 《…》 → <cite class=\"book\">…</cite>
@@ -2120,15 +2181,18 @@ Some issues:
 
 Changes are reported to message buffer with char position.
 
-When called in lisp code, p1 p2 are region begin/end positions.
-Version 2016-07-08"
+When called in lisp code, *begin *end are region begin/end positions.
+Version 2016-09-28"
   (interactive
    (let ((-boundaries (xah-html--get-thing-or-selection 'block)))
      (list (elt -boundaries 1) (elt -boundaries 2))))
   (let ((-changedItems '()))
     (save-excursion
       (save-restriction
-        (narrow-to-region p1 p2)
+        (narrow-to-region *begin *end)
+
+        (xah-html-htmlize-elisp-keywords *begin *end)
+
         (let (-ms)
           (goto-char (point-min))
           (while (search-forward-regexp "「\\([^」]+?\\)」" nil t)
@@ -2173,13 +2237,13 @@ Version 2016-07-08"
        (terpri))
      (reverse -changedItems))))
 
-(defun xah-html-htmlize-keyboard-shortcut-notation (p1 p2)
+(defun xah-html-htmlize-keyboard-shortcut-notation (*begin *end)
   "Markup keyboard shortcut notation in HTML tag, on text selection or current line.
 Example:
  C-w ⇒ <kbd>Ctrl</kbd>+<kbd>w</kbd>
  ctrl+w ⇒ <kbd>Ctrl</kbd>+<kbd>w</kbd>
 
-When called in lisp code, p1 p2 are region begin/end positions.
+When called in lisp code, *begin *end are region begin/end positions.
 
 Version 2015-04-08"
   (interactive
@@ -2271,7 +2335,7 @@ Version 2015-04-08"
                         ]))
 
     (save-restriction
-      (narrow-to-region p1 p2)
+      (narrow-to-region *begin *end)
       (xah-html-emacs-to-windows-kbd-notation (point-min) (point-max))
 
     (xah-replace-pairs-region (point-min) (point-max) -replaceList)
@@ -2394,20 +2458,21 @@ Version 2016-04-24
     (setq -p2 (elt -bds 2))
     (xah-html-add-open-close-tags "pre" lang-code -p1 -p2)))
 
-(defun xah-html-mark-unicode (p1)
+(defun xah-html-mark-unicode (*pos)
   "Wrap a special <mark> tag around the character before cursor.
 like this:
  <mark class=\"unicode\" title=\"U+3B1: GREEK SMALL LETTER ALPHA\">α</mark>
 
 If the char is any of 「&」 「<」 「>」, then replace them with 「&amp;」「&lt;」「&gt;」.
 
-When called in elisp program, wrap the tag around charbefore position p1."
+When called in elisp program, wrap the tag around char before position *pos.
+Version 2016-09-28"
   (interactive (list (point)))
   (let* (
-         (-codepoint (string-to-char (buffer-substring-no-properties (- p1 1) p1 )))
+         (-codepoint (string-to-char (buffer-substring-no-properties (- *pos 1) *pos )))
          (-name (get-char-code-property -codepoint 'name))
-         (-char (buffer-substring-no-properties (- p1 1) p1)))
-    (goto-char (- p1 1))
+         (-char (buffer-substring-no-properties (- *pos 1) *pos)))
+    (goto-char (- *pos 1))
     (insert (format "<mark class=\"unicode\" title=\"U+%X: %s\">" -codepoint -name))
     (right-char 1)
     (insert (format "</mark>"))
@@ -2692,8 +2757,6 @@ t
   (define-key xah-html-mode-no-chord-map (kbd "r v") 'xah-html-make-html-table-undo)
   (define-key xah-html-mode-no-chord-map (kbd "t") 'xah-html-wrap-p-tag)
   (define-key xah-html-mode-no-chord-map (kbd "y") 'xah-html-make-citation)
-
-
 
   ;; define separate, so that user can override the lead key
   (define-key xah-html-mode-map (kbd "C-c C-c") xah-html-mode-no-chord-map)
