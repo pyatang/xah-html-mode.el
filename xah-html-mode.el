@@ -2137,7 +2137,8 @@ Some issues:
 
 • Some words are common in other lang, e.g. “while”, “print”, “string”, unix “find”, “grep”, HTML's “kbd” tag, etc. But they are also built-in elisp symbols. This command will tag them, but you may not want that.
 
-• Some function/variable are from 3rd party libs, and some are not bundled with GNU emacs , e.g. 「'htmlize」. They may or may not be tagged depending whether they've been loaded."
+• Some function/variable are from 3rd party libs, and some are not bundled with GNU emacs , e.g. 「'htmlize」. They may or may not be tagged depending whether they've been loaded.
+Version 2016-10-05"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -2156,11 +2157,27 @@ Some issues:
              ((fboundp (intern -mStr))
               (progn
                 (push (format "ƒ %s" -mStr) -changedItems)
-                (replace-match (concat "<code class=\"elisp-ƒ\">" -mStr "</code>") t t)))
+                (replace-match (concat "<code class=\"elisp-ƒ\">" -mStr "</code>") t t)
+                (let (-p1 -p2)
+                  (search-backward "</code>" )
+                  (setq -p2 (point))
+                  (search-backward "<code class=\"elisp-ƒ\">" )
+                  (search-forward "<code class=\"elisp-ƒ\">")
+                  (setq -p1 (point))
+                  (overlay-put (make-overlay -p1 -p2) 'face (list :background "yellow"))
+                  (search-forward "</code>"))))
              ((boundp (intern -mStr))
               (progn
                 (push (format "υ %s" -mStr) -changedItems)
-                (replace-match (concat "<var class=\"elisp\">" -mStr "</var>") t t)))
+                (replace-match (concat "<var class=\"elisp\">" -mStr "</var>") t t)
+                (let (-p1 -p2)
+                  (search-backward "</var>" )
+                  (setq -p2 (point))
+                  (search-backward "<var class=\"elisp\">" )
+                  (search-forward "<var class=\"elisp\">")
+                  (setq -p1 (point))
+                  (overlay-put (make-overlay -p1 -p2) 'face (list :background "green"))
+                  (search-forward "</var>"))))
              (t "do nothing"))))))
     (mapcar
      (lambda (-x)
