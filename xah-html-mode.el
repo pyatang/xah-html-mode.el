@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 4.3.0
+;; Version: 4.4.0
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -2182,7 +2182,7 @@ Some issues:
 Changes are reported to message buffer with char position.
 
 When called in lisp code, *begin *end are region begin/end positions.
-Version 2016-09-28"
+Version 2016-10-05"
   (interactive
    (let ((-boundaries (xah-html--get-thing-or-selection 'block)))
      (list (elt -boundaries 1) (elt -boundaries 2))))
@@ -2204,32 +2204,78 @@ Version 2016-09-28"
                               (insert -ms )
                               (xah-html-replace-html-chars-to-entities (point-min) (point-max))
                               (buffer-string))
-                            "</code>"))))
+                            "</code>"))
+            (let (-p1 -p2)
+              (search-backward "</code>" )
+              (setq -p2 (point))
+              (search-backward "<code>" )
+              (search-forward "<code>")
+              (setq -p1 (point))
+              (overlay-put (make-overlay -p1 -p2) 'face 'highlight)
+              (search-forward "</code>"))))
 
         (goto-char (point-min))
         (while (search-forward-regexp "〈\\([^〉]+?\\)〉" nil t)
           (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
-          (replace-match "<cite>\\1</cite>" t))
+          (replace-match "<cite>\\1</cite>" t)
+          (let (-p1 -p2)
+            (search-backward "</cite>" )
+            (setq -p2 (point))
+            (search-backward "<cite>" )
+            (search-forward "<cite>" )
+            (setq -p1 (point))
+            (overlay-put (make-overlay -p1 -p2) 'face 'highlight)
+            (search-forward "</cite>" )))
 
         (goto-char (point-min))
         (while (search-forward-regexp "《\\([^》]+?\\)》" nil t)
           (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
-          (replace-match "<cite class=\"book\">\\1</cite>" t))
+          (replace-match "<cite class=\"book\">\\1</cite>" t)
+          (let (-p1 -p2)
+            (search-backward "</cite>" )
+            (setq -p2 (point))
+            (search-backward "<cite class=\"book\">" )
+            (search-forward "<cite class=\"book\">" )
+            (setq -p1 (point))
+            (overlay-put (make-overlay -p1 -p2) 'face 'highlight)
+            (search-forward "</cite>" )))
 
         (goto-char (point-min))
         (while (search-forward-regexp "‹\\([^›]+?\\)›" nil t)
           (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
-          (replace-match "<var class=\"d\">\\1</var>" t))
+          (replace-match "<var class=\"d\">\\1</var>" t)
+          (let (-p1 -p2)
+            (search-backward "</var>" )
+            (setq -p2 (point))
+            (search-backward "<var class=\"d\">" )
+            (search-forward "<var class=\"d\">" )
+            (setq -p1 (point))
+            (overlay-put (make-overlay -p1 -p2) 'face 'highlight)
+            (search-forward "</var>" )))
 
         (goto-char (point-min))
         (while (search-forward-regexp "〔<a href=" nil t)
           (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
-          (replace-match "〔➤see <a href=" t))
+          (replace-match "〔➤see <a href=" t)
+          (let (-p1 -p2)
+            (search-backward "〔➤see <a href=" )
+            (setq -p1 (point))
+            (search-forward "〔➤see <a href=" )
+            (setq -p2 (point))
+            (overlay-put (make-overlay -p1 -p2) 'face 'highlight)))
 
         (goto-char (point-min))
-        (while (search-forward-regexp "〔\\([ -_/\\:~.A-Za-z0-9%]+?\\)〕" nil t)
+        (while (search-forward-regexp "\\[\\([ -_/\\:~.A-Za-z0-9%]+?\\)\\]" nil t)
           (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
-          (replace-match "<code class=\"path-α\">\\1</code>" t))))
+          (replace-match "<code class=\"path-α\">\\1</code>" t)
+          (let (-p1 -p2)
+            (search-backward "</code>" )
+            (setq -p2 (point))
+            (search-backward "<code class=\"path-α\">" )
+            (search-forward "<code class=\"path-α\">")
+            (setq -p1 (point))
+            (overlay-put (make-overlay -p1 -p2) 'face 'highlight)
+            (search-forward "</code>")))))
 
     (mapcar
      (lambda (-x)
