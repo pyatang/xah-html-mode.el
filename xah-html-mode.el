@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 4.4.0
+;; Version: 4.4.1
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -2210,26 +2210,22 @@ Version 2016-10-05"
 
         (xah-html-htmlize-elisp-keywords *begin *end)
 
-        (let (-ms)
+        (progn
           (goto-char (point-min))
           (while (search-forward-regexp "「\\([^」]+?\\)」" nil t)
-            (setq -ms (match-string-no-properties 1))
-            (push (concat (number-to-string (point)) " " -ms) -changedItems)
-            (replace-match "")
-            (insert (concat "<code>"
-                            (with-temp-buffer
-                              (insert -ms )
-                              (xah-html-replace-html-chars-to-entities (point-min) (point-max))
-                              (buffer-string))
-                            "</code>"))
-            (let (-p1 -p2)
-              (search-backward "</code>" )
-              (setq -p2 (point))
-              (search-backward "<code>" )
-              (search-forward "<code>")
-              (setq -p1 (point))
-              (overlay-put (make-overlay -p1 -p2) 'face 'highlight)
-              (search-forward "</code>"))))
+            (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
+            (save-restriction
+              (narrow-to-region (match-beginning 0) (match-end 0))
+              (goto-char (point-min))
+              (delete-char 1)
+              (goto-char (point-max))
+              (delete-char -1)
+              (xah-html-replace-html-chars-to-entities (point-min) (point-max))
+              (goto-char (point-min))
+              (insert "<code>")
+              (overlay-put (make-overlay (point) (point-max)) 'face 'highlight)
+              (goto-char (point-max))
+              (insert "</code>"))))
 
         (goto-char (point-min))
         (while (search-forward-regexp "〈\\([^〉]+?\\)〉" nil t)
@@ -2282,7 +2278,7 @@ Version 2016-10-05"
             (overlay-put (make-overlay -p1 -p2) 'face 'highlight)))
 
         (goto-char (point-min))
-        (while (search-forward-regexp "\\[\\([ -_/\\:~.A-Za-z0-9%]+?\\)\\]" nil t)
+        (while (search-forward-regexp "\\{\\([ -_/\\:~.A-Za-z0-9%]+?\\)\\}" nil t)
           (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
           (replace-match "<code class=\"path-α\">\\1</code>" t)
           (let (-p1 -p2)
@@ -2308,7 +2304,7 @@ Example:
 
 When called in lisp code, *begin *end are region begin/end positions.
 
-Version 2015-04-08"
+Version 2016-10-05"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -2401,7 +2397,7 @@ Version 2015-04-08"
       (narrow-to-region *begin *end)
       (xah-html-emacs-to-windows-kbd-notation (point-min) (point-max))
 
-    (xah-replace-pairs-region (point-min) (point-max) -replaceList)
+    (xah-replace-pairs-region (point-min) (point-max) -replaceList 'REPORT 'HILIGHT)
 
       (let ((case-fold-search nil))
         (mapc
