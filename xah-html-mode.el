@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 4.4.1
+;; Version: 4.4.2
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -2278,7 +2278,7 @@ Version 2016-10-05"
             (overlay-put (make-overlay -p1 -p2) 'face 'highlight)))
 
         (goto-char (point-min))
-        (while (search-forward-regexp "\\{\\([ -_/\\:~.A-Za-z0-9%]+?\\)\\}" nil t)
+        (while (search-forward-regexp "{\\([ -_/\\:~.A-Za-z0-9%]+?\\)}" nil t)
           (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
           (replace-match "<code class=\"path-α\">\\1</code>" t)
           (let (-p1 -p2)
