@@ -2893,14 +2893,16 @@ t
 (defvar xah-html-mode-map nil "Keybinding for `xah-html-mode'")
 (progn
   (setq xah-html-mode-map (make-sparse-keymap))
-  (define-key xah-html-mode-map (kbd "<C-right>") 'xah-html-skip-tag-forward)
-  (define-key xah-html-mode-map (kbd "<C-left>") 'xah-html-skip-tag-backward)
   (define-key xah-html-mode-map (kbd "RET") 'xah-html-open-local-link)
 
   (define-key xah-html-mode-map (kbd "TAB") 'xah-html-wrap-html-tag)
 
   (define-prefix-command 'xah-html-mode-no-chord-map)
 
+  (define-key xah-html-mode-no-chord-map (kbd "<right>") 'xah-html-skip-tag-forward)
+  (define-key xah-html-mode-no-chord-map (kbd "<left>") 'xah-html-skip-tag-backward)
+
+  (define-key xah-html-mode-no-chord-map (kbd ",") 'xah-html-replace-html-chars-to-entities)
   (define-key xah-html-mode-no-chord-map (kbd ";") 'xah-html-emacs-to-windows-kbd-notation)
   (define-key xah-html-mode-no-chord-map (kbd ".") 'xah-html-decode-percent-encoded-url)
   (define-key xah-html-mode-no-chord-map (kbd "1") 'xah-html-get-precode-make-new-file)
@@ -2910,6 +2912,7 @@ t
   (define-key xah-html-mode-no-chord-map (kbd "4") 'xah-html-markup-ruby)
   (define-key xah-html-mode-no-chord-map (kbd "5") 'xah-html-mark-unicode)
   (define-key xah-html-mode-no-chord-map (kbd "6") 'xah-html-html-to-text)
+
   (define-key xah-html-mode-no-chord-map (kbd "7") nil)
   (define-key xah-html-mode-no-chord-map (kbd "8") nil)
   (define-key xah-html-mode-no-chord-map (kbd "9") 'xah-html-redo-syntax-coloring-buffer)
@@ -2924,7 +2927,7 @@ t
   (define-key xah-html-mode-no-chord-map (kbd "f") 'xah-html-image-linkify)
   (define-key xah-html-mode-no-chord-map (kbd "g") 'xah-html-brackets-to-html)
   (define-key xah-html-mode-no-chord-map (kbd "h") 'xah-html-wrap-url)
-  (define-key xah-html-mode-no-chord-map (kbd "i") 'xah-html-replace-html-chars-to-entities)
+  (define-key xah-html-mode-no-chord-map (kbd "i") nil)
   (define-key xah-html-mode-no-chord-map (kbd "j") nil)
   (define-key xah-html-mode-no-chord-map (kbd "k") 'xah-html-htmlize-keyboard-shortcut-notation)
   (define-key xah-html-mode-no-chord-map (kbd "l") 'xah-html-htmlize-elisp-keywords)
