@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 4.5.0
+;; Version: 5.0.0
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -18,7 +18,10 @@
 ;; Major mode for editing pure HTML5 files.
 ;; home page: http://ergoemacs.org/emacs/xah-html-mode.html
 
+(require 'thingatpt) ; in emacs 24
+(require 'url-util) ; in emacs 24
 (require 'xah-replace-pairs)
+(require 'xah-get-thing)
 (require 'htmlize)
 
 (progn
@@ -74,128 +77,11 @@ Note: in emacs GNU Emacs 24.4+ and later, there's `string-trim' function. You ne
 "
   (replace-regexp-in-string "\\`[ \t\n]*" "" (replace-regexp-in-string "[ \t\n]*\\'" "" string)))
 
-(defun xah-html--get-thing-at-cursor (unit)
-  "Return the string and boundary of UNIT under cursor.
 
-Returns a vector [text a b], where text is the string and a and b are its boundary.
 
-UNIT can be:
 
-• 'word — sequence of 0 to 9, A to Z, a to z, and hyphen.
 
-• 'glyphs — sequence of visible glyphs. Useful for file name, URL, …, anything doesn't have white spaces in it.
 
-• 'line — delimited by “\\n”. (captured text does not include “\\n”.)
-
-• 'block — delimited by empty lines or beginning/end of buffer. Lines with just spaces or tabs are also considered empty line. (captured text does not include a ending “\\n”.)
-
-• 'buffer — whole buffer. (respects `narrow-to-region')
-
-• 'filepath — delimited by chars that's USUALLY not part of filepath.
-
-• 'url — delimited by chars that's USUALLY not part of URL.
-
-• a vector [beginRegex endRegex] — The elements are regex strings used to determine the beginning/end of boundary chars. They are passed to `skip-chars-backward' and `skip-chars-forward'. For example, if you want paren as delimiter, use [\"^(\" \"^)\"]
-
-Example usage:
- (setq bds (xah-html--get-thing-at-cursor 'line))
- (setq inputstr (elt bds 0) p1 (elt bds 1) p2 (elt bds 2)  )
-
-This function is similar to `thing-at-point' and `bounds-of-thing-at-point'.
-The main differences are:
-
-• This function returns the text and the 2 boundaries as a vector in one shot.
-
-• 'line always returns the line without end of line character, avoiding inconsistency when the line is at end of buffer.
-
-• This function's behavior does not depend on syntax table. e.g. for units 「'word」, 「'block」, etc."
-  (let (p1 p2)
-    (save-excursion
-      (cond
-       ( (eq unit 'word)
-         (let ((wordcharset "-A-Za-z0-9ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ"))
-           (skip-chars-backward wordcharset)
-           (setq p1 (point))
-           (skip-chars-forward wordcharset)
-           (setq p2 (point))))
-
-       ( (eq unit 'glyphs)
-         (progn
-           (skip-chars-backward "[:graph:]")
-           (setq p1 (point))
-           (skip-chars-forward "[:graph:]")
-           (setq p2 (point))))
-
-       ((eq unit 'buffer)
-        (progn
-          (setq p1 (point-min))
-          (setq p2 (point-max))))
-
-       ((eq unit 'line)
-        (progn
-          (setq p1 (line-beginning-position))
-          (setq p2 (line-end-position))))
-       ((eq unit 'block)
-        (progn
-          (if (re-search-backward "\n[ \t]*\n" nil "move")
-              (progn (re-search-forward "\n[ \t]*\n")
-                     (setq p1 (point)))
-            (setq p1 (point)))
-          (if (re-search-forward "\n[ \t]*\n" nil "move")
-              (progn (re-search-backward "\n[ \t]*\n")
-                     (setq p2 (point)))
-            (setq p2 (point)))))
-
-       ((eq unit 'filepath)
-        (let (p0)
-          (setq p0 (point))
-          ;; chars that are likely to be delimiters of full path, e.g. space, tabs, brakets.
-          (skip-chars-backward "^  \"\t\n'|()[]{}<>〔〕“”〈〉《》【】〖〗«»‹›·。\\`")
-          (setq p1 (point))
-          (goto-char p0)
-          (skip-chars-forward "^  \"\t\n'|()[]{}<>〔〕“”〈〉《》【】〖〗«»‹›·。\\'")
-          (setq p2 (point))))
-
-       ((eq unit 'url)
-        (let (p0
-              ;; (-delimitors "^ \t\n,()[]{}<>〔〕“”\"`'!$^*|\;")
-              (-delimitors "!\"#$%&'*+,-./0123456789:;=?@ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz~"))
-          (setq p0 (point))
-          (skip-chars-backward -delimitors) ;"^ \t\n,([{<>〔“\""
-          (setq p1 (point))
-          (goto-char p0)
-          (skip-chars-forward -delimitors) ;"^ \t\n,)]}<>〕\"”"
-          (setq p2 (point))))
-
-       ((vectorp unit)
-        (let (p0)
-          (setq p0 (point))
-          (skip-chars-backward (elt unit 0))
-          (setq p1 (point))
-          (goto-char p0)
-          (skip-chars-forward (elt unit 1))
-          (setq p2 (point))))))
-
-    (vector (buffer-substring-no-properties p1 p2) p1 p2 )))
-
-(defun xah-html--get-thing-or-selection (unit)
-  "Return the string and boundary of text selection or UNIT under cursor.
-
-If `use-region-p' is true, then the region is the unit.  Else,
-it depends on the UNIT. See `xah-html--get-thing-at-cursor' for detail about
-UNIT.
-
-Returns a vector [text a b], where text is the string and a and b
-are its boundary.
-
-Example usage:
- (setq bds (xah-html--get-thing-or-selection 'line))
- (setq inputstr (elt bds 0) p1 (elt bds 1) p2 (elt bds 2)  )"
-  (interactive)
-  (if (use-region-p)
-      (let ((p1 (region-beginning)) (p2 (region-end)))
-        (vector (buffer-substring-no-properties p1 p2) p1 p2 ))
-    (xah-html--get-thing-at-cursor unit)))
 
 (defun xah-html--get-image-dimensions (*file-path)
   "Returns a vector [width height] of a image's dimension.
@@ -594,25 +480,26 @@ Version 2015-08-23"
 
 
 
-(defun xah-html-htmlize-string (source-code-str major-mode-name)
-  "Take source-code-str and return a htmlized version using major mode major-mode-name.
+(defun xah-html-htmlize-string (*source-code-str *major-mode-name)
+  "Take *source-code-str and return a htmlized version using major mode *major-mode-name.
 The purpose is to syntax color source code in HTML.
-This function requires the `htmlize-buffer' from 〔htmlize.el〕 by Hrvoje Niksic."
+This function requires the `htmlize-buffer' from htmlize.el by Hrvoje Niksic.
+Version 2016-10-18"
   (interactive)
-  (let (htmlizeOutputBuffer -resultStr)
+  (let (-output-buff -resultStr)
     ;; put code in a temp buffer, set the mode, fontify
     (with-temp-buffer
-      (insert source-code-str)
-      (funcall (intern major-mode-name))
-      (font-lock-fontify-buffer)
-      (setq htmlizeOutputBuffer (htmlize-buffer)))
+      (insert *source-code-str)
+      (funcall (intern *major-mode-name))
+      (font-lock-ensure)
+      (setq -output-buff (htmlize-buffer)))
     ;; extract the fontified source code in htmlize output
-    (with-current-buffer htmlizeOutputBuffer
+    (with-current-buffer -output-buff
       (let (-p1 -p2 )
         (setq -p1 (search-forward "<pre>"))
         (setq -p2 (search-forward "</pre>"))
         (setq -resultStr (buffer-substring-no-properties (+ -p1 1) (- -p2 6)))))
-    (kill-buffer htmlizeOutputBuffer)
+    (kill-buffer -output-buff)
     -resultStr ))
 
 (defun xah-html-langcode-to-major-mode-name (lang-code lang-code-map)
@@ -714,19 +601,6 @@ This command does the inverse of `xah-html-htmlize-precode'."
           (setq -i (1+ -i)))))
     (message "xah-html-redo-syntax-coloring-buffer %s redone" -i)))
 
-;; (defun xah-html-open-local-link ()
-;;   "Open the link under cursor or insert newline.
-;; If cursor is on a src=… or href=…, then if it a file path, open file, if http, open in browser.
-;; Else call `newline'.
-;; Version 2016-03-22"
-;;   (interactive)
-;;   (if (xah-html-point-in-src-or-href-q)
-;;       (let ((-srcValue (aref (xah-html--get-thing-at-cursor 'filepath) 0)))
-;;         (if (string-match "^http" -srcValue)
-;;             (browse-url -srcValue)
-;;           (find-file -srcValue)))
-;;     (newline)))
-
 (defun xah-html-open-local-link ()
   "Open the link under cursor or insert newline.
 If cursor is on a src=… or href=…, then if it a file path, open file, if http, open in browser.
@@ -734,13 +608,13 @@ Else call `newline'.
 Version 2016-07-28"
   (interactive)
   (if (xah-html-point-in-src-or-href-q)
-      (let ((-srcValue (aref (xah-html--get-thing-at-cursor 'filepath) 0)))
-        (if (string-match "^http:\\|^https:" -srcValue)
-            (browse-url -srcValue)
-          (if (file-exists-p -srcValue)
-            (find-file -srcValue)
-            (when (y-or-n-p (format "file no exist at 「%s」. Create new?" -srcValue))
-              (find-file -srcValue)))))
+      (let ((-srcStr (xah-get-thing-at-point 'filepath )))
+        (if (string-match "^http:\\|^https:" -srcStr)
+            (browse-url -srcStr)
+          (if (file-exists-p -srcStr)
+            (find-file -srcStr)
+            (when (y-or-n-p (format "file no exist at 「%s」. Create new?" -srcStr))
+              (find-file -srcStr)))))
     (newline)))
 
 (defun xah-html-point-in-src-or-href-q ()
@@ -868,13 +742,13 @@ Version 2016-03-07"
 
 
 
-(defun xah-html-tag-self-closing-p (tag-name)
+(defun xah-html-tag-self-closing-p (*tag-name)
   "Return true if the tag is a self-closing tag, ⁖ br."
   (interactive)
-  (member tag-name  xah-html-html5-self-close-tags))
+  (member *tag-name  xah-html-html5-self-close-tags))
 
-(defun xah-html-cursor-in-tag-markup? (&optional bracketPositions)
-  "Return true if cursor is inside a tag markup.
+(defun xah-html--cursor-in-tag-markup-p (&optional bracketPositions)
+  "Return t if cursor is inside a tag markup.
 For example,
  <p class=\"…\">…</p>
  If cursor is between the beginning p or ending p markup.
@@ -893,7 +767,23 @@ For example,
         (progn (message "%s" "yes") t)
       (progn (message "%s" "no") nil))))
 
-(defun xah-html-end-tag? (&optional bracketPositions)
+(defun xah-html-in--opening-tag-p ()
+  "Return t if it's a opening tag. Else, false."
+  (interactive)
+  (save-excursion
+    (if
+        (search-backward "<" (- (point) 150))
+        (progn
+          (forward-char)
+          (message "%s" (not (char-equal (char-after) ?/))))
+      (user-error "Not in a tag. Cursor must be inside a tag."))))
+
+(defun xah-html--in-closing-tag-p ()
+  "Return t if cursor is in a closing tag. Else, false."
+  (interactive)
+  (not (xah-html-in--opening-tag-p)))
+
+(defun xah-html--ending-tag-p (&optional bracketPositions)
   "Return t if cursor is inside a begin tag, else nil.
 This function assumes your cursor is inside a tag, ⁖ <…▮…>
  It simply check if the left brack is followed by a slash or not.
@@ -977,8 +867,8 @@ Also delete the matching beginning/ending tag."
     ;;    to do this, first determine the name of the tag. ⁖ the “p” in  <p …>, then search the matching tag.
     ;; if so, O shit, it's complex. Need to determine if one of the nested has the same tag name. and and …
     ;; if not, then we can proceed. Just find the closing tag and delete it. Also the beginning.
-    (if (xah-html-cursor-in-tag-markup?)
-        (if (xah-html-end-tag?)
+    (if (xah-html--cursor-in-tag-markup-p)
+        (if (xah-html--ending-tag-p)
             (progn (message "end %s" (xah-html-get-tag-name)))
           (progn (message "begin %s" (xah-html-get-tag-name))))
       (message "%s" "cursor needs to be inside a tag."))))
@@ -1289,17 +1179,23 @@ becomes:
 Version 2016-03-19"
   (interactive)
   (let (-bds -p1 -p2 -input-str -resultStr)
-    (setq -bds (xah-html--get-thing-or-selection 'block))
-    (setq -input-str (elt -bds 0) -p1 (elt -bds 1) -p2 (elt -bds 2))
+    (setq -bds (xah-get-boundary-of-thing 'block))
+    (setq -p1 (car -bds))
+    (setq -p2 (cdr -bds))
+    (setq -input-str (buffer-substring-no-properties -p1  -p2))
     (save-excursion
       (setq -resultStr
             (with-temp-buffer
               (insert -input-str)
               (delete-trailing-whitespace)
-              (goto-char 1)
-              (while
-                  (search-forward-regexp  "\.html$" nil t)
-                (backward-char 1))
+
+              (when (fboundp 'xah-all-linkify)
+                (goto-char 1)
+                (while
+                    (search-forward-regexp  "\.html$" nil t)
+                  (backward-char 1)
+                  (xah-all-linkify)))
+
               (goto-char 1)
               (while
                   (not (equal (line-end-position) (point-max)))
@@ -1364,11 +1260,10 @@ with “*” as separator, becomes
 </table>"
   (interactive "sEnter string pattern for column separation:")
   (let (-bds -p1 -p2 -str)
-
-    (setq -bds (xah-html--get-thing-or-selection 'block))
-    (setq -str (elt -bds 0))
-    (setq -p1 (elt -bds 1))
-    (setq -p2 (elt -bds 2))
+    (setq -bds (xah-get-boundary-of-thing 'block))
+    (setq -p1 (car -bds) )
+    (setq -p2 (cdr -bds) )
+    (setq -str (buffer-substring-no-properties -p1 -p2) )
     (delete-region -p1 -p2)
     (insert (xah-html-make-html-table-string -str sep) "\n")))
 
@@ -1463,9 +1358,8 @@ when called in lisp program,
 If *change-entity-p is true, convert html entities to char.
 "
   (interactive
-   (let ((-bds (xah-html--get-thing-or-selection 'block)))
-     (list (elt -bds 1) (elt -bds 2) (if current-prefix-arg nil t))))
-
+   (let ((-bds (xah-get-boundary-of-thing 'block)))
+     (list (car -bds) (cdr -bds) (if current-prefix-arg nil t))))
   (save-restriction
     (narrow-to-region *begin *end)
     (xah-replace-regexp-pairs-region (point-min) (point-max) '(["<code class=\"[^\"]+\">" "「"] ["<var class=\"[^\"]+\">" "‹"]))
@@ -1479,140 +1373,96 @@ If *change-entity-p is true, convert html entities to char.
     (when *change-entity-p (xah-html-replace-html-chars-to-entities (point-min) (point-max) "ENTITY-TO-CHAR-P"))
     (goto-char (point-max))))
 
-(defun xah-html-remove-html-tags (string &optional from to)
-  "Delete HTML tags in string or region.
-Work on current text block or text selection. (a “text block” is text between blank lines)
+;; '(
+;; ["<!doctype html>" ""]
+;; ["<meta charset=\"utf-8\" />" ""]
+;; [" class=\"[-_a-z0-9]+\" *"  " "]
+;; [" id=\"[-_a-z0-9]+\" *"  " "]
+;; [" title=\"\\([^\"]+?\\)\" *"  " "]
+;; [" data-accessed=\"[-0-9]+\" *"  " "]
+;; [" width=\"[0-9]+%?\" *"  " "]
+;; [" height=\"[0-9]+%?\" *"  " "]
 
-When called in lisp code, if string is non-nil, returns a changed string.  If string nil, change the text in the region between positions from to.
+;; ["<link rel=\"stylesheet\" href=\"\\([^\"]+?\\)\" />" ""]
+;; ["<a +href=\"\\([^\"]+?\\)\" *>\\([^<]+?\\)</a>" "\\2"]
+;; ["<img +src=\"\\([^\"]+?\\)\" +alt=\"\\([^\"]+?\\)\" */?>" ""]
 
-WARNING: this command does not cover all HTML tags or convert all HTML entities. For robust solution you might use: 「lynx -dump -display_charset=utf-8 URL」."
-  (interactive
-   (if (region-active-p)
-       (list nil (region-beginning) (region-end))
-     (let ((-bds (xah-html--get-thing-or-selection 'block)))
-       (list nil (elt -bds 1) (elt -bds 2)))))
+;; ["<[a-z0-9]+ */?>" ""]
+;; ["</[a-z0-9]+>" ""]
+;; ["&amp;" "&"]
+;; ["&lt;" "<"]
+;; ["&gt;" ">"]
+;; )
 
-  (let (-work-on-string-p -input-str -output-str)
-    (setq -work-on-string-p (if string t nil))
-    (setq -input-str (if -work-on-string-p string (buffer-substring-no-properties from to)))
+(defun xah-html-remove-html-tags (&optional *begin *end)
+  "Delete HTML tags in in current text block or text selection.
+ a “text block” is text between blank lines
+ WARNING: this command does not cover all HTML tags or convert all HTML entities. For robust solution you might use: lynx -dump -display_charset=utf-8 URL.
+Version 2016-10-18"
+  (interactive)
+  (let (-p1 -p2 -input-str -output-str)
+    (if (null *begin)
+        (if (use-region-p)
+            (progn
+              (setq -p1 (region-beginning))
+              (setq -p2 (region-end)))
+          (let ((-bds (xah-get-boundary-of-thing 'block)))
+            (setq -p1 (car -bds))
+            (setq -p2 (cdr -bds))))
+      (progn
+        (setq -p1 *begin)
+        (setq -p2 *end)))
+    (setq -input-str (buffer-substring-no-properties -p1 -p2))
+
     (setq -output-str
-          (let ((case-fold-search t) (tempStr -input-str))
-
-            (setq tempStr
+          (let ((case-fold-search t) (-tempStr -input-str))
+            (setq -tempStr
                   (xah-replace-regexp-pairs-in-string
-                   tempStr
-                   '(
-                     ["<script>\\([^\\<]+?\\)</script>" ""]
+                   -tempStr
+                   '(["<script>\\([^\\<]+?\\)</script>" ""]
                      ["<[^>]+?>" ""]
                      ["</[a-z0-9]+>" ""]
                      ["&amp;" "&"]
                      ["&lt;" "<"]
                      ["&gt;" ">"]
-                     )
-
-                   ;; '(
-                   ;; ["<!doctype html>" ""]
-                   ;; ["<meta charset=\"utf-8\" />" ""]
-                   ;; [" class=\"[-_a-z0-9]+\" *"  " "]
-                   ;; [" id=\"[-_a-z0-9]+\" *"  " "]
-                   ;; [" title=\"\\([^\"]+?\\)\" *"  " "]
-                   ;; [" data-accessed=\"[-0-9]+\" *"  " "]
-                   ;; [" width=\"[0-9]+%?\" *"  " "]
-                   ;; [" height=\"[0-9]+%?\" *"  " "]
-
-                   ;; ["<link rel=\"stylesheet\" href=\"\\([^\"]+?\\)\" />" ""]
-                   ;; ["<a +href=\"\\([^\"]+?\\)\" *>\\([^<]+?\\)</a>" "\\2"]
-                   ;; ["<img +src=\"\\([^\"]+?\\)\" +alt=\"\\([^\"]+?\\)\" */?>" ""]
-
-                   ;; ["<[a-z0-9]+ */?>" ""]
-                   ;; ["</[a-z0-9]+>" ""]
-                   ;; ["&amp;" "&"]
-                   ;; ["&lt;" "<"]
-                   ;; ["&gt;" ">"]
-                   ;; )
-
-                   ))
-
-            tempStr
+                     )))
+            -tempStr
             ))
+    (delete-region -p1 -p2)
+    (insert -output-str)))
 
-    (if -work-on-string-p
-        -output-str
-      (save-excursion
-        (delete-region from to)
-        (goto-char from)
-        (insert -output-str)))))
-
-;; (defun xah-html-html-to-text (string &optional from to)
-;; "Convert html to plain text on text selection or current text block."
-;;   (interactive
-;;    (if (region-active-p)
-;;        (list nil (region-beginning) (region-end))
-;;      (let ((-bds (xah-html--get-thing-or-selection 'block)) )
-;;        (list nil (elt -bds 1) (elt -bds 2))) ) )
-
-;;   (let (-work-on-string-p -input-str -output-str)
-;;     (setq -work-on-string-p (if string t nil))
-;;     (setq -input-str (if -work-on-string-p string (buffer-substring-no-properties from to)))
-;;     (setq -output-str
-;;           (let ((case-fold-search t) (tempStr -input-str))
-;; (setq tempStr (xah-replace-regexp-pairs-in-string tempStr '(
-;; ["<script>\\([^\\<]+?\\)</script>" ""]
-;; ["<li>" "<li>• " ]
-;; ["<h2>" "────────── ────────── ────────── ────────── ──────────
-;; <h2>" ]
-;; ["<h3>" "────────── ────────── ──────────
-;; <h3>" ]
-;; ["<h4>" "────────── ──────────
-;; <h4>" ]
-;; ["<a +href=\"\\([^\"]+?\\)\" *>\\([^<]+?\\)</a>" "\\2 〔 \\1 〕"]
-;; ["<img +src=\"\\([^\"]+?\\)\" +alt=\"\\([^\"]+?\\)\" +width=\"[0-9]+\" +height=\"[0-9]+\" */?>" "〔IMAGE “\\2” \\1 〕"]
-;; )))
-;; tempStr
-;;  ) )
-
-;; (setq -output-str (xah-html-remove-html-tags -output-str) )
-
-;;     (if -work-on-string-p
-;;         -output-str
-;;       (save-excursion
-;;         (delete-region from to)
-;;         (goto-char from)
-;;         (insert -output-str) )) ) )
-
-(defun xah-html-html-to-text (string &optional from to)
-  "Convert html to plain text on text selection or current text block.
-Version 2016-07-08."
-  (interactive
-   (if (region-active-p)
-       (list nil (region-beginning) (region-end))
-     (let ((-bds (xah-html--get-thing-or-selection 'block)))
-       (list nil (elt -bds 1) (elt -bds 2)))))
-
-  (let (-work-on-string-p -input-str -output-str)
-    (setq -work-on-string-p (if string t nil))
-    (setq -input-str (if -work-on-string-p string (buffer-substring-no-properties from to)))
-
+(defun xah-html-html-to-text ()
+  "Convert html to plain text on current text block or text selection.
+Version 2016-10-18"
+  (interactive)
+  (let ( -p1 -p2 -input-str -output-str)
+    (if (use-region-p)
+        (progn
+          (setq -p1 (region-beginning))
+          (setq -p2 (region-end)))
+      (let (-bds)
+        (setq -bds (xah-get-boundary-of-thing 'block))
+        (setq -p1 (car -bds))
+        (setq -p2 (cdr -bds))))
+    (setq -input-str (buffer-substring-no-properties -p1 -p2))
     (setq
      -output-str
      (with-temp-buffer
        (insert -input-str)
        (goto-char 1)
        (let ((case-fold-search nil))
-
          (xah-replace-regexp-pairs-region
           (point-min)
           (point-max)
           [
            ["<var class=\"d\">\\([^<]+?\\)</var>" "‹\\1›"]
-            ["<script>\\([^\\<]+?\\)</script>" ""]
-            ["<a +href=\"\\([^\"]+?\\)\" *>\\([^<]+?\\)</a>" "\\2 〔 \\1 〕"]
-            ["<img +src=\"\\([^\"]+?\\)\" +alt=\"\\([^\"]+?\\)\" +width=\"[0-9]+\" +height=\"[0-9]+\" */?>" "〔IMAGE “\\2” \\1 〕"]
+           ["<script>\\([^\\<]+?\\)</script>" ""]
+           ["<a +href=\"\\([^\"]+?\\)\" *>\\([^<]+?\\)</a>" "\\2 〔 \\1 〕"]
+           ["<img +src=\"\\([^\"]+?\\)\" +alt=\"\\([^\"]+?\\)\" +width=\"[0-9]+\" +height=\"[0-9]+\" */?>" "〔IMAGE “\\2” \\1 〕"]
            ]
           'FIXEDCASE-P )
-
          (xah-replace-pairs-region
-          1
+          (point-min)
           (point-max)
           '(
             ;; todo. something wrong here. not supposed to be regex
@@ -1632,16 +1482,10 @@ Version 2016-07-08."
             ["<h6>" "──────────\n" ]
             ["</h6>" "" ]
             )))
+       (xah-html-remove-html-tags (point-min) (point-max))
        (buffer-substring 1 (point-max))))
-
-    (setq -output-str (xah-html-remove-html-tags -output-str))
-
-    (if -work-on-string-p
-        -output-str
-      (save-excursion
-        (delete-region from to)
-        (goto-char from)
-        (insert -output-str)))))
+    (delete-region -p1 -p2 )
+    (insert -output-str)))
 
 (defun xah-html-rename-html-inline-image ()
   "Replace current HTML inline image's file name.
@@ -1778,11 +1622,11 @@ If there's a text selection, use it for input, otherwise the input is a text blo
 The order of lines for {title, author, date/time, url} needs not be in that order. Author should start with “by”."
   (interactive)
   (let* (
-         (-bds (xah-html--get-thing-or-selection 'block))
+         (-bds (xah-get-boundary-of-thing 'block))
+         (-p1 (car -bds))
+         (-p2 (cdr -bds))
+         (-inputText (buffer-substring-no-properties -p1 -p2))
          ;; (-inputText (replace-regexp-in-string "^[[:space:]]*" "" (elt -bds 0))) ; remove white space in front
-         (-inputText (elt -bds 0))
-         (-p1 (elt -bds 1))
-         (-p2 (elt -bds 2))
          (-myList (split-string -inputText "[[:space:]]*\n[[:space:]]*" t "[[:space:]]*"))
          -title -author -date -url )
 
@@ -1791,7 +1635,7 @@ The order of lines for {title, author, date/time, url} needs not be in that orde
 ;; the whole thing here is not optimal implementation. data structure should be hash or so. easier... basically, we have n items, and we need to identify them into n things. that is, pairing them up. Now, some items are easily recognized with 100% certainty. We pair those first. Then, in the end, we'll have 2 or so items that we need to identify, but by then, the items are few, and we can easily distinguish them. So, for this, we need a data structure such that we can easily remove item for those we already identified.
       (while (> (length -myList) 0)
         (setq -x (pop -myList))
-(message "「%s」" -x)
+        (message "「%s」" -x)
         (cond
          ((string-match "^https?://" -x) (setq -url -x))
          ((string-match "^ *[bB]y " -x) (setq -author -x))
@@ -1885,7 +1729,7 @@ URL `http://ergoemacs.org/emacs/elisp_html-linkify.html'
 Version 2015-09-12"
   (interactive "P")
   (let (
-         -boundaries
+         -bds
          -p1-input
          -p2-input
          -input-str
@@ -1898,9 +1742,9 @@ Version 2015-09-12"
           (setq -p2-input (region-end))
           (setq -input-str (buffer-substring-no-properties -p1-input -p2-input)))
       (progn
-        (setq -boundaries (bounds-of-thing-at-point 'url))
-        (setq -p1-input (car -boundaries))
-        (setq -p2-input (cdr -boundaries))
+        (setq -bds (bounds-of-thing-at-point 'url))
+        (setq -p1-input (car -bds))
+        (setq -p2-input (cdr -bds))
         (setq -input-str (buffer-substring-no-properties -p1-input -p2-input))))
 
     ;; check if it's just plain URL or already in linked form 「<a href=…>…</a>」
@@ -2035,7 +1879,7 @@ Works the same way for links to wiktionary, e.g. https://en.wiktionary.org/wiki/
 URL `http://ergoemacs.org/emacs/elisp_html_wikipedia_url_linkify.html'
 Version 2016-06-29."
   (interactive)
-  (let (-boundaries
+  (let (-bds
         -p1 -p2
         -input-str
         -link-text
@@ -2055,9 +1899,9 @@ Version 2016-06-29."
             (skip-chars-forward "^ \t\n<>[]")
             (setq -p2 (point))))
 
-        ;; (setq -boundaries (bounds-of-thing-at-point 'url))
-        ;; (setq -p1 (car -boundaries))
-        ;; (setq -p2 (cdr -boundaries))
+        ;; (setq -bds (bounds-of-thing-at-point 'url))
+        ;; (setq -p1 (car -bds))
+        ;; (setq -p2 (cdr -bds))
         ))
     (setq -input-str (buffer-substring-no-properties -p1 -p2))
     (require 'url-util)
@@ -2076,85 +1920,33 @@ Version 2016-06-29."
       (delete-region -p1 -p2)
       (insert -output-str))))
 
-;; (defun xah-html-wikipedia-url-linkify-old (string &optional from-to-pair)
-;;   "Make the URL at cursor point into a html link.
-
-;; If there is a text selection, use that as input.
-
-;; Example:
-;; http://en.wikipedia.org/wiki/Emacs
-;; ⇒
-;; <a href=\"http://en.wikipedia.org/wiki/Emacs\">Emacs</a>.
-
-;; When called interactively, work on current URL or text selection (of a URL).
-
-;; When called in lisp code, if string is non-nil, returns a changed string.  If string nil, change the text in the region between positions in sequence from-to-pair."
-
-;;   (interactive
-;;    (if (region-active-p)
-;;        (list nil (vector (region-beginning) (region-end)))
-;;      (let (-p0 -p1 -p2)
-;;        (progn
-;;          (setq -p0 (point))
-;;          (skip-chars-backward "^ \t\n<>[]")
-;;          (setq -p1 (point))
-;;          (goto-char -p0)
-;;          (skip-chars-forward "^ \t\n<>[]")
-;;          (setq -p2 (point))
-;;          (list nil (vector -p1 -p2))))))
-;;   (let (-work-on-string-p -input-str -output-str
-;;                           (-from (elt from-to-pair 0))
-;;                           (-to (elt from-to-pair 1)))
-;;     (setq -work-on-string-p (if () t nil))
-;;     (setq -input-str (if -work-on-string-p string (buffer-substring-no-properties -from -to)))
-
-;;     (setq -output-str
-;;           (format "<a href=\"%s\">%s</a>" (url-encode-url -input-str)
-;;                   (replace-regexp-in-string "_" " "
-;;                                             (xah-html-url-percent-decode-string (file-name-nondirectory -input-str)))))
-
-;;     (if -work-on-string-p
-;;         -output-str
-;;       (progn
-;;         (delete-region -from -to)
-;;         (goto-char -from)
-;;         (insert -output-str)))))
-
-(defun xah-html-wrap-url (string &optional from to)
-  "Make the URL at cursor point into a html link.
-
-When called interactively, work on current glyph sequence or text selection.
-
-When called in lisp code, if string is non-nil, returns a changed string.  If string nil, change the text in the region between positions from to."
-  (interactive
-   (if (region-active-p)
-       (list nil (region-beginning) (region-end))
-     (let ((-bds (xah-html--get-thing-at-cursor 'glyphs)))
-       (list nil (elt -bds 1) (elt -bds 2)))))
-
-  (let (-work-on-string-p -input-str -output-str)
-    (setq -work-on-string-p (if string t nil))
-    (setq -input-str (if -work-on-string-p string (buffer-substring-no-properties from to)))
-    (setq -output-str (concat "<a href=\"" (url-encode-url -input-str) "\">" -input-str "</a>" ))
-
-    (if -work-on-string-p
-        -output-str
-      (save-excursion
-        (delete-region from to)
-        (goto-char from)
-        (insert -output-str)))))
+(defun xah-html-wrap-url ()
+  "Make the URL at cursor point into a HTML link.
+Work on current char sequence or text selection.
+Version 2016-10-18"
+  (interactive)
+  (let ( -bds -p1 -p2 -input-str )
+    (if (use-region-p)
+        (progn
+          (setq -p1 (region-beginning))
+          (setq -p2 (region-end)))
+      (progn
+        (setq -bds (xah-get-boundary-of-thing 'url))
+        (setq -p1 (car -bds))
+        (setq -p2 (cdr -bds))))
+    (setq -input-str (buffer-substring-no-properties -p1 -p2))
+    (delete-region -p1 -p2)
+    (insert (concat "<a href=\"" (url-encode-url -input-str) "\">" -input-str "</a>" ))))
 
 (defun xah-html-wrap-p-tag ()
   "Add <p>…</p> tag to current text block or text selection.
 If there's a text selection, wrap p around each text block (separated by 2 newline chars.)"
   (interactive)
   (let (-bds -p1 -p2 -inputText)
-
-    (setq -bds (xah-html--get-thing-or-selection 'block))
-    (setq -inputText (elt -bds 0))
-    (setq -p1 (elt -bds 1))
-    (setq -p2 (elt -bds 2))
-
+    (setq -bds (xah-get-boundary-of-thing 'block))
+    (setq -p1 (car -bds))
+    (setq -p2 (cdr -bds))
+    (setq -inputText (buffer-substring-no-properties -p1 -p2))
     (delete-region -p1 -p2 )
     (insert "<p>" (replace-regexp-in-string "\n\n+" "</p>\n\n<p>" (xah-html--trim-string -inputText)) "</p>")))
 
@@ -2314,8 +2106,9 @@ Changes are reported to message buffer with char position.
 When called in lisp code, *begin *end are region begin/end positions.
 Version 2016-10-05"
   (interactive
-   (let ((-boundaries (xah-html--get-thing-or-selection 'block)))
-     (list (elt -boundaries 1) (elt -boundaries 2))))
+   (let ((-bds (xah-get-boundary-of-thing 'block)))
+     (list (car -bds) (cdr -bds) )))
+
   (let ((-changedItems '()))
     (save-excursion
       (save-restriction
@@ -2578,16 +2371,18 @@ Version 2016-04-24
     (if current-prefix-arg
         (read-string "class:" nil xah-html-class-input-history "")
       nil )))
-  (let (-bds -p1 -p2 -wrap-type )
-    (setq -wrap-type (xah-html-get-tag-type *tag-name))
-    (setq -bds
-          (cond
-           ((equal -wrap-type "w") (xah-html--get-thing-or-selection 'word))
-           ((equal -wrap-type "l") (xah-html--get-thing-or-selection 'line))
-           ((equal -wrap-type "b") (xah-html--get-thing-or-selection 'block))
-           (t (xah-html--get-thing-or-selection 'word))))
-    (setq -p1 (elt -bds 1)
-          -p2 (elt -bds 2))
+  (let* (
+         (-wrap-type (xah-html-get-tag-type *tag-name))
+         (-bds
+          (if (use-region-p)
+              (cons (region-beginning) (region-end))
+            (cond
+             ((equal -wrap-type "w") (xah-get-boundary-of-thing 'word))
+             ((equal -wrap-type "l") (xah-get-boundary-of-thing 'line))
+             ((equal -wrap-type "b") (xah-get-boundary-of-thing 'block))
+             (t (xah-get-boundary-of-thing 'word)))))
+         (-p1 (car -bds))
+         (-p2 (cdr -bds)))
 
     (save-restriction
       (narrow-to-region -p1 -p2)
@@ -2626,11 +2421,9 @@ Version 2016-04-24
   (interactive
    (list
     (ido-completing-read "lang code:" (mapcar (lambda (x) (car x)) xah-html-lang-name-map) "PREDICATE" "REQUIRE-MATCH" nil xah-html-html-tag-input-history "code")))
-  (let (-bds -p1 -p2)
-    (setq -bds (xah-html--get-thing-or-selection 'block))
-    (setq -p1 (elt -bds 1))
-    (setq -p2 (elt -bds 2))
-    (xah-html-add-open-close-tags "pre" lang-code -p1 -p2)))
+  (let ((-bds (xah-get-boundary-of-thing 'block)))
+    (xah-html-add-open-close-tags "pre" lang-code (car -bds) (cdr -bds))))
+
 
 (defun xah-html-mark-unicode (*pos)
   "Wrap a special <mark> tag around the character before cursor.
@@ -2704,9 +2497,9 @@ Work on text selection or whole buffer.
 This is heuristic based, does not remove ALL possible redundant whitespace."
   (interactive)
   (let* (
-         (-bds (xah-html--get-thing-or-selection 'buffer))
-         (-p1 (elt -bds 1))
-         (-p2 (elt -bds 2)))
+         (-bds (xah-get-boundary-of-thing 'buffer))
+         (-p1 (car -bds))
+         (-p2 (cdr -bds)))
     (save-excursion
       (save-restriction
         (narrow-to-region -p1 -p2)
@@ -2757,15 +2550,15 @@ To encode, see `xah-html-encode-percent-encoded-url'.
 URL `http://ergoemacs.org/emacs/elisp_decode_uri_percent_encoding.html'
 Version 2015-09-14."
   (interactive)
-  (let (-boundaries -p1 -p2 -input-str)
+  (let (-bds -p1 -p2 -input-str)
     (if (use-region-p)
         (progn
           (setq -p1 (region-beginning))
           (setq -p2 (region-end)))
       (progn
-        (setq -boundaries (bounds-of-thing-at-point 'url))
-        (setq -p1 (car -boundaries))
-        (setq -p2 (cdr -boundaries))))
+        (setq -bds (bounds-of-thing-at-point 'url))
+        (setq -p1 (car -bds))
+        (setq -p2 (cdr -bds))))
     (setq -input-str (buffer-substring-no-properties -p1 -p2))
     (require 'url-util)
     (delete-region -p1 -p2)
@@ -2787,15 +2580,15 @@ becomes
 URL `http://ergoemacs.org/emacs/elisp_decode_uri_percent_encoding.html'
 Version 2015-09-14."
   (interactive)
-  (let (-boundaries -p1 -p2 -input-str)
+  (let (-bds -p1 -p2 -input-str)
     (if (use-region-p)
         (progn
           (setq -p1 (region-beginning))
           (setq -p2 (region-end)))
       (progn
-        (setq -boundaries (bounds-of-thing-at-point 'url))
-        (setq -p1 (car -boundaries))
-        (setq -p2 (cdr -boundaries))))
+        (setq -bds (bounds-of-thing-at-point 'url))
+        (setq -p1 (car -bds))
+        (setq -p2 (cdr -bds))))
     (setq -input-str (buffer-substring-no-properties -p1 -p2))
     (require 'url-util)
     (delete-region -p1 -p2)
