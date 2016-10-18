@@ -1179,7 +1179,7 @@ becomes:
 Version 2016-03-19"
   (interactive)
   (let (-bds -p1 -p2 -input-str -resultStr)
-    (setq -bds (xah-get-boundary-of-thing 'block))
+    (setq -bds (xah-get-bounds-of-thing 'block))
     (setq -p1 (car -bds))
     (setq -p2 (cdr -bds))
     (setq -input-str (buffer-substring-no-properties -p1  -p2))
@@ -1260,7 +1260,7 @@ with “*” as separator, becomes
 </table>"
   (interactive "sEnter string pattern for column separation:")
   (let (-bds -p1 -p2 -str)
-    (setq -bds (xah-get-boundary-of-thing 'block))
+    (setq -bds (xah-get-bounds-of-thing 'block))
     (setq -p1 (car -bds) )
     (setq -p2 (cdr -bds) )
     (setq -str (buffer-substring-no-properties -p1 -p2) )
@@ -1358,7 +1358,7 @@ when called in lisp program,
 If *change-entity-p is true, convert html entities to char.
 "
   (interactive
-   (let ((-bds (xah-get-boundary-of-thing 'block)))
+   (let ((-bds (xah-get-bounds-of-thing 'block)))
      (list (car -bds) (cdr -bds) (if current-prefix-arg nil t))))
   (save-restriction
     (narrow-to-region *begin *end)
@@ -1406,14 +1406,13 @@ Version 2016-10-18"
             (progn
               (setq -p1 (region-beginning))
               (setq -p2 (region-end)))
-          (let ((-bds (xah-get-boundary-of-thing 'block)))
+          (let ((-bds (xah-get-bounds-of-thing 'block)))
             (setq -p1 (car -bds))
             (setq -p2 (cdr -bds))))
       (progn
         (setq -p1 *begin)
         (setq -p2 *end)))
     (setq -input-str (buffer-substring-no-properties -p1 -p2))
-
     (setq -output-str
           (let ((case-fold-search t) (-tempStr -input-str))
             (setq -tempStr
@@ -1441,7 +1440,7 @@ Version 2016-10-18"
           (setq -p1 (region-beginning))
           (setq -p2 (region-end)))
       (let (-bds)
-        (setq -bds (xah-get-boundary-of-thing 'block))
+        (setq -bds (xah-get-bounds-of-thing 'block))
         (setq -p1 (car -bds))
         (setq -p2 (cdr -bds))))
     (setq -input-str (buffer-substring-no-properties -p1 -p2))
@@ -1622,7 +1621,7 @@ If there's a text selection, use it for input, otherwise the input is a text blo
 The order of lines for {title, author, date/time, url} needs not be in that order. Author should start with “by”."
   (interactive)
   (let* (
-         (-bds (xah-get-boundary-of-thing 'block))
+         (-bds (xah-get-bounds-of-thing 'block))
          (-p1 (car -bds))
          (-p2 (cdr -bds))
          (-inputText (buffer-substring-no-properties -p1 -p2))
@@ -1926,14 +1925,10 @@ Work on current char sequence or text selection.
 Version 2016-10-18"
   (interactive)
   (let ( -bds -p1 -p2 -input-str )
-    (if (use-region-p)
-        (progn
-          (setq -p1 (region-beginning))
-          (setq -p2 (region-end)))
-      (progn
-        (setq -bds (xah-get-boundary-of-thing 'url))
+    (progn
+        (setq -bds (xah-get-bounds-of-thing-or-region 'url))
         (setq -p1 (car -bds))
-        (setq -p2 (cdr -bds))))
+        (setq -p2 (cdr -bds)))
     (setq -input-str (buffer-substring-no-properties -p1 -p2))
     (delete-region -p1 -p2)
     (insert (concat "<a href=\"" (url-encode-url -input-str) "\">" -input-str "</a>" ))))
@@ -1943,7 +1938,7 @@ Version 2016-10-18"
 If there's a text selection, wrap p around each text block (separated by 2 newline chars.)"
   (interactive)
   (let (-bds -p1 -p2 -inputText)
-    (setq -bds (xah-get-boundary-of-thing 'block))
+    (setq -bds (xah-get-bounds-of-thing 'block))
     (setq -p1 (car -bds))
     (setq -p2 (cdr -bds))
     (setq -inputText (buffer-substring-no-properties -p1 -p2))
@@ -2106,7 +2101,7 @@ Changes are reported to message buffer with char position.
 When called in lisp code, *begin *end are region begin/end positions.
 Version 2016-10-05"
   (interactive
-   (let ((-bds (xah-get-boundary-of-thing 'block)))
+   (let ((-bds (xah-get-bounds-of-thing 'block)))
      (list (car -bds) (cdr -bds) )))
 
   (let ((-changedItems '()))
@@ -2377,10 +2372,10 @@ Version 2016-04-24
           (if (use-region-p)
               (cons (region-beginning) (region-end))
             (cond
-             ((equal -wrap-type "w") (xah-get-boundary-of-thing 'word))
-             ((equal -wrap-type "l") (xah-get-boundary-of-thing 'line))
-             ((equal -wrap-type "b") (xah-get-boundary-of-thing 'block))
-             (t (xah-get-boundary-of-thing 'word)))))
+             ((equal -wrap-type "w") (xah-get-bounds-of-thing 'word))
+             ((equal -wrap-type "l") (xah-get-bounds-of-thing 'line))
+             ((equal -wrap-type "b") (xah-get-bounds-of-thing 'block))
+             (t (xah-get-bounds-of-thing 'word)))))
          (-p1 (car -bds))
          (-p2 (cdr -bds)))
 
@@ -2421,7 +2416,7 @@ Version 2016-04-24
   (interactive
    (list
     (ido-completing-read "lang code:" (mapcar (lambda (x) (car x)) xah-html-lang-name-map) "PREDICATE" "REQUIRE-MATCH" nil xah-html-html-tag-input-history "code")))
-  (let ((-bds (xah-get-boundary-of-thing 'block)))
+  (let ((-bds (xah-get-bounds-of-thing 'block)))
     (xah-html-add-open-close-tags "pre" lang-code (car -bds) (cdr -bds))))
 
 
@@ -2497,7 +2492,7 @@ Work on text selection or whole buffer.
 This is heuristic based, does not remove ALL possible redundant whitespace."
   (interactive)
   (let* (
-         (-bds (xah-get-boundary-of-thing 'buffer))
+         (-bds (xah-get-bounds-of-thing 'buffer))
          (-p1 (car -bds))
          (-p2 (cdr -bds)))
     (save-excursion
