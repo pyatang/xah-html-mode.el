@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 4.4.2
+;; Version: 4.5.0
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -196,6 +196,42 @@ Example usage:
       (let ((p1 (region-beginning)) (p2 (region-end)))
         (vector (buffer-substring-no-properties p1 p2) p1 p2 ))
     (xah-html--get-thing-at-cursor unit)))
+
+(defun xah-html--get-image-dimensions (*file-path)
+  "Returns a vector [width height] of a image's dimension.
+The elements are integer datatype.
+Support png jpg svg gif and any image type emacs supports.
+If it's svg, and dimension cannot be determined, it returns [0 0]
+URL `http://ergoemacs.org/emacs/elisp_image_tag.html'
+Version 2015-06-13"
+  (let ((-x nil)
+        (-y nil))
+    (cond
+     ((string-match "\.svg$" *file-path)
+      (progn
+        (with-temp-buffer
+          ;; hackish. grab the first occurence of width height in file
+          (insert-file-contents *file-path)
+          (goto-char (point-min))
+          (when (search-forward-regexp "width=\"\\([0-9]+\\).*\"" nil 'NOERROR)
+            (setq -x (match-string 1 )))
+          (goto-char (point-min))
+          (if (search-forward-regexp "height=\"\\([0-9]+\\).*\"" nil 'NOERROR)
+              (setq -y (match-string 1 ))))
+        (if (and (not (null -x)) (not (null -y)))
+            (progn (vector (string-to-number -x) (string-to-number -y)))
+          (progn [0 0]))))
+     (t
+      (let (-xy )
+        (progn
+          (clear-image-cache t)
+          (setq -xy (image-size
+                     (create-image
+                      (if (file-name-absolute-p *file-path)
+                          *file-path
+                        (concat default-directory *file-path)))
+                     t)))
+        (vector (car -xy) (cdr -xy)))))))
 
 
 (defcustom xah-html-html5-tag-names nil
@@ -584,7 +620,7 @@ This function requires the `htmlize-buffer' from 〔htmlize.el〕 by Hrvoje Niks
   (interactive)
   (elt (cdr (assoc lang-code lang-code-map)) 0))
 
-(defun xah-html-htmlize-precode (lang-code-map)
+(defun xah-html-htmlize-precode (*lang-code-map)
   "Replace text enclosed by “pre” tag to htmlized code.
 
 For example, if the cursor is inside the pre tags <pre class=\"‹langCode›\">…▮…</pre>, then after calling, the text inside the pre tag will be htmlized. That is, wrapped with many span tags for syntax coloring.
@@ -602,11 +638,11 @@ This function requires the `htmlize-buffer' from 〔htmlize.el〕 by Hrvoje Niks
            (-langCode (elt t78730 0))
            (-p1 (elt t78730 1))
            (-p2 (elt t78730 2))
-           ;; (-modeName (elt (cdr (assoc -langCode lang-code-map)) 0))
-           (-modeName (xah-html-langcode-to-major-mode-name -langCode lang-code-map)))
+           ;; (-modeName (elt (cdr (assoc -langCode *lang-code-map)) 0))
+           (-modeName (xah-html-langcode-to-major-mode-name -langCode *lang-code-map)))
       (xah-html-htmlize-region -p1 -p2 -modeName t))))
 
-(defun xah-html-htmlize-region (p1 p2 mode-name &optional trim-whitespace-boundary?)
+(defun xah-html-htmlize-region (p1 p2 mode-name &optional *trim-whitespace-boundary-p)
   "Htmlized region p1 p2 using `major-mode' mode-name.
 
 This function requires the `htmlize-buffer' from 〔htmlize.el〕 by Hrvoje Niksic."
@@ -617,7 +653,7 @@ This function requires the `htmlize-buffer' from 〔htmlize.el〕 by Hrvoje Niks
   (let* (
          (-input-str (buffer-substring-no-properties p1 p2))
          (-out-str
-          (xah-html-htmlize-string (if trim-whitespace-boundary?
+          (xah-html-htmlize-string (if *trim-whitespace-boundary-p
                                        (replace-regexp-in-string "\\`[ \t\n]*" "" (replace-regexp-in-string "[ \t\n]*\\'" "" -input-str))
                                      -input-str
                                      ) mode-name)))
@@ -1250,8 +1286,7 @@ becomes:
 <li>cat</li>
 <li>dog</li>
 </ul>
-Version 2016-03-19
-"
+Version 2016-03-19"
   (interactive)
   (let (-bds -p1 -p2 -input-str -resultStr)
     (setq -bds (xah-html--get-thing-or-selection 'block))
@@ -1264,9 +1299,7 @@ Version 2016-03-19
               (goto-char 1)
               (while
                   (search-forward-regexp  "\.html$" nil t)
-                (backward-char 1)
-                (xah-all-linkify))
-
+                (backward-char 1))
               (goto-char 1)
               (while
                   (not (equal (line-end-position) (point-max)))
@@ -1610,6 +1643,25 @@ Version 2016-07-08."
         (goto-char from)
         (insert -output-str)))))
 
+(defun xah-html-rename-html-inline-image ()
+  "Replace current HTML inline image's file name.
+This command is for interactive use only.
+When cursor is in HTML link file path, e.g.  <img src=\"img/cats.jpg\" > and this command is called, it'll prompt user for a new name. The link path will be changed to the new name, the corresponding file will also be renamed. The operation is aborted if a name exists.
+Version 2016-10-17"
+  (interactive)
+  (let* (
+         (-bounds (bounds-of-thing-at-point 'filename))
+         (-inputPath (buffer-substring-no-properties (car -bounds) (cdr -bounds)))
+         (-expandedPath (expand-file-name -inputPath (file-name-directory (or (buffer-file-name) default-directory ))))
+         (-newPath (read-string "New name: " -expandedPath nil -expandedPath )))
+    (if (file-exists-p -newPath)
+        (progn (user-error "file 「%s」 exist." -newPath ))
+      (progn
+        (rename-file -expandedPath -newPath)
+        (message "rename to %s" -newPath)
+        (delete-region (car -bounds) (cdr -bounds))
+        (insert (xahsite-filepath-to-href-value -newPath (or (buffer-file-name) default-directory)))))))
+
 (defun xah-html-extract-url (*begin *end &optional *full-path-p)
   "Extract URLs in current block or region to `kill-ring'.
 
@@ -1908,6 +1960,67 @@ Version 2015-09-12"
              -url (format-time-string "%Y-%m-%d") -linkText
              ))))
 
+(defun xah-html-image-linkify ()
+  "Replace image file path under cursor to HTML img inline link.
+Example:
+ img/my_cats.jpg
+become
+ <img src=\"img/my_cats.jpg\" alt=\"emacs logo\" width=\"470\" height=\"456\" />
+
+URL `http://ergoemacs.org/emacs/elisp_image_tag.html'
+Version 2015-12-23"
+  (interactive)
+  (let ( -p1 -p2 -imgPath
+             -hrefValue -altText -imgWH -width -height)
+    (save-excursion
+      ;; get image file path begin end pos
+      (let (-p0)
+        (setq -p0 (point))
+        ;; chars that are likely to be delimiters of full path, e.g. space, tabs, brakets.
+        (skip-chars-backward "^  \"\t\n'|()[]{}<>〔〕“”〈〉《》【】〖〗«»‹›·。\\`")
+        (setq -p1 (point))
+        (goto-char -p0)
+        (skip-chars-forward "^  \"\t\n'|()[]{}<>〔〕“”〈〉《》【】〖〗«»‹›·。\\'")
+        (setq -p2 (point))
+        (goto-char -p0))
+
+      (setq -imgPath
+            (if (and (fboundp 'xahsite-web-path-to-filepath)
+                     (fboundp 'xah-local-url-to-file-path))
+                (xahsite-web-path-to-filepath
+                 (xah-local-url-to-file-path
+                  (buffer-substring-no-properties -p1 -p2 )))
+              (buffer-substring-no-properties -p1 -p2 )))
+      (when (not (file-exists-p -imgPath))
+        (user-error "file not exist at %s"  -imgPath))
+
+      (setq -hrefValue
+            (file-relative-name
+             -imgPath
+             (file-name-directory (or (buffer-file-name) default-directory))))
+      (setq -altText
+            (replace-regexp-in-string
+             "_" " "
+             (replace-regexp-in-string
+              "\\.[A-Za-z]\\{3,4\\}$" "" (file-name-nondirectory -imgPath) t t) t t))
+      (setq -imgWH (xah-html--get-image-dimensions -imgPath))
+      (setq -width (number-to-string (elt -imgWH 0)))
+      (setq -height (number-to-string (elt -imgWH 1))))
+
+    (delete-region -p1 -p2)
+    (insert
+     (if (or (equal -width "0") (equal -height "0"))
+         (concat
+          "<img src=\""
+          -hrefValue
+          "\"" " " "alt=\"" -altText "\"" " />")
+       (concat
+        "<img src=\""
+        -hrefValue
+        "\"" " " "alt=\"" -altText "\""
+        " width=\"" -width "\""
+        " height=\"" -height "\" />")))))
+
 (defun xah-html-wikipedia-url-linkify ()
   "Change Wikipedia URL under cursor into a HTML link.
 If there is a text selection, use that as input.
@@ -2192,7 +2305,7 @@ Version 2016-10-05"
 • 「…」 → <code>…</code>
 • 〈…〉 → <cite>…</cite>
 • 《…》 → <cite class=\"book\">…</cite>
-• 〔…〕 → <code class=\"path-α\">\\1</code>
+• 〔…〕 → <code class=\"path-xl\">\\1</code>
 •  ‹…› → <var class=\"d\">…</var>
 • 〔<…〕 → 〔➤ <…〕
 
@@ -2280,12 +2393,12 @@ Version 2016-10-05"
         (goto-char (point-min))
         (while (search-forward-regexp "{\\([ -_/\\:~.A-Za-z0-9%]+?\\)}" nil t)
           (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
-          (replace-match "<code class=\"path-α\">\\1</code>" t)
+          (replace-match "<code class=\"path-xl\">\\1</code>" t)
           (let (-p1 -p2)
             (search-backward "</code>" )
             (setq -p2 (point))
-            (search-backward "<code class=\"path-α\">" )
-            (search-forward "<code class=\"path-α\">")
+            (search-backward "<code class=\"path-xl\">" )
+            (search-forward "<code class=\"path-xl\">")
             (setq -p1 (point))
             (overlay-put (make-overlay -p1 -p2) 'face 'highlight)
             (search-forward "</code>")))))
@@ -2304,7 +2417,7 @@ Example:
 
 When called in lisp code, *begin *end are region begin/end positions.
 
-Version 2016-10-05"
+Version 2016-10-13"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -2340,6 +2453,8 @@ Version 2016-10-05"
                         ["numlock" "<kbd>Num Lock</kbd>"]
                         ["Num Lock" "<kbd>Num Lock</kbd>"]
 
+                        ["Help" "<kbd>Help</kbd>"]
+                        ["Power" "<kbd>Power</kbd>"]
                         ["Tab" "<kbd>Tab ↹</kbd>"]
                         ["Esc" "<kbd>Esc</kbd>"]
                         ["Home" "<kbd>↖ Home</kbd>"]
@@ -2786,40 +2901,51 @@ t
 
   (define-prefix-command 'xah-html-mode-no-chord-map)
 
+  (define-key xah-html-mode-no-chord-map (kbd ";") 'xah-html-emacs-to-windows-kbd-notation)
   (define-key xah-html-mode-no-chord-map (kbd ".") 'xah-html-decode-percent-encoded-url)
-  (define-key xah-html-mode-no-chord-map (kbd "d") 'xah-html-extract-url)
+  (define-key xah-html-mode-no-chord-map (kbd "1") 'xah-html-get-precode-make-new-file)
+  (define-key xah-html-mode-no-chord-map (kbd "2") 'xah-html-toggle-syntax-coloring-markup)
+
   (define-key xah-html-mode-no-chord-map (kbd "3") 'xah-html-update-title)
   (define-key xah-html-mode-no-chord-map (kbd "4") 'xah-html-markup-ruby)
   (define-key xah-html-mode-no-chord-map (kbd "5") 'xah-html-mark-unicode)
   (define-key xah-html-mode-no-chord-map (kbd "6") 'xah-html-html-to-text)
-  (define-key xah-html-mode-no-chord-map (kbd "7") 'xah-html-toggle-syntax-coloring-markup)
-  (define-key xah-html-mode-no-chord-map (kbd "8") 'xah-html-get-precode-make-new-file)
+  (define-key xah-html-mode-no-chord-map (kbd "7") nil)
+  (define-key xah-html-mode-no-chord-map (kbd "8") nil)
   (define-key xah-html-mode-no-chord-map (kbd "9") 'xah-html-redo-syntax-coloring-buffer)
   (define-key xah-html-mode-no-chord-map (kbd "DEL") 'xah-html-remove-html-tags)
+
+  (define-key xah-html-mode-no-chord-map (kbd "a") 'xah-html-rename-html-inline-image)
+  (define-key xah-html-mode-no-chord-map (kbd "b") 'xah-html-wikipedia-url-linkify)
+  (define-key xah-html-mode-no-chord-map (kbd "b") nil)
   (define-key xah-html-mode-no-chord-map (kbd "c") 'xah-html-lines-to-html-list)
+  (define-key xah-html-mode-no-chord-map (kbd "d") 'xah-html-extract-url)
+  (define-key xah-html-mode-no-chord-map (kbd "e") 'xah-html-source-url-linkify)
+  (define-key xah-html-mode-no-chord-map (kbd "f") 'xah-html-image-linkify)
   (define-key xah-html-mode-no-chord-map (kbd "g") 'xah-html-brackets-to-html)
   (define-key xah-html-mode-no-chord-map (kbd "h") 'xah-html-wrap-url)
+  (define-key xah-html-mode-no-chord-map (kbd "i") 'xah-html-replace-html-chars-to-entities)
+  (define-key xah-html-mode-no-chord-map (kbd "j") nil)
   (define-key xah-html-mode-no-chord-map (kbd "k") 'xah-html-htmlize-keyboard-shortcut-notation)
+  (define-key xah-html-mode-no-chord-map (kbd "l") 'xah-html-htmlize-elisp-keywords)
   (define-key xah-html-mode-no-chord-map (kbd "m") 'xah-html-insert-wrap-source-code)
+  (define-key xah-html-mode-no-chord-map (kbd "n") nil)
+  (define-key xah-html-mode-no-chord-map (kbd "o") nil)
   (define-key xah-html-mode-no-chord-map (kbd "p") 'browse-url-of-buffer)
-
-  (define-key xah-html-mode-no-chord-map (kbd "l 3") 'xah-html-source-url-linkify)
-  (define-key xah-html-mode-no-chord-map (kbd "l s") 'xah-html-make-link-defunct)
-  (define-key xah-html-mode-no-chord-map (kbd "l w") 'xah-html-word-to-wikipedia-linkify)
-  (define-key xah-html-mode-no-chord-map (kbd "l g") 'xah-html-wikipedia-url-linkify)
-  (define-key xah-html-mode-no-chord-map (kbd "r u") 'xah-html-replace-html-chars-to-unicode)
-  (define-key xah-html-mode-no-chord-map (kbd "r e") 'xah-html-replace-html-chars-to-entities)
-  (define-key xah-html-mode-no-chord-map (kbd "r p") 'xah-html-replace-html-named-entities)
-  (define-key xah-html-mode-no-chord-map (kbd "r .") 'xah-html-htmlize-elisp-keywords)
-  (define-key xah-html-mode-no-chord-map (kbd "r j") 'xah-html-emacs-to-windows-kbd-notation)
-  (define-key xah-html-mode-no-chord-map (kbd "r m") 'xah-html-make-html-table)
-  (define-key xah-html-mode-no-chord-map (kbd "r v") 'xah-html-make-html-table-undo)
+  (define-key xah-html-mode-no-chord-map (kbd "q") 'xah-html-make-link-defunct)
+  (define-key xah-html-mode-no-chord-map (kbd "q") nil)
+  (define-key xah-html-mode-no-chord-map (kbd "r") 'xah-html-word-to-wikipedia-linkify)
+  (define-key xah-html-mode-no-chord-map (kbd "s") nil)
   (define-key xah-html-mode-no-chord-map (kbd "t") 'xah-html-wrap-p-tag)
+  (define-key xah-html-mode-no-chord-map (kbd "u") nil)
+  (define-key xah-html-mode-no-chord-map (kbd "v") 'xah-html-make-html-table)
+  (define-key xah-html-mode-no-chord-map (kbd "w") 'xah-html-replace-html-named-entities)
+  (define-key xah-html-mode-no-chord-map (kbd "x") 'xah-html-replace-html-chars-to-unicode)
   (define-key xah-html-mode-no-chord-map (kbd "y") 'xah-html-make-citation)
+  (define-key xah-html-mode-no-chord-map (kbd "z") 'xah-html-make-html-table-undo)
 
   ;; define separate, so that user can override the lead key
-  (define-key xah-html-mode-map (kbd "C-c C-c") xah-html-mode-no-chord-map)
-)
+  (define-key xah-html-mode-map (kbd "C-c C-c") xah-html-mode-no-chord-map))
 
 
 
