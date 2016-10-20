@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 5.0.0
+;; Version: 5.0.1
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -18,22 +18,134 @@
 ;; Major mode for editing pure HTML5 files.
 ;; home page: http://ergoemacs.org/emacs/xah-html-mode.html
 
-(require 'thingatpt) ; in emacs 24
-(require 'url-util) ; in emacs 24
+;; part of emacs
+(require 'ido)
+(require 'sgml-mode)
+(require 'newcomment)
+(require 'browse-url)
+(require 'url-util)
+(require 'thingatpt)
+
 (require 'xah-replace-pairs)
 (require 'xah-get-thing)
 (require 'htmlize)
 
-(progn
-  ;; part of emacs
-  (require 'ido)
-  (require 'sgml-mode)
-  (require 'newcomment)
-  (require 'browse-url)
-  (require 'url-util)
-  )
+;; (load "html-util.el" )
 
 (defvar xah-html-mode-hook nil "Standard hook for `xah-html-mode'")
+
+
+
+(defun xah-html--tag-self-closing-p (*tag-name)
+  "Return true if the tag is a self-closing tag, <br> or <br />"
+  (interactive)
+  (member *tag-name  xah-html-html5-self-close-tags))
+
+(defun xah-html--get-bracket-positions ()
+  "Returns html angle bracket positions.
+Returns a vector [ -posPrev< -posPrev> -posNext< -posNext> ]
+ -posPrev< is the position of < nearest to cursor on the left side
+ -posPrev> is the position of > nearest to cursor on the left side
+ similar for -posNext< and -posNext> for the right side.
+If any of these are not found, nil is the value.
+Here, a char's position is the point immediately to the left of the char.
+
+Version 2016-10-18"
+  (let (
+        (-pos (point))
+        -posPrev< ; position of first < char to the left of cursor
+        -posPrev>
+        -posNext<
+        -posNext>
+        )
+    (save-excursion
+      (goto-char -pos)
+      (setq -posPrev< (search-backward "<" nil 'NOERROR))
+      (goto-char -pos)
+      (setq -posPrev> (search-backward ">" nil 'NOERROR))
+      (goto-char -pos)
+      (setq -posNext<
+            (if (search-forward "<" nil 'NOERROR)
+                (- (point) 1)
+              nil
+              ))
+      (goto-char -pos)
+      (setq -posNext>
+            (if (search-forward ">" nil 'NOERROR)
+                (- (point) 1)
+              nil
+              ))
+      (vector -posPrev< -posPrev> -posNext< -posNext>))))
+
+(defun xah-html--cursor-in-tag-markup-p (&optional *bracketPositions)
+  "Return t if cursor is between angle brackets like this: 「<…▮…>」, where the … is any char except angle brackets.
+More precisely: on the left side of cursor, there exist a <, and there's no > between < and cursor.
+And, on the right side of cursor, there exist a >, and there's no < between > and cursor.
+ *bracketPositions is optional. If nil, then `xah-html--get-bracket-positions' is called to get it.
+Version 2016-10-18"
+  (interactive)
+  (let ((-bracketPos
+         (if (null *bracketPositions)
+             (xah-html--get-bracket-positions)
+           *bracketPositions))
+        -posPrev< -posPrev> -posNext> -posNext< )
+    (progn
+      (setq -posPrev< (elt -bracketPos 0))
+      (setq -posPrev> (elt -bracketPos 1))
+      (setq -posNext< (elt -bracketPos 2))
+      (setq -posNext> (elt -bracketPos 3)))
+    (if (and
+         (not (null -posPrev< ))
+         (not (null -posNext> ))
+         (if (not (null -posPrev> ))
+             (< -posPrev> -posPrev<)
+           t
+           )
+         (if (not (null -posNext< ))
+             (< -posNext> -posNext<)
+           t
+           ))
+        nil)))
+
+(defun xah-html--in-opening-tag-p ()
+  "Return t if it's a opening tag. Else, false.
+We assume that the cursor is inside a tag, like this 「<…▮…>」.
+"
+  (interactive)
+  (save-excursion
+    (if
+        (search-backward "<" (- (point) 150))
+        (progn
+          (forward-char)
+          (message "%s" (not (char-equal (char-after) ?/))))
+      (user-error "Not in a tag. Cursor must be inside a tag."))))
+
+(defun xah-html--in-closing-tag-p ()
+  "Return t if cursor is in a closing tag. Else, false."
+  (interactive)
+  (not (xah-html--in-opening-tag-p)))
+
+(defun xah-html--ending-tag-p (&optional *bracketPositions)
+  "Return t if cursor is inside a begin tag, else nil.
+This function assumes your cursor is inside a tag, ⁖ <…▮…>
+ It simply check if the left brack is followed by a slash or not.
+
+*bracketPositions is optional. If nil, then
+ `xah-html--get-bracket-positions' is called to get it.
+"
+  (interactive)
+  (let ( -posPrev< -posPrev> -posNext> -posNext< )
+    (when (not *bracketPositions)
+      (progn
+        (setq *bracketPositions (xah-html--get-bracket-positions))
+        (setq -posPrev< (elt *bracketPositions 0))
+        (setq -posPrev> (elt *bracketPositions 1))
+        (setq -posNext< (elt *bracketPositions 2))
+        (setq -posNext> (elt *bracketPositions 3))))
+    (goto-char -posPrev<)
+    (forward-char 1)
+    (looking-at "/" )))
+
 
 
 
@@ -76,12 +188,6 @@ White space here is any of: space, tab, emacs newline (line feed, ASCII 10).
 Note: in emacs GNU Emacs 24.4+ and later, there's `string-trim' function. You need to (require 'subr-x).
 "
   (replace-regexp-in-string "\\`[ \t\n]*" "" (replace-regexp-in-string "[ \t\n]*\\'" "" string)))
-
-
-
-
-
-
 
 (defun xah-html--get-image-dimensions (*file-path)
   "Returns a vector [width height] of a image's dimension.
@@ -742,71 +848,9 @@ Version 2016-03-07"
 
 
 
-(defun xah-html-tag-self-closing-p (*tag-name)
-  "Return true if the tag is a self-closing tag, ⁖ br."
-  (interactive)
-  (member *tag-name  xah-html-html5-self-close-tags))
-
-(defun xah-html--cursor-in-tag-markup-p (&optional bracketPositions)
-  "Return t if cursor is inside a tag markup.
-For example,
- <p class=\"…\">…</p>
- If cursor is between the beginning p or ending p markup.
- bracketPositions is optional. If nil, then
- `xah-html-get-bracket-positions' is called to get it."
-  (interactive)
-  (let ( pl< pl> pr> pr< )
-    (when (not bracketPositions)
-      (progn
-        (setq bracketPositions (xah-html-get-bracket-positions))
-        (setq pl< (elt bracketPositions 0))
-        (setq pl> (elt bracketPositions 1))
-        (setq pr< (elt bracketPositions 2))
-        (setq pr> (elt bracketPositions 3))))
-    (if (and (< pl> pl<) (< pr> pr<))
-        (progn (message "%s" "yes") t)
-      (progn (message "%s" "no") nil))))
-
-(defun xah-html-in--opening-tag-p ()
-  "Return t if it's a opening tag. Else, false."
-  (interactive)
-  (save-excursion
-    (if
-        (search-backward "<" (- (point) 150))
-        (progn
-          (forward-char)
-          (message "%s" (not (char-equal (char-after) ?/))))
-      (user-error "Not in a tag. Cursor must be inside a tag."))))
-
-(defun xah-html--in-closing-tag-p ()
-  "Return t if cursor is in a closing tag. Else, false."
-  (interactive)
-  (not (xah-html-in--opening-tag-p)))
-
-(defun xah-html--ending-tag-p (&optional bracketPositions)
-  "Return t if cursor is inside a begin tag, else nil.
-This function assumes your cursor is inside a tag, ⁖ <…▮…>
- It simply check if the left brack is followed by a slash or not.
-
-bracketPositions is optional. If nil, then
- `xah-html-get-bracket-positions' is called to get it.
-"
-  (let ( pl< pl> pr> pr< )
-    (when (not bracketPositions)
-      (progn
-        (setq bracketPositions (xah-html-get-bracket-positions))
-        (setq pl< (elt bracketPositions 0))
-        (setq pl> (elt bracketPositions 1))
-        (setq pr< (elt bracketPositions 2))
-        (setq pr> (elt bracketPositions 3))))
-    (goto-char pl<)
-    (forward-char 1)
-    (looking-at "/" )))
-
-(defun xah-html-get-tag-name (&optional left<)
+(defun xah-html--get-tag-name (&optional left<)
   "Return the tag name.
-This function assumes your cursor is inside a tag, ⁖ <…▮…>
-"
+This function assumes your cursor is inside a tag, ⁖ <…▮…>"
   (let ( -p1 -p2 )
     (when (not left<)
       (setq left< (search-backward "<")))
@@ -819,37 +863,6 @@ This function assumes your cursor is inside a tag, ⁖ <…▮…>
     (backward-char 1)
     (setq -p2 (point))
     (buffer-substring-no-properties -p1 -p2)))
-
-(defun xah-html-get-bracket-positions ()
-  "Returns html angle bracket positions.
-Returns a vector [ pl< pl> pr< pr> ]
- pl< is the position of < nearest to cursor on the left side
- pl> is the position of > nearest to cursor on the left side
- similar for pr< and pr> for the right side.
-
-this command does not `save-excursion'. You need to call that.
-"
-  ;; search for current tag.
-  ;; find left nearest >, and right nearest <
-  ;; or left nearest <, and right nearest >
-  ;; determine if it's <…> or >…<.
-  (let (
-        (p-current (point))
-        pl< ; position of first < char to the left of cursor
-        pl>
-        pr<
-        pr>
-        )
-    (progn
-      (goto-char p-current)
-      (setq pl< (search-backward "<" nil "NOERROR"))
-      (goto-char p-current)
-      (setq pl> (search-backward ">" nil "NOERROR"))
-      (goto-char p-current)
-      (setq pr< (search-forward "<" nil "NOERROR"))
-      (goto-char p-current)
-      (setq pr> (search-forward ">" nil "NOERROR"))
-      (vector pl< pl> pr< pr>))))
 
 (defun xah-html-delete-tag ()
   "work in progress. do nothing.
@@ -869,8 +882,8 @@ Also delete the matching beginning/ending tag."
     ;; if not, then we can proceed. Just find the closing tag and delete it. Also the beginning.
     (if (xah-html--cursor-in-tag-markup-p)
         (if (xah-html--ending-tag-p)
-            (progn (message "end %s" (xah-html-get-tag-name)))
-          (progn (message "begin %s" (xah-html-get-tag-name))))
+            (progn (message "end %s" (xah-html--get-tag-name)))
+          (progn (message "begin %s" (xah-html--get-tag-name))))
       (message "%s" "cursor needs to be inside a tag."))))
 
 (defun xah-html-skip-tag-forward ()
@@ -893,7 +906,7 @@ this is a quick 1 min hackjob, works only when there's no nesting."
     (search-backward "<" )
     (forward-char 1)
     (setq -p1 (point))
-    (setq oldTagName (xah-html-get-tag-name))
+    (setq oldTagName (xah-html--get-tag-name))
     (setq newTagName (ido-completing-read "HTML tag:" xah-html-html5-tag-list "PREDICATE" "REQUIRE-MATCH" nil xah-html-html-tag-input-history "span"))
     (goto-char -p1)
     (delete-char (length oldTagName))
@@ -1934,14 +1947,16 @@ Version 2016-10-18"
     (insert (concat "<a href=\"" (url-encode-url -input-str) "\">" -input-str "</a>" ))))
 
 (defun xah-html-wrap-p-tag ()
-  "Add <p>…</p> tag to current text block or text selection.
-If there's a text selection, wrap p around each text block (separated by 2 newline chars.)"
+  "Add <p>…</p> tag to current block or text selection.
+If there's a text selection, wrap p around each text block.
+ 〔a block is separated by blank lines.〕
+Version 2016-10-19"
   (interactive)
-  (let (-bds -p1 -p2 -inputText)
-    (setq -bds (xah-get-bounds-of-thing 'block))
-    (setq -p1 (car -bds))
-    (setq -p2 (cdr -bds))
-    (setq -inputText (buffer-substring-no-properties -p1 -p2))
+  (let* (
+         (-bds (xah-get-bounds-of-thing-or-region 'block))
+         (-p1 (car -bds))
+         (-p2 (cdr -bds))
+         (-inputText (buffer-substring-no-properties -p1 -p2)))
     (delete-region -p1 -p2 )
     (insert "<p>" (replace-regexp-in-string "\n\n+" "</p>\n\n<p>" (xah-html--trim-string -inputText)) "</p>")))
 
@@ -2345,7 +2360,7 @@ This function does not `save-excursion'."
          (-str-left (format "<%s%s>" tag-name -class-str))
          (-str-right (format "</%s>" tag-name )))
     (goto-char p1)
-    (if (xah-html-tag-self-closing-p tag-name)
+    (if (xah-html--tag-self-closing-p tag-name)
         (insert (format "<%s%s />" tag-name -class-str))
       (progn
         (insert -str-left )
@@ -2406,7 +2421,7 @@ Version 2016-04-24
       (xah-html-add-open-close-tags *tag-name *class-name (point-min) (point-max)))
 
     (when ; put cursor between when input text is empty
-        (not (xah-html-tag-self-closing-p *tag-name))
+        (not (xah-html--tag-self-closing-p *tag-name))
       (when (and
              (= -p1 -p2))
         (search-backward "</" )))))
@@ -2418,7 +2433,6 @@ Version 2016-04-24
     (ido-completing-read "lang code:" (mapcar (lambda (x) (car x)) xah-html-lang-name-map) "PREDICATE" "REQUIRE-MATCH" nil xah-html-html-tag-input-history "code")))
   (let ((-bds (xah-get-bounds-of-thing 'block)))
     (xah-html-add-open-close-tags "pre" lang-code (car -bds) (cdr -bds))))
-
 
 (defun xah-html-mark-unicode (*pos)
   "Wrap a special <mark> tag around the character before cursor.
