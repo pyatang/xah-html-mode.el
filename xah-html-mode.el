@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 5.0.1
+;; Version: 5.1.0
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -145,7 +145,6 @@ This function assumes your cursor is inside a tag, ⁖ <…▮…>
     (goto-char -posPrev<)
     (forward-char 1)
     (looking-at "/" )))
-
 
 
 
@@ -2458,7 +2457,7 @@ Version 2016-09-28"
      ((string-equal -char "<") (search-backward "<" ) (delete-char -1) (insert "&lt;"))
      ((string-equal -char ">") (search-backward "<" ) (delete-char -1) (insert "&gt;")))))
 
-(defun xah-html-markup-ruby (&optional begin end)
+(defun xah-html-markup-ruby (&optional *begin *end)
   "Wrap HTML ruby annotation tag on current line or selection.
 Chars inside paren are wrapped with “rt” tag.
 For example
@@ -2466,27 +2465,26 @@ For example
 becomes
  <ruby class=\"ruby88\">abc <rt>xyz</rt></ruby>
 
-When called in lisp code, begin end are region begin/end positions.
+When called in lisp code, *begin *end are region begin/end positions.
 
 URL `http://ergoemacs.org/emacs/elisp_html-ruby-annotation-markup.html'
 Version 2015-07-27"
   (interactive)
   (progn
-    (if (null begin)
+    (if (null *begin)
         (progn
           (if (use-region-p)
               (progn
-                (setq begin (region-beginning))
-                (setq end (region-end)))
+                (setq *begin (region-beginning))
+                (setq *end (region-end)))
             (progn
-              (setq begin (line-beginning-position))
-              (setq end (line-end-position)))))
+              (setq *begin (line-beginning-position))
+              (setq *end (line-end-position)))))
       (progn
-        (setq begin (line-beginning-position))
-        (setq end (line-end-position))))
-
+        (setq *begin (line-beginning-position))
+        (setq *end (line-end-position))))
     (save-restriction
-      (narrow-to-region begin end)
+      (narrow-to-region *begin *end)
       (progn
         (goto-char (point-min))
         (while (search-forward "(" nil 'NOERROR)
@@ -2606,29 +2604,70 @@ Version 2015-09-14."
 
 
 (defun xah-html-abbrev-enable-function ()
-  "Determine whether to expand abbrev.
-This is called by emacs abbrev system."
-;; (let ((-syntax-state (syntax-ppss)))
-;;     (if (or (nth 3 -syntax-state) (nth 4 -syntax-state))
-;;         (progn nil)
-;;       t))
-t
-)
+  "Return t if not in string or comment. Else nil.
+This is for abbrev table property `:enable-function'.
+Version 2016-10-24"
+  (let ((-syntax-state (syntax-ppss)))
+    (not (or (nth 3 -syntax-state) (nth 4 -syntax-state)))))
 
-(setq xah-html-mode-abbrev-table nil)
+(defun xah-html-expand-abbrev ()
+  "Expand the symbol before cursor,
+if cursor is not in string or comment.
+Returns the abbrev symbol if there's a expansion, else nil.
+Version 2016-10-24"
+  (interactive)
+  (when (xah-html-abbrev-enable-function) ; abbrev property :enable-function doesn't seem to work, so check here instead
+    (let (
+          -p1 -p2
+          -abrStr
+          -abrSymbol
+          )
+      (save-excursion
+        (forward-symbol -1)
+        (setq -p1 (point))
+        (forward-symbol 1)
+        (setq -p2 (point)))
+      (setq -abrStr (buffer-substring-no-properties -p1 -p2))
+      (setq -abrSymbol (abbrev-symbol -abrStr))
+      (if -abrSymbol
+          (progn
+            (abbrev-insert -abrSymbol -abrStr -p1 -p2 )
+            (xah-html--abbrev-position-cursor -p1)
+            -abrSymbol)
+        nil))))
+
+(defun xah-html--abbrev-position-cursor (&optional *pos)
+  "Move cursor back to ▮ if exist, else put at end.
+Return true if found, else false.
+Version 2016-10-24"
+  (interactive)
+  (message "pos is %s" *pos)
+  (let ((-found-p (search-backward "▮" (if *pos *pos (max (point-min) (- (point) 100))) t )))
+    (when -found-p (forward-char ))
+    -found-p
+    ))
+
+(defun xah-html--ahf ()
+  "Abbrev hook function, used for `define-abbrev'.
+ Our use is to prevent inserting the char that triggered expansion. Experimental.
+ the “ahf” stand for abbrev hook function.
+Version 2016-10-24"
+  t)
+
+(put 'xah-html--ahf 'no-self-insert t)
 
 (define-abbrev-table 'xah-html-mode-abbrev-table
   '(
 
-    ("cdata" "<![CDATA[▮]]>" nil :system t)
+    ("cdata" "<![CDATA[▮]]>" xah-html--ahf)
     ("hr" "<hr />")
     ("br" "<br />")
-    ("cl" "class=\"\"" nil :system t)
-    ("id" "id=\"\"" nil :system t)
+    ("cl" "class=\"▮\"" xah-html--ahf)
+    ("id" "id=\"▮\"" xah-html--ahf)
 
-    ("w" "width" nil :system t)
-    ("h" "height" nil :system t)
-    ("bgc" "background-color" nil :system t)
+    ("w" "width" xah-html--ahf)
+    ("h" "height" xah-html--ahf)
+    ("bgc" "background-color" xah-html--ahf)
 
     ("zcss" "<link rel=\"stylesheet\" href=\"lbasic.css\" />")
     ("zstyle" "<style type=\"text/css\">\np {line-height:130%}\n</style>")
@@ -2639,55 +2678,47 @@ t
     ;; todo
 ;; http://xahlee.info/js/css_colors.html
 ;; http://xahlee.info/js/css_color_names.html
-    ("zwhite" "#ffffff" nil :system t)
-    ("zsilver" "#c0c0c0" nil :system t)
-    ("zgray" "#808080" nil :system t)
-    ("zblack" "#000000" nil :system t)
-    ("zred" "#ff0000" nil :system t)
-    ("zmaroon" "#800000" nil :system t)
-    ("zyellow" "#ffff00" nil :system t)
-    ("zolive" "#808000" nil :system t)
-    ("zlime" "#00ff00" nil :system t)
-    ("zgreen" "#008000" nil :system t)
-    ("zaqua" "#00ffff" nil :system t)
-    ("zteal" "#008080" nil :system t)
-    ("zblue" "#0000ff" nil :system t)
-    ("znavy" "#000080" nil :system t)
-    ("zfuchsia" "#ff00ff" nil :system t)
-    ("zpurple" "#800080" nil :system t)
-    ("zorange" "#ffa500" nil :system t)
-    ("hsl" "hsl(0,100%,50%)" nil :system t)
+    ("zwhite" "#ffffff" xah-html--ahf)
+    ("zsilver" "#c0c0c0" xah-html--ahf)
+    ("zgray" "#808080" xah-html--ahf)
+    ("zblack" "#000000" xah-html--ahf)
+    ("zred" "#ff0000" xah-html--ahf)
+    ("zmaroon" "#800000" xah-html--ahf)
+    ("zyellow" "#ffff00" xah-html--ahf)
+    ("zolive" "#808000" xah-html--ahf)
+    ("zlime" "#00ff00" xah-html--ahf)
+    ("zgreen" "#008000" xah-html--ahf)
+    ("zaqua" "#00ffff" xah-html--ahf)
+    ("zteal" "#008080" xah-html--ahf)
+    ("zblue" "#0000ff" xah-html--ahf)
+    ("znavy" "#000080" xah-html--ahf)
+    ("zfuchsia" "#ff00ff" xah-html--ahf)
+    ("zpurple" "#800080" xah-html--ahf)
+    ("zorange" "#ffa500" xah-html--ahf)
+    ("hsl" "hsl(0,100%,50%)" xah-html--ahf)
 
-    ("og" "<meta property=\"og:image\" content=\"http://ergoemacs.org/emacs/i/geek_vs_non_geek_repetitive_tasks.png\" />" nil :system t)
+    ("og" "<meta property=\"og:image\" content=\"http://ergoemacs.org/emacs/i/geek_vs_non_geek_repetitive_tasks.png\" />" xah-html--ahf)
 
-    ("zhtml5" "<!DOCTYPE html>" nil :system t)
-    ("html4s" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">" nil :system t)
-    ("html4t" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">" nil :system t)
-    ("xhtml" "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">" nil :system t)
+    ("zhtml5" "<!DOCTYPE html>" xah-html--ahf)
+    ("html4s" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">" xah-html--ahf)
+    ("html4t" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">" xah-html--ahf)
+    ("xhtml" "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">" xah-html--ahf)
     ("zhtml" "<!doctype html><html><head><meta charset=\"utf-8\" />
 <title>ttt</title>
 </head>
 <body>
 
 </body>
-</html>" nil :system t)
+</html>" xah-html--ahf)
 
     )
 
   "abbrev table for `xah-html-mode'"
-  ;; :regexp "\\_<\\([_-0-9A-Za-z]+\\)"
-  ;; :regexp "\\([_-0-9A-Za-z]+\\)"
-  :case-fixed t
-
   )
 
-;; (symbol-plist 'xah-html-mode-abbrev-table)
-;; (get 'xah-html-mode-abbrev-table 'case-fixed)
-;; (abbrev-table-get xah-html-mode-abbrev-table :case-fixed)
-;; (abbrev-table-get xah-html-mode-abbrev-table :enable-function)
-;; (abbrev-table-get xah-html-mode-abbrev-table :parents)
-
-  ;; :enable-function 'xah-html-abbrev-enable-function
+(abbrev-table-put xah-html-mode-abbrev-table :case-fixed t)
+(abbrev-table-put xah-html-mode-abbrev-table :system t)
+(abbrev-table-put xah-html-mode-abbrev-table :enable-function 'xah-html-abbrev-enable-function)
 
 
 ;; keybinding
@@ -2819,6 +2850,18 @@ URL `http://ergoemacs.org/emacs/xah-html-mode.html'
 
   (set (make-local-variable 'comment-start) "<!-- ")
   (set (make-local-variable 'comment-end) " -->")
+
+  (make-local-variable 'abbrev-expand-function)
+  (if (or
+       (and (>= emacs-major-version 24)
+            (>= emacs-minor-version 4))
+       (>= emacs-major-version 25))
+      (progn
+        (setq abbrev-expand-function 'xah-html-expand-abbrev))
+    (progn (add-hook 'abbrev-expand-functions 'xah-html-expand-abbrev nil t)))
+
+  (abbrev-mode 1)
+
   :group 'xah-html-mode
   )
 
