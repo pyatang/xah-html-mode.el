@@ -2,8 +2,8 @@
 
 ;; Copyright © 2013-2015, by Xah Lee
 
-;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 5.1.0
+;; Author: Xah Lee ( http://xahlee.info/ )
+;; Version: 5.1.1
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -156,27 +156,28 @@ This function assumes your cursor is inside a tag, ⁖ <…▮…>
 
 ;; 'ada-mode 'antlr-mode 'archive-mode 'asm-mode 'autoconf-mode 'awk-mode 'bat-mode 'bibtex-mode 'bibtex-style-mode 'bovine-grammar-mode 'c++-mode 'c-mode 'change-log-mode 'clojure-mode 'clojurec-mode 'clojurescript-mode 'clojurex-mode 'compilation-mode 'conf-colon-mode 'conf-javaprop-mode 'conf-mode 'conf-mode-maybe 'conf-ppd-mode 'conf-space-mode 'conf-unix-mode 'conf-xdefaults-mode 'css-mode 'dcl-mode 'delphi-mode 'diff-mode 'dns-mode 'doc-view-mode-maybe 'doctex-mode 'dsssl-mode 'ebrowse-tree-mode 'elisp-byte-code-mode 'emacs-lisp-mode 'f90-mode 'fortran-mode 'fundamental-mode 'gdb-script-mode 'git-rebase-mode 'go-mode 'html-mode 'icon-mode 'idl-mode 'idlwave-mode 'image-mode 'java-mode 'javascript-mode 'latex-mode 'ld-script-mode 'lisp-mode 'm2-mode 'm4-mode 'mail-mode 'makefile-automake-mode 'makefile-gmake-mode 'makefile-imake-mode 'makefile-makepp-mode 'markdown-mode 'metafont-mode 'metapost-mode 'mixal-mode 'nroff-mode 'objc-mode 'org-mode 'pascal-mode 'perl-mode 'pike-mode 'prolog-mode 'ps-mode 'python-mode 'rst-mode 'ruby-mode 'scheme-mode 'scribe-mode 'scss-mode 'ses-mode 'sgml-mode 'sh-mode 'shell-script-mode 'sieve-mode 'simula-mode 'snmp-mode 'snmpv2-mode 'sql-mode 'srecode-template-mode 'tar-mode 'tcl-mode 'tex-mode 'texinfo-mode 'text-mode 'tuareg-mode 'vera-mode 'verilog-mode 'vhdl-mode 'vimrc-mode 'wisent-grammar-mode 'xah-clojure-mode 'xah-css-mode 'xah-elisp-mode 'xah-html-mode 'xah-js-mode 'xah-php-mode 'xml-mode
 
-(defun xah-html--is-datetimestamp-p (input-string)
-  "Return t if input-string is a date/time stamp, else nil.
+(defun xah-html--is-datetimestamp-p (*input-string)
+  "Return t if *input-string is a date/time stamp, else nil.
 This is based on heuristic, so it's not 100% correct.
 If the string contains any month names, weekday names, or of the form dddd-dd-dd, dddd-dd-dddd, dddd-dd-dd, or using slash, then it's considered a date.
 
 2015-09-27 issue: if a sentence “You May Do So”, it's be thought as date. Similar for containing word “March”."
-  (cond
-         ((string-match (regexp-opt (append xah-html--month-full-names xah-html--month-abbrev-names xah-html--weekday-names) 'words) input-string) t)
-         ;; mm/dd/yyyy
-         ((string-match "\\b[0-9][0-9]/[0-9][0-9]/[0-9][0-9][0-9][0-9]\\b" input-string) t)
-         ;; yyyy/mm/dd
-         ((string-match "\\b[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9]\\b" input-string) t)
-         ;; mm/dd/yy
-         ((string-match "\\b[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\\b" input-string) t)
-         ;; mm-dd-yyyy
-         ((string-match "\\b[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]\\b" input-string) t)
-         ;; yyyy-mm-dd
-         ((string-match "\\b[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\\b" input-string) t)
-         ;; mm-dd-yy
-         ((string-match "\\b[0-9][0-9]-[0-9][0-9]-[0-9][0-9]\\b" input-string) t)
-         (t nil) ))
+  (let ((case-fold-search t))
+    (cond
+     ((string-match (regexp-opt (append xah-html--month-full-names xah-html--month-abbrev-names xah-html--weekday-names) 'words) *input-string) t)
+     ;; mm/dd/yyyy
+     ((string-match "\\b[0-9][0-9]/[0-9][0-9]/[0-9][0-9][0-9][0-9]\\b" *input-string) t)
+     ;; yyyy/mm/dd
+     ((string-match "\\b[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9]\\b" *input-string) t)
+     ;; mm/dd/yy
+     ((string-match "\\b[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\\b" *input-string) t)
+     ;; mm-dd-yyyy
+     ((string-match "\\b[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]\\b" *input-string) t)
+     ;; yyyy-mm-dd
+     ((string-match "\\b[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\\b" *input-string) t)
+     ;; mm-dd-yy
+     ((string-match "\\b[0-9][0-9]-[0-9][0-9]-[0-9][0-9]\\b" *input-string) t)
+     (t nil))))
 
 
 
@@ -452,6 +453,7 @@ For example:
 
         ;; ("clojure" . ["clojure-mode" "clj"])
         ("clojure" . ["xah-clojure-mode" "clj"])
+        ("typescript" . ["typescript-mode" "ts"])
         ("css" . ["xah-css-mode" "css"])
         ("emacs-lisp" . ["xah-elisp-mode" "el"])
         ("dart" . ["dart-mode" "dart"])
@@ -1626,7 +1628,7 @@ http://www.time.com/time/magazine/article/0,9171,981408,00.html
 
 After execution, the lines will become
 
-〔<cite>Circus Maximalist</cite> <time>1994-09-12</time> By Paul Gray. @ <a href=\"http://www.time.com/time/magazine/article/0,9171,981408,00.html\">Source www.time.com</a>〕
+ 〔<cite>Circus Maximalist</cite> <time>1994-09-12</time> By Paul Gray. @ <a href=\"http://www.time.com/time/magazine/article/0,9171,981408,00.html\">Source www.time.com</a>〕
 
 If there's a text selection, use it for input, otherwise the input is a text block between blank lines.
 
@@ -1638,25 +1640,24 @@ The order of lines for {title, author, date/time, url} needs not be in that orde
          (-p2 (cdr -bds))
          (-inputText (buffer-substring-no-properties -p1 -p2))
          ;; (-inputText (replace-regexp-in-string "^[[:space:]]*" "" (elt -bds 0))) ; remove white space in front
-         (-myList (split-string -inputText "[[:space:]]*\n[[:space:]]*" t "[[:space:]]*"))
+         ;; (-lines (split-string -inputText "[ \t]*\n[ \t]*" t "[[:space:]]*"))
+         (-lines (split-string -inputText "\n" t " *"))
          -title -author -date -url )
 
-       ;; set title, date, url, author,
-    (let (-x (case-fold-search nil))
-;; the whole thing here is not optimal implementation. data structure should be hash or so. easier... basically, we have n items, and we need to identify them into n things. that is, pairing them up. Now, some items are easily recognized with 100% certainty. We pair those first. Then, in the end, we'll have 2 or so items that we need to identify, but by then, the items are few, and we can easily distinguish them. So, for this, we need a data structure such that we can easily remove item for those we already identified.
-      (while (> (length -myList) 0)
-        (setq -x (pop -myList))
-        (message "「%s」" -x)
+    ;; set title, date, url, author,
+    (let (-x (case-fold-search t))
+      ;; the whole thing here is not optimal implementation. data structure should be hash or so. easier... basically, we have n items, and we need to identify them into n things. that is, pairing them up. Now, some items are easily recognized with 100% certainty. We pair those first. Then, in the end, we'll have 2 or so items that we need to identify, but by then, the items are few, and we can easily distinguish them. So, for this, we need a data structure such that we can easily remove item for those we already identified.
+      (while (> (length -lines) 0)
+        (setq -x (pop -lines))
         (cond
-         ((string-match "^https?://" -x) (setq -url -x))
-         ((string-match "^ *[bB]y " -x) (setq -author -x))
-         ((string-match "^ *author[: ]" -x ) (setq -author -x))
-         ((xah-html--is-datetimestamp-p -x) (setq -date -x))
+         ((xah-html--is-datetimestamp-p -x) (setq -date -x) )
+         ((string-match "^https?://" -x) (setq -url -x) )
+         ((string-match "^ *[bB]y " -x) (setq -author -x) )
          (t (setq -title -x)))))
 
     (when (null -title) (error "I can't find “title” %s" -title))
     (when (null -author) (error "I can't find “author” %s" -author))
-    (when (null -date) (error "I can't find “date” %s" -date))
+    (when (null -date) (error "error 74188 I can't find “date” %s" -date))
     (when (null -url) (error "I can't find “url” %s" -url))
 
     (setq -title (xah-html--trim-string -title))
@@ -2102,7 +2103,7 @@ Version 2016-10-05"
 (defun xah-html-brackets-to-html (*begin *end)
   "Replace bracketed text to HTML markup in current line or text selection.
 
-• 「emacs-lisp-function-name」 → <code class=\"elisp-ƒ\">emacs-lisp-function-name</code>
+• 「emacs-lisp-function-name」 → <code class=\"elisp-ƒ\">emacs-lisp-function-name</code> if in xah elisp mode
 • 「…」 → <code>…</code>
 • 〈…〉 → <cite>…</cite>
 • 《…》 → <cite class=\"book\">…</cite>
@@ -2113,18 +2114,17 @@ Version 2016-10-05"
 Changes are reported to message buffer with char position.
 
 When called in lisp code, *begin *end are region begin/end positions.
-Version 2016-10-05"
+Version 2016-10-31"
   (interactive
    (let ((-bds (xah-get-bounds-of-thing 'block)))
-     (list (car -bds) (cdr -bds) )))
+     (list (car -bds) (cdr -bds))))
 
   (let ((-changedItems '()))
     (save-excursion
       (save-restriction
         (narrow-to-region *begin *end)
-
-        (xah-html-htmlize-elisp-keywords *begin *end)
-
+        (when (string-match "/ergoemacs_org/" (buffer-file-name))
+          (xah-html-htmlize-elisp-keywords *begin *end))
         (progn
           (goto-char (point-min))
           (while (search-forward-regexp "「\\([^」]+?\\)」" nil t)
@@ -2193,7 +2193,7 @@ Version 2016-10-05"
             (overlay-put (make-overlay -p1 -p2) 'face 'highlight)))
 
         (goto-char (point-min))
-        (while (search-forward-regexp "{\\([ -_/\\:~.A-Za-z0-9%]+?\\)}" nil t)
+        (while (search-forward-regexp "〔\\([ -_/\\:~.A-Za-z0-9%]+?\\)〕" nil t)
           (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
           (replace-match "<code class=\"path-xl\">\\1</code>" t)
           (let (-p1 -p2)
@@ -2641,7 +2641,6 @@ Version 2016-10-24"
 Return true if found, else false.
 Version 2016-10-24"
   (interactive)
-  (message "pos is %s" *pos)
   (let ((-found-p (search-backward "▮" (if *pos *pos (max (point-min) (- (point) 100))) t )))
     (when -found-p (forward-char ))
     -found-p
@@ -2660,8 +2659,8 @@ Version 2016-10-24"
   '(
 
     ("cdata" "<![CDATA[▮]]>" xah-html--ahf)
-    ("hr" "<hr />")
-    ("br" "<br />")
+    ("hr" "<hr />" xah-html--ahf)
+    ("br" "<br />" xah-html--ahf)
     ("cl" "class=\"▮\"" xah-html--ahf)
     ("id" "id=\"▮\"" xah-html--ahf)
 
@@ -2866,6 +2865,7 @@ URL `http://ergoemacs.org/emacs/xah-html-mode.html'
   )
 
 (add-to-list 'auto-mode-alist '("\\.html\\'" . xah-html-mode))
+(add-to-list 'auto-mode-alist '("\\.htm\\'" . xah-html-mode))
 
 (provide 'xah-html-mode)
 
