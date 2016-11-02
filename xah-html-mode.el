@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.1.1
+;; Version: 5.1.2
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -2114,11 +2114,10 @@ Version 2016-10-05"
 Changes are reported to message buffer with char position.
 
 When called in lisp code, *begin *end are region begin/end positions.
-Version 2016-10-31"
+Version 2016-11-02"
   (interactive
-   (let ((-bds (xah-get-bounds-of-thing 'block)))
+   (let ((-bds (xah-get-bounds-of-thing-or-region 'block)))
      (list (car -bds) (cdr -bds))))
-
   (let ((-changedItems '()))
     (save-excursion
       (save-restriction
@@ -2141,7 +2140,6 @@ Version 2016-10-31"
               (overlay-put (make-overlay (point) (point-max)) 'face 'highlight)
               (goto-char (point-max))
               (insert "</code>"))))
-
         (goto-char (point-min))
         (while (search-forward-regexp "〈\\([^〉]+?\\)〉" nil t)
           (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
@@ -2154,7 +2152,6 @@ Version 2016-10-31"
             (setq -p1 (point))
             (overlay-put (make-overlay -p1 -p2) 'face 'highlight)
             (search-forward "</cite>" )))
-
         (goto-char (point-min))
         (while (search-forward-regexp "《\\([^》]+?\\)》" nil t)
           (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
@@ -2167,7 +2164,6 @@ Version 2016-10-31"
             (setq -p1 (point))
             (overlay-put (make-overlay -p1 -p2) 'face 'highlight)
             (search-forward "</cite>" )))
-
         (goto-char (point-min))
         (while (search-forward-regexp "‹\\([^›]+?\\)›" nil t)
           (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
@@ -2180,7 +2176,6 @@ Version 2016-10-31"
             (setq -p1 (point))
             (overlay-put (make-overlay -p1 -p2) 'face 'highlight)
             (search-forward "</var>" )))
-
         (goto-char (point-min))
         (while (search-forward-regexp "〔<a href=" nil t)
           (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
@@ -2191,7 +2186,6 @@ Version 2016-10-31"
             (search-forward "〔➤see <a href=" )
             (setq -p2 (point))
             (overlay-put (make-overlay -p1 -p2) 'face 'highlight)))
-
         (goto-char (point-min))
         (while (search-forward-regexp "〔\\([ -_/\\:~.A-Za-z0-9%]+?\\)〕" nil t)
           (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
@@ -2203,8 +2197,18 @@ Version 2016-10-31"
             (search-forward "<code class=\"path-xl\">")
             (setq -p1 (point))
             (overlay-put (make-overlay -p1 -p2) 'face 'highlight)
-            (search-forward "</code>")))))
-
+            (search-forward "</code>")))
+        (progn
+          (goto-char (point-min))
+          (while (search-forward-regexp "\\.\\.\\." nil t)
+            (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
+            (replace-match "…" t)
+            (let (-p1 -p2)
+              (search-backward "…" )
+              (setq -p1 (point))
+              (search-forward "…")
+              (setq -p2 (point))
+              (overlay-put (make-overlay -p1 -p2) 'face 'highlight))))))
     (mapcar
      (lambda (-x)
        (princ -x)
