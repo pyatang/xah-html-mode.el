@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.1.2
+;; Version: 5.2.0
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -28,6 +28,7 @@
 
 (require 'xah-replace-pairs)
 (require 'xah-get-thing)
+(require 'xah-css-mode)
 (require 'htmlize)
 
 ;; (load "html-util.el" )
@@ -153,8 +154,6 @@ This function assumes your cursor is inside a tag, ⁖ <…▮…>
 (defvar xah-html--month-abbrev-names (mapcar (lambda (x) (substring x 0 3)) xah-html--month-full-names) "list of English month 3-letter abbrev names.")
 
 (defvar xah-html--weekday-names '("Monday" "Tuesday" "Wednesday" "Thursday" "Friday" "Saturday" "Sunday") "list of English weekday full names.")
-
-;; 'ada-mode 'antlr-mode 'archive-mode 'asm-mode 'autoconf-mode 'awk-mode 'bat-mode 'bibtex-mode 'bibtex-style-mode 'bovine-grammar-mode 'c++-mode 'c-mode 'change-log-mode 'clojure-mode 'clojurec-mode 'clojurescript-mode 'clojurex-mode 'compilation-mode 'conf-colon-mode 'conf-javaprop-mode 'conf-mode 'conf-mode-maybe 'conf-ppd-mode 'conf-space-mode 'conf-unix-mode 'conf-xdefaults-mode 'css-mode 'dcl-mode 'delphi-mode 'diff-mode 'dns-mode 'doc-view-mode-maybe 'doctex-mode 'dsssl-mode 'ebrowse-tree-mode 'elisp-byte-code-mode 'emacs-lisp-mode 'f90-mode 'fortran-mode 'fundamental-mode 'gdb-script-mode 'git-rebase-mode 'go-mode 'html-mode 'icon-mode 'idl-mode 'idlwave-mode 'image-mode 'java-mode 'javascript-mode 'latex-mode 'ld-script-mode 'lisp-mode 'm2-mode 'm4-mode 'mail-mode 'makefile-automake-mode 'makefile-gmake-mode 'makefile-imake-mode 'makefile-makepp-mode 'markdown-mode 'metafont-mode 'metapost-mode 'mixal-mode 'nroff-mode 'objc-mode 'org-mode 'pascal-mode 'perl-mode 'pike-mode 'prolog-mode 'ps-mode 'python-mode 'rst-mode 'ruby-mode 'scheme-mode 'scribe-mode 'scss-mode 'ses-mode 'sgml-mode 'sh-mode 'shell-script-mode 'sieve-mode 'simula-mode 'snmp-mode 'snmpv2-mode 'sql-mode 'srecode-template-mode 'tar-mode 'tcl-mode 'tex-mode 'texinfo-mode 'text-mode 'tuareg-mode 'vera-mode 'verilog-mode 'vhdl-mode 'vimrc-mode 'wisent-grammar-mode 'xah-clojure-mode 'xah-css-mode 'xah-elisp-mode 'xah-html-mode 'xah-js-mode 'xah-php-mode 'xml-mode
 
 (defun xah-html--is-datetimestamp-p (*input-string)
   "Return t if *input-string is a date/time stamp, else nil.
@@ -397,26 +396,6 @@ Version 2015-06-13"
   :group 'xah-html-mode )
 (setq xah-html-html5-self-close-tags '( "area" "base" "br" "col" "command" "embed" "hr" "img" "input" "keygen" "link" "meta" "param" "source" "track" "wbr"))
 
-(defvar xah-html-css-color-names nil "List of CSS color names.")
-(setq xah-html-css-color-names
-'("aliceblue" "antiquewhite" "aqua" "aquamarine" "azure" "beige" "bisque" "black" "blanchedalmond" "blue" "blueviolet" "brown" "burlywood" "cadetblue" "chartreuse" "chocolate" "coral" "cornflowerblue" "cornsilk" "crimson" "cyan" "darkblue" "darkcyan" "darkgoldenrod" "darkgray" "darkgreen" "darkgrey" "darkkhaki" "darkmagenta" "darkolivegreen" "darkorange" "darkorchid" "darkred" "darksalmon" "darkseagreen" "darkslateblue" "darkslategray" "darkslategrey" "darkturquoise" "darkviolet" "deeppink" "deepskyblue" "dimgray" "dimgrey" "dodgerblue" "firebrick" "floralwhite" "forestgreen" "fuchsia" "gainsboro" "ghostwhite" "gold" "goldenrod" "gray" "green" "greenyellow" "grey" "honeydew" "hotpink" "indianred" "indigo" "ivory" "khaki" "lavender" "lavenderblush" "lawngreen" "lemonchiffon" "lightblue" "lightcoral" "lightcyan" "lightgoldenrodyellow" "lightgray" "lightgreen" "lightgrey" "lightpink" "lightsalmon" "lightseagreen" "lightskyblue" "lightslategray" "lightslategrey" "lightsteelblue" "lightyellow" "lime" "limegreen" "linen" "magenta" "maroon" "mediumaquamarine" "mediumblue" "mediumorchid" "mediumpurple" "mediumseagreen" "mediumslateblue" "mediumspringgreen" "mediumturquoise" "mediumvioletred" "midnightblue" "mintcream" "mistyrose" "moccasin" "navajowhite" "navy" "oldlace" "olive" "olivedrab" "orange" "orangered" "orchid" "palegoldenrod" "palegreen" "paleturquoise" "palevioletred" "papayawhip" "peachpuff" "peru" "pink" "plum" "powderblue" "purple" "red" "rosybrown" "royalblue" "saddlebrown" "salmon" "sandybrown" "seagreen" "seashell" "sienna" "silver" "skyblue" "slateblue" "slategray" "slategrey" "snow" "springgreen" "steelblue" "tan" "teal" "thistle" "tomato" "turquoise" "violet" "wheat" "white" "whitesmoke" "yellow" "yellowgreen")
- )
-
-(defvar xah-html-css-property-names nil "List of CSS property names.")
-(setq xah-html-css-property-names
-      '(
-        "background" "background-color" "background-image" "background-position" "background-repeat" "border" "border-bottom" "border-collapse" "border-color" "border-left" "border-radius" "border-top" "box-shadow" "clear" "color" "content" "cursor" "direction" "display" "filter" "float" "font-family" "font-size" "font-style" "font-weight" "height" "line-height" "list-style" "list-style-image" "list-style-type" "margin" "margin-bottom" "margin-left" "margin-right" "margin-top" "max-width" "min-width" "opacity" "orphans" "overflow" "padding" "padding-left" "padding-right" "padding-top" "page-break-after" "page-break-inside" "position" "pre-wrap" "table" "table-cell" "text-align" "text-decoration" "unicode-bidi" "vertical-align" "white-space" "widows" "width" "word-wrap" "z-index"
-        ))
-
-(defvar xah-html-css-unit-names nil "List of CSS unite names.")
-(setq xah-html-css-unit-names '("px" "pt" "pc" "cm" "mm" "in" "em" "ex" "%"))
-
-(defvar xah-html-css-value-kwds nil "List of CSS value names")
-(setq xah-html-css-value-kwds
-      '(
-        "!important" "absolute" "alpha" "auto" "avoid" "block" "bold" "both" "bottom" "break-word" "center" "collapse" "dashed" "dotted" "embed" "fixed" "help" "hidden" "hsl" "hsla" "inherit" "inline" "inline-block" "italic" "large" "left" "ltr" "middle" "monospace" "no-repeat" "none" "normal" "nowrap" "pointer" "relative" "rgb" "rgba" "right" "rtl" "sans-serif" "serif" "small" "smaller" "solid" "square" "static" "thin" "top" "transparent" "underline" "url" "x-large" "xx-large"
-        ))
-
 
 
 (defun xah-html-get-tag-type (tag-name)
@@ -609,10 +588,10 @@ Version 2016-10-18"
     (kill-buffer -output-buff)
     -resultStr ))
 
-(defun xah-html-langcode-to-major-mode-name (lang-code lang-code-map)
-  "get the `major-mode' name associated with lang-code."
+(defun xah-html-langcode-to-major-mode-name (*lang-code *lang-code-map)
+  "get the `major-mode' name associated with *lang-code."
   (interactive)
-  (elt (cdr (assoc lang-code lang-code-map)) 0))
+  (elt (cdr (assoc *lang-code *lang-code-map)) 0))
 
 (defun xah-html-htmlize-precode (*lang-code-map)
   "Replace text enclosed by “pre” tag to htmlized code.
@@ -681,14 +660,14 @@ This command does the inverse of `xah-html-htmlize-precode'."
         (xah-html-dehtmlize-precode -p1 -p2)
       (xah-html-htmlize-precode lang-name-map))))
 
-(defun xah-html-redo-syntax-coloring-buffer (&optional lang-code)
+(defun xah-html-redo-syntax-coloring-buffer (&optional *lang-code)
   "redo all pre lang code syntax coloring in current html page."
   (interactive)
   (let (-langCode -p1 -p2 (-i 0))
 
     ;; (-search-string
-    ;;  (if lang-code
-    ;;      (progn (format "<pre class=\"\\([-A-Za-z0-9]+\\)\">" lang-code))
+    ;;  (if *lang-code
+    ;;      (progn (format "<pre class=\"\\([-A-Za-z0-9]+\\)\">" *lang-code))
     ;;    (progn "<pre class=\"\\([-A-Za-z0-9]+\\)\">")))
 
     (save-excursion
@@ -1632,7 +1611,8 @@ After execution, the lines will become
 
 If there's a text selection, use it for input, otherwise the input is a text block between blank lines.
 
-The order of lines for {title, author, date/time, url} needs not be in that order. Author should start with “by”."
+The order of lines for {title, author, date/time, url} needs not be in that order. Author should start with “by”.
+Version 2016-11-05"
   (interactive)
   (let* (
          (-bds (xah-get-bounds-of-thing 'block))
@@ -1650,9 +1630,9 @@ The order of lines for {title, author, date/time, url} needs not be in that orde
       (while (> (length -lines) 0)
         (setq -x (pop -lines))
         (cond
-         ((xah-html--is-datetimestamp-p -x) (setq -date -x) )
-         ((string-match "^https?://" -x) (setq -url -x) )
-         ((string-match "^ *[bB]y " -x) (setq -author -x) )
+         ((string-match "http://" -x) (setq -url -x))
+         ((xah-html--is-datetimestamp-p -x) (setq -date -x))
+         ((string-match "^ *[bB]y " -x) (setq -author -x))
          (t (setq -title -x)))))
 
     (when (null -title) (error "I can't find “title” %s" -title))
@@ -2223,102 +2203,103 @@ Example:
 
 When called in lisp code, *begin *end are region begin/end positions.
 
-Version 2016-10-13"
+Version 2016-11-06"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
      (list (line-beginning-position) (line-end-position))))
   (let* (
-         (-replaceList [
-                        ;; case must match
-                        ["Ctrl" "<kbd>Ctrl</kbd>"]
-                        ["Control" "<kbd>Ctrl</kbd>"]
-                        ["AltGr" "<kbd>AltGr</kbd>"]
-                        ["Compose" "<kbd>⎄ Compose</kbd>"]
-                        ["Alt" "<kbd>Alt</kbd>"]
-                        ["Shift" "<kbd>⇧ Shift</kbd>"]
-                        ["Cmd" "<kbd>⌘ Cmd</kbd>"]
-                        ["Option" "<kbd>⌥ Opt</kbd>"]
-                        ["Opt" "<kbd>⌥ Opt</kbd>"]
-                        ["Win" "<kbd>❖ Win</kbd>"]
-                        ["Menu" "<kbd>▤ Menu</kbd>"]
-                        ["Meta" "<kbd>◆ Meta</kbd>"]
-                        ["Super" "<kbd>❖ Super</kbd>"]
-                        ["Hyper" "<kbd>Hyper</kbd>"]
+         (-replaceList
+          [
+           ;; case must match
+           ["Ctrl" "<kbd>Ctrl</kbd>"]
+           ["Control" "<kbd>Ctrl</kbd>"]
+           ["AltGr" "<kbd>AltGr</kbd>"]
+           ["Compose" "<kbd>⎄ Compose</kbd>"]
+           ["Alt" "<kbd>Alt</kbd>"]
+           ["Shift" "<kbd>⇧ Shift</kbd>"]
+           ["Cmd" "<kbd>⌘ command</kbd>"]
+           ["Option" "<kbd>⌥ Opt</kbd>"]
+           ["Opt" "<kbd>⌥ Opt</kbd>"]
+           ["Win" "<kbd>❖ Window</kbd>"]
+           ["Menu" "<kbd>▤ Menu</kbd>"]
+           ["Meta" "<kbd>◆ Meta</kbd>"]
+           ["Super" "<kbd>❖ Super</kbd>"]
+           ["Hyper" "<kbd>Hyper</kbd>"]
 
-                        ["Return" "<kbd>Return ↩</kbd>"]
-                        ["Enter" "<kbd>Enter ↵</kbd>"]
-                        ["Backspace" "<kbd>⌫ Backspace</kbd>"]
-                        ["Delete" "<kbd>⌦ Delete</kbd>"]
-                        ["DEL" "<kbd>⌦ Delete</kbd>"]
-                        ["Space" "<kbd>Space</kbd>"]
-                        ["Caps Lock" "<kbd>Caps Lock</kbd>"]
-                        ["capslock" "<kbd>Caps Lock</kbd>"]
-                        ["f-lock" "<kbd>F Lock</kbd>"]
-                        ["f lock" "<kbd>F Lock</kbd>"]
-                        ["numlock" "<kbd>Num Lock</kbd>"]
-                        ["Num Lock" "<kbd>Num Lock</kbd>"]
+           ["Return" "<kbd>Return ↩</kbd>"]
+           ["Enter" "<kbd>Enter ↵</kbd>"]
+           ["Backspace" "<kbd>⌫ Backspace</kbd>"]
+           ["Delete" "<kbd>⌦ Delete</kbd>"]
+           ["DEL" "<kbd>⌦ Delete</kbd>"]
+           ["Space" "<kbd>Space</kbd>"]
+           ["Caps Lock" "<kbd>Caps Lock</kbd>"]
+           ["capslock" "<kbd>Caps Lock</kbd>"]
+           ["f-lock" "<kbd>F Lock</kbd>"]
+           ["f lock" "<kbd>F Lock</kbd>"]
+           ["numlock" "<kbd>Num Lock</kbd>"]
+           ["Number Lock" "<kbd>Num Lock</kbd>"]
 
-                        ["Help" "<kbd>Help</kbd>"]
-                        ["Power" "<kbd>Power</kbd>"]
-                        ["Tab" "<kbd>Tab ↹</kbd>"]
-                        ["Esc" "<kbd>Esc</kbd>"]
-                        ["Home" "<kbd>↖ Home</kbd>"]
-                        ["End" "<kbd>↘ End</kbd>"]
-                        ["Page Up" "<kbd>⇞ Page △</kbd>"]
-                        ["pageup" "<kbd>⇞ Page △</kbd>"]
-                        ["PgUp" "<kbd>⇞ Page △</kbd>"]
-                        ["Page Down" "<kbd>⇟ Page ▽</kbd>"]
-                        ["pagedown" "<kbd>⇟ Page ▽</kbd>"]
-                        ["PgDn" "<kbd>⇟ Page ▽</kbd>"]
-                        ["Insert" "<kbd>Insert</kbd>"]
-                        ["INS" "<kbd>Insert</kbd>"]
-                        ["Pause" "<kbd>Pause</kbd>"]
-                        ["Break" "<kbd>Pause</kbd>"]
-                        ["PrtScn" "<kbd>PrtScn</kbd>"]
-                        ["printscreen" "<kbd>PrtScn</kbd>"]
-                        ["sysrq" "<kbd>SysRq</kbd>"]
-                        ["scrlk" "<kbd>Scroll Lock</kbd>"]
-                        ["ScrLk" "<kbd>Scroll Lock</kbd>"]
-                        ["scrolllock" "<kbd>Scroll Lock</kbd>"]
-                        ["Fn" "<kbd>Fn</kbd>"]
+           ["Help" "<kbd>Help</kbd>"]
+           ["Power" "<kbd>Power</kbd>"]
+           ["Tab" "<kbd>Tab ↹</kbd>"]
+           ["Esc" "<kbd>Esc</kbd>"]
+           ["Home" "<kbd>↖ Home</kbd>"]
+           ["End" "<kbd>↘ End</kbd>"]
+           ["Page Up" "<kbd>⇞ Page △</kbd>"]
+           ["pageup" "<kbd>⇞ Page △</kbd>"]
+           ["PgUp" "<kbd>⇞ Page △</kbd>"]
+           ["Page Down" "<kbd>⇟ Page ▽</kbd>"]
+           ["pagedown" "<kbd>⇟ Page ▽</kbd>"]
+           ["PgDn" "<kbd>⇟ Page ▽</kbd>"]
+           ["Insert" "<kbd>Insert</kbd>"]
+           ["INS" "<kbd>Insert</kbd>"]
+           ["Pause" "<kbd>Pause</kbd>"]
+           ["Break" "<kbd>Pause</kbd>"]
+           ["PrtScn" "<kbd>PrtScn</kbd>"]
+           ["printscreen" "<kbd>PrtScn</kbd>"]
+           ["sysrq" "<kbd>SysRq</kbd>"]
+           ["scrlk" "<kbd>Scroll Lock</kbd>"]
+           ["ScrLk" "<kbd>Scroll Lock</kbd>"]
+           ["scrolllock" "<kbd>Scroll Lock</kbd>"]
+           ["Fn" "<kbd>Fn</kbd>"]
 
-                        ["Copy" "<kbd>Copy</kbd>"]
-                        ["Cut" "<kbd>✂ Cut</kbd>"]
-                        ["Paste" "<kbd>Paste</kbd>"]
-                        ["Undo" "<kbd>⎌ Undo</kbd>"]
-                        ["Redo" "<kbd>↷</kbd>"]
+           ["Copy" "<kbd>Copy</kbd>"]
+           ["Cut" "<kbd>✂ Cut</kbd>"]
+           ["Paste" "<kbd>Paste</kbd>"]
+           ["Undo" "<kbd>⎌ Undo</kbd>"]
+           ["Redo" "<kbd>↷</kbd>"]
 
-                        ["F10" "<kbd>F10</kbd>"] ["F11" "<kbd>F11</kbd>"] ["F12" "<kbd>F12</kbd>"] ["F13" "<kbd>F13</kbd>"] ["F14" "<kbd>F14</kbd>"] ["F15" "<kbd>F15</kbd>"] ["F16" "<kbd>F16</kbd>"] ["F17" "<kbd>F17</kbd>"] ["F18" "<kbd>F18</kbd>"] ["F19" "<kbd>F19</kbd>"] ["F20" "<kbd>F20</kbd>"] ["F21" "<kbd>F21</kbd>"] ["F22" "<kbd>F22</kbd>"] ["F23" "<kbd>F23</kbd>"] ["F24" "<kbd>F24</kbd>"]
+           ["F10" "<kbd>F10</kbd>"] ["F11" "<kbd>F11</kbd>"] ["F12" "<kbd>F12</kbd>"] ["F13" "<kbd>F13</kbd>"] ["F14" "<kbd>F14</kbd>"] ["F15" "<kbd>F15</kbd>"] ["F16" "<kbd>F16</kbd>"] ["F17" "<kbd>F17</kbd>"] ["F18" "<kbd>F18</kbd>"] ["F19" "<kbd>F19</kbd>"] ["F20" "<kbd>F20</kbd>"] ["F21" "<kbd>F21</kbd>"] ["F22" "<kbd>F22</kbd>"] ["F23" "<kbd>F23</kbd>"] ["F24" "<kbd>F24</kbd>"]
 
-                        ["F1" "<kbd>F1</kbd>"] ["F2" "<kbd>F2</kbd>"] ["F3" "<kbd>F3</kbd>"] ["F4" "<kbd>F4</kbd>"] ["F5" "<kbd>F5</kbd>"] ["F6" "<kbd>F6</kbd>"] ["F7" "<kbd>F7</kbd>"] ["F8" "<kbd>F8</kbd>"] ["F9" "<kbd>F9</kbd>"]
+           ["F1" "<kbd>F1</kbd>"] ["F2" "<kbd>F2</kbd>"] ["F3" "<kbd>F3</kbd>"] ["F4" "<kbd>F4</kbd>"] ["F5" "<kbd>F5</kbd>"] ["F6" "<kbd>F6</kbd>"] ["F7" "<kbd>F7</kbd>"] ["F8" "<kbd>F8</kbd>"] ["F9" "<kbd>F9</kbd>"]
 
-                        ["kp0" "<kbd>Keypad 0</kbd>"] ["kp1" "<kbd>Keypad 1</kbd>"] ["kp2" "<kbd>Keypad 2</kbd>"] ["kp3" "<kbd>Keypad 3</kbd>"] ["kp4" "<kbd>Keypad 4</kbd>"] ["kp5" "<kbd>Keypad 5</kbd>"] ["kp6" "<kbd>Keypad 6</kbd>"] ["kp7" "<kbd>Keypad 7</kbd>"] ["kp8" "<kbd>Keypad 8</kbd>"] ["kp9" "<kbd>Keypad 9</kbd>"]
+           ["kp0" "<kbd>Keypad 0</kbd>"] ["kp1" "<kbd>Keypad 1</kbd>"] ["kp2" "<kbd>Keypad 2</kbd>"] ["kp3" "<kbd>Keypad 3</kbd>"] ["kp4" "<kbd>Keypad 4</kbd>"] ["kp5" "<kbd>Keypad 5</kbd>"] ["kp6" "<kbd>Keypad 6</kbd>"] ["kp7" "<kbd>Keypad 7</kbd>"] ["kp8" "<kbd>Keypad 8</kbd>"] ["kp9" "<kbd>Keypad 9</kbd>"]
 
-                        ["kp+" "<kbd>Keypad +</kbd>"]
-                        ["kp-" "<kbd>Keypad -</kbd>"]
-                        ["kp*" "<kbd>Keypad *</kbd>"]
-                        ["kp/" "<kbd>Keypad /</kbd>"]
+           ["kp+" "<kbd>Keypad +</kbd>"]
+           ["kp-" "<kbd>Keypad -</kbd>"]
+           ["kp*" "<kbd>Keypad *</kbd>"]
+           ["kp/" "<kbd>Keypad /</kbd>"]
 
-                        ["Left" "<kbd>←</kbd>"]
-                        ["Right" "<kbd>→</kbd>"]
-                        ["Up" "<kbd>↑</kbd>"]
-                        ["Down" "<kbd>↓</kbd>"]
+           ["Left" "<kbd>←</kbd>"]
+           ["Right" "<kbd>→</kbd>"]
+           ["Up" "<kbd>↑</kbd>"]
+           ["Down" "<kbd>↓</kbd>"]
 
-                        ["←" "<kbd>←</kbd>"]
-                        ["→" "<kbd>→</kbd>"]
-                        ["↑" "<kbd>↑</kbd>"]
-                        ["↓" "<kbd>↓</kbd>"]
+           ["←" "<kbd>←</kbd>"]
+           ["→" "<kbd>→</kbd>"]
+           ["↑" "<kbd>↑</kbd>"]
+           ["↓" "<kbd>↓</kbd>"]
 
-                        ["‹key›" "<kbd>‹key›</kbd>"]
+           ["‹key›" "<kbd>‹key›</kbd>"]
 
-                        ]))
+           ]))
 
     (save-restriction
       (narrow-to-region *begin *end)
       (xah-html-emacs-to-windows-kbd-notation (point-min) (point-max))
 
-    (xah-replace-pairs-region (point-min) (point-max) -replaceList 'REPORT 'HILIGHT)
+      (xah-replace-pairs-region (point-min) (point-max) -replaceList 'REPORT 'HILIGHT)
 
       (let ((case-fold-search nil))
         (mapc
@@ -2353,22 +2334,25 @@ Version 2016-10-13"
 (defvar xah-html-class-input-history nil "for input history of `xah-html-wrap-html-tag'")
 (setq xah-html-class-input-history (list))
 
-(defun xah-html-add-open-close-tags (tag-name class-name p1 p2)
-  "Add HTML open/close tags around region boundary p1 p2.
-This function does not `save-excursion'."
+(defun xah-html-insert-open-close-tags (*tag-name *class-name *p1 *p2)
+  "Add HTML open/close tags around region boundary *p1 *p2.
+This function does not `save-excursion'.
+2016-11-10"
   (let* (
-         (-class-str (if (null class-name)
+         (-class-str (if (null *class-name)
                          ""
-                       (format " class=\"%s\"" class-name)))
-         (-str-left (format "<%s%s>" tag-name -class-str))
-         (-str-right (format "</%s>" tag-name )))
-    (goto-char p1)
-    (if (xah-html--tag-self-closing-p tag-name)
-        (insert (format "<%s%s />" tag-name -class-str))
+                       (format " class=\"%s\"" *class-name)))
+         (-str-left (format "<%s%s>" *tag-name -class-str))
+         (-str-right (format "</%s>" *tag-name )))
+    (goto-char *p1)
+    (if (xah-html--tag-self-closing-p *tag-name)
+        (insert (format "<%s%s />" *tag-name -class-str))
       (progn
         (insert -str-left )
-        (goto-char (+ p2 (length -str-left)))
-        (insert -str-right)))))
+        (goto-char (+ *p2 (length -str-left)))
+        (insert -str-right)
+        (when (eq *p1 *p2)
+          (search-backward "<"))))))
 
 (defun xah-html-wrap-html-tag (*tag-name &optional *class-name)
   "Insert HTML open/close tags to current text unit or text selection.
@@ -2421,7 +2405,7 @@ Version 2016-04-24
           (insert "\n")
           (goto-char (point-max))
           (insert "\n")))
-      (xah-html-add-open-close-tags *tag-name *class-name (point-min) (point-max)))
+      (xah-html-insert-open-close-tags *tag-name *class-name (point-min) (point-max)))
 
     (when ; put cursor between when input text is empty
         (not (xah-html--tag-self-closing-p *tag-name))
@@ -2429,13 +2413,13 @@ Version 2016-04-24
              (= -p1 -p2))
         (search-backward "</" )))))
 
-(defun xah-html-insert-wrap-source-code (&optional lang-code)
-  "Insert/wrap a <pre class=\"‹lang-code›\"> tags to text selection or current text block."
+(defun xah-html-insert-wrap-source-code (&optional *lang-code)
+  "Insert/wrap a <pre class=\"‹*lang-code›\"> tags to text selection or current text block."
   (interactive
    (list
     (ido-completing-read "lang code:" (mapcar (lambda (x) (car x)) xah-html-lang-name-map) "PREDICATE" "REQUIRE-MATCH" nil xah-html-html-tag-input-history "code")))
   (let ((-bds (xah-get-bounds-of-thing 'block)))
-    (xah-html-add-open-close-tags "pre" lang-code (car -bds) (cdr -bds))))
+    (xah-html-insert-open-close-tags "pre" *lang-code (car -bds) (cdr -bds))))
 
 (defun xah-html-mark-unicode (*pos)
   "Wrap a special <mark> tag around the character before cursor.
@@ -2793,10 +2777,10 @@ Version 2016-10-24"
             (htmlElementNamesRegex (regexp-opt xah-html-html5-tag-list))
             (htmlAttributeNamesRegexp (regexp-opt xah-html-attribute-names))
             (htmlBooleanAttributeNamesRegexp (regexp-opt xah-html-boolean-attribute-names))
-            (cssPropertieNames (regexp-opt xah-html-css-property-names 'words))
-            (cssValueNames (regexp-opt xah-html-css-value-kwds 'words))
-            (cssColorNames (regexp-opt xah-html-css-color-names 'words))
-            (cssUnitNames (regexp-opt xah-html-css-unit-names 'words))
+            (cssPropertieNames (regexp-opt xah-css-property-names 'words))
+            (cssValueNames (regexp-opt xah-css-value-kwds 'words))
+            (cssColorNames (regexp-opt xah-css-color-names 'words))
+            (cssUnitNames (regexp-opt xah-css-unit-names 'words))
 
   ;              (attriRegex " *= *\"\\([ -_a-z]*?\\)\"")
   ;              (attriRegex " +\\(?:[ =\"-_a-z]*?\\)") ; one or more attributes
