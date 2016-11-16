@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.2.0
+;; Version: 5.2.1
 ;; Created: 12 May 2012
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -1804,7 +1804,7 @@ become
  <img src=\"img/my_cats.jpg\" alt=\"emacs logo\" width=\"470\" height=\"456\" />
 
 URL `http://ergoemacs.org/emacs/elisp_image_tag.html'
-Version 2015-12-23"
+Version 2016-11-15"
   (interactive)
   (let ( -p1 -p2 -imgPath
              -hrefValue -altText -imgWH -width -height)
@@ -1819,7 +1819,6 @@ Version 2015-12-23"
         (skip-chars-forward "^  \"\t\n'|()[]{}<>〔〕“”〈〉《》【】〖〗«»‹›·。\\'")
         (setq -p2 (point))
         (goto-char -p0))
-
       (setq -imgPath
             (if (and (fboundp 'xahsite-web-path-to-filepath)
                      (fboundp 'xah-local-url-to-file-path))
@@ -1829,16 +1828,17 @@ Version 2015-12-23"
               (buffer-substring-no-properties -p1 -p2 )))
       (when (not (file-exists-p -imgPath))
         (user-error "file not exist at %s"  -imgPath))
-
       (setq -hrefValue
             (file-relative-name
              -imgPath
              (file-name-directory (or (buffer-file-name) default-directory))))
       (setq -altText
             (replace-regexp-in-string
-             "_" " "
+             "-" " "
              (replace-regexp-in-string
-              "\\.[A-Za-z]\\{3,4\\}$" "" (file-name-nondirectory -imgPath) t t) t t))
+              "_" " "
+              (replace-regexp-in-string
+               "\\.[A-Za-z]\\{3,4\\}$" "" (file-name-nondirectory -imgPath) t t) t t)))
       (setq -imgWH (xah-html--get-image-dimensions -imgPath))
       (setq -width (number-to-string (elt -imgWH 0)))
       (setq -height (number-to-string (elt -imgWH 1))))
@@ -2794,14 +2794,14 @@ Version 2016-10-24"
           ;; todo these multiline regex are bad. see elisp manual
           ("<!--\\|-->" . font-lock-comment-delimiter-face)
           (,(format "<!--%s-->" textNodeRegex) . (1 font-lock-comment-face))
-          (,(format "<h\\([1-6]\\)>%s</h\\1>" textNodeRegex) . (2 "bold"))
+          (,(format "<h\\([1-6]\\)>%s</h\\1>" textNodeRegex) . (2 'bold))
           (,(format "“%s”" textNodeRegex) . (1 'xah-html-curly-quote-f“”))
           (,(format "‘%s’" textNodeRegex) . (1 'xah-html-curly-quote-f‘’))
-          (,(format "<title>%s</title>" textNodeRegex) . (1 "bold"))
+          (,(format "<title>%s</title>" textNodeRegex) . (1 'bold))
           (,(format "<span%s>%s</span>" attriRegex textNodeRegex) . (1 'xah-html-span-f))
           (,(format "<mark>%s</mark>" textNodeRegex) . (1 'xah-html-mark-f))
           (,(format "<mark%s>%s</mark>" attriRegex textNodeRegex) . (1 'xah-html-mark-f))
-          (,(format "<b%s>%s</b>" attriRegex textNodeRegex) . (1 "bold"))
+          (,(format "<b%s>%s</b>" attriRegex textNodeRegex) . (1 'bold))
 
           (,(concat "</\\(" htmlElementNamesRegex "\\) *>") . (1 font-lock-function-name-face))
           (,(concat "<\\(" htmlElementNamesRegex "\\).*?>") . (1 font-lock-function-name-face))
