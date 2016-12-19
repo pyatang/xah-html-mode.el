@@ -1,10 +1,11 @@
-;;; xah-html-mode.el --- Major mode for editing pure html5.
+;;; xah-html-mode.el --- Major mode for editing pure html5. -*- coding: utf-8; lexical-binding: t; -*-
 
-;; Copyright © 2013-2015, by Xah Lee
+;; Copyright © 2013-2016, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.2.1
+;; Version: 5.2.2
 ;; Created: 12 May 2012
+;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
 
@@ -126,26 +127,16 @@ We assume that the cursor is inside a tag, like this 「<…▮…>」.
   (interactive)
   (not (xah-html--in-opening-tag-p)))
 
-(defun xah-html--ending-tag-p (&optional *bracketPositions)
+(defun xah-html--ending-tag-p ()
   "Return t if cursor is inside a begin tag, else nil.
-This function assumes your cursor is inside a tag, ⁖ <…▮…>
- It simply check if the left brack is followed by a slash or not.
-
-*bracketPositions is optional. If nil, then
- `xah-html--get-bracket-positions' is called to get it.
-"
+This function assumes your cursor is inside a tag, eg <…▮…>
+ It simply check if the left brack is followed by a slash or not.\n
+Version 2016-12-18"
   (interactive)
-  (let ( -posPrev< -posPrev> -posNext> -posNext< )
-    (when (not *bracketPositions)
-      (progn
-        (setq *bracketPositions (xah-html--get-bracket-positions))
-        (setq -posPrev< (elt *bracketPositions 0))
-        (setq -posPrev> (elt *bracketPositions 1))
-        (setq -posNext< (elt *bracketPositions 2))
-        (setq -posNext> (elt *bracketPositions 3))))
-    (goto-char -posPrev<)
-    (forward-char 1)
-    (looking-at "/" )))
+  (save-excursion
+      (search-backward "<")
+      (forward-char 1)
+      (looking-at "/" )))
 
 
 
@@ -603,38 +594,37 @@ The opening tag must be of the form <pre class=\"‹langCode›\">.  The ‹lang
 Cursor will end up right before </pre>.
 
 See also: `xah-html-dehtmlize-precode', `xah-html-toggle-syntax-coloring-markup'.
-This function requires the `htmlize-buffer' from 〔htmlize.el〕 by Hrvoje Niksic."
+This function requires the `htmlize-buffer' from 〔htmlize.el〕 by Hrvoje Niksic.
+Version 2016-12-18"
   (interactive (list xah-html-lang-name-map))
-  (let (-langCode -p1 -p2 -modeName )
-    (let* (
-           (t78730 (xah-html-get-precode-langCode))
-           (-langCode (elt t78730 0))
-           (-p1 (elt t78730 1))
-           (-p2 (elt t78730 2))
-           ;; (-modeName (elt (cdr (assoc -langCode *lang-code-map)) 0))
-           (-modeName (xah-html-langcode-to-major-mode-name -langCode *lang-code-map)))
-      (xah-html-htmlize-region -p1 -p2 -modeName t))))
+  (let* (
+         (-temp78730 (xah-html-get-precode-langCode))
+         (-langCode (elt -temp78730 0))
+         (-p1 (elt -temp78730 1))
+         (-p2 (elt -temp78730 2))
+         ;; (-modeName (elt (cdr (assoc -langCode *lang-code-map)) 0))
+         (-modeName (xah-html-langcode-to-major-mode-name -langCode *lang-code-map)))
+    (xah-html-htmlize-region -p1 -p2 -modeName t)))
 
-(defun xah-html-htmlize-region (p1 p2 mode-name &optional *trim-whitespace-boundary-p)
-  "Htmlized region p1 p2 using `major-mode' mode-name.
-
-This function requires the `htmlize-buffer' from 〔htmlize.el〕 by Hrvoje Niksic."
+(defun xah-html-htmlize-region (*p1 *p2 *mode-name &optional *trim-whitespace-boundary-p)
+  "Htmlized region *p1 *p2 using `major-mode' *mode-name.
+This function requires the `htmlize-buffer' from 〔htmlize.el〕 by Hrvoje Niksic.
+Version 2016-12-18"
   (interactive
    (list (region-beginning)
          (region-end)
          (ido-completing-read "Chose mode for coloring:" xah-html-lang-mode-list)))
   (let* (
-         (-input-str (buffer-substring-no-properties p1 p2))
+         (-input-str (buffer-substring-no-properties *p1 *p2))
          (-out-str
           (xah-html-htmlize-string (if *trim-whitespace-boundary-p
                                        (replace-regexp-in-string "\\`[ \t\n]*" "" (replace-regexp-in-string "[ \t\n]*\\'" "" -input-str))
                                      -input-str
-                                     ) mode-name)))
-
+                                     ) *mode-name)))
     (if (string= -input-str -out-str)
         nil
       (progn
-        (delete-region p1 p2)
+        (delete-region *p1 *p2)
         (insert -out-str)))))
 
 (defun xah-html-dehtmlize-precode (*begin *end)
@@ -660,16 +650,11 @@ This command does the inverse of `xah-html-htmlize-precode'."
         (xah-html-dehtmlize-precode -p1 -p2)
       (xah-html-htmlize-precode lang-name-map))))
 
-(defun xah-html-redo-syntax-coloring-buffer (&optional *lang-code)
-  "redo all pre lang code syntax coloring in current html page."
+(defun xah-html-redo-syntax-coloring-buffer ()
+  "redo all pre lang code syntax coloring in current html page.
+Version 2016-12-18"
   (interactive)
   (let (-langCode -p1 -p2 (-i 0))
-
-    ;; (-search-string
-    ;;  (if *lang-code
-    ;;      (progn (format "<pre class=\"\\([-A-Za-z0-9]+\\)\">" *lang-code))
-    ;;    (progn "<pre class=\"\\([-A-Za-z0-9]+\\)\">")))
-
     (save-excursion
       (goto-char (point-min))
       (while
@@ -830,7 +815,7 @@ Version 2016-03-07"
 
 (defun xah-html--get-tag-name (&optional left<)
   "Return the tag name.
-This function assumes your cursor is inside a tag, ⁖ <…▮…>"
+This function assumes your cursor is inside a tag, eg <…▮…>"
   (let ( -p1 -p2 )
     (when (not left<)
       (setq left< (search-backward "<")))
@@ -850,14 +835,14 @@ Delete the tag under cursor.
 Also delete the matching beginning/ending tag."
   (interactive)
   (save-excursion
-    ;; determine if it's inside the tag. ⁖ <…>
+    ;; determine if it's inside the tag. eg <…>
     ;; if so, good. else abort.
-    ;; now, determine if it's opening tag or closing. ⁖ closing tag start with </
+    ;; now, determine if it's opening tag or closing. eg closing tag start with </
     ;; if it's opening tag, need to delete the matching one to the right
     ;; else, need to delete the matching one to the left
     ;; let's assume it's the opening.
-    ;; now, determine if there's nested element. ⁖ <p>…<b>…</b>…</p>
-    ;;    to do this, first determine the name of the tag. ⁖ the “p” in  <p …>, then search the matching tag.
+    ;; now, determine if there's nested element. eg <p>…<b>…</b>…</p>
+    ;;    to do this, first determine the name of the tag. eg the “p” in  <p …>, then search the matching tag.
     ;; if so, O shit, it's complex. Need to determine if one of the nested has the same tag name. and and …
     ;; if not, then we can proceed. Just find the closing tag and delete it. Also the beginning.
     (if (xah-html--cursor-in-tag-markup-p)
@@ -880,21 +865,21 @@ Also delete the matching beginning/ending tag."
 
 (defun xah-html-change-current-tag ()
   "change the tag name of current tag, and class name if there's one. WARNING:
-this is a quick 1 min hackjob, works only when there's no nesting."
+this is a quick 1 min hackjob, works only when there's no nesting.
+version 2016-12-18"
   (interactive)
-  (let (-p1 -p2 oldTagName newTagName oldClassName newClassName)
+  (let (-p1 -p2 -oldTagName -newTagName -newClassName)
     (search-backward "<" )
     (forward-char 1)
     (setq -p1 (point))
-    (setq oldTagName (xah-html--get-tag-name))
-    (setq newTagName (ido-completing-read "HTML tag:" xah-html-html5-tag-list "PREDICATE" "REQUIRE-MATCH" nil xah-html-html-tag-input-history "span"))
+    (setq -oldTagName (xah-html--get-tag-name))
+    (setq -newTagName (ido-completing-read "HTML tag:" xah-html-html5-tag-list "PREDICATE" "REQUIRE-MATCH" nil xah-html-html-tag-input-history "span"))
     (goto-char -p1)
-    (delete-char (length oldTagName))
-    (insert newTagName)
-    (search-forward (concat "</" oldTagName))
-    (delete-char (- (length oldTagName)))
-    (insert newTagName)
-
+    (delete-char (length -oldTagName))
+    (insert -newTagName)
+    (search-forward (concat "</" -oldTagName))
+    (delete-char (- (length -oldTagName)))
+    (insert -newTagName)
     (progn
       (goto-char -p1)
       (search-forward ">")
@@ -903,20 +888,19 @@ this is a quick 1 min hackjob, works only when there's no nesting."
       (when
           (search-forward-regexp "class[ \n]*=[ \n]*\"" -p2 "NOERROR")
   ;(string-match "class[ \n]*=[ \n]*\"" (buffer-substring-no-properties -p1 -p2))
-        (progn
-          (setq -p1 (point))
+        (let (-p3 -p4)
+          (setq -p3 (point))
           (search-forward "\"")
-          (setq -p2 (- (point) 1))
-          (setq oldClassName (buffer-substring-no-properties -p1 -p2))
-          (setq newClassName (read-string "new class name:"))
-          (if (string-equal newClassName "")
+          (setq -p4 (- (point) 1))
+          (setq -newClassName (read-string "new class name:"))
+          (if (string-equal -newClassName "")
               (progn ; todo need to clean this up. don't use bunch of user functions
-                (delete-region -p1 -p2 )
-                (backward-kill-word 1)
+                (delete-region -p3 -p4 )
+                (kill-word -1)
                 (delete-char -1))
-            (progn (delete-region -p1 -p2 )
-                   (goto-char -p1)
-                   (insert newClassName))))))))
+            (progn (delete-region -p3 -p4 )
+                   (goto-char -p3)
+                   (insert -newClassName))))))))
 
 ;; (defun xah-html-split-tag ()
 ;;   "split a HTML element into 2 elements of the same tag, at cursor point.
@@ -1261,24 +1245,26 @@ with “*” as separator, becomes
     (insert (xah-html-make-html-table-string -str sep) "\n")))
 
 (defun xah-html-make-html-table-undo ()
-  "inverse of `xah-html-make-html-table'."
+  "inverse of `xah-html-make-html-table'.
+version 2016-12-18"
   (interactive)
-  (let ( -p1 -p2 -str)
+  (let ( -p1 -p2)
     (search-backward "<table")
     (setq -p1 (point))
     (search-forward "</table>")
     (setq -p2 (point))
-
-    (xah-replace-regexp-pairs-region -p1 -p2 [
-                                        ["<table \\([^>]+?\\)>" ""]
-                                        ["</th><th>" "•"]
-                                        ["</td><td>" "•"]
-                                        ["<tr>" ""]
-                                        ["</tr>" ""]
-                                        ["</table>" ""]
-                                        ]
-                                 "FIXEDCASE" "LITERAL"
-                                 )))
+    (xah-replace-regexp-pairs-region
+     -p1 -p2
+     [
+      ["<table \\([^>]+?\\)>" ""]
+      ["</th><th>" "•"]
+      ["</td><td>" "•"]
+      ["<tr>" ""]
+      ["</tr>" ""]
+      ["</table>" ""]
+      ]
+     "FIXEDCASE" "LITERAL"
+     )))
 
 (defun xah-html-word-to-wikipedia-linkify ()
   "Make the current word or text selection into a Wikipedia link.
@@ -1574,7 +1560,6 @@ Update the <title>…</title> and <h1>…</h1> of current buffer."
   (let (-p1 -p2)
     (save-excursion
       (goto-char 1)
-
       (progn (search-forward "<title>")
              (setq -p1 (point))
              (search-forward "</title>")
@@ -1583,7 +1568,6 @@ Update the <title>…</title> and <h1>…</h1> of current buffer."
              (delete-region -p1 -p2 )
              (goto-char -p1)
              (insert newTitle ))
-
       (if (search-forward "<h1>")
           (progn
             (setq -p1 (point))
@@ -1630,7 +1614,7 @@ Version 2016-11-05"
       (while (> (length -lines) 0)
         (setq -x (pop -lines))
         (cond
-         ((string-match "http://" -x) (setq -url -x))
+         ((string-match "https?://" -x) (setq -url -x))
          ((xah-html--is-datetimestamp-p -x) (setq -date -x))
          ((string-match "^ *[bB]y " -x) (setq -author -x))
          (t (setq -title -x)))))
@@ -1871,7 +1855,7 @@ Works the same way for links to wiktionary, e.g. https://en.wiktionary.org/wiki/
 URL `http://ergoemacs.org/emacs/elisp_html_wikipedia_url_linkify.html'
 Version 2016-06-29."
   (interactive)
-  (let (-bds
+  (let (
         -p1 -p2
         -input-str
         -link-text
@@ -1889,12 +1873,7 @@ Version 2016-06-29."
             (setq -p1 (point))
             (goto-char -p0)
             (skip-chars-forward "^ \t\n<>[]")
-            (setq -p2 (point))))
-
-        ;; (setq -bds (bounds-of-thing-at-point 'url))
-        ;; (setq -p1 (car -bds))
-        ;; (setq -p2 (cdr -bds))
-        ))
+            (setq -p2 (point))))))
     (setq -input-str (buffer-substring-no-properties -p1 -p2))
     (require 'url-util)
     (setq -link-text
@@ -2337,7 +2316,7 @@ Version 2016-11-06"
 (defun xah-html-insert-open-close-tags (*tag-name *class-name *p1 *p2)
   "Add HTML open/close tags around region boundary *p1 *p2.
 This function does not `save-excursion'.
-2016-11-10"
+2016-12-07"
   (let* (
          (-class-str (if (null *class-name)
                          ""
@@ -2350,9 +2329,7 @@ This function does not `save-excursion'.
       (progn
         (insert -str-left )
         (goto-char (+ *p2 (length -str-left)))
-        (insert -str-right)
-        (when (eq *p1 *p2)
-          (search-backward "<"))))))
+        (insert -str-right)))))
 
 (defun xah-html-wrap-html-tag (*tag-name &optional *class-name)
   "Insert HTML open/close tags to current text unit or text selection.
@@ -2360,7 +2337,7 @@ When there's no text selection, the tag will be wrapped around current {word, li
 
 If current line or word is empty, then insert open/end tags and place cursor between them.
 If `universal-argument' is called first, then also prompt for a “class” attribute. Empty value means don't add the attribute.
-Version 2016-04-24
+Version 2016-12-07
 "
   (interactive
    (list
@@ -2380,7 +2357,6 @@ Version 2016-04-24
              (t (xah-get-bounds-of-thing 'word)))))
          (-p1 (car -bds))
          (-p2 (cdr -bds)))
-
     (save-restriction
       (narrow-to-region -p1 -p2)
       (when ; trim whitespace
@@ -2397,7 +2373,6 @@ Version 2016-04-24
           (delete-horizontal-space)
           (goto-char (point-max))
           (delete-horizontal-space)))
-
       ;; add blank at start/end
       (when (equal -wrap-type "b")
         (progn
@@ -2406,7 +2381,6 @@ Version 2016-04-24
           (goto-char (point-max))
           (insert "\n")))
       (xah-html-insert-open-close-tags *tag-name *class-name (point-min) (point-max)))
-
     (when ; put cursor between when input text is empty
         (not (xah-html--tag-self-closing-p *tag-name))
       (when (and
@@ -2839,13 +2813,9 @@ URL `http://ergoemacs.org/emacs/xah-html-mode.html'
   (set (make-local-variable 'comment-end) " -->")
 
   (make-local-variable 'abbrev-expand-function)
-  (if (or
-       (and (>= emacs-major-version 24)
-            (>= emacs-minor-version 4))
-       (>= emacs-major-version 25))
-      (progn
-        (setq abbrev-expand-function 'xah-html-expand-abbrev))
-    (progn (add-hook 'abbrev-expand-functions 'xah-html-expand-abbrev nil t)))
+  (if (version< emacs-version "24.4")
+      (add-hook 'abbrev-expand-functions 'xah-html-expand-abbrev nil t)
+    (setq abbrev-expand-function 'xah-html-expand-abbrev))
 
   (abbrev-mode 1)
 
@@ -2856,9 +2826,5 @@ URL `http://ergoemacs.org/emacs/xah-html-mode.html'
 (add-to-list 'auto-mode-alist '("\\.htm\\'" . xah-html-mode))
 
 (provide 'xah-html-mode)
-
-;; Local Variables:
-;; coding: utf-8
-;; End:
 
 ;;; xah-html-mode.el ends here
