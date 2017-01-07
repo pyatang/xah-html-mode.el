@@ -1,9 +1,9 @@
 ;;; xah-html-mode.el --- Major mode for editing pure html5. -*- coding: utf-8; lexical-binding: t; -*-
 
-;; Copyright © 2013-2016, by Xah Lee
+;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.2.2
+;; Version: 5.2.3
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -44,7 +44,7 @@
   (member *tag-name  xah-html-html5-self-close-tags))
 
 (defun xah-html--get-bracket-positions ()
-  "Returns html angle bracket positions.
+  "Returns HTML angle bracket positions.
 Returns a vector [ -posPrev< -posPrev> -posNext< -posNext> ]
  -posPrev< is the position of < nearest to cursor on the left side
  -posPrev> is the position of > nearest to cursor on the left side
@@ -651,7 +651,7 @@ This command does the inverse of `xah-html-htmlize-precode'."
       (xah-html-htmlize-precode lang-name-map))))
 
 (defun xah-html-redo-syntax-coloring-buffer ()
-  "redo all pre lang code syntax coloring in current html page.
+  "redo all pre lang code syntax coloring in current HTML page.
 Version 2016-12-18"
   (interactive)
   (let (-langCode -p1 -p2 (-i 0))
@@ -1326,15 +1326,15 @@ are changed to
  is changed to
  ‹…›
 
-The html entities &amp; &lt; &gt; are changed to & < >.
+The HTML entities &amp; &lt; &gt; are changed to & < >.
 
-if `universal-argument' is called first, don't convert the html entities.
+if `universal-argument' is called first, don't convert the HTML entities.
 
 When done, the cursor is placed at *end.
 
 when called in lisp program,
 *begin *end are region begin/end.
-If *change-entity-p is true, convert html entities to char.
+If *change-entity-p is true, convert HTML entities to char.
 "
   (interactive
    (let ((-bds (xah-get-bounds-of-thing 'block)))
@@ -1410,18 +1410,14 @@ Version 2016-10-18"
     (insert -output-str)))
 
 (defun xah-html-html-to-text ()
-  "Convert html to plain text on current text block or text selection.
-Version 2016-10-18"
+  "Convert HTML to plain text on current text block or text selection.
+Version 2017-01-07"
   (interactive)
   (let ( -p1 -p2 -input-str -output-str)
-    (if (use-region-p)
-        (progn
-          (setq -p1 (region-beginning))
-          (setq -p2 (region-end)))
-      (let (-bds)
-        (setq -bds (xah-get-bounds-of-thing 'block))
-        (setq -p1 (car -bds))
-        (setq -p2 (cdr -bds))))
+    (let (-bds)
+      (setq -bds (xah-get-bounds-of-thing-or-region 'block))
+      (setq -p1 (car -bds))
+      (setq -p2 (cdr -bds)))
     (setq -input-str (buffer-substring-no-properties -p1 -p2))
     (setq
      -output-str
@@ -1433,6 +1429,7 @@ Version 2016-10-18"
           (point-min)
           (point-max)
           [
+           [" class=\"\\([A-Za-z0-9]+\\)\" " " "]
            ["<var class=\"d\">\\([^<]+?\\)</var>" "‹\\1›"]
            ["<script>\\([^\\<]+?\\)</script>" ""]
            ["<a +href=\"\\([^\"]+?\\)\" *>\\([^<]+?\\)</a>" "\\2 〔 \\1 〕"]
@@ -1647,7 +1644,7 @@ Version 2016-11-05"
             "〕")))
 
 (defun xah-html-make-link-defunct ()
-  "Make the html link under cursor to a defunct form.
+  "Make the HTML link under cursor to a defunct form.
 Example:
 If cursor is inside this tag
  <a class=\"sorc\" href=\"http://example.com/\" data-accessed=\"2008-12-26\">…</a>
@@ -1687,7 +1684,7 @@ Version 2015-09-12"
     (insert -newLinkStr)))
 
 (defun xah-html-source-url-linkify (*prefixArg)
-  "Make URL at cursor point into a html link.
+  "Make URL at cursor point into a HTML link.
 If there's a text selection, use the text selection as input.
 
 Example: http://example.com/xyz.htm
@@ -2182,7 +2179,7 @@ Example:
 
 When called in lisp code, *begin *end are region begin/end positions.
 
-Version 2016-11-06"
+Version 2017-01-06"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -2225,12 +2222,12 @@ Version 2016-11-06"
            ["Esc" "<kbd>Esc</kbd>"]
            ["Home" "<kbd>↖ Home</kbd>"]
            ["End" "<kbd>↘ End</kbd>"]
-           ["Page Up" "<kbd>⇞ Page △</kbd>"]
-           ["pageup" "<kbd>⇞ Page △</kbd>"]
-           ["PgUp" "<kbd>⇞ Page △</kbd>"]
-           ["Page Down" "<kbd>⇟ Page ▽</kbd>"]
-           ["pagedown" "<kbd>⇟ Page ▽</kbd>"]
-           ["PgDn" "<kbd>⇟ Page ▽</kbd>"]
+           ["Page Up" "<kbd>⇞ Page Up</kbd>"]
+           ["pageup" "<kbd>⇞ Page Up</kbd>"]
+           ["PgUp" "<kbd>⇞ Page Up</kbd>"]
+           ["Page Down" "<kbd>⇟ Page Down</kbd>"]
+           ["pagedown" "<kbd>⇟ Page Down</kbd>"]
+           ["PgDn" "<kbd>⇟ Page Down</kbd>"]
            ["Insert" "<kbd>Insert</kbd>"]
            ["INS" "<kbd>Insert</kbd>"]
            ["Pause" "<kbd>Pause</kbd>"]
@@ -2272,6 +2269,7 @@ Version 2016-11-06"
 
            ["‹key›" "<kbd>‹key›</kbd>"]
 
+           ["  " "+"]
            ]))
 
     (save-restriction
@@ -2617,6 +2615,7 @@ Version 2016-10-24"
 
 (put 'xah-html--ahf 'no-self-insert t)
 
+(setq xah-html-mode-abbrev-table nil)
 (define-abbrev-table 'xah-html-mode-abbrev-table
   '(
 
@@ -2626,8 +2625,8 @@ Version 2016-10-24"
     ("cl" "class=\"▮\"" xah-html--ahf)
     ("id" "id=\"▮\"" xah-html--ahf)
 
-    ("w" "width" xah-html--ahf)
-    ("h" "height" xah-html--ahf)
+    ("wi" "width" xah-html--ahf)
+    ("hei" "height" xah-html--ahf)
     ("bgc" "background-color" xah-html--ahf)
 
     ("zcss" "<link rel=\"stylesheet\" href=\"lbasic.css\" />")
