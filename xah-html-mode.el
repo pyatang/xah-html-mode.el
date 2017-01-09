@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.2.3
+;; Version: 5.2.4
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -595,7 +595,7 @@ Cursor will end up right before </pre>.
 
 See also: `xah-html-dehtmlize-precode', `xah-html-toggle-syntax-coloring-markup'.
 This function requires the `htmlize-buffer' from 〔htmlize.el〕 by Hrvoje Niksic.
-Version 2016-12-18"
+Version 2017-01-08"
   (interactive (list xah-html-lang-name-map))
   (let* (
          (-temp78730 (xah-html-get-precode-langCode))
@@ -2009,7 +2009,7 @@ Some issues:
 • Some words are common in other lang, e.g. “while”, “print”, “string”, unix “find”, “grep”, HTML's “kbd” tag, etc. But they are also built-in elisp symbols. This command will tag them, but you may not want that.
 
 • Some function/variable are from 3rd party libs, and some are not bundled with GNU emacs , e.g. 「'htmlize」. They may or may not be tagged depending whether they've been loaded.
-Version 2016-10-05"
+Version 2017-01-08"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -2025,7 +2025,7 @@ Version 2016-10-05"
                   (point-max) t)
             (setq -mStr (match-string 1))
             (cond
-             ((fboundp (intern -mStr))
+             ((fboundp (intern-soft -mStr))
               (progn
                 (push (format "ƒ %s" -mStr) -changedItems)
                 (replace-match (concat "<code class=\"elisp-ƒ\">" -mStr "</code>") t t)
@@ -2037,7 +2037,7 @@ Version 2016-10-05"
                   (setq -p1 (point))
                   (overlay-put (make-overlay -p1 -p2) 'face (list :background "yellow"))
                   (search-forward "</code>"))))
-             ((boundp (intern -mStr))
+             ((boundp (intern-soft -mStr))
               (progn
                 (push (format "υ %s" -mStr) -changedItems)
                 (replace-match (concat "<var class=\"elisp\">" -mStr "</var>") t t)
