@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.2.4
+;; Version: 5.3.0
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -62,18 +62,18 @@ Version 2016-10-18"
         )
     (save-excursion
       (goto-char -pos)
-      (setq -posPrev< (search-backward "<" nil 'NOERROR))
+      (setq -posPrev< (search-backward "<" nil "NOERROR"))
       (goto-char -pos)
-      (setq -posPrev> (search-backward ">" nil 'NOERROR))
+      (setq -posPrev> (search-backward ">" nil "NOERROR"))
       (goto-char -pos)
       (setq -posNext<
-            (if (search-forward "<" nil 'NOERROR)
+            (if (search-forward "<" nil "NOERROR")
                 (- (point) 1)
               nil
               ))
       (goto-char -pos)
       (setq -posNext>
-            (if (search-forward ">" nil 'NOERROR)
+            (if (search-forward ">" nil "NOERROR")
                 (- (point) 1)
               nil
               ))
@@ -184,8 +184,9 @@ Note: in emacs GNU Emacs 24.4+ and later, there's `string-trim' function. You ne
 The elements are integer datatype.
 Support png jpg svg gif and any image type emacs supports.
 If it's svg, and dimension cannot be determined, it returns [0 0]
+
 URL `http://ergoemacs.org/emacs/elisp_image_tag.html'
-Version 2015-06-13"
+Version 2017-01-11"
   (let ((-x nil)
         (-y nil))
     (cond
@@ -195,10 +196,10 @@ Version 2015-06-13"
           ;; hackish. grab the first occurence of width height in file
           (insert-file-contents *file-path)
           (goto-char (point-min))
-          (when (search-forward-regexp "width=\"\\([0-9]+\\).*\"" nil 'NOERROR)
+          (when (re-search-forward "width=\"\\([0-9]+\\).*\"" nil "NOERROR")
             (setq -x (match-string 1 )))
           (goto-char (point-min))
-          (if (search-forward-regexp "height=\"\\([0-9]+\\).*\"" nil 'NOERROR)
+          (if (re-search-forward "height=\"\\([0-9]+\\).*\"" nil "NOERROR")
               (setq -y (match-string 1 ))))
         (if (and (not (null -x)) (not (null -y)))
             (progn (vector (string-to-number -x) (string-to-number -y)))
@@ -509,7 +510,7 @@ The numbers in the file name are datestamp and a random integer.
 If file already exist, emacs will ask to overwrite.
 
 If there's a text selection, use that region as content.
-Version 2015-08-23"
+Version 2017-01-11"
   (interactive (list xah-html-lang-name-map))
   (let* (
          (-langcodeinfo (xah-html-get-precode-langCode))
@@ -521,21 +522,23 @@ Version 2015-08-23"
          (-majorMode (elt (cdr (assoc -langCode lang-name-map)) 0))
          -fname
          (-buf (generate-new-buffer "untitled")))
-
+    (when (null -majorMode)
+      (message "no major mode found for class 「%s」." -langCode))
     (progn
       (split-window-below)
       (delete-region -p1 -p2 )
       (switch-to-buffer -buf)
-      (funcall (intern -majorMode))
+      (if (null -majorMode)
+          (fundamental-mode)
+        (funcall (intern-soft -majorMode)))
       (setq buffer-offer-save t)
       (insert -textContent)
       (when (xah-html-precode-htmlized-p (point-min) (point-max))
         (xah-html-remove-span-tag-region (point-min) (point-max))))
-
     (if (equal -fileSuffix "java")
         (progn
           (goto-char (point-min))
-          (if (search-forward-regexp "public class \\([A-Za-z0-9]+\\) [\n ]*{" nil 'NOERROR)
+          (if (re-search-forward "public class \\([A-Za-z0-9]+\\) [\n ]*{" nil "NOERROR")
               (progn
                 (setq -fname
                       (format "%s.java" (match-string 1))))
@@ -560,14 +563,34 @@ Version 2015-08-23"
 (defun xah-html-htmlize-string (*source-code-str *major-mode-name)
   "Take *source-code-str and return a htmlized version using major mode *major-mode-name.
 The purpose is to syntax color source code in HTML.
+
+If *MAJOR-MODE-NAME is string. It'll be converted to symbol and if is not in `obarray', `fundamental-mode' is used.
+
 This function requires the `htmlize-buffer' from htmlize.el by Hrvoje Niksic.
-Version 2016-10-18"
+
+Version 2017-01-10"
   (interactive)
-  (let (-output-buff -resultStr)
+  (let (-output-buff -resultStr
+                     (-majorModeSym (intern-soft *major-mode-name)))
+
+    ;; (message "*major-mode-name is %s" *major-mode-name)
+    ;; (message "-majorModeSym is %s" -majorModeSym)
+
     ;; put code in a temp buffer, set the mode, fontify
+
     (with-temp-buffer
       (insert *source-code-str)
-      (funcall (intern *major-mode-name))
+      ;; (intern-soft "tuareg-mode")
+
+      (intern-soft "xah-elisp-mode")
+      (if (null -majorModeSym)
+          (progn
+            (fundamental-mode))
+        ;; (fboundp 'tuareg-mode)
+        (if (fboundp -majorModeSym)
+            (progn
+              (funcall -majorModeSym))
+          (fundamental-mode)))
       (font-lock-ensure)
       (setq -output-buff (htmlize-buffer)))
     ;; extract the fontified source code in htmlize output
@@ -580,7 +603,9 @@ Version 2016-10-18"
     -resultStr ))
 
 (defun xah-html-langcode-to-major-mode-name (*lang-code *lang-code-map)
-  "get the `major-mode' name associated with *lang-code."
+  "get the `major-mode' name associated with *lang-code.
+return major-mode name as string. If none found, return nil.
+Version 2017-01-10"
   (interactive)
   (elt (cdr (assoc *lang-code *lang-code-map)) 0))
 
@@ -650,27 +675,50 @@ This command does the inverse of `xah-html-htmlize-precode'."
         (xah-html-dehtmlize-precode -p1 -p2)
       (xah-html-htmlize-precode lang-name-map))))
 
+(defun xah-html-redo-syntax-coloring-file ( *file-path )
+  "redo all pre lang code syntax coloring in current HTML page.
+Returns 0 if nothing is done. Else a positive integer of the count of <pre class=lang>.
+Version 2017-01-10"
+  (interactive (read-file-name "file path:" nil nil t))
+  (let ( (-result 0))
+    (with-temp-buffer
+      (insert-file-contents *file-path)
+      (setq -result (xah-html-redo-syntax-coloring-buffer))
+      (when (> -result 0)
+        (write-region 1 (point-max) *file-path)))
+    -result
+    ))
+
 (defun xah-html-redo-syntax-coloring-buffer ()
   "redo all pre lang code syntax coloring in current HTML page.
-Version 2016-12-18"
+Returns 0 if nothing is done. Else a positive integer of the count of <pre class=lang>.
+Version 2017-01-10"
   (interactive)
-  (let (-langCode -p1 -p2 (-i 0))
+  (let (-langCode -p1 -p2 (-count 0)
+                  -majorModeNameStr
+                  )
     (save-excursion
       (goto-char (point-min))
       (while
           (re-search-forward "<pre class=\"\\([-A-Za-z0-9]+\\)\">" nil "NOERROR")
         (setq -langCode (match-string 1))
-        (setq -p1 (point))
-        (backward-char 1)
-        (xah-html-skip-tag-forward)
-        (search-backward "</pre>")
-        (setq -p2 (point))
-        (save-restriction
-          (narrow-to-region -p1 -p2)
-          (xah-html-dehtmlize-precode (point-min) (point-max))
-          (xah-html-htmlize-region (point-min) (point-max) (xah-html-langcode-to-major-mode-name -langCode xah-html-lang-name-map) t)
-          (setq -i (1+ -i)))))
-    (message "xah-html-redo-syntax-coloring-buffer %s redone" -i)))
+        (setq -majorModeNameStr (xah-html-langcode-to-major-mode-name -langCode xah-html-lang-name-map))
+        (if (null -majorModeNameStr)
+            nil
+          (progn
+            (setq -p1 (point))
+            (backward-char 1)
+            (xah-html-skip-tag-forward)
+            (search-backward "</pre>")
+            (setq -p2 (point))
+            (save-restriction
+              (narrow-to-region -p1 -p2)
+              (xah-html-dehtmlize-precode (point-min) (point-max))
+              (xah-html-htmlize-region (point-min) (point-max) -majorModeNameStr t)
+              (setq -count (1+ -count)))))))
+    (message "xah-html-redo-syntax-coloring-buffer %s redone" -count)
+    -count
+    ))
 
 (defun xah-html-open-local-link ()
   "Open the link under cursor or insert newline.
@@ -824,7 +872,7 @@ This function assumes your cursor is inside a tag, eg <…▮…>"
     (when (looking-at "/" )
       (forward-char 1))
     (setq -p1 (point))
-    (search-forward-regexp " \\|>")
+    (re-search-forward " \\|>")
     (backward-char 1)
     (setq -p2 (point))
     (buffer-substring-no-properties -p1 -p2)))
@@ -886,7 +934,7 @@ version 2016-12-18"
       (setq -p2  (point))
       (goto-char -p1)
       (when
-          (search-forward-regexp "class[ \n]*=[ \n]*\"" -p2 "NOERROR")
+          (re-search-forward "class[ \n]*=[ \n]*\"" -p2 "NOERROR")
   ;(string-match "class[ \n]*=[ \n]*\"" (buffer-substring-no-properties -p1 -p2))
         (let (-p3 -p4)
           (setq -p3 (point))
@@ -955,7 +1003,7 @@ When called in lisp code, *begin *end are region begin/end positions. If entity-
 See also: `xah-html-replace-html-named-entities', `xah-html-replace-html-chars-to-unicode'
 
 URL `http://ergoemacs.org/emacs/elisp_replace_html_entities_command.html'
-Version 2016-09-02"
+Version 2017-01-11"
   (interactive
    (list
     ;; These are done separately here
@@ -988,11 +1036,8 @@ Version 2016-09-02"
              (goto-char (point-min))
              (while (search-forward (elt -x 0) nil t)
                (push (format "%s %s" (point) -x) -changedItems)
-               (replace-match (elt -x 1) 'FIXEDCASE 'LITERAL)))
-           -findReplaceMap))))
-    (mapcar
-     (lambda (-x) (princ -x) (terpri))
-     (reverse -changedItems))))
+               (replace-match (elt -x 1) "FIXEDCASE" "LITERAL")))
+           -findReplaceMap))))))
 
 (defun xah-html-replace-html-chars-to-unicode (*begin *end &optional *fullwidth-to-ascii-p)
   "Replace chars <>& to fullwidth version ＜＞＆ in current line or text selection.
@@ -1045,7 +1090,7 @@ See also:
 `xah-html-replace-html-chars-to-unicode'
 
 URL `http://ergoemacs.org/emacs/elisp_replace_html_entities_command.html'
-Version 2015-04-23"
+Version 2017-01-11"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -1118,7 +1163,7 @@ Version 2015-04-23"
          (lambda (-x)
            (goto-char (point-min))
            (while (search-forward (elt -x 0) nil t)
-             (replace-match (elt -x 1) 'FIXEDCASE 'LITERAL)))
+             (replace-match (elt -x 1) "FIXEDCASE" "LITERAL")))
          -replaceMap)))))
 
 (defun xah-html-get-html-file-title (fname &optional no-error-p)
@@ -1169,7 +1214,7 @@ Version 2016-03-19"
               (when (fboundp 'xah-all-linkify)
                 (goto-char 1)
                 (while
-                    (search-forward-regexp  "\.html$" nil t)
+                    (re-search-forward  "\.html$" nil t)
                   (backward-char 1)
                   (xah-all-linkify)))
 
@@ -1411,7 +1456,7 @@ Version 2016-10-18"
 
 (defun xah-html-html-to-text ()
   "Convert HTML to plain text on current text block or text selection.
-Version 2017-01-07"
+Version 2017-01-11"
   (interactive)
   (let ( -p1 -p2 -input-str -output-str)
     (let (-bds)
@@ -1435,7 +1480,7 @@ Version 2017-01-07"
            ["<a +href=\"\\([^\"]+?\\)\" *>\\([^<]+?\\)</a>" "\\2 〔 \\1 〕"]
            ["<img +src=\"\\([^\"]+?\\)\" +alt=\"\\([^\"]+?\\)\" +width=\"[0-9]+\" +height=\"[0-9]+\" */?>" "〔IMAGE “\\2” \\1 〕"]
            ]
-          'FIXEDCASE-P )
+          "FIXEDCASE" )
          (xah-replace-pairs-region
           (point-min)
           (point-max)
@@ -1466,13 +1511,13 @@ Version 2017-01-07"
   "Replace current HTML inline image's file name.
 This command is for interactive use only.
 When cursor is in HTML link file path, e.g.  <img src=\"img/cats.jpg\" > and this command is called, it'll prompt user for a new name. The link path will be changed to the new name, the corresponding file will also be renamed. The operation is aborted if a name exists.
-Version 2016-10-17"
+Version 2017-01-09"
   (interactive)
   (let* (
          (-bounds (bounds-of-thing-at-point 'filename))
          (-inputPath (buffer-substring-no-properties (car -bounds) (cdr -bounds)))
          (-expandedPath (expand-file-name -inputPath (file-name-directory (or (buffer-file-name) default-directory ))))
-         (-newPath (read-string "New name: " -expandedPath nil -expandedPath )))
+         (-newPath (replace-regexp-in-string " " "_" (read-string "New name: " -expandedPath nil -expandedPath ))))
     (if (file-exists-p -newPath)
         (progn (user-error "file 「%s」 exist." -newPath ))
       (progn
@@ -1551,7 +1596,7 @@ Update the <title>…</title> and <h1>…</h1> of current buffer."
    (let (oldTitle)
      (save-excursion
        (goto-char 1)
-       (search-forward-regexp "<title>\\([^<]+?\\)</title>")
+       (re-search-forward "<title>\\([^<]+?\\)</title>")
        (setq oldTitle (match-string 1 )))
      (list (read-string "New title:" oldTitle nil oldTitle "INHERIT-INPUT-METHOD"))))
   (let (-p1 -p2)
@@ -1672,10 +1717,10 @@ Version 2015-09-12"
         (insert -wholeLinkStr)
 
         (goto-char 1)
-        (search-forward-regexp  "href=\"\\([^\"]+?\\)\"")
+        (re-search-forward  "href=\"\\([^\"]+?\\)\"")
         (setq -url (match-string 1))
 
-        (search-forward-regexp  "data-accessed=\"\\([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\\)\"")
+        (re-search-forward  "data-accessed=\"\\([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\\)\"")
         (setq -accessedDate (match-string 1))
 
         (setq -newLinkStr (format "<s data-accessed=\"%s\" data-defunct-date=\"%s\">%s</s>" -accessedDate (format-time-string "%Y-%m-%d") -url ))))
@@ -1927,7 +1972,7 @@ For example:
 This command will do most emacs syntax correctly, but not 100% correct, especially on notations like <C-M-down>. But works if it's written as C-M-<down>
 
 When called in lisp code, *begin *end are region begin/end positions.
-Version 2015-04-08."
+Version 2017-01-11"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -1941,7 +1986,7 @@ Version 2015-04-08."
          (goto-char (point-min))
          (while
              (search-forward (aref -x 0) nil t)
-           (replace-match (aref -x 1) 'FIXEDCASE)))
+           (replace-match (aref -x 1) "FIXEDCASE")))
        [
         ["<prior>" "PageUp"]
         ["<next>" "PageDown"]
@@ -1966,8 +2011,8 @@ Version 2015-04-08."
        (lambda (-x)
          (goto-char (point-min))
          (while
-             (search-forward-regexp (aref -x 0) nil t)
-           (replace-match (aref -x 1) 'FIXEDCASE)))
+             (re-search-forward (aref -x 0) nil t)
+           (replace-match (aref -x 1) "FIXEDCASE")))
        [
         ["<C-\\(.\\)>" "C-<\\1>"]
         ["<C-s-\\(.\\)>" "C-s-<\\1>"]
@@ -2020,7 +2065,7 @@ Version 2017-01-08"
         (narrow-to-region *begin *end)
         (progn
           (goto-char (point-min))
-          (while (search-forward-regexp
+          (while (re-search-forward
                   "「\\([:-A-Za-z0-9]+\\)」"
                   (point-max) t)
             (setq -mStr (match-string 1))
@@ -2082,7 +2127,7 @@ Version 2016-11-02"
           (xah-html-htmlize-elisp-keywords *begin *end))
         (progn
           (goto-char (point-min))
-          (while (search-forward-regexp "「\\([^」]+?\\)」" nil t)
+          (while (re-search-forward "「\\([^」]+?\\)」" nil t)
             (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
             (save-restriction
               (narrow-to-region (match-beginning 0) (match-end 0))
@@ -2097,7 +2142,7 @@ Version 2016-11-02"
               (goto-char (point-max))
               (insert "</code>"))))
         (goto-char (point-min))
-        (while (search-forward-regexp "〈\\([^〉]+?\\)〉" nil t)
+        (while (re-search-forward "〈\\([^〉]+?\\)〉" nil t)
           (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
           (replace-match "<cite>\\1</cite>" t)
           (let (-p1 -p2)
@@ -2109,7 +2154,7 @@ Version 2016-11-02"
             (overlay-put (make-overlay -p1 -p2) 'face 'highlight)
             (search-forward "</cite>" )))
         (goto-char (point-min))
-        (while (search-forward-regexp "《\\([^》]+?\\)》" nil t)
+        (while (re-search-forward "《\\([^》]+?\\)》" nil t)
           (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
           (replace-match "<cite class=\"book\">\\1</cite>" t)
           (let (-p1 -p2)
@@ -2121,7 +2166,7 @@ Version 2016-11-02"
             (overlay-put (make-overlay -p1 -p2) 'face 'highlight)
             (search-forward "</cite>" )))
         (goto-char (point-min))
-        (while (search-forward-regexp "‹\\([^›]+?\\)›" nil t)
+        (while (re-search-forward "‹\\([^›]+?\\)›" nil t)
           (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
           (replace-match "<var class=\"d\">\\1</var>" t)
           (let (-p1 -p2)
@@ -2133,7 +2178,7 @@ Version 2016-11-02"
             (overlay-put (make-overlay -p1 -p2) 'face 'highlight)
             (search-forward "</var>" )))
         (goto-char (point-min))
-        (while (search-forward-regexp "〔<a href=" nil t)
+        (while (re-search-forward "〔<a href=" nil t)
           (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
           (replace-match "〔➤see <a href=" t)
           (let (-p1 -p2)
@@ -2143,7 +2188,7 @@ Version 2016-11-02"
             (setq -p2 (point))
             (overlay-put (make-overlay -p1 -p2) 'face 'highlight)))
         (goto-char (point-min))
-        (while (search-forward-regexp "〔\\([ -_/\\:~.A-Za-z0-9%]+?\\)〕" nil t)
+        (while (re-search-forward "〔\\([ -_/\\:~.A-Za-z0-9%]+?\\)〕" nil t)
           (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
           (replace-match "<code class=\"path-xl\">\\1</code>" t)
           (let (-p1 -p2)
@@ -2156,7 +2201,7 @@ Version 2016-11-02"
             (search-forward "</code>")))
         (progn
           (goto-char (point-min))
-          (while (search-forward-regexp "\\.\\.\\." nil t)
+          (while (re-search-forward "\\.\\.\\." nil t)
             (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
             (replace-match "…" t)
             (let (-p1 -p2)
@@ -2179,7 +2224,7 @@ Example:
 
 When called in lisp code, *begin *end are region begin/end positions.
 
-Version 2017-01-06"
+Version 2017-01-11"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -2283,8 +2328,8 @@ Version 2017-01-06"
          (lambda (-x)
            (goto-char (point-min))
            (while
-               (search-forward-regexp (aref -x 0) nil t)
-             (replace-match (aref -x 1) 'FIXEDCASE)))
+               (re-search-forward (aref -x 0) nil t)
+             (replace-match (aref -x 1) "FIXEDCASE")))
          [
           ["\+\\([^<]\\) \\(.\\) \\(.\\)\\'" "+<kbd>\\1</kbd> <kbd>\\2</kbd> <kbd>\\3</kbd>"]
           ["\+\\([^<]\\) \\([A-Za-z0-0]\\)\\'" "+<kbd>\\1</kbd> <kbd>\\2</kbd>"]
@@ -2428,7 +2473,7 @@ becomes
 When called in lisp code, *begin *end are region begin/end positions.
 
 URL `http://ergoemacs.org/emacs/elisp_html-ruby-annotation-markup.html'
-Version 2015-07-27"
+Version 2017-01-11"
   (interactive)
   (progn
     (if (null *begin)
@@ -2447,11 +2492,11 @@ Version 2015-07-27"
       (narrow-to-region *begin *end)
       (progn
         (goto-char (point-min))
-        (while (search-forward "(" nil 'NOERROR)
+        (while (search-forward "(" nil "NOERROR")
           (replace-match "<rt>")))
       (progn
         (goto-char (point-min))
-        (while (search-forward ")" nil 'NOERROR)
+        (while (search-forward ")" nil "NOERROR")
           (replace-match "</rt>")))
       (goto-char (point-min))
       (insert "<ruby class=\"ruby88\">")
@@ -2472,11 +2517,11 @@ This is heuristic based, does not remove ALL possible redundant whitespace."
         (narrow-to-region -p1 -p2)
         (progn
           (goto-char (point-min))
-          (while (search-forward-regexp "[ \t]+\n" nil "noerror")
+          (while (re-search-forward "[ \t]+\n" nil "noerror")
             (replace-match "\n")))
         (progn
           (goto-char (point-min))
-          (while (search-forward-regexp " *<p>\n+" nil "noerror")
+          (while (re-search-forward " *<p>\n+" nil "noerror")
             (replace-match "<p>")))))))
 
 (defun xah-html-url-percent-decode-string (string)
