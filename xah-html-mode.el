@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.3.0
+;; Version: 5.3.1
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -62,18 +62,18 @@ Version 2016-10-18"
         )
     (save-excursion
       (goto-char -pos)
-      (setq -posPrev< (search-backward "<" nil "NOERROR"))
+      (setq -posPrev< (search-backward "<" nil t))
       (goto-char -pos)
-      (setq -posPrev> (search-backward ">" nil "NOERROR"))
+      (setq -posPrev> (search-backward ">" nil t))
       (goto-char -pos)
       (setq -posNext<
-            (if (search-forward "<" nil "NOERROR")
+            (if (search-forward "<" nil t)
                 (- (point) 1)
               nil
               ))
       (goto-char -pos)
       (setq -posNext>
-            (if (search-forward ">" nil "NOERROR")
+            (if (search-forward ">" nil t)
                 (- (point) 1)
               nil
               ))
@@ -196,10 +196,10 @@ Version 2017-01-11"
           ;; hackish. grab the first occurence of width height in file
           (insert-file-contents *file-path)
           (goto-char (point-min))
-          (when (re-search-forward "width=\"\\([0-9]+\\).*\"" nil "NOERROR")
+          (when (re-search-forward "width=\"\\([0-9]+\\).*\"" nil t)
             (setq -x (match-string 1 )))
           (goto-char (point-min))
-          (if (re-search-forward "height=\"\\([0-9]+\\).*\"" nil "NOERROR")
+          (if (re-search-forward "height=\"\\([0-9]+\\).*\"" nil t)
               (setq -y (match-string 1 ))))
         (if (and (not (null -x)) (not (null -y)))
             (progn (vector (string-to-number -x) (string-to-number -y)))
@@ -478,7 +478,7 @@ For example:
 WARNING: it just losely check if it contains span tag."
   (progn
     (goto-char *begin)
-    (re-search-forward "<span class=" *end "NOERROR")))
+    (re-search-forward "<span class=" *end t)))
 
 (defun xah-html-get-precode-langCode ()
   "Get the langCode and position boundary of current HTML pre block.
@@ -538,7 +538,7 @@ Version 2017-01-11"
     (if (equal -fileSuffix "java")
         (progn
           (goto-char (point-min))
-          (if (re-search-forward "public class \\([A-Za-z0-9]+\\) [\n ]*{" nil "NOERROR")
+          (if (re-search-forward "public class \\([A-Za-z0-9]+\\) [\n ]*{" nil t)
               (progn
                 (setq -fname
                       (format "%s.java" (match-string 1))))
@@ -678,13 +678,18 @@ This command does the inverse of `xah-html-htmlize-precode'."
 (defun xah-html-redo-syntax-coloring-file ( *file-path )
   "redo all pre lang code syntax coloring in current HTML page.
 Returns 0 if nothing is done. Else a positive integer of the count of <pre class=lang>.
-Version 2017-01-10"
+Version 2017-01-11"
   (interactive (read-file-name "file path:" nil nil t))
   (let ( (-result 0))
     (with-temp-buffer
       (insert-file-contents *file-path)
+      (goto-char (point-min))
+      (xah-html-mode)
       (setq -result (xah-html-redo-syntax-coloring-buffer))
       (when (> -result 0)
+        (let ((-backup-path
+               (concat *file-path "~htmlize" (format-time-string "%Y%m%dT%H%M%S") "~")))
+          (copy-file *file-path -backup-path t))
         (write-region 1 (point-max) *file-path)))
     -result
     ))
@@ -692,7 +697,7 @@ Version 2017-01-10"
 (defun xah-html-redo-syntax-coloring-buffer ()
   "redo all pre lang code syntax coloring in current HTML page.
 Returns 0 if nothing is done. Else a positive integer of the count of <pre class=lang>.
-Version 2017-01-10"
+Version 2017-01-12"
   (interactive)
   (let (-langCode -p1 -p2 (-count 0)
                   -majorModeNameStr
@@ -700,7 +705,8 @@ Version 2017-01-10"
     (save-excursion
       (goto-char (point-min))
       (while
-          (re-search-forward "<pre class=\"\\([-A-Za-z0-9]+\\)\">" nil "NOERROR")
+          ;; (re-search-forward "<pre class=\"\\([-A-Za-z0-9]+\\)\">" nil t)
+          (re-search-forward "<pre class=\"\\(emacs-lisp\\)\">" nil t)
         (setq -langCode (match-string 1))
         (setq -majorModeNameStr (xah-html-langcode-to-major-mode-name -langCode xah-html-lang-name-map))
         (if (null -majorModeNameStr)
@@ -934,7 +940,7 @@ version 2016-12-18"
       (setq -p2  (point))
       (goto-char -p1)
       (when
-          (re-search-forward "class[ \n]*=[ \n]*\"" -p2 "NOERROR")
+          (re-search-forward "class[ \n]*=[ \n]*\"" -p2 t)
   ;(string-match "class[ \n]*=[ \n]*\"" (buffer-substring-no-properties -p1 -p2))
         (let (-p3 -p4)
           (setq -p3 (point))
@@ -1548,11 +1554,11 @@ Version 2016-07-28"
          (progn (setq -p1 (region-beginning))
                 (setq -p2 (region-end)))
        (save-excursion
-         (if (re-search-backward "\n[ \t]*\n" nil "NOERROR")
+         (if (re-search-backward "\n[ \t]*\n" nil t)
              (progn (re-search-forward "\n[ \t]*\n")
                     (setq -p1 (point)))
            (setq -p1 (point)))
-         (if (re-search-forward "\n[ \t]*\n" nil "NOERROR")
+         (if (re-search-forward "\n[ \t]*\n" nil t)
              (progn (re-search-backward "\n[ \t]*\n")
                     (setq -p2 (point)))
            (setq -p2 (point)))))
@@ -2492,11 +2498,11 @@ Version 2017-01-11"
       (narrow-to-region *begin *end)
       (progn
         (goto-char (point-min))
-        (while (search-forward "(" nil "NOERROR")
+        (while (search-forward "(" nil t)
           (replace-match "<rt>")))
       (progn
         (goto-char (point-min))
-        (while (search-forward ")" nil "NOERROR")
+        (while (search-forward ")" nil t)
           (replace-match "</rt>")))
       (goto-char (point-min))
       (insert "<ruby class=\"ruby88\">")
@@ -2517,11 +2523,11 @@ This is heuristic based, does not remove ALL possible redundant whitespace."
         (narrow-to-region -p1 -p2)
         (progn
           (goto-char (point-min))
-          (while (re-search-forward "[ \t]+\n" nil "noerror")
+          (while (re-search-forward "[ \t]+\n" nil t)
             (replace-match "\n")))
         (progn
           (goto-char (point-min))
-          (while (re-search-forward " *<p>\n+" nil "noerror")
+          (while (re-search-forward " *<p>\n+" nil t)
             (replace-match "<p>")))))))
 
 (defun xah-html-url-percent-decode-string (string)
@@ -2619,19 +2625,19 @@ Version 2016-10-24"
   "Expand the symbol before cursor,
 if cursor is not in string or comment.
 Returns the abbrev symbol if there's a expansion, else nil.
-Version 2016-10-24"
+Version 2017-01-13"
   (interactive)
   (when (xah-html-abbrev-enable-function) ; abbrev property :enable-function doesn't seem to work, so check here instead
-    (let (
-          -p1 -p2
-          -abrStr
-          -abrSymbol
-          )
+    (let ( (-p0 (point))
+           -p1 -p2
+           -abrStr
+           -abrSymbol
+           )
       (save-excursion
         (forward-symbol -1)
         (setq -p1 (point))
-        (forward-symbol 1)
-        (setq -p2 (point)))
+        (goto-char -p0)
+        (setq -p2 -p0))
       (setq -abrStr (buffer-substring-no-properties -p1 -p2))
       (setq -abrSymbol (abbrev-symbol -abrStr))
       (if -abrSymbol
