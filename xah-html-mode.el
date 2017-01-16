@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.3.1
+;; Version: 5.3.2
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -62,18 +62,18 @@ Version 2016-10-18"
         )
     (save-excursion
       (goto-char -pos)
-      (setq -posPrev< (search-backward "<" nil t))
+      (setq -posPrev< (search-backward "<" nil "NOERROR"))
       (goto-char -pos)
-      (setq -posPrev> (search-backward ">" nil t))
+      (setq -posPrev> (search-backward ">" nil "NOERROR"))
       (goto-char -pos)
       (setq -posNext<
-            (if (search-forward "<" nil t)
+            (if (search-forward "<" nil "NOERROR")
                 (- (point) 1)
               nil
               ))
       (goto-char -pos)
       (setq -posNext>
-            (if (search-forward ">" nil t)
+            (if (search-forward ">" nil "NOERROR")
                 (- (point) 1)
               nil
               ))
@@ -196,10 +196,10 @@ Version 2017-01-11"
           ;; hackish. grab the first occurence of width height in file
           (insert-file-contents *file-path)
           (goto-char (point-min))
-          (when (re-search-forward "width=\"\\([0-9]+\\).*\"" nil t)
+          (when (re-search-forward "width=\"\\([0-9]+\\).*\"" nil "NOERROR")
             (setq -x (match-string 1 )))
           (goto-char (point-min))
-          (if (re-search-forward "height=\"\\([0-9]+\\).*\"" nil t)
+          (if (re-search-forward "height=\"\\([0-9]+\\).*\"" nil "NOERROR")
               (setq -y (match-string 1 ))))
         (if (and (not (null -x)) (not (null -y)))
             (progn (vector (string-to-number -x) (string-to-number -y)))
@@ -474,8 +474,9 @@ For example:
 (setq xah-html-lang-mode-list (mapcar (lambda (x) (aref (cdr x) 0)) xah-html-lang-name-map))
 
 (defun xah-html-precode-htmlized-p (*begin *end )
-  "Return true if region p1 p2 is htmlized code.
-WARNING: it just losely check if it contains span tag."
+  "Return true if region *BEGIN *END is htmlized code.
+WARNING: it just losely check if it contains span tag.
+Version 2017-01-16"
   (progn
     (goto-char *begin)
     (re-search-forward "<span class=" *end t)))
@@ -538,7 +539,7 @@ Version 2017-01-11"
     (if (equal -fileSuffix "java")
         (progn
           (goto-char (point-min))
-          (if (re-search-forward "public class \\([A-Za-z0-9]+\\) [\n ]*{" nil t)
+          (if (re-search-forward "public class \\([A-Za-z0-9]+\\) [\n ]*{" nil "NOERROR")
               (progn
                 (setq -fname
                       (format "%s.java" (match-string 1))))
@@ -705,8 +706,8 @@ Version 2017-01-12"
     (save-excursion
       (goto-char (point-min))
       (while
-          ;; (re-search-forward "<pre class=\"\\([-A-Za-z0-9]+\\)\">" nil t)
-          (re-search-forward "<pre class=\"\\(emacs-lisp\\)\">" nil t)
+          ;; (re-search-forward "<pre class=\"\\([-A-Za-z0-9]+\\)\">" nil "NOERROR")
+          (re-search-forward "<pre class=\"\\(emacs-lisp\\)\">" nil "NOERROR")
         (setq -langCode (match-string 1))
         (setq -majorModeNameStr (xah-html-langcode-to-major-mode-name -langCode xah-html-lang-name-map))
         (if (null -majorModeNameStr)
@@ -940,7 +941,7 @@ version 2016-12-18"
       (setq -p2  (point))
       (goto-char -p1)
       (when
-          (re-search-forward "class[ \n]*=[ \n]*\"" -p2 t)
+          (re-search-forward "class[ \n]*=[ \n]*\"" -p2 "NOERROR")
   ;(string-match "class[ \n]*=[ \n]*\"" (buffer-substring-no-properties -p1 -p2))
         (let (-p3 -p4)
           (setq -p3 (point))
@@ -1554,11 +1555,11 @@ Version 2016-07-28"
          (progn (setq -p1 (region-beginning))
                 (setq -p2 (region-end)))
        (save-excursion
-         (if (re-search-backward "\n[ \t]*\n" nil t)
+         (if (re-search-backward "\n[ \t]*\n" nil "NOERROR")
              (progn (re-search-forward "\n[ \t]*\n")
                     (setq -p1 (point)))
            (setq -p1 (point)))
-         (if (re-search-forward "\n[ \t]*\n" nil t)
+         (if (re-search-forward "\n[ \t]*\n" nil "NOERROR")
              (progn (re-search-backward "\n[ \t]*\n")
                     (setq -p2 (point)))
            (setq -p2 (point)))))
@@ -2498,11 +2499,11 @@ Version 2017-01-11"
       (narrow-to-region *begin *end)
       (progn
         (goto-char (point-min))
-        (while (search-forward "(" nil t)
+        (while (search-forward "(" nil "NOERROR")
           (replace-match "<rt>")))
       (progn
         (goto-char (point-min))
-        (while (search-forward ")" nil t)
+        (while (search-forward ")" nil "NOERROR")
           (replace-match "</rt>")))
       (goto-char (point-min))
       (insert "<ruby class=\"ruby88\">")
@@ -2523,11 +2524,11 @@ This is heuristic based, does not remove ALL possible redundant whitespace."
         (narrow-to-region -p1 -p2)
         (progn
           (goto-char (point-min))
-          (while (re-search-forward "[ \t]+\n" nil t)
+          (while (re-search-forward "[ \t]+\n" nil "NOERROR")
             (replace-match "\n")))
         (progn
           (goto-char (point-min))
-          (while (re-search-forward " *<p>\n+" nil t)
+          (while (re-search-forward " *<p>\n+" nil "NOERROR")
             (replace-match "<p>")))))))
 
 (defun xah-html-url-percent-decode-string (string)
