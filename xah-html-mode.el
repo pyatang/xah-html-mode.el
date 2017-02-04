@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.3.2
+;; Version: 5.3.3
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -698,7 +698,7 @@ Version 2017-01-11"
 (defun xah-html-redo-syntax-coloring-buffer ()
   "redo all pre lang code syntax coloring in current HTML page.
 Returns 0 if nothing is done. Else a positive integer of the count of <pre class=lang>.
-Version 2017-01-12"
+Version 2017-02-04"
   (interactive)
   (let (-langCode -p1 -p2 (-count 0)
                   -majorModeNameStr
@@ -706,8 +706,7 @@ Version 2017-01-12"
     (save-excursion
       (goto-char (point-min))
       (while
-          ;; (re-search-forward "<pre class=\"\\([-A-Za-z0-9]+\\)\">" nil "NOERROR")
-          (re-search-forward "<pre class=\"\\(emacs-lisp\\)\">" nil "NOERROR")
+          (re-search-forward "<pre class=\"\\([-A-Za-z0-9]+\\)\">" nil "NOERROR")
         (setq -langCode (match-string 1))
         (setq -majorModeNameStr (xah-html-langcode-to-major-mode-name -langCode xah-html-lang-name-map))
         (if (null -majorModeNameStr)
@@ -731,7 +730,7 @@ Version 2017-01-12"
   "Open the link under cursor or insert newline.
 If cursor is on a src=… or href=…, then if it a file path, open file, if http, open in browser.
 Else call `newline'.
-Version 2016-07-28"
+Version 2017-02-04"
   (interactive)
   (if (xah-html-point-in-src-or-href-q)
       (let ((-srcStr (xah-get-thing-at-point 'filepath )))
@@ -745,7 +744,7 @@ Version 2016-07-28"
 
 (defun xah-html-point-in-src-or-href-q ()
   "Return true if curser is inside a string of src or href.
-Version 2016-03-07"
+Version 2017-02-04"
   (interactive)
   (let ((in-string-q (nth 3 (syntax-ppss))))
     (if in-string-q
@@ -757,7 +756,8 @@ Version 2016-03-07"
                 (backward-char 1)
                 (if (or
                      (string-match "href" (current-word))
-                     (string-match "src" (current-word)))
+                     (string-match "src" (current-word))
+                     (string-match "content" (current-word)))
                     (progn t)
                   (progn nil)))
             nil))
@@ -2765,7 +2765,6 @@ Version 2016-10-24"
 
   (define-key xah-html-mode-no-chord-map (kbd "a") 'xah-html-rename-html-inline-image)
   (define-key xah-html-mode-no-chord-map (kbd "b") 'xah-html-wikipedia-url-linkify)
-  (define-key xah-html-mode-no-chord-map (kbd "b") nil)
   (define-key xah-html-mode-no-chord-map (kbd "c") 'xah-html-lines-to-html-list)
   (define-key xah-html-mode-no-chord-map (kbd "d") 'xah-html-extract-url)
   (define-key xah-html-mode-no-chord-map (kbd "e") 'xah-html-source-url-linkify)
