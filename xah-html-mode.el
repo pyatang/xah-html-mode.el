@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.3.3
+;; Version: 5.3.4
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1251,50 +1251,60 @@ Version 2016-03-19"
     (delete-region -p1 -p2)
     (insert -resultStr)))
 
-(defun xah-html-make-html-table-string (textBlock delimiter)
-  "Transform the string TEXTBLOCK into a HTML marked up table.
-
- “\\n” is used as delimiter of rows. Extra newlines at the end is discarded.
-The argument delimiter is a char used as the delimiter for columns.
-
- See the parent function `xah-html-make-html-table'."
-(let ((txtbk textBlock))
-    (setq txtbk (replace-regexp-in-string "\n+$" "\n" (concat txtbk "\n"))) ; make sure ending is just one newline char
-    (setq txtbk (replace-regexp-in-string delimiter "</td><td>" txtbk))
-    (setq txtbk (replace-regexp-in-string "\n" "</td></tr>\n<tr><td>" txtbk))
-    (setq txtbk (substring txtbk 0 -8)) ; delete the beginning “<tr><td>” in last line
-    (concat "<table class=\"nrm\">\n<tr><td>" txtbk "</table>")
-))
-
-(defun xah-html-make-html-table (sep)
+(defun xah-html-make-html-table (*separator)
   "Transform the current text block or selection into a HTML table.
 
 If there's a text selection, use the selection as input.
 Otherwise, used current text block delimited by empty lines.
 
-SEP is a string used as a delimitor for columns.
+*SEPARATOR is a string used as a delimitor for columns.
 
 For example:
 
-a*b*c
-1*2*3
-this*and*that
+a.b.c
+1.2.3
 
-with “*” as separator, becomes
+with “.” as separator, becomes
 
 <table class=\"nrm\">
 <tr><td>a</td><td>b</td><td>c</td></tr>
 <tr><td>1</td><td>2</td><td>3</td></tr>
-<tr><td>this</td><td>and</td><td>that</td></tr>
-</table>"
-  (interactive "sEnter string pattern for column separation:")
-  (let (-bds -p1 -p2 -str)
-    (setq -bds (xah-get-bounds-of-thing 'block))
-    (setq -p1 (car -bds) )
-    (setq -p2 (cdr -bds) )
-    (setq -str (buffer-substring-no-properties -p1 -p2) )
-    (delete-region -p1 -p2)
-    (insert (xah-html-make-html-table-string -str sep) "\n")))
+</table>
+
+URL `http://ergoemacs.org/emacs/elisp_make-html-table.html'
+Version 2017-03-03"
+  (interactive "sEnter the string for column separation:")
+  (let (-bds -p1 -p2)
+    (setq -bds (xah-get-bounds-of-thing-or-region 'block))
+    (setq -p1 (car -bds))
+    (setq -p2 (cdr -bds))
+    (save-excursion
+      (save-restriction
+        (narrow-to-region -p1 -p2)
+        (let ((case-fold-search nil))
+
+          (goto-char (point-max))
+          (insert "\n")
+
+          (goto-char (point-min))
+          (while (search-forward *separator nil "NOERROR")
+            (replace-match "</td><td>"))
+
+          (goto-char (point-min))
+          (while (search-forward "\n" nil "NOERROR")
+            (replace-match "</td></tr>\n<tr><td>"))
+
+          (goto-char (point-max))
+          (beginning-of-line)
+          (delete-char 8)
+
+          (goto-char (point-min))
+          (insert "<table class=\"nrm\">\n<tr><td>")
+
+          (goto-char (point-max))
+          (insert "</table>")
+          ;;
+          )))))
 
 (defun xah-html-make-html-table-undo ()
   "inverse of `xah-html-make-html-table'.
