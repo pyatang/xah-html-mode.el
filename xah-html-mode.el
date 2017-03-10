@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.3.4
+;; Version: 5.3.5
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -2241,7 +2241,7 @@ Example:
 
 When called in lisp code, *begin *end are region begin/end positions.
 
-Version 2017-01-11"
+Version 2017-03-09"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -2280,7 +2280,7 @@ Version 2017-01-11"
 
            ["Help" "<kbd>Help</kbd>"]
            ["Power" "<kbd>Power</kbd>"]
-           ["Tab" "<kbd>Tab ↹</kbd>"]
+           ["Tab" "<kbd>Tab ⇥</kbd>"]
            ["Esc" "<kbd>Esc</kbd>"]
            ["Home" "<kbd>↖ Home</kbd>"]
            ["End" "<kbd>↘ End</kbd>"]
