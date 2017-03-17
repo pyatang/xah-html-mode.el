@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.3.5
+;; Version: 5.4.0
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1473,7 +1473,7 @@ Version 2016-10-18"
 
 (defun xah-html-html-to-text ()
   "Convert HTML to plain text on current text block or text selection.
-Version 2017-01-11"
+Version 2017-03-12"
   (interactive)
   (let ( -p1 -p2 -input-str -output-str)
     (let (-bds)
@@ -1505,9 +1505,15 @@ Version 2017-01-11"
             ;; todo. something wrong here. not supposed to be regex
             ["<li>" "<li>• " ]
             ["</li>" "" ]
+
             ["<code>" "「" ]
             ["<code class=\"elisp-ƒ\">" "「" ]
             ["</code>" "」" ]
+
+            ["<cite>" "“" ]
+            ["<code class=\"book\">" "“" ]
+            ["</cite>" "”" ]
+
             ["<h2>" "────────── ────────── ────────── ────────── ──────────\n" ]
             ["</h2>" "" ]
             ["<h3>" "────────── ────────── ──────────\n" ]
@@ -2071,7 +2077,7 @@ Some issues:
 • Some words are common in other lang, e.g. “while”, “print”, “string”, unix “find”, “grep”, HTML's “kbd” tag, etc. But they are also built-in elisp symbols. This command will tag them, but you may not want that.
 
 • Some function/variable are from 3rd party libs, and some are not bundled with GNU emacs , e.g. 「'htmlize」. They may or may not be tagged depending whether they've been loaded.
-Version 2017-01-08"
+Version 2017-03-17"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -2087,7 +2093,7 @@ Version 2017-01-08"
                   (point-max) t)
             (setq -mStr (match-string 1))
             (cond
-             ((fboundp (intern-soft -mStr))
+             ((and (intern-soft -mStr) (fboundp (intern-soft -mStr)))
               (progn
                 (push (format "ƒ %s" -mStr) -changedItems)
                 (replace-match (concat "<code class=\"elisp-ƒ\">" -mStr "</code>") t t)
@@ -2099,7 +2105,7 @@ Version 2017-01-08"
                   (setq -p1 (point))
                   (overlay-put (make-overlay -p1 -p2) 'face (list :background "yellow"))
                   (search-forward "</code>"))))
-             ((boundp (intern-soft -mStr))
+             ((and (intern-soft -mStr) (boundp (intern-soft -mStr)))
               (progn
                 (push (format "υ %s" -mStr) -changedItems)
                 (replace-match (concat "<var class=\"elisp\">" -mStr "</var>") t t)
@@ -2127,12 +2133,12 @@ Version 2017-01-08"
 • 《…》 → <cite class=\"book\">…</cite>
 • 〔…〕 → <code class=\"path-xl\">\\1</code>
 •  ‹…› → <var class=\"d\">…</var>
-• 〔<…〕 → 〔➤ <…〕
+• 〔<…〕 → 〔► <…〕
 
 Changes are reported to message buffer with char position.
 
 When called in lisp code, *begin *end are region begin/end positions.
-Version 2016-11-02"
+Version 2017-03-09"
   (interactive
    (let ((-bds (xah-get-bounds-of-thing-or-region 'block)))
      (list (car -bds) (cdr -bds))))
@@ -2197,11 +2203,11 @@ Version 2016-11-02"
         (goto-char (point-min))
         (while (re-search-forward "〔<a href=" nil t)
           (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
-          (replace-match "〔➤see <a href=" t)
+          (replace-match "〔►see <a href=" t)
           (let (-p1 -p2)
-            (search-backward "〔➤see <a href=" )
+            (search-backward "〔►see <a href=" )
             (setq -p1 (point))
-            (search-forward "〔➤see <a href=" )
+            (search-forward "〔►see <a href=" )
             (setq -p2 (point))
             (overlay-put (make-overlay -p1 -p2) 'face 'highlight)))
         (goto-char (point-min))
