@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.4.0
+;; Version: 5.4.1
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1534,17 +1534,20 @@ Version 2017-03-12"
   "Replace current HTML inline image's file name.
 This command is for interactive use only.
 When cursor is in HTML link file path, e.g.  <img src=\"img/cats.jpg\" > and this command is called, it'll prompt user for a new name. The link path will be changed to the new name, the corresponding file will also be renamed. The operation is aborted if a name exists.
-Version 2017-01-09"
+Version 2017-03-26"
   (interactive)
   (let* (
          (-bounds (bounds-of-thing-at-point 'filename))
          (-inputPath (buffer-substring-no-properties (car -bounds) (cdr -bounds)))
          (-expandedPath (expand-file-name -inputPath (file-name-directory (or (buffer-file-name) default-directory ))))
-         (-newPath (replace-regexp-in-string " " "_" (read-string "New name: " -expandedPath nil -expandedPath ))))
+         (-newPath (replace-regexp-in-string " " "_" (read-string "New name: " -expandedPath nil -expandedPath )))
+         (-doit-p nil))
     (if (file-exists-p -newPath)
-        (progn (user-error "file 「%s」 exist." -newPath ))
+        (setq -doit-p (y-or-n-p "file exist. Replace?"))
+      (setq -doit-p t))
+    (when -doit-p
       (progn
-        (rename-file -expandedPath -newPath)
+        (rename-file -expandedPath -newPath t)
         (message "rename to %s" -newPath)
         (delete-region (car -bounds) (cdr -bounds))
         (insert (xahsite-filepath-to-href-value -newPath (or (buffer-file-name) default-directory)))))))
@@ -1656,12 +1659,12 @@ http://www.time.com/time/magazine/article/0,9171,981408,00.html
 
 After execution, the lines will become
 
- 〔<cite>Circus Maximalist</cite> <time>1994-09-12</time> By Paul Gray. @ <a href=\"http://www.time.com/time/magazine/article/0,9171,981408,00.html\">Source www.time.com</a>〕
+ 〔<cite>Circus Maximalist</cite> <time>1994-09-12</time> By Paul Gray. At <a href=\"http://www.time.com/time/magazine/article/0,9171,981408,00.html\">Source www.time.com</a>〕
 
 If there's a text selection, use it for input, otherwise the input is a text block between blank lines.
 
 The order of lines for {title, author, date/time, url} needs not be in that order. Author should start with “by”.
-Version 2016-11-05"
+Version 2017-04-06"
   (interactive)
   (let* (
          (-bds (xah-get-bounds-of-thing 'block))
@@ -1708,7 +1711,7 @@ Version 2016-11-05"
     (insert (concat "〔<cite>" -title "</cite> ")
             "<time>" -date "</time>"
             " By " -author
-            ". @ " -url
+            ". At " -url
             "〕")))
 
 (defun xah-html-make-link-defunct ()
