@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.4.1
+;; Version: 5.5.1
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1987,6 +1987,12 @@ Version 2016-10-19"
     (delete-region -p1 -p2 )
     (insert "<p>" (replace-regexp-in-string "\n\n+" "</p>\n\n<p>" (xah-html--trim-string -inputText)) "</p>")))
 
+(defun xah-html-insert-br-tag ()
+  "Insert <br /> tag.
+Version 2017-04-28"
+  (interactive)
+  (insert "<br />"))
+
 (defun xah-html-emacs-to-windows-kbd-notation (*begin *end)
   "Change emacs key notation to Windows's notation on text selection or current line.
 
@@ -2760,6 +2766,8 @@ Version 2016-10-24"
   (define-key xah-html-mode-map (kbd "RET") 'xah-html-open-local-link)
 
   (define-key xah-html-mode-map (kbd "TAB") 'xah-html-wrap-html-tag)
+
+  (define-key xah-html-mode-map (kbd "<C-return>") 'xah-html-insert-br-tag)
 
   (define-prefix-command 'xah-html-mode-no-chord-map)
 
