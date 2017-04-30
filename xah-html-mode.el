@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.5.1
+;; Version: 5.6.1
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -770,7 +770,6 @@ Version 2017-02-04"
 
 (setq xah-html-mode-syntax-table
       (let ((synTable (make-syntax-table)))
-        (modify-syntax-entry ?\n "> b" synTable)
         (modify-syntax-entry ?\! "." synTable)
         (modify-syntax-entry ?\" "\"" synTable)
         (modify-syntax-entry ?\# "." synTable)
@@ -778,8 +777,6 @@ Version 2017-02-04"
         (modify-syntax-entry ?\% "." synTable)
         (modify-syntax-entry ?\& "." synTable)
         (modify-syntax-entry ?\' "." synTable)
-        (modify-syntax-entry ?\( "()" synTable)
-        (modify-syntax-entry ?\) ")(" synTable)
         (modify-syntax-entry ?\* "." synTable)
         (modify-syntax-entry ?\+ "." synTable)
         (modify-syntax-entry ?\, "." synTable)
@@ -795,9 +792,9 @@ Version 2017-02-04"
         (modify-syntax-entry ?\? "." synTable)
         (modify-syntax-entry ?\@ "." synTable)
         (modify-syntax-entry '(?A . ?Z) "w" synTable)
-        (modify-syntax-entry ?\[ "(]" synTable)
+
         (modify-syntax-entry ?\\ "\\" synTable)
-        (modify-syntax-entry ?\] ")[" synTable)
+
         (modify-syntax-entry ?^ "." synTable) ; can't use blackslash, because it became control
         (modify-syntax-entry ?\_ "_" synTable)
         (modify-syntax-entry ?\` "." synTable)
@@ -807,11 +804,17 @@ Version 2017-02-04"
         (modify-syntax-entry ?\} "){" synTable)
         (modify-syntax-entry ?\~ "." synTable)
 
-        (modify-syntax-entry ?“ "(”" synTable)
-        (modify-syntax-entry ?” ")“" synTable)
+        (modify-syntax-entry ?\( "()" synTable)
+        (modify-syntax-entry ?\) ")(" synTable)
 
-        (modify-syntax-entry ?‘ "(’" synTable)
-        (modify-syntax-entry ?’ ")‘" synTable)
+        (modify-syntax-entry ?\[ "(]" synTable)
+        (modify-syntax-entry ?\] ")[" synTable)
+
+        (modify-syntax-entry ?\“ "<”" synTable)
+        (modify-syntax-entry ?\” ">“" synTable)
+
+        (modify-syntax-entry ?‘ "<’" synTable)
+        (modify-syntax-entry ?’ ">‘" synTable)
 
         synTable)
 )
@@ -2846,8 +2849,8 @@ Version 2016-10-24"
           ("<!--\\|-->" . font-lock-comment-delimiter-face)
           (,(format "<!--%s-->" textNodeRegex) . (1 font-lock-comment-face))
           (,(format "<h\\([1-6]\\)>%s</h\\1>" textNodeRegex) . (2 'bold))
-          (,(format "“%s”" textNodeRegex) . (1 'xah-html-curly-quote-f“”))
-          (,(format "‘%s’" textNodeRegex) . (1 'xah-html-curly-quote-f‘’))
+          ;; (,(format "“%s”" textNodeRegex) . (1 'xah-html-curly-quote-f“”))
+          ;; (,(format "‘%s’" textNodeRegex) . (1 'xah-html-curly-quote-f‘’))
           (,(format "<title>%s</title>" textNodeRegex) . (1 'bold))
           (,(format "<span%s>%s</span>" attriRegex textNodeRegex) . (1 'xah-html-span-f))
           (,(format "<mark>%s</mark>" textNodeRegex) . (1 'xah-html-mark-f))
