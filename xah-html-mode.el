@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.6.1
+;; Version: 5.6.2
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -764,110 +764,10 @@ Version 2017-02-04"
       nil
       )))
 
-
-;; syntax table
-(defvar xah-html-mode-syntax-table nil "Syntax table for `xah-html-mode'.")
 
-(setq xah-html-mode-syntax-table
-      (let ((synTable (make-syntax-table)))
-        (modify-syntax-entry ?\! "." synTable)
-        (modify-syntax-entry ?\" "\"" synTable)
-        (modify-syntax-entry ?\# "." synTable)
-        (modify-syntax-entry ?\$ "." synTable)
-        (modify-syntax-entry ?\% "." synTable)
-        (modify-syntax-entry ?\& "." synTable)
-        (modify-syntax-entry ?\' "." synTable)
-        (modify-syntax-entry ?\* "." synTable)
-        (modify-syntax-entry ?\+ "." synTable)
-        (modify-syntax-entry ?\, "." synTable)
-        (modify-syntax-entry ?\- "_" synTable)
-        (modify-syntax-entry ?\. "." synTable)
-        (modify-syntax-entry ?\/ "." synTable)
-        (modify-syntax-entry '(?0 . ?9) "w" synTable)
-        (modify-syntax-entry ?\: "." synTable)
-        (modify-syntax-entry ?\; "." synTable)
-        (modify-syntax-entry ?\< "." synTable)
-        (modify-syntax-entry ?\= "." synTable)
-        (modify-syntax-entry ?\> "." synTable)
-        (modify-syntax-entry ?\? "." synTable)
-        (modify-syntax-entry ?\@ "." synTable)
-        (modify-syntax-entry '(?A . ?Z) "w" synTable)
 
-        (modify-syntax-entry ?\\ "\\" synTable)
 
-        (modify-syntax-entry ?^ "." synTable) ; can't use blackslash, because it became control
-        (modify-syntax-entry ?\_ "_" synTable)
-        (modify-syntax-entry ?\` "." synTable)
-        (modify-syntax-entry '(?a . ?z) "w" synTable)
-        (modify-syntax-entry ?\{ "(}" synTable)
-        (modify-syntax-entry ?\| "." synTable)
-        (modify-syntax-entry ?\} "){" synTable)
-        (modify-syntax-entry ?\~ "." synTable)
 
-        (modify-syntax-entry ?\( "()" synTable)
-        (modify-syntax-entry ?\) ")(" synTable)
-
-        (modify-syntax-entry ?\[ "(]" synTable)
-        (modify-syntax-entry ?\] ")[" synTable)
-
-        (modify-syntax-entry ?\“ "<”" synTable)
-        (modify-syntax-entry ?\” ">“" synTable)
-
-        (modify-syntax-entry ?‘ "<’" synTable)
-        (modify-syntax-entry ?’ ">‘" synTable)
-
-        synTable)
-)
-
-
-
-(defface xah-html-curly-quote-f“”
-  '((((class color) (min-colors 88) (background light)) (:foreground "#458b00"))
-    (((class color) (min-colors 88) (background dark)) (:foreground "#76ee00"))
-    (((class color) (min-colors 16) (background light)) (:foreground "#458b00"))
-    (((class color) (min-colors 16) (background dark)) (:foreground "#76ee00"))
-    (((class color) (min-colors 8)) (:foreground "blue" :weight bold))
-    (t (:inverse-video t :weight bold)))
-  "Face used for curly quoted text."
-  :group 'xah-html-mode)
-
-(defface xah-html-curly-quote-f‘’
-  '((((class color) (min-colors 88) (background light)) (:foreground "#ffa500"))
-    (((class color) (min-colors 88) (background dark)) (:foreground "#8b5a00"))
-    (((class color) (min-colors 16) (background light)) (:foreground "#ffa500"))
-    (((class color) (min-colors 16) (background dark)) (:foreground "#8b5a00"))
-    (((class color) (min-colors 8)) (:foreground "blue" :weight bold))
-    (t (:inverse-video t :weight bold)))
-  "Face used for curly quoted text."
-  :group 'xah-html-mode)
-
-(defface xah-html-span-f
-  '(
-    (t :background "pink"))
-  "face for span tag content."
-  :group 'xah-html-mode )
-
-;; temp for debugging
-(face-spec-set
- 'xah-html-span-f
- '(
-   (t :background "pink"))
- 'face-defface-spec
- )
-
-(defface xah-html-mark-f
-  '(
-    (t :background "yellow"))
-  "face for mark tag content."
-  :group 'xah-html-mode )
-
-;; temp for debugging
-(face-spec-set
- 'xah-html-mark-f
- '(
-   (t :background "yellow"))
- 'face-defface-spec
- )
 
 
 
@@ -2824,7 +2724,141 @@ Version 2016-10-24"
   ;; define separate, so that user can override the lead key
   (define-key xah-html-mode-map (kbd "C-c C-c") xah-html-mode-no-chord-map))
 
+
 
+
+(defvar xah-html-mode-syntax-table nil "Syntax table for `xah-html-mode'.")
+
+(setq xah-html-mode-syntax-table
+      (let ((synTable (make-syntax-table)))
+        (modify-syntax-entry ?\! "." synTable)
+        (modify-syntax-entry ?\# "." synTable)
+
+        (modify-syntax-entry ?\$ "." synTable)
+
+        (modify-syntax-entry ?\% "." synTable)
+        (modify-syntax-entry ?\& "." synTable)
+        (modify-syntax-entry ?\' "." synTable)
+        (modify-syntax-entry ?\* "." synTable)
+        (modify-syntax-entry ?\+ "." synTable)
+        (modify-syntax-entry ?\, "." synTable)
+        (modify-syntax-entry ?\- "_" synTable)
+        (modify-syntax-entry ?\. "." synTable)
+        (modify-syntax-entry ?\/ "." synTable)
+        (modify-syntax-entry ?\: "." synTable)
+        (modify-syntax-entry ?\; "." synTable)
+        (modify-syntax-entry ?\< "." synTable)
+        (modify-syntax-entry ?\= "." synTable)
+        (modify-syntax-entry ?\> "." synTable)
+        (modify-syntax-entry ?\? "." synTable)
+        (modify-syntax-entry ?\@ "." synTable)
+
+        (modify-syntax-entry ?\" "\"" synTable)
+
+        (modify-syntax-entry ?\\ "\\" synTable)
+
+        (modify-syntax-entry ?^ "." synTable) ; can't use blackslash, because it became control
+        (modify-syntax-entry ?\_ "_" synTable)
+        (modify-syntax-entry ?\` "." synTable)
+        (modify-syntax-entry ?\{ "(}" synTable)
+        (modify-syntax-entry ?\| "." synTable)
+        (modify-syntax-entry ?\} "){" synTable)
+        (modify-syntax-entry ?\~ "." synTable)
+
+        (modify-syntax-entry ?\( "()" synTable)
+        (modify-syntax-entry ?\) ")(" synTable)
+
+        (modify-syntax-entry ?\[ "(]" synTable)
+        (modify-syntax-entry ?\] ")[" synTable)
+
+        (modify-syntax-entry ?\‹ "(›" synTable)
+        (modify-syntax-entry ?\› ")‹" synTable)
+
+        (modify-syntax-entry ?\« "(»" synTable)
+        (modify-syntax-entry ?\» ")«" synTable)
+
+        (modify-syntax-entry ?\“ "(”" synTable)
+        (modify-syntax-entry ?\” ")“" synTable)
+
+        (modify-syntax-entry ?‘ "(’" synTable)
+        (modify-syntax-entry ?’ ")‘" synTable)
+
+        synTable)
+)
+
+
+(defface xah-html-double-curly-quote-f
+  '((t :foreground "black"
+       :background "aquamarine"
+       ))
+  "Face used for curly quoted text."
+  :group 'xah-html-mode )
+
+(face-spec-set
+ 'xah-html-double-curly-quote-f
+ '((t :foreground "black"
+      :background "aquamarine"
+      ))
+ 'face-defface-spec
+ )
+
+(defface xah-html-single-curly-quote-f
+  '((t :foreground "red"
+       :background "aquamarine"
+       ))
+  "Face used for curly quoted text."
+  :group 'xah-html-mode )
+
+(face-spec-set
+ 'xah-html-single-curly-quote-f
+ '((t :foreground "red"
+      :background "aquamarine"
+      ))
+ 'face-defface-spec
+ )
+
+(defface xah-html-french-quote-f
+  '((t :foreground "DarkMagenta"
+       :background "aquamarine"
+       ))
+  "Face used for « French quoted » text."
+  :group 'xah-html-mode )
+
+(face-spec-set
+ 'xah-html-french-quote-f
+ '((t :foreground "DarkMagenta"
+      :background "aquamarine"
+      ))
+ 'face-defface-spec
+ )
+
+(defface xah-html-span-f
+  '(
+    (t :background "pink"))
+  "face for span tag content."
+  :group 'xah-html-mode )
+
+;; temp for debugging
+(face-spec-set
+ 'xah-html-span-f
+ '(
+   (t :background "pink"))
+ 'face-defface-spec
+ )
+
+(defface xah-html-mark-f
+  '(
+    (t :background "yellow"))
+  "face for mark tag content."
+  :group 'xah-html-mode )
+
+;; temp for debugging
+(face-spec-set
+ 'xah-html-mark-f
+ '(
+   (t :background "yellow"))
+ 'face-defface-spec
+ )
 
 (setq xah-html-font-lock-keywords
       (let (
@@ -2849,8 +2883,9 @@ Version 2016-10-24"
           ("<!--\\|-->" . font-lock-comment-delimiter-face)
           (,(format "<!--%s-->" textNodeRegex) . (1 font-lock-comment-face))
           (,(format "<h\\([1-6]\\)>%s</h\\1>" textNodeRegex) . (2 'bold))
-          ;; (,(format "“%s”" textNodeRegex) . (1 'xah-html-curly-quote-f“”))
-          ;; (,(format "‘%s’" textNodeRegex) . (1 'xah-html-curly-quote-f‘’))
+          (,(format "‘%s’" textNodeRegex) . (1 'xah-html-single-curly-quote-f))
+          (,(format "“%s”" textNodeRegex) . (1 'xah-html-double-curly-quote-f))
+          (,(format "«%s»" textNodeRegex) . (1 'xah-html-french-quote-f))
           (,(format "<title>%s</title>" textNodeRegex) . (1 'bold))
           (,(format "<span%s>%s</span>" attriRegex textNodeRegex) . (1 'xah-html-span-f))
           (,(format "<mark>%s</mark>" textNodeRegex) . (1 'xah-html-mark-f))
