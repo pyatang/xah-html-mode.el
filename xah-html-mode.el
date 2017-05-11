@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.6.2
+;; Version: 5.6.3
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -2710,7 +2710,6 @@ Version 2016-10-24"
   (define-key xah-html-mode-no-chord-map (kbd "o") nil)
   (define-key xah-html-mode-no-chord-map (kbd "p") 'browse-url-of-buffer)
   (define-key xah-html-mode-no-chord-map (kbd "q") 'xah-html-make-link-defunct)
-  (define-key xah-html-mode-no-chord-map (kbd "q") nil)
   (define-key xah-html-mode-no-chord-map (kbd "r") 'xah-html-word-to-wikipedia-linkify)
   (define-key xah-html-mode-no-chord-map (kbd "s") nil)
   (define-key xah-html-mode-no-chord-map (kbd "t") 'xah-html-wrap-p-tag)
