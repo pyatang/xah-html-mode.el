@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.6.3
+;; Version: 5.6.4
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -2315,7 +2315,7 @@ When there's no text selection, the tag will be wrapped around current {word, li
 
 If current line or word is empty, then insert open/end tags and place cursor between them.
 If `universal-argument' is called first, then also prompt for a “class” attribute. Empty value means don't add the attribute.
-Version 2016-12-07
+Version 2017-05-28
 "
   (interactive
    (list
@@ -2329,14 +2329,16 @@ Version 2016-12-07
           (if (use-region-p)
               (cons (region-beginning) (region-end))
             (cond
-             ((equal -wrap-type "w") (xah-get-bounds-of-thing 'word))
-             ((equal -wrap-type "l") (xah-get-bounds-of-thing 'line))
+             ((equal -wrap-type "w") (bounds-of-thing-at-point 'word ))
+             ((equal -wrap-type "l") (cons (line-beginning-position) (line-end-position)))
+             ;; ((equal -wrap-type "l") (xah-get-bounds-of-thing 'line))
              ((equal -wrap-type "b") (xah-get-bounds-of-thing 'block))
              (t (xah-get-bounds-of-thing 'word)))))
          (-p1 (car -bds))
          (-p2 (cdr -bds)))
     (save-restriction
       (narrow-to-region -p1 -p2)
+
       (when ; trim whitespace
           (and
            (not (use-region-p))
@@ -2351,6 +2353,7 @@ Version 2016-12-07
           (delete-horizontal-space)
           (goto-char (point-max))
           (delete-horizontal-space)))
+
       ;; add blank at start/end
       (when (equal -wrap-type "b")
         (progn
@@ -2358,7 +2361,9 @@ Version 2016-12-07
           (insert "\n")
           (goto-char (point-max))
           (insert "\n")))
+
       (xah-html-insert-open-close-tags *tag-name *class-name (point-min) (point-max)))
+
     (when ; put cursor between when input text is empty
         (not (xah-html--tag-self-closing-p *tag-name))
       (when (and
@@ -2616,8 +2621,8 @@ Version 2016-10-24"
     ("iframe" "<iframe src=\"some.html\" width=\"200\" height=\"300\"></iframe>")
 
     ;; todo
-;; http://xahlee.info/js/css_colors.html
-;; http://xahlee.info/js/css_color_names.html
+    ;; http://xahlee.info/js/css_colors.html
+    ;; http://xahlee.info/js/css_color_names.html
     ("zwhite" "#ffffff" xah-html--ahf)
     ("zsilver" "#c0c0c0" xah-html--ahf)
     ("zgray" "#808080" xah-html--ahf)
@@ -2639,19 +2644,18 @@ Version 2016-10-24"
 
     ("og" "<meta property=\"og:image\" content=\"http://ergoemacs.org/emacs/i/geek_vs_non_geek_repetitive_tasks.png\" />" xah-html--ahf)
 
-    ("zhtml5" "<!DOCTYPE html>" xah-html--ahf)
-    ("html4s" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">" xah-html--ahf)
-    ("html4t" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">" xah-html--ahf)
-    ("xhtml" "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">" xah-html--ahf)
-    ("zhtml" "<!doctype html><html><head><meta charset=\"utf-8\" />
+
+    ("uhtml4s" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">" xah-html--ahf)
+    ("uhtml4t" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">" xah-html--ahf)
+    ("uxhtml" "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">" xah-html--ahf)
+    ("uhtml5" "<!DOCTYPE html>" xah-html--ahf)
+    ("uhtml" "<!doctype html><html><head><meta charset=\"utf-8\" />
 <title>ttt</title>
 </head>
 <body>
 
 </body>
-</html>" xah-html--ahf)
-
-    )
+</html>" xah-html--ahf))
 
   "abbrev table for `xah-html-mode'"
   )
