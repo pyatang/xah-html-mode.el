@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.6.4
+;; Version: 5.6.5
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1567,7 +1567,7 @@ After execution, the lines will become
 If there's a text selection, use it for input, otherwise the input is a text block between blank lines.
 
 The order of lines for {title, author, date/time, url} needs not be in that order. Author should start with “by”.
-Version 2017-04-06"
+Version 2017-06-08"
   (interactive)
   (let* (
          (-bds (xah-get-bounds-of-thing 'block))
@@ -1611,11 +1611,11 @@ Version 2017-04-06"
     (setq -url (with-temp-buffer (insert -url) (xah-html-source-url-linkify 1) (buffer-string)))
 
     (delete-region -p1 -p2 )
-    (insert (concat "〔<cite>" -title "</cite> ")
+    (insert (concat "〔 <cite>" -title "</cite> ")
             "<time>" -date "</time>"
             " By " -author
             ". At " -url
-            "〕")))
+            " 〕")))
 
 (defun xah-html-make-link-defunct ()
   "Make the HTML link under cursor to a defunct form.
@@ -1758,8 +1758,10 @@ Example:
 become
  <img src=\"img/my_cats.jpg\" alt=\"emacs logo\" width=\"470\" height=\"456\" />
 
+Returns the string used in the alt attribute.
+
 URL `http://ergoemacs.org/emacs/elisp_image_tag.html'
-Version 2016-11-15"
+Version 2017-06-09"
   (interactive)
   (let ( -p1 -p2 -imgPath
              -hrefValue -altText -imgWH -width -height)
@@ -1810,7 +1812,9 @@ Version 2016-11-15"
         -hrefValue
         "\"" " " "alt=\"" -altText "\""
         " width=\"" -width "\""
-        " height=\"" -height "\" />")))))
+        " height=\"" -height "\" />")))
+    -altText
+    ))
 
 (defun xah-html-wikipedia-url-linkify ()
   "Change Wikipedia URL under cursor into a HTML link.
@@ -2045,12 +2049,12 @@ Version 2017-03-17"
 • 《…》 → <cite class=\"book\">…</cite>
 • 〔…〕 → <code class=\"path-xl\">\\1</code>
 •  ‹…› → <var class=\"d\">…</var>
-• 〔<…〕 → 〔► <…〕
+• 〔 <…〕 → 〔 ► <…〕
 
 Changes are reported to message buffer with char position.
 
 When called in lisp code, *begin *end are region begin/end positions.
-Version 2017-03-09"
+Version 2017-06-08"
   (interactive
    (let ((-bds (xah-get-bounds-of-thing-or-region 'block)))
      (list (car -bds) (cdr -bds))))
@@ -2115,11 +2119,11 @@ Version 2017-03-09"
         (goto-char (point-min))
         (while (re-search-forward "〔<a href=" nil t)
           (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
-          (replace-match "〔►see <a href=" t)
+          (replace-match "〔 ►see <a href=" t)
           (let (-p1 -p2)
-            (search-backward "〔►see <a href=" )
+            (search-backward "〔 ►see <a href=" )
             (setq -p1 (point))
-            (search-forward "〔►see <a href=" )
+            (search-forward "〔 ►see <a href=" )
             (setq -p2 (point))
             (overlay-put (make-overlay -p1 -p2) 'face 'highlight)))
         (goto-char (point-min))
@@ -2159,7 +2163,7 @@ Example:
 
 When called in lisp code, *begin *end are region begin/end positions.
 
-Version 2017-03-09"
+Version 2017-06-07"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -2173,14 +2177,14 @@ Version 2017-03-09"
            ["AltGr" "<kbd>AltGr</kbd>"]
            ["Compose" "<kbd>⎄ Compose</kbd>"]
            ["Alt" "<kbd>Alt</kbd>"]
-           ["Shift" "<kbd>⇧ Shift</kbd>"]
+           ["Shift" "<kbd>Shift</kbd>"]
            ["Cmd" "<kbd>⌘ command</kbd>"]
-           ["Option" "<kbd>⌥ Opt</kbd>"]
-           ["Opt" "<kbd>⌥ Opt</kbd>"]
+           ["Option" "<kbd>⌥ option</kbd>"]
+           ["Opt" "<kbd>⌥ option</kbd>"]
            ["Win" "<kbd>❖ Window</kbd>"]
            ["Menu" "<kbd>▤ Menu</kbd>"]
            ["Meta" "<kbd>◆ Meta</kbd>"]
-           ["Super" "<kbd>❖ Super</kbd>"]
+           ["Super" "<kbd>Super</kbd>"]
            ["Hyper" "<kbd>Hyper</kbd>"]
 
            ["Return" "<kbd>Return ↩</kbd>"]
@@ -2198,16 +2202,16 @@ Version 2017-03-09"
 
            ["Help" "<kbd>Help</kbd>"]
            ["Power" "<kbd>Power</kbd>"]
-           ["Tab" "<kbd>Tab ⇥</kbd>"]
+           ["Tab" "<kbd>Tab</kbd>"]
            ["Esc" "<kbd>Esc</kbd>"]
-           ["Home" "<kbd>↖ Home</kbd>"]
-           ["End" "<kbd>↘ End</kbd>"]
-           ["Page Up" "<kbd>⇞ Page Up</kbd>"]
-           ["pageup" "<kbd>⇞ Page Up</kbd>"]
-           ["PgUp" "<kbd>⇞ Page Up</kbd>"]
-           ["Page Down" "<kbd>⇟ Page Down</kbd>"]
-           ["pagedown" "<kbd>⇟ Page Down</kbd>"]
-           ["PgDn" "<kbd>⇟ Page Down</kbd>"]
+           ["Home" "<kbd>Home</kbd>"]
+           ["End" "<kbd>End</kbd>"]
+           ["Page Up" "<kbd>Page Up</kbd>"]
+           ["pageup" "<kbd>Page Up</kbd>"]
+           ["PgUp" "<kbd>Page Up</kbd>"]
+           ["Page Down" "<kbd>Page Down</kbd>"]
+           ["pagedown" "<kbd>Page Down</kbd>"]
+           ["PgDn" "<kbd>Page Down</kbd>"]
            ["Insert" "<kbd>Insert</kbd>"]
            ["INS" "<kbd>Insert</kbd>"]
            ["Pause" "<kbd>Pause</kbd>"]
