@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.6.5
+;; Version: 5.6.6
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -764,11 +764,6 @@ Version 2017-02-04"
       nil
       )))
 
-
-
-
-
-
 
 
 (defun xah-html--get-tag-name (&optional left<)
@@ -1376,7 +1371,7 @@ Version 2016-10-18"
 
 (defun xah-html-html-to-text ()
   "Convert HTML to plain text on current text block or text selection.
-Version 2017-03-12"
+Version 2017-06-24"
   (interactive)
   (let ( -p1 -p2 -input-str -output-str)
     (let (-bds)
@@ -1397,7 +1392,7 @@ Version 2017-03-12"
            [" class=\"\\([A-Za-z0-9]+\\)\" " " "]
            ["<var class=\"d\">\\([^<]+?\\)</var>" "‹\\1›"]
            ["<script>\\([^\\<]+?\\)</script>" ""]
-           ["<a +href=\"\\([^\"]+?\\)\" *>\\([^<]+?\\)</a>" "\\2 〔 \\1 〕"]
+           ["<a +href=\"\\([^\"]+?\\)\" *>\\([^<]+?\\)</a>" "\\2 \n  \\1\n"]
            ["<img +src=\"\\([^\"]+?\\)\" +alt=\"\\([^\"]+?\\)\" +width=\"[0-9]+\" +height=\"[0-9]+\" */?>" "〔IMAGE “\\2” \\1 〕"]
            ]
           "FIXEDCASE" )
@@ -2049,12 +2044,12 @@ Version 2017-03-17"
 • 《…》 → <cite class=\"book\">…</cite>
 • 〔…〕 → <code class=\"path-xl\">\\1</code>
 •  ‹…› → <var class=\"d\">…</var>
-• 〔 <…〕 → 〔 ► <…〕
+• 〔<…〕 → 〔► <…〕
 
 Changes are reported to message buffer with char position.
 
 When called in lisp code, *begin *end are region begin/end positions.
-Version 2017-06-08"
+Version 2017-06-13"
   (interactive
    (let ((-bds (xah-get-bounds-of-thing-or-region 'block)))
      (list (car -bds) (cdr -bds))))
@@ -2119,11 +2114,11 @@ Version 2017-06-08"
         (goto-char (point-min))
         (while (re-search-forward "〔<a href=" nil t)
           (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
-          (replace-match "〔 ►see <a href=" t)
+          (replace-match "〔►see <a href=" t)
           (let (-p1 -p2)
-            (search-backward "〔 ►see <a href=" )
+            (search-backward "〔►see <a href=" )
             (setq -p1 (point))
-            (search-forward "〔 ►see <a href=" )
+            (search-forward "〔►see <a href=" )
             (setq -p2 (point))
             (overlay-put (make-overlay -p1 -p2) 'face 'highlight)))
         (goto-char (point-min))
@@ -2163,7 +2158,7 @@ Example:
 
 When called in lisp code, *begin *end are region begin/end positions.
 
-Version 2017-06-07"
+Version 2017-06-10"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -2190,6 +2185,7 @@ Version 2017-06-07"
            ["Return" "<kbd>Return ↩</kbd>"]
            ["Enter" "<kbd>Enter ↵</kbd>"]
            ["Backspace" "<kbd>⌫ Backspace</kbd>"]
+           ["bs" "<kbd>⌫ Backspace</kbd>"]
            ["Delete" "<kbd>⌦ Delete</kbd>"]
            ["DEL" "<kbd>⌦ Delete</kbd>"]
            ["Space" "<kbd>Space</kbd>"]
@@ -2390,11 +2386,13 @@ like this:
 If the char is any of 「&」 「<」 「>」, then replace them with 「&amp;」「&lt;」「&gt;」.
 
 When called in elisp program, wrap the tag around char before position *pos.
-Version 2016-09-28"
+Version 2017-07-06"
   (interactive (list (point)))
   (let* (
          (-codepoint (string-to-char (buffer-substring-no-properties (- *pos 1) *pos )))
-         (-name (get-char-code-property -codepoint 'name))
+         (-name (if describe-char-unicodedata-file
+                    (car (cdr (car (describe-char-unicode-data  -codepoint))))
+                  (get-char-code-property -codepoint 'name)))
          (-char (buffer-substring-no-properties (- *pos 1) *pos)))
     (goto-char (- *pos 1))
     (insert (format "<mark class=\"unicode\" title=\"U+%X: %s\">" -codepoint -name))
@@ -2624,6 +2622,8 @@ Version 2016-10-24"
 
     ("iframe" "<iframe src=\"some.html\" width=\"200\" height=\"300\"></iframe>")
 
+    ("mx" "<kbd>Alt</kbd>+<kbd>x</kbd>")
+
     ;; todo
     ;; http://xahlee.info/js/css_colors.html
     ;; http://xahlee.info/js/css_color_names.html
@@ -2647,7 +2647,6 @@ Version 2016-10-24"
     ("hsl" "hsl(0,100%,50%)" xah-html--ahf)
 
     ("og" "<meta property=\"og:image\" content=\"http://ergoemacs.org/emacs/i/geek_vs_non_geek_repetitive_tasks.png\" />" xah-html--ahf)
-
 
     ("uhtml4s" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">" xah-html--ahf)
     ("uhtml4t" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">" xah-html--ahf)
@@ -2731,7 +2730,6 @@ Version 2016-10-24"
   ;; define separate, so that user can override the lead key
   (define-key xah-html-mode-map (kbd "C-c C-c") xah-html-mode-no-chord-map))
 
-
 
 
 (defvar xah-html-mode-syntax-table nil "Syntax table for `xah-html-mode'.")
@@ -2792,7 +2790,6 @@ Version 2016-10-24"
 
         synTable)
 )
-
 
 (defface xah-html-double-curly-quote-f
   '((t :foreground "black"
@@ -2921,7 +2918,7 @@ Version 2016-10-24"
 (define-derived-mode
     xah-html-mode
     prog-mode
-    "ξhtml"
+    "∑html"
   "A simple major mode for HTML5.
 HTML5 keywords are colored.
 
