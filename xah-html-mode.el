@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.6.6
+;; Version: 5.6.7
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -140,21 +140,25 @@ Version 2016-12-18"
 
 
 
-(defvar xah-html--month-full-names '("January" "February" "March" "April" "May" "June" "July" "August" "September" "October" "November" "December") "list of English month full names.")
+;; (defvar xah-html--month-full-names '("January" "February" "March" "April" "May" "June" "July" "August" "September" "October" "November" "December") "list of English month full names.")
 
-(defvar xah-html--month-abbrev-names (mapcar (lambda (x) (substring x 0 3)) xah-html--month-full-names) "list of English month 3-letter abbrev names.")
+;; (defvar xah-html--month-abbrev-names (mapcar (lambda (x) (substring x 0 3)) xah-html--month-full-names) "list of English month 3-letter abbrev names.")
 
-(defvar xah-html--weekday-names '("Monday" "Tuesday" "Wednesday" "Thursday" "Friday" "Saturday" "Sunday") "list of English weekday full names.")
+;; (defvar xah-html--weekday-names '("Monday" "Tuesday" "Wednesday" "Thursday" "Friday" "Saturday" "Sunday") "list of English weekday full names.")
 
 (defun xah-html--is-datetimestamp-p (*input-string)
   "Return t if *input-string is a date/time stamp, else nil.
 This is based on heuristic, so it's not 100% correct.
 If the string contains any month names, weekday names, or of the form dddd-dd-dd, dddd-dd-dddd, dddd-dd-dd, or using slash, then it's considered a date.
 
-2015-09-27 issue: if a sentence “You May Do So”, it's be thought as date. Similar for containing word “March”."
-  (let ((case-fold-search t))
+2015-09-27 issue: if a sentence “You May Do So”, it's be thought as date. Similar for containing word “March”.
+Version 2017-07-10"
+  (let* ((case-fold-search t)
+         (-someMonthNames '("January" "February" "April" "June" "July" "August" "September" "October" "November" "December"))
+         (-someMonthAbbrevs (mapcar (lambda (x) (substring x 0 3)) -someMonthNames))
+         (-weekDayNames '("Monday" "Tuesday" "Wednesday" "Thursday" "Friday" "Saturday" "Sunday")))
     (cond
-     ((string-match (regexp-opt (append xah-html--month-full-names xah-html--month-abbrev-names xah-html--weekday-names) 'words) *input-string) t)
+     ((string-match (regexp-opt (append -someMonthNames -someMonthAbbrevs -weekDayNames) 'words) *input-string) t)
      ;; mm/dd/yyyy
      ((string-match "\\b[0-9][0-9]/[0-9][0-9]/[0-9][0-9][0-9][0-9]\\b" *input-string) t)
      ;; yyyy/mm/dd
@@ -1562,7 +1566,7 @@ After execution, the lines will become
 If there's a text selection, use it for input, otherwise the input is a text block between blank lines.
 
 The order of lines for {title, author, date/time, url} needs not be in that order. Author should start with “by”.
-Version 2017-06-08"
+Version 2017-07-11"
   (interactive)
   (let* (
          (-bds (xah-get-bounds-of-thing 'block))
@@ -1585,10 +1589,10 @@ Version 2017-06-08"
          ((string-match "^ *[bB]y " -x) (setq -author -x))
          (t (setq -title -x)))))
 
-    (when (null -title) (error "I can't find “title” %s" -title))
-    (when (null -author) (error "I can't find “author” %s" -author))
-    (when (null -date) (error "error 74188 I can't find “date” %s" -date))
-    (when (null -url) (error "I can't find “url” %s" -url))
+    (when (not -author) (error "I can't find “author” %s" -author))
+    (when (not -date) (error "error 74188 I can't find “date” %s" -date))
+    (when (not -url) (error "I can't find “url” %s" -url))
+    (when (not -title) (error "I can't find “title” %s" -title))
 
     (setq -title (xah-html--trim-string -title))
     (setq -title (replace-regexp-in-string "^\"\\(.+\\)\"$" "\\1" -title))
@@ -2296,7 +2300,7 @@ Version 2017-06-10"
 This function does not `save-excursion'.
 2016-12-07"
   (let* (
-         (-class-str (if (null *class-name)
+         (-class-str (if (not *class-name)
                          ""
                        (format " class=\"%s\"" *class-name)))
          (-str-left (format "<%s%s>" *tag-name -class-str))
@@ -2386,12 +2390,14 @@ like this:
 If the char is any of 「&」 「<」 「>」, then replace them with 「&amp;」「&lt;」「&gt;」.
 
 When called in elisp program, wrap the tag around char before position *pos.
-Version 2017-07-06"
+Version 2017-07-08"
   (interactive (list (point)))
   (let* (
          (-codepoint (string-to-char (buffer-substring-no-properties (- *pos 1) *pos )))
          (-name (if describe-char-unicodedata-file
-                    (car (cdr (car (describe-char-unicode-data  -codepoint))))
+                    (progn
+                      (require 'descr-text)
+                      (car (cdr (car (describe-char-unicode-data  -codepoint)))))
                   (get-char-code-property -codepoint 'name)))
          (-char (buffer-substring-no-properties (- *pos 1) *pos)))
     (goto-char (- *pos 1))
@@ -2418,7 +2424,7 @@ URL `http://ergoemacs.org/emacs/elisp_html-ruby-annotation-markup.html'
 Version 2017-01-11"
   (interactive)
   (progn
-    (if (null *begin)
+    (if (not *begin)
         (progn
           (if (use-region-p)
               (progn
