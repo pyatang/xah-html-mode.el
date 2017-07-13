@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.6.8
+;; Version: 5.6.9
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -54,24 +54,24 @@ Here, a char's position is the point immediately to the left of the char.
 
 Version 2016-10-18"
   (let (
-        (-pos (point))
+        ($pos (point))
         -posPrev< ; position of first < char to the left of cursor
         -posPrev>
         -posNext<
         -posNext>
         )
     (save-excursion
-      (goto-char -pos)
+      (goto-char $pos)
       (setq -posPrev< (search-backward "<" nil "NOERROR"))
-      (goto-char -pos)
+      (goto-char $pos)
       (setq -posPrev> (search-backward ">" nil "NOERROR"))
-      (goto-char -pos)
+      (goto-char $pos)
       (setq -posNext<
             (if (search-forward "<" nil "NOERROR")
                 (- (point) 1)
               nil
               ))
-      (goto-char -pos)
+      (goto-char $pos)
       (setq -posNext>
             (if (search-forward ">" nil "NOERROR")
                 (- (point) 1)
@@ -86,16 +86,16 @@ And, on the right side of cursor, there exist a >, and there's no < between > an
  *bracketPositions is optional. If nil, then `xah-html--get-bracket-positions' is called to get it.
 Version 2016-10-18"
   (interactive)
-  (let ((-bracketPos
+  (let (($bracketPos
          (if (null *bracketPositions)
              (xah-html--get-bracket-positions)
            *bracketPositions))
         -posPrev< -posPrev> -posNext> -posNext< )
     (progn
-      (setq -posPrev< (elt -bracketPos 0))
-      (setq -posPrev> (elt -bracketPos 1))
-      (setq -posNext< (elt -bracketPos 2))
-      (setq -posNext> (elt -bracketPos 3)))
+      (setq -posPrev< (elt $bracketPos 0))
+      (setq -posPrev> (elt $bracketPos 1))
+      (setq -posNext< (elt $bracketPos 2))
+      (setq -posNext> (elt $bracketPos 3)))
     (if (and
          (not (null -posPrev< ))
          (not (null -posNext> ))
@@ -154,11 +154,11 @@ If the string contains any month names, weekday names, or of the form dddd-dd-dd
 2015-09-27 issue: if a sentence “You May Do So”, it's be thought as date. Similar for containing word “March”.
 Version 2017-07-10"
   (let* ((case-fold-search t)
-         (-someMonthNames '("January" "February" "April" "June" "July" "August" "September" "October" "November" "December"))
-         (-someMonthAbbrevs (mapcar (lambda (x) (substring x 0 3)) -someMonthNames))
-         (-weekDayNames '("Monday" "Tuesday" "Wednesday" "Thursday" "Friday" "Saturday" "Sunday")))
+         ($someMonthNames '("January" "February" "April" "June" "July" "August" "September" "October" "November" "December"))
+         ($someMonthAbbrevs (mapcar (lambda (x) (substring x 0 3)) $someMonthNames))
+         ($weekDayNames '("Monday" "Tuesday" "Wednesday" "Thursday" "Friday" "Saturday" "Sunday")))
     (cond
-     ((string-match (regexp-opt (append -someMonthNames -someMonthAbbrevs -weekDayNames) 'words) *input-string) t)
+     ((string-match (regexp-opt (append $someMonthNames $someMonthAbbrevs $weekDayNames) 'words) *input-string) t)
      ;; mm/dd/yyyy
      ((string-match "\\b[0-9][0-9]/[0-9][0-9]/[0-9][0-9][0-9][0-9]\\b" *input-string) t)
      ;; yyyy/mm/dd
@@ -191,8 +191,8 @@ If it's svg, and dimension cannot be determined, it returns [0 0]
 
 URL `http://ergoemacs.org/emacs/elisp_image_tag.html'
 Version 2017-01-11"
-  (let ((-x nil)
-        (-y nil))
+  (let (($x nil)
+        ($y nil))
     (cond
      ((string-match "\.svg$" *file-path)
       (progn
@@ -201,24 +201,24 @@ Version 2017-01-11"
           (insert-file-contents *file-path)
           (goto-char (point-min))
           (when (re-search-forward "width=\"\\([0-9]+\\).*\"" nil "NOERROR")
-            (setq -x (match-string 1 )))
+            (setq $x (match-string 1 )))
           (goto-char (point-min))
           (if (re-search-forward "height=\"\\([0-9]+\\).*\"" nil "NOERROR")
-              (setq -y (match-string 1 ))))
-        (if (and (not (null -x)) (not (null -y)))
-            (progn (vector (string-to-number -x) (string-to-number -y)))
+              (setq $y (match-string 1 ))))
+        (if (and (not (null $x)) (not (null $y)))
+            (progn (vector (string-to-number $x) (string-to-number $y)))
           (progn [0 0]))))
      (t
-      (let (-xy )
+      (let ($xy )
         (progn
           (clear-image-cache t)
-          (setq -xy (image-size
+          (setq $xy (image-size
                      (create-image
                       (if (file-name-absolute-p *file-path)
                           *file-path
                         (concat default-directory *file-path)))
                      t)))
-        (vector (car -xy) (cdr -xy)))))))
+        (vector (car $xy) (cdr $xy)))))))
 
 
 (defcustom xah-html-html5-tag-names nil
@@ -493,15 +493,15 @@ Your cursor must be between the tags.
 
 Returns a vector [langCode pos1 pos2], where pos1 pos2 are the boundary of the text content."
   (interactive)
-  (let (-langCode -p1 -p2)
+  (let ($langCode $p1 $p2)
     (save-excursion
       (re-search-backward "<pre class=\"\\([-A-Za-z0-9]+\\)\"") ; tag begin position
-      (setq -langCode (match-string 1))
-      (setq -p1 (search-forward ">")) ; text content begin
+      (setq $langCode (match-string 1))
+      (setq $p1 (search-forward ">")) ; text content begin
       (backward-char 1)
       (xah-html-skip-tag-forward)
-      (setq -p2 (search-backward "</pre>")) ; text content end
-      (vector -langCode -p1 -p2))))
+      (setq $p2 (search-backward "</pre>")) ; text content end
+      (vector $langCode $p1 $p2))))
 
 (defun xah-html-get-precode-make-new-file (lang-name-map)
   "Create a new file in current dir with content from text inside pre code block.
@@ -518,49 +518,49 @@ If there's a text selection, use that region as content.
 Version 2017-01-11"
   (interactive (list xah-html-lang-name-map))
   (let* (
-         (-langcodeinfo (xah-html-get-precode-langCode))
-         (-langCode (elt -langcodeinfo 0))
-         (-p1 (elt -langcodeinfo 1))
-         (-p2 (elt -langcodeinfo 2))
-         (-textContent (buffer-substring-no-properties -p1 -p2))
-         (-fileSuffix (elt (cdr (assoc -langCode lang-name-map)) 1))
-         (-majorMode (elt (cdr (assoc -langCode lang-name-map)) 0))
-         -fname
-         (-buf (generate-new-buffer "untitled")))
-    (when (null -majorMode)
-      (message "no major mode found for class 「%s」." -langCode))
+         ($langcodeinfo (xah-html-get-precode-langCode))
+         ($langCode (elt $langcodeinfo 0))
+         ($p1 (elt $langcodeinfo 1))
+         ($p2 (elt $langcodeinfo 2))
+         ($textContent (buffer-substring-no-properties $p1 $p2))
+         ($fileSuffix (elt (cdr (assoc $langCode lang-name-map)) 1))
+         ($majorMode (elt (cdr (assoc $langCode lang-name-map)) 0))
+         $fname
+         ($buf (generate-new-buffer "untitled")))
+    (when (null $majorMode)
+      (message "no major mode found for class 「%s」." $langCode))
     (progn
       (split-window-below)
-      (delete-region -p1 -p2 )
-      (switch-to-buffer -buf)
-      (if (null -majorMode)
+      (delete-region $p1 $p2 )
+      (switch-to-buffer $buf)
+      (if (null $majorMode)
           (fundamental-mode)
-        (funcall (intern-soft -majorMode)))
+        (funcall (intern-soft $majorMode)))
       (setq buffer-offer-save t)
-      (insert -textContent)
+      (insert $textContent)
       (when (xah-html-precode-htmlized-p (point-min) (point-max))
         (xah-html-remove-span-tag-region (point-min) (point-max))))
-    (if (equal -fileSuffix "java")
+    (if (equal $fileSuffix "java")
         (progn
           (goto-char (point-min))
           (if (re-search-forward "public class \\([A-Za-z0-9]+\\) [\n ]*{" nil "NOERROR")
               (progn
-                (setq -fname
+                (setq $fname
                       (format "%s.java" (match-string 1))))
-            (progn (setq -fname
+            (progn (setq $fname
                          (format "%s.%s.%d.%s"
                                  "xxtemp"
                                  (format-time-string "%Y%m%d%M%S")
                                  (random 99999)
-                                 -fileSuffix)))))
+                                 $fileSuffix)))))
       (progn
-        (setq -fname
+        (setq $fname
               (format "%s.%s.%d.%s"
                       "xxtemp"
                       (format-time-string "%Y%m%d%M%S")
                       (random 99999)
-                      -fileSuffix))))
-    (write-file -fname "CONFIRM")
+                      $fileSuffix))))
+    (write-file $fname "CONFIRM")
     (goto-char (point-min))))
 
 
@@ -575,11 +575,11 @@ This function requires the `htmlize-buffer' from htmlize.el by Hrvoje Niksic.
 
 Version 2017-01-10"
   (interactive)
-  (let (-output-buff -resultStr
-                     (-majorModeSym (intern-soft *major-mode-name)))
+  (let ($output-buff $resultStr
+                     ($majorModeSym (intern-soft *major-mode-name)))
 
     ;; (message "*major-mode-name is %s" *major-mode-name)
-    ;; (message "-majorModeSym is %s" -majorModeSym)
+    ;; (message "-majorModeSym is %s" $majorModeSym)
 
     ;; put code in a temp buffer, set the mode, fontify
 
@@ -588,24 +588,24 @@ Version 2017-01-10"
       ;; (intern-soft "tuareg-mode")
 
       (intern-soft "xah-elisp-mode")
-      (if (null -majorModeSym)
+      (if (null $majorModeSym)
           (progn
             (fundamental-mode))
         ;; (fboundp 'tuareg-mode)
-        (if (fboundp -majorModeSym)
+        (if (fboundp $majorModeSym)
             (progn
-              (funcall -majorModeSym))
+              (funcall $majorModeSym))
           (fundamental-mode)))
       (font-lock-ensure)
-      (setq -output-buff (htmlize-buffer)))
+      (setq $output-buff (htmlize-buffer)))
     ;; extract the fontified source code in htmlize output
-    (with-current-buffer -output-buff
-      (let (-p1 -p2 )
-        (setq -p1 (search-forward "<pre>"))
-        (setq -p2 (search-forward "</pre>"))
-        (setq -resultStr (buffer-substring-no-properties (+ -p1 1) (- -p2 6)))))
-    (kill-buffer -output-buff)
-    -resultStr ))
+    (with-current-buffer $output-buff
+      (let ($p1 $p2 )
+        (setq $p1 (search-forward "<pre>"))
+        (setq $p2 (search-forward "</pre>"))
+        (setq $resultStr (buffer-substring-no-properties (+ $p1 1) (- $p2 6)))))
+    (kill-buffer $output-buff)
+    $resultStr ))
 
 (defun xah-html-langcode-to-major-mode-name (*lang-code *lang-code-map)
   "get the `major-mode' name associated with *lang-code.
@@ -628,13 +628,13 @@ This function requires the `htmlize-buffer' from 〔htmlize.el〕 by Hrvoje Niks
 Version 2017-01-08"
   (interactive (list xah-html-lang-name-map))
   (let* (
-         (-temp78730 (xah-html-get-precode-langCode))
-         (-langCode (elt -temp78730 0))
-         (-p1 (elt -temp78730 1))
-         (-p2 (elt -temp78730 2))
-         ;; (-modeName (elt (cdr (assoc -langCode *lang-code-map)) 0))
-         (-modeName (xah-html-langcode-to-major-mode-name -langCode *lang-code-map)))
-    (xah-html-htmlize-region -p1 -p2 -modeName t)))
+         ($temp78730 (xah-html-get-precode-langCode))
+         ($langCode (elt $temp78730 0))
+         ($p1 (elt $temp78730 1))
+         ($p2 (elt $temp78730 2))
+         ;; ($modeName (elt (cdr (assoc $langCode *lang-code-map)) 0))
+         ($modeName (xah-html-langcode-to-major-mode-name $langCode *lang-code-map)))
+    (xah-html-htmlize-region $p1 $p2 $modeName t)))
 
 (defun xah-html-htmlize-region (*p1 *p2 *mode-name &optional *trim-whitespace-boundary-p)
   "Htmlized region *p1 *p2 using `major-mode' *mode-name.
@@ -645,25 +645,25 @@ Version 2016-12-18"
          (region-end)
          (ido-completing-read "Chose mode for coloring:" xah-html-lang-mode-list)))
   (let* (
-         (-input-str (buffer-substring-no-properties *p1 *p2))
-         (-out-str
+         ($input-str (buffer-substring-no-properties *p1 *p2))
+         ($out-str
           (xah-html-htmlize-string (if *trim-whitespace-boundary-p
-                                       (replace-regexp-in-string "\\`[ \t\n]*" "" (replace-regexp-in-string "[ \t\n]*\\'" "" -input-str))
-                                     -input-str
+                                       (replace-regexp-in-string "\\`[ \t\n]*" "" (replace-regexp-in-string "[ \t\n]*\\'" "" $input-str))
+                                     $input-str
                                      ) *mode-name)))
-    (if (string= -input-str -out-str)
+    (if (string= $input-str $out-str)
         nil
       (progn
         (delete-region *p1 *p2)
-        (insert -out-str)))))
+        (insert $out-str)))))
 
 (defun xah-html-dehtmlize-precode (*begin *end)
   "Delete span tags between pre tags.
 Note: only span tags of the form 「<span class=\"…\">…</span>」 are deleted.
 This command does the inverse of `xah-html-htmlize-precode'."
   (interactive
-   (let* ( (-xx (xah-html-get-precode-langCode)))
-     (list (elt -xx 1) (elt -xx 2))))
+   (let* ( ($xx (xah-html-get-precode-langCode)))
+     (list (elt $xx 1) (elt $xx 2))))
   (save-restriction
     (narrow-to-region *begin *end)
     (xah-html-remove-span-tag-region (point-min) (point-max))
@@ -673,11 +673,11 @@ This command does the inverse of `xah-html-htmlize-precode'."
   "Call `xah-html-htmlize-precode' or `xah-html-dehtmlize-precode'."
   (interactive (list xah-html-lang-name-map))
   (let* (
-         (-t34342 (xah-html-get-precode-langCode))
-         (-p1 (elt -t34342 1))
-         (-p2 (elt -t34342 2)))
-    (if (xah-html-precode-htmlized-p -p1 -p2)
-        (xah-html-dehtmlize-precode -p1 -p2)
+         ($t34342 (xah-html-get-precode-langCode))
+         ($p1 (elt $t34342 1))
+         ($p2 (elt $t34342 2)))
+    (if (xah-html-precode-htmlized-p $p1 $p2)
+        (xah-html-dehtmlize-precode $p1 $p2)
       (xah-html-htmlize-precode lang-name-map))))
 
 (defun xah-html-redo-syntax-coloring-file ( *file-path )
@@ -685,18 +685,18 @@ This command does the inverse of `xah-html-htmlize-precode'."
 Returns 0 if nothing is done. Else a positive integer of the count of <pre class=lang>.
 Version 2017-01-11"
   (interactive (read-file-name "file path:" nil nil t))
-  (let ( (-result 0))
+  (let ( ($result 0))
     (with-temp-buffer
       (insert-file-contents *file-path)
       (goto-char (point-min))
       (xah-html-mode)
-      (setq -result (xah-html-redo-syntax-coloring-buffer))
-      (when (> -result 0)
-        (let ((-backup-path
+      (setq $result (xah-html-redo-syntax-coloring-buffer))
+      (when (> $result 0)
+        (let (($backup-path
                (concat *file-path "~htmlize" (format-time-string "%Y%m%dT%H%M%S") "~")))
-          (copy-file *file-path -backup-path t))
+          (copy-file *file-path $backup-path t))
         (write-region 1 (point-max) *file-path)))
-    -result
+    $result
     ))
 
 (defun xah-html-redo-syntax-coloring-buffer ()
@@ -704,30 +704,30 @@ Version 2017-01-11"
 Returns 0 if nothing is done. Else a positive integer of the count of <pre class=lang>.
 Version 2017-02-04"
   (interactive)
-  (let (-langCode -p1 -p2 (-count 0)
-                  -majorModeNameStr
+  (let ($langCode $p1 $p2 ($count 0)
+                  $majorModeNameStr
                   )
     (save-excursion
       (goto-char (point-min))
       (while
           (re-search-forward "<pre class=\"\\([-A-Za-z0-9]+\\)\">" nil "NOERROR")
-        (setq -langCode (match-string 1))
-        (setq -majorModeNameStr (xah-html-langcode-to-major-mode-name -langCode xah-html-lang-name-map))
-        (if (null -majorModeNameStr)
+        (setq $langCode (match-string 1))
+        (setq $majorModeNameStr (xah-html-langcode-to-major-mode-name $langCode xah-html-lang-name-map))
+        (if (null $majorModeNameStr)
             nil
           (progn
-            (setq -p1 (point))
+            (setq $p1 (point))
             (backward-char 1)
             (xah-html-skip-tag-forward)
             (search-backward "</pre>")
-            (setq -p2 (point))
+            (setq $p2 (point))
             (save-restriction
-              (narrow-to-region -p1 -p2)
+              (narrow-to-region $p1 $p2)
               (xah-html-dehtmlize-precode (point-min) (point-max))
-              (xah-html-htmlize-region (point-min) (point-max) -majorModeNameStr t)
-              (setq -count (1+ -count)))))))
-    (message "xah-html-redo-syntax-coloring-buffer %s redone" -count)
-    -count
+              (xah-html-htmlize-region (point-min) (point-max) $majorModeNameStr t)
+              (setq $count (1+ $count)))))))
+    (message "xah-html-redo-syntax-coloring-buffer %s redone" $count)
+    $count
     ))
 
 (defun xah-html-open-local-link ()
@@ -737,13 +737,13 @@ Else call `newline'.
 Version 2017-02-04"
   (interactive)
   (if (xah-html-point-in-src-or-href-q)
-      (let ((-srcStr (xah-get-thing-at-point 'filepath )))
-        (if (string-match "^http:\\|^https:" -srcStr)
-            (browse-url -srcStr)
-          (if (file-exists-p -srcStr)
-            (find-file -srcStr)
-            (when (y-or-n-p (format "file no exist at 「%s」. Create new?" -srcStr))
-              (find-file -srcStr)))))
+      (let (($srcStr (xah-get-thing-at-point 'filepath )))
+        (if (string-match "^http:\\|^https:" $srcStr)
+            (browse-url $srcStr)
+          (if (file-exists-p $srcStr)
+            (find-file $srcStr)
+            (when (y-or-n-p (format "file no exist at 「%s」. Create new?" $srcStr))
+              (find-file $srcStr)))))
     (newline)))
 
 (defun xah-html-point-in-src-or-href-q ()
@@ -773,18 +773,18 @@ Version 2017-02-04"
 (defun xah-html--get-tag-name (&optional left<)
   "Return the tag name.
 This function assumes your cursor is inside a tag, eg <…▮…>"
-  (let ( -p1 -p2 )
+  (let ( $p1 $p2 )
     (when (not left<)
       (setq left< (search-backward "<")))
     (goto-char left<)
     (forward-char 1)
     (when (looking-at "/" )
       (forward-char 1))
-    (setq -p1 (point))
+    (setq $p1 (point))
     (re-search-forward " \\|>")
     (backward-char 1)
-    (setq -p2 (point))
-    (buffer-substring-no-properties -p1 -p2)))
+    (setq $p2 (point))
+    (buffer-substring-no-properties $p1 $p2)))
 
 (defun xah-html-delete-tag ()
   "work in progress. do nothing.
@@ -825,39 +825,39 @@ Also delete the matching beginning/ending tag."
 this is a quick 1 min hackjob, works only when there's no nesting.
 version 2016-12-18"
   (interactive)
-  (let (-p1 -p2 -oldTagName -newTagName -newClassName)
+  (let ($p1 $p2 $oldTagName $newTagName $newClassName)
     (search-backward "<" )
     (forward-char 1)
-    (setq -p1 (point))
-    (setq -oldTagName (xah-html--get-tag-name))
-    (setq -newTagName (ido-completing-read "HTML tag:" xah-html-html5-tag-list "PREDICATE" "REQUIRE-MATCH" nil xah-html-html-tag-input-history "span"))
-    (goto-char -p1)
-    (delete-char (length -oldTagName))
-    (insert -newTagName)
-    (search-forward (concat "</" -oldTagName))
-    (delete-char (- (length -oldTagName)))
-    (insert -newTagName)
+    (setq $p1 (point))
+    (setq $oldTagName (xah-html--get-tag-name))
+    (setq $newTagName (ido-completing-read "HTML tag:" xah-html-html5-tag-list "PREDICATE" "REQUIRE-MATCH" nil xah-html-html-tag-input-history "span"))
+    (goto-char $p1)
+    (delete-char (length $oldTagName))
+    (insert $newTagName)
+    (search-forward (concat "</" $oldTagName))
+    (delete-char (- (length $oldTagName)))
+    (insert $newTagName)
     (progn
-      (goto-char -p1)
+      (goto-char $p1)
       (search-forward ">")
-      (setq -p2  (point))
-      (goto-char -p1)
+      (setq $p2  (point))
+      (goto-char $p1)
       (when
-          (re-search-forward "class[ \n]*=[ \n]*\"" -p2 "NOERROR")
-  ;(string-match "class[ \n]*=[ \n]*\"" (buffer-substring-no-properties -p1 -p2))
-        (let (-p3 -p4)
-          (setq -p3 (point))
+          (re-search-forward "class[ \n]*=[ \n]*\"" $p2 "NOERROR")
+  ;(string-match "class[ \n]*=[ \n]*\"" (buffer-substring-no-properties $p1 $p2))
+        (let ($p3 $p4)
+          (setq $p3 (point))
           (search-forward "\"")
-          (setq -p4 (- (point) 1))
-          (setq -newClassName (read-string "new class name:"))
-          (if (string-equal -newClassName "")
+          (setq $p4 (- (point) 1))
+          (setq $newClassName (read-string "new class name:"))
+          (if (string-equal $newClassName "")
               (progn ; todo need to clean this up. don't use bunch of user functions
-                (delete-region -p3 -p4 )
+                (delete-region $p3 $p4 )
                 (kill-word -1)
                 (delete-char -1))
-            (progn (delete-region -p3 -p4 )
-                   (goto-char -p3)
-                   (insert -newClassName))))))))
+            (progn (delete-region $p3 $p4 )
+                   (goto-char $p3)
+                   (insert $newClassName))))))))
 
 ;; (defun xah-html-split-tag ()
 ;;   "split a HTML element into 2 elements of the same tag, at cursor point.
@@ -926,8 +926,8 @@ Version 2017-01-11"
   (if (null *begin) (setq *begin (line-beginning-position)))
   (if (null *end) (setq *end (line-end-position)))
 
-  (let ((-changedItems '())
-        (-findReplaceMap
+  (let (($changedItems '())
+        ($findReplaceMap
          (if *entity-to-char-p
              ;; this to prevent creating a replacement sequence out of blue
              [
@@ -941,12 +941,12 @@ Version 2017-01-11"
         (narrow-to-region *begin *end)
         (let ( (case-fold-search nil))
           (mapc
-           (lambda (-x)
+           (lambda ($x)
              (goto-char (point-min))
-             (while (search-forward (elt -x 0) nil t)
-               (push (format "%s %s" (point) -x) -changedItems)
-               (replace-match (elt -x 1) "FIXEDCASE" "LITERAL")))
-           -findReplaceMap))))))
+             (while (search-forward (elt $x 0) nil t)
+               (push (format "%s %s" (point) $x) $changedItems)
+               (replace-match (elt $x 1) "FIXEDCASE" "LITERAL")))
+           $findReplaceMap))))))
 
 (defun xah-html-replace-html-chars-to-unicode (*begin *end &optional *fullwidth-to-ascii-p)
   "Replace chars <>& to fullwidth version ＜＞＆ in current line or text selection.
@@ -1005,7 +1005,7 @@ Version 2017-01-11"
        (list (region-beginning) (region-end))
      (list (line-beginning-position) (line-end-position))))
   (let (
-        (-replaceMap
+        ($replaceMap
          [
           ["&nbsp;" " "] ["&ensp;" " "] ["&emsp;" " "] ["&thinsp;" " "]
           ["&rlm;" "‏"] ["&lrm;" "‎"] ["&zwj;" "‍"] ["&zwnj;" "‌"]
@@ -1069,11 +1069,11 @@ Version 2017-01-11"
       (narrow-to-region *begin *end)
       (let ( (case-fold-search nil))
         (mapc
-         (lambda (-x)
+         (lambda ($x)
            (goto-char (point-min))
-           (while (search-forward (elt -x 0) nil t)
-             (replace-match (elt -x 1) "FIXEDCASE" "LITERAL")))
-         -replaceMap)))))
+           (while (search-forward (elt $x 0) nil t)
+             (replace-match (elt $x 1) "FIXEDCASE" "LITERAL")))
+         $replaceMap)))))
 
 (defun xah-html-get-html-file-title (fname &optional no-error-p)
   "Return fname <title> tag's text.
@@ -1109,15 +1109,15 @@ becomes:
 </ul>
 Version 2016-03-19"
   (interactive)
-  (let (-bds -p1 -p2 -input-str -resultStr)
-    (setq -bds (xah-get-bounds-of-thing 'block))
-    (setq -p1 (car -bds))
-    (setq -p2 (cdr -bds))
-    (setq -input-str (buffer-substring-no-properties -p1  -p2))
+  (let ($bds $p1 $p2 $input-str $resultStr)
+    (setq $bds (xah-get-bounds-of-thing 'block))
+    (setq $p1 (car $bds))
+    (setq $p2 (cdr $bds))
+    (setq $input-str (buffer-substring-no-properties $p1  $p2))
     (save-excursion
-      (setq -resultStr
+      (setq $resultStr
             (with-temp-buffer
-              (insert -input-str)
+              (insert $input-str)
               (delete-trailing-whitespace)
 
               (when (fboundp 'xah-all-linkify)
@@ -1150,8 +1150,8 @@ Version 2016-03-19"
                   (insert "\n</ul>")))
 
               (buffer-string))))
-    (delete-region -p1 -p2)
-    (insert -resultStr)))
+    (delete-region $p1 $p2)
+    (insert $resultStr)))
 
 (defun xah-html-make-html-table (*separator)
   "Transform the current text block or selection into a HTML table.
@@ -1176,13 +1176,13 @@ with “.” as separator, becomes
 URL `http://ergoemacs.org/emacs/elisp_make-html-table.html'
 Version 2017-03-03"
   (interactive "sEnter the string for column separation:")
-  (let (-bds -p1 -p2)
-    (setq -bds (xah-get-bounds-of-thing-or-region 'block))
-    (setq -p1 (car -bds))
-    (setq -p2 (cdr -bds))
+  (let ($bds $p1 $p2)
+    (setq $bds (xah-get-bounds-of-thing-or-region 'block))
+    (setq $p1 (car $bds))
+    (setq $p2 (cdr $bds))
     (save-excursion
       (save-restriction
-        (narrow-to-region -p1 -p2)
+        (narrow-to-region $p1 $p2)
         (let ((case-fold-search nil))
 
           (goto-char (point-max))
@@ -1212,13 +1212,13 @@ Version 2017-03-03"
   "inverse of `xah-html-make-html-table'.
 version 2016-12-18"
   (interactive)
-  (let ( -p1 -p2)
+  (let ( $p1 $p2)
     (search-backward "<table")
-    (setq -p1 (point))
+    (setq $p1 (point))
     (search-forward "</table>")
-    (setq -p2 (point))
+    (setq $p2 (point))
     (xah-replace-regexp-pairs-region
-     -p1 -p2
+     $p1 $p2
      [
       ["<table \\([^>]+?\\)>" ""]
       ["</th><th>" "•"]
@@ -1240,24 +1240,24 @@ becomes
 URL `http://ergoemacs.org/emacs/elisp_html_word_to_wikipedia_linkify.html'
 Version 2015-07-27"
   (interactive)
-  (let (-p0 -p1 -p2 -linkText)
+  (let ($p0 $p1 $p2 $linkText)
     (if (region-active-p)
         (progn
-          (setq -p1 (region-beginning))
-          (setq -p2 (region-end)))
+          (setq $p1 (region-beginning))
+          (setq $p2 (region-end)))
       (progn
-        (setq -p0 (point))
+        (setq $p0 (point))
         (skip-chars-backward "^ \t\n")
-        (setq -p1 (point))
-        (goto-char -p0)
+        (setq $p1 (point))
+        (goto-char $p0)
         (skip-chars-forward "^ \t\n")
-        (setq -p2 (point))))
-    (setq -linkText
-          (replace-regexp-in-string "_" " " (buffer-substring-no-properties -p1 -p2)))
-    (delete-region -p1 -p2)
+        (setq $p2 (point))))
+    (setq $linkText
+          (replace-regexp-in-string "_" " " (buffer-substring-no-properties $p1 $p2)))
+    (delete-region $p1 $p2)
     (insert (concat "<a href=\"http://en.wikipedia.org/wiki/"
-                    (replace-regexp-in-string " " "_" -linkText)
-                    "\">" -linkText "</a>"))))
+                    (replace-regexp-in-string " " "_" $linkText)
+                    "\">" $linkText "</a>"))))
 
 (defun xah-html-remove-span-tag-region (*begin *end)
   "Delete HTML “span” tags in region.
@@ -1301,8 +1301,8 @@ when called in lisp program,
 If *change-entity-p is true, convert HTML entities to char.
 "
   (interactive
-   (let ((-bds (xah-get-bounds-of-thing 'block)))
-     (list (car -bds) (cdr -bds) (if current-prefix-arg nil t))))
+   (let (($bds (xah-get-bounds-of-thing 'block)))
+     (list (car $bds) (cdr $bds) (if current-prefix-arg nil t))))
   (save-restriction
     (narrow-to-region *begin *end)
     (xah-replace-regexp-pairs-region (point-min) (point-max) '(["<code class=\"[^\"]+\">" "「"] ["<var class=\"[^\"]+\">" "‹"]))
@@ -1340,27 +1340,27 @@ If *change-entity-p is true, convert HTML entities to char.
 (defun xah-html-remove-html-tags (&optional *begin *end)
   "Delete HTML tags in in current text block or text selection.
  a “text block” is text between blank lines
- WARNING: this command does not cover all HTML tags or convert all HTML entities. For robust solution you might use: lynx -dump -display_charset=utf-8 URL.
+ WARNING: this command does not cover all HTML tags or convert all HTML entities. For robust solution you might use: lynx $dump -display_charset=utf-8 URL.
 Version 2016-10-18"
   (interactive)
-  (let (-p1 -p2 -input-str -output-str)
+  (let ($p1 $p2 $input-str $output-str)
     (if (null *begin)
         (if (use-region-p)
             (progn
-              (setq -p1 (region-beginning))
-              (setq -p2 (region-end)))
-          (let ((-bds (xah-get-bounds-of-thing 'block)))
-            (setq -p1 (car -bds))
-            (setq -p2 (cdr -bds))))
+              (setq $p1 (region-beginning))
+              (setq $p2 (region-end)))
+          (let (($bds (xah-get-bounds-of-thing 'block)))
+            (setq $p1 (car $bds))
+            (setq $p2 (cdr $bds))))
       (progn
-        (setq -p1 *begin)
-        (setq -p2 *end)))
-    (setq -input-str (buffer-substring-no-properties -p1 -p2))
-    (setq -output-str
-          (let ((case-fold-search t) (-tempStr -input-str))
-            (setq -tempStr
+        (setq $p1 *begin)
+        (setq $p2 *end)))
+    (setq $input-str (buffer-substring-no-properties $p1 $p2))
+    (setq $output-str
+          (let ((case-fold-search t) ($tempStr $input-str))
+            (setq $tempStr
                   (xah-replace-regexp-pairs-in-string
-                   -tempStr
+                   $tempStr
                    '(["<script>\\([^\\<]+?\\)</script>" ""]
                      ["<[^>]+?>" ""]
                      ["</[a-z0-9]+>" ""]
@@ -1368,25 +1368,25 @@ Version 2016-10-18"
                      ["&lt;" "<"]
                      ["&gt;" ">"]
                      )))
-            -tempStr
+            $tempStr
             ))
-    (delete-region -p1 -p2)
-    (insert -output-str)))
+    (delete-region $p1 $p2)
+    (insert $output-str)))
 
 (defun xah-html-html-to-text ()
   "Convert HTML to plain text on current text block or text selection.
 Version 2017-06-24"
   (interactive)
-  (let ( -p1 -p2 -input-str -output-str)
-    (let (-bds)
-      (setq -bds (xah-get-bounds-of-thing-or-region 'block))
-      (setq -p1 (car -bds))
-      (setq -p2 (cdr -bds)))
-    (setq -input-str (buffer-substring-no-properties -p1 -p2))
+  (let ( $p1 $p2 $input-str $output-str)
+    (let ($bds)
+      (setq $bds (xah-get-bounds-of-thing-or-region 'block))
+      (setq $p1 (car $bds))
+      (setq $p2 (cdr $bds)))
+    (setq $input-str (buffer-substring-no-properties $p1 $p2))
     (setq
-     -output-str
+     $output-str
      (with-temp-buffer
-       (insert -input-str)
+       (insert $input-str)
        (goto-char 1)
        (let ((case-fold-search nil))
          (xah-replace-regexp-pairs-region
@@ -1429,8 +1429,8 @@ Version 2017-06-24"
             )))
        (xah-html-remove-html-tags (point-min) (point-max))
        (buffer-substring 1 (point-max))))
-    (delete-region -p1 -p2 )
-    (insert -output-str)))
+    (delete-region $p1 $p2 )
+    (insert $output-str)))
 
 (defun xah-html-rename-html-inline-image ()
   "Replace current HTML inline image's file name.
@@ -1439,20 +1439,20 @@ When cursor is in HTML link file path, e.g.  <img src=\"img/cats.jpg\" > and thi
 Version 2017-03-26"
   (interactive)
   (let* (
-         (-bounds (bounds-of-thing-at-point 'filename))
-         (-inputPath (buffer-substring-no-properties (car -bounds) (cdr -bounds)))
-         (-expandedPath (expand-file-name -inputPath (file-name-directory (or (buffer-file-name) default-directory ))))
-         (-newPath (replace-regexp-in-string " " "_" (read-string "New name: " -expandedPath nil -expandedPath )))
-         (-doit-p nil))
-    (if (file-exists-p -newPath)
-        (setq -doit-p (y-or-n-p "file exist. Replace?"))
-      (setq -doit-p t))
-    (when -doit-p
+         ($bounds (bounds-of-thing-at-point 'filename))
+         ($inputPath (buffer-substring-no-properties (car $bounds) (cdr $bounds)))
+         ($expandedPath (expand-file-name $inputPath (file-name-directory (or (buffer-file-name) default-directory ))))
+         ($newPath (replace-regexp-in-string " " "_" (read-string "New name: " $expandedPath nil $expandedPath )))
+         ($doit-p nil))
+    (if (file-exists-p $newPath)
+        (setq $doit-p (y-or-n-p "file exist. Replace?"))
+      (setq $doit-p t))
+    (when $doit-p
       (progn
-        (rename-file -expandedPath -newPath t)
-        (message "rename to %s" -newPath)
-        (delete-region (car -bounds) (cdr -bounds))
-        (insert (xahsite-filepath-to-href-value -newPath (or (buffer-file-name) default-directory)))))))
+        (rename-file $expandedPath $newPath t)
+        (message "rename to %s" $newPath)
+        (delete-region (car $bounds) (cdr $bounds))
+        (insert (xahsite-filepath-to-href-value $newPath (or (buffer-file-name) default-directory)))))))
 
 (defun xah-html-extract-url (*begin *end &optional *full-path-p)
   "Extract URLs in current block or region to `kill-ring'.
@@ -1470,26 +1470,26 @@ Returns a list.
 URL `http://ergoemacs.org/emacs/elisp_extract_url_command.html'
 Version 2016-07-28"
   (interactive
-   (let (-p1 -p2)
-     ;; set region boundary -p1 -p2
+   (let ($p1 $p2)
+     ;; set region boundary $p1 $p2
      (if (use-region-p)
-         (progn (setq -p1 (region-beginning))
-                (setq -p2 (region-end)))
+         (progn (setq $p1 (region-beginning))
+                (setq $p2 (region-end)))
        (save-excursion
          (if (re-search-backward "\n[ \t]*\n" nil "NOERROR")
              (progn (re-search-forward "\n[ \t]*\n")
-                    (setq -p1 (point)))
-           (setq -p1 (point)))
+                    (setq $p1 (point)))
+           (setq $p1 (point)))
          (if (re-search-forward "\n[ \t]*\n" nil "NOERROR")
              (progn (re-search-backward "\n[ \t]*\n")
-                    (setq -p2 (point)))
-           (setq -p2 (point)))))
-     (list -p1 -p2 current-prefix-arg)))
+                    (setq $p2 (point)))
+           (setq $p2 (point)))))
+     (list $p1 $p2 current-prefix-arg)))
 
-  (let ((-regionText (buffer-substring-no-properties *begin *end))
-        (-urlList (list)))
+  (let (($regionText (buffer-substring-no-properties *begin *end))
+        ($urlList (list)))
     (with-temp-buffer
-      (insert -regionText)
+      (insert $regionText)
 
       (goto-char 1)
       (while (re-search-forward "<" nil t)
@@ -1498,24 +1498,24 @@ Version 2016-07-28"
       (goto-char 1)
       (while (re-search-forward
               "<[A-Za-z]+.+?\\(href\\|src\\)[[:blank:]]*?=[[:blank:]]*?\\([\"']\\)\\([^\"']+?\\)\\2" nil t)
-        (push (match-string 3) -urlList)))
-    (setq -urlList (reverse -urlList))
+        (push (match-string 3) $urlList)))
+    (setq $urlList (reverse $urlList))
 
     (when *full-path-p
-      (setq -urlList
+      (setq $urlList
             (mapcar
-             (lambda (-x)
-               (if (string-match "^http:\\|^https:" -x )
-                   (progn -x)
+             (lambda ($x)
+               (if (string-match "^http:\\|^https:" $x )
+                   (progn $x)
                  (progn
-                   (expand-file-name -x (file-name-directory (buffer-file-name))))))
-             -urlList)))
+                   (expand-file-name $x (file-name-directory (buffer-file-name))))))
+             $urlList)))
 
     (when (called-interactively-p 'any)
-      (let ((-printedResult (mapconcat 'identity -urlList "\n")))
-        (kill-new -printedResult)
-        (message "%s" -printedResult)))
-    -urlList ))
+      (let (($printedResult (mapconcat 'identity $urlList "\n")))
+        (kill-new $printedResult)
+        (message "%s" $printedResult)))
+    $urlList ))
 
 (defun xah-html-update-title ( newTitle)
   "Update a HTML article's title and h1 tags.
@@ -1527,25 +1527,25 @@ Update the <title>…</title> and <h1>…</h1> of current buffer."
        (re-search-forward "<title>\\([^<]+?\\)</title>")
        (setq oldTitle (match-string 1 )))
      (list (read-string "New title:" oldTitle nil oldTitle "INHERIT-INPUT-METHOD"))))
-  (let (-p1 -p2)
+  (let ($p1 $p2)
     (save-excursion
       (goto-char 1)
       (progn (search-forward "<title>")
-             (setq -p1 (point))
+             (setq $p1 (point))
              (search-forward "</title>")
              (search-backward "<")
-             (setq -p2 (point))
-             (delete-region -p1 -p2 )
-             (goto-char -p1)
+             (setq $p2 (point))
+             (delete-region $p1 $p2 )
+             (goto-char $p1)
              (insert newTitle ))
       (if (search-forward "<h1>")
           (progn
-            (setq -p1 (point))
+            (setq $p1 (point))
             (search-forward "</h1>")
             (search-backward "<")
-            (setq -p2 (point))
-            (delete-region -p1 -p2 )
-            (goto-char -p1)
+            (setq $p2 (point))
+            (delete-region $p1 $p2 )
+            (goto-char $p1)
             (insert newTitle ))
         (progn
           (message "<h1> tag not found. adding"))))))
@@ -1569,51 +1569,51 @@ The order of lines for {title, author, date/time, url} needs not be in that orde
 Version 2017-07-11"
   (interactive)
   (let* (
-         (-bds (xah-get-bounds-of-thing 'block))
-         (-p1 (car -bds))
-         (-p2 (cdr -bds))
-         (-inputText (buffer-substring-no-properties -p1 -p2))
-         ;; (-inputText (replace-regexp-in-string "^[[:space:]]*" "" (elt -bds 0))) ; remove white space in front
-         ;; (-lines (split-string -inputText "[ \t]*\n[ \t]*" t "[[:space:]]*"))
-         (-lines (split-string -inputText "\n" t " *"))
-         -title -author -date -url )
+         ($bds (xah-get-bounds-of-thing 'block))
+         ($p1 (car $bds))
+         ($p2 (cdr $bds))
+         ($inputText (buffer-substring-no-properties $p1 $p2))
+         ;; ($inputText (replace-regexp-in-string "^[[:space:]]*" "" (elt $bds 0))) ; remove white space in front
+         ;; ($lines (split-string $inputText "[ \t]*\n[ \t]*" t "[[:space:]]*"))
+         ($lines (split-string $inputText "\n" t " *"))
+         $title $author $date $url )
 
     ;; set title, date, url, author,
-    (let (-x (case-fold-search t))
+    (let ($x (case-fold-search t))
       ;; the whole thing here is not optimal implementation. data structure should be hash or so. easier... basically, we have n items, and we need to identify them into n things. that is, pairing them up. Now, some items are easily recognized with 100% certainty. We pair those first. Then, in the end, we'll have 2 or so items that we need to identify, but by then, the items are few, and we can easily distinguish them. So, for this, we need a data structure such that we can easily remove item for those we already identified.
-      (while (> (length -lines) 0)
-        (setq -x (pop -lines))
+      (while (> (length $lines) 0)
+        (setq $x (pop $lines))
         (cond
-         ((string-match "https?://" -x) (setq -url -x))
-         ((xah-html--is-datetimestamp-p -x) (setq -date -x))
-         ((string-match "^ *[bB]y " -x) (setq -author -x))
-         (t (setq -title -x)))))
+         ((string-match "https?://" $x) (setq $url $x))
+         ((xah-html--is-datetimestamp-p $x) (setq $date $x))
+         ((string-match "^ *[bB]y " $x) (setq $author $x))
+         (t (setq $title $x)))))
 
-    (when (not -author) (error "I can't find “author” %s" -author))
-    (when (not -date) (error "error 74188 I can't find “date” %s" -date))
-    (when (not -url) (error "I can't find “url” %s" -url))
-    (when (not -title) (error "I can't find “title” %s" -title))
+    (when (not $author) (error "I can't find “author” %s" $author))
+    (when (not $date) (error "error 74188 I can't find “date” %s" $date))
+    (when (not $url) (error "I can't find “url” %s" $url))
+    (when (not $title) (error "I can't find “title” %s" $title))
 
-    (setq -title (xah-html--trim-string -title))
-    (setq -title (replace-regexp-in-string "^\"\\(.+\\)\"$" "\\1" -title))
-    (setq -title (xah-replace-pairs-in-string -title '(["’" "'"] ["&" "＆"] )))
+    (setq $title (xah-html--trim-string $title))
+    (setq $title (replace-regexp-in-string "^\"\\(.+\\)\"$" "\\1" $title))
+    (setq $title (xah-replace-pairs-in-string $title '(["’" "'"] ["&" "＆"] )))
 
-    (setq -author (xah-html--trim-string -author))
-    (setq -author (replace-regexp-in-string "\\. " " " -author)) ; remove period in Initals
-    (setq -author (replace-regexp-in-string "^ *[Bb]y +" "" -author))
-    (setq -author (upcase-initials (downcase -author)))
+    (setq $author (xah-html--trim-string $author))
+    (setq $author (replace-regexp-in-string "\\. " " " $author)) ; remove period in Initals
+    (setq $author (replace-regexp-in-string "^ *[Bb]y +" "" $author))
+    (setq $author (upcase-initials (downcase $author)))
 
-    (setq -date (xah-html--trim-string -date))
-    (setq -date (xah-fix-datetime-stamp -date))
+    (setq $date (xah-html--trim-string $date))
+    (setq $date (xah-fix-datetime-stamp $date))
 
-    (setq -url (xah-html--trim-string -url))
-    (setq -url (with-temp-buffer (insert -url) (xah-html-source-url-linkify 1) (buffer-string)))
+    (setq $url (xah-html--trim-string $url))
+    (setq $url (with-temp-buffer (insert $url) (xah-html-source-url-linkify 1) (buffer-string)))
 
-    (delete-region -p1 -p2 )
-    (insert (concat "〔 <cite>" -title "</cite> ")
-            "<time>" -date "</time>"
-            " By " -author
-            ". At " -url
+    (delete-region $p1 $p2 )
+    (insert (concat "〔 <cite>" $title "</cite> ")
+            "<time>" $date "</time>"
+            " By " $author
+            ". At " $url
             " 〕")))
 
 (defun xah-html-make-link-defunct ()
@@ -1630,31 +1630,31 @@ It becomes:
 URL `http://ergoemacs.org/emacs/elisp_html-linkify.html'
 Version 2015-09-12"
   (interactive)
-  (let (-p1 -p2 -wholeLinkStr -newLinkStr -url -accessedDate)
+  (let ($p1 $p2 $wholeLinkStr $newLinkStr $url $accessedDate)
     (save-excursion
       ;; get the boundary of opening tag
       (forward-char 3)
-      (search-backward "<a " ) (setq -p1 (point))
-      (search-forward "</a>") (setq -p2 (point))
+      (search-backward "<a " ) (setq $p1 (point))
+      (search-forward "</a>") (setq $p2 (point))
 
-      ;; get -wholeLinkStr
-      (setq -wholeLinkStr (buffer-substring-no-properties -p1 -p2))
+      ;; get $wholeLinkStr
+      (setq $wholeLinkStr (buffer-substring-no-properties $p1 $p2))
 
       ;; generate replacement text
       (with-temp-buffer
-        (insert -wholeLinkStr)
+        (insert $wholeLinkStr)
 
         (goto-char 1)
         (re-search-forward  "href=\"\\([^\"]+?\\)\"")
-        (setq -url (match-string 1))
+        (setq $url (match-string 1))
 
         (re-search-forward  "data-accessed=\"\\([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\\)\"")
-        (setq -accessedDate (match-string 1))
+        (setq $accessedDate (match-string 1))
 
-        (setq -newLinkStr (format "<s data-accessed=\"%s\" data-defunct-date=\"%s\">%s</s>" -accessedDate (format-time-string "%Y-%m-%d") -url ))))
+        (setq $newLinkStr (format "<s data-accessed=\"%s\" data-defunct-date=\"%s\">%s</s>" $accessedDate (format-time-string "%Y-%m-%d") $url ))))
 
-    (delete-region -p1 -p2)
-    (insert -newLinkStr)))
+    (delete-region $p1 $p2)
+    (insert $newLinkStr)))
 
 (defun xah-html-source-url-linkify (*prefixArg)
   "Make URL at cursor point into a HTML link.
@@ -1675,79 +1675,79 @@ URL `http://ergoemacs.org/emacs/elisp_html-linkify.html'
 Version 2015-09-12"
   (interactive "P")
   (let (
-         -bds
-         -p1-input
-         -p2-input
-         -input-str
-         -p1-url -p2-url -p1-tag -p2-tag
-         -url -domainName -linkText )
+         $bds
+         $p1-input
+         $p2-input
+         $input-str
+         $p1-url $p2-url $p1-tag $p2-tag
+         $url $domainName $linkText )
 
     (if (use-region-p)
         (progn
-          (setq -p1-input (region-beginning))
-          (setq -p2-input (region-end))
-          (setq -input-str (buffer-substring-no-properties -p1-input -p2-input)))
+          (setq $p1-input (region-beginning))
+          (setq $p2-input (region-end))
+          (setq $input-str (buffer-substring-no-properties $p1-input $p2-input)))
       (progn
-        (setq -bds (bounds-of-thing-at-point 'url))
-        (setq -p1-input (car -bds))
-        (setq -p2-input (cdr -bds))
-        (setq -input-str (buffer-substring-no-properties -p1-input -p2-input))))
+        (setq $bds (bounds-of-thing-at-point 'url))
+        (setq $p1-input (car $bds))
+        (setq $p2-input (cdr $bds))
+        (setq $input-str (buffer-substring-no-properties $p1-input $p2-input))))
 
     ;; check if it's just plain URL or already in linked form 「<a href=…>…</a>」
     ;; If latter, you need to get the boundaries for the entire link too.
-    (if (string-match "href=\"" -input-str)
+    (if (string-match "href=\"" $input-str)
         (save-excursion
           (search-backward "href=" (- (point) 104)) ; search boundary as extra guard for error
           (forward-char 6)
-          (setq -p1-url (point))
-          (search-forward "\"" (+ -p1-url 104))
-          (setq -p2-url (- (point) 1))
+          (setq $p1-url (point))
+          (search-forward "\"" (+ $p1-url 104))
+          (setq $p2-url (- (point) 1))
 
-          (goto-char -p1-url)
-          (search-backward "<a" (- -p1-url 30))
-          (setq -p1-tag (point))
-          (goto-char -p2-url)
-          (search-forward "</a>" (+ -p2-url 140))
-          (setq -p2-tag (point)))
+          (goto-char $p1-url)
+          (search-backward "<a" (- $p1-url 30))
+          (setq $p1-tag (point))
+          (goto-char $p2-url)
+          (search-forward "</a>" (+ $p2-url 140))
+          (setq $p2-tag (point)))
       (progn
-        (setq -p1-url -p1-input)
-        (setq -p2-url -p2-input)
-        (setq -p1-tag -p1-input)
-        (setq -p2-tag -p2-input)))
+        (setq $p1-url $p1-input)
+        (setq $p2-url $p2-input)
+        (setq $p1-tag $p1-input)
+        (setq $p2-tag $p2-input)))
 
-    (setq -url (replace-regexp-in-string "&amp;" "&" (buffer-substring-no-properties -p1-url -p2-url) nil "LITERAL")) ; in case it's already encoded. TODO this is only 99% correct.
+    (setq $url (replace-regexp-in-string "&amp;" "&" (buffer-substring-no-properties $p1-url $p2-url) nil "LITERAL")) ; in case it's already encoded. TODO this is only 99% correct.
 
     ;; get the domain name
-    (setq -domainName
+    (setq $domainName
           (progn
-            (string-match "://\\([^\/]+?\\)/" -url)
-            (match-string 1 -url)))
+            (string-match "://\\([^\/]+?\\)/" $url)
+            (match-string 1 $url)))
 
-    (setq -linkText
+    (setq $linkText
           (cond
-           ((equal *prefixArg 1) -url) ; full url
-           ((or (equal *prefixArg 2) (equal *prefixArg 4) (equal *prefixArg '(4))) (concat -domainName "…")) ; ‹domain›…
+           ((equal *prefixArg 1) $url) ; full url
+           ((or (equal *prefixArg 2) (equal *prefixArg 4) (equal *prefixArg '(4))) (concat $domainName "…")) ; ‹domain›…
            ((equal *prefixArg 3) "img src") ; img src
            (t (if
                   (or
-                   (string-match "wikipedia\\.org.+jpg$" -url)
-                   (string-match "wikipedia\\.org.+JPG$" -url)
-                   (string-match "wikipedia\\.org.+png$" -url)
-                   (string-match "wikipedia\\.org.+PNG$" -url)
-                   (string-match "wikipedia\\.org.+svg$" -url)
-                   (string-match "wikipedia\\.org.+SVG$" -url))
+                   (string-match "wikipedia\\.org.+jpg$" $url)
+                   (string-match "wikipedia\\.org.+JPG$" $url)
+                   (string-match "wikipedia\\.org.+png$" $url)
+                   (string-match "wikipedia\\.org.+PNG$" $url)
+                   (string-match "wikipedia\\.org.+svg$" $url)
+                   (string-match "wikipedia\\.org.+SVG$" $url))
                   "image source"
-                -url
+                $url
                 )) ; smart
            ))
 
-    (setq -url (replace-regexp-in-string "&" "&amp;" -url))
+    (setq $url (replace-regexp-in-string "&" "&amp;" $url))
 
     ;; delete URL and insert the link
-    (delete-region -p1-tag -p2-tag)
+    (delete-region $p1-tag $p2-tag)
     (insert (format
              "<a class=\"sorc\" href=\"%s\" data-accessed=\"%s\">%s</a>"
-             -url (format-time-string "%Y-%m-%d") -linkText
+             $url (format-time-string "%Y-%m-%d") $linkText
              ))))
 
 (defun xah-html-image-linkify ()
@@ -1762,57 +1762,57 @@ Returns the string used in the alt attribute.
 URL `http://ergoemacs.org/emacs/elisp_image_tag.html'
 Version 2017-06-09"
   (interactive)
-  (let ( -p1 -p2 -imgPath
-             -hrefValue -altText -imgWH -width -height)
+  (let ( $p1 $p2 $imgPath
+             $hrefValue $altText $imgWH $width $height)
     (save-excursion
       ;; get image file path begin end pos
-      (let (-p0)
-        (setq -p0 (point))
+      (let ($p0)
+        (setq $p0 (point))
         ;; chars that are likely to be delimiters of full path, e.g. space, tabs, brakets.
         (skip-chars-backward "^  \"\t\n'|()[]{}<>〔〕“”〈〉《》【】〖〗«»‹›·。\\`")
-        (setq -p1 (point))
-        (goto-char -p0)
+        (setq $p1 (point))
+        (goto-char $p0)
         (skip-chars-forward "^  \"\t\n'|()[]{}<>〔〕“”〈〉《》【】〖〗«»‹›·。\\'")
-        (setq -p2 (point))
-        (goto-char -p0))
-      (setq -imgPath
+        (setq $p2 (point))
+        (goto-char $p0))
+      (setq $imgPath
             (if (and (fboundp 'xahsite-web-path-to-filepath)
                      (fboundp 'xah-local-url-to-file-path))
                 (xahsite-web-path-to-filepath
                  (xah-local-url-to-file-path
-                  (buffer-substring-no-properties -p1 -p2 )))
-              (buffer-substring-no-properties -p1 -p2 )))
-      (when (not (file-exists-p -imgPath))
-        (user-error "file not exist at %s"  -imgPath))
-      (setq -hrefValue
+                  (buffer-substring-no-properties $p1 $p2 )))
+              (buffer-substring-no-properties $p1 $p2 )))
+      (when (not (file-exists-p $imgPath))
+        (user-error "file not exist at %s"  $imgPath))
+      (setq $hrefValue
             (file-relative-name
-             -imgPath
+             $imgPath
              (file-name-directory (or (buffer-file-name) default-directory))))
-      (setq -altText
+      (setq $altText
             (replace-regexp-in-string
              "-" " "
              (replace-regexp-in-string
               "_" " "
               (replace-regexp-in-string
-               "\\.[A-Za-z]\\{3,4\\}$" "" (file-name-nondirectory -imgPath) t t) t t)))
-      (setq -imgWH (xah-html--get-image-dimensions -imgPath))
-      (setq -width (number-to-string (elt -imgWH 0)))
-      (setq -height (number-to-string (elt -imgWH 1))))
+               "\\.[A-Za-z]\\{3,4\\}$" "" (file-name-nondirectory $imgPath) t t) t t)))
+      (setq $imgWH (xah-html--get-image-dimensions $imgPath))
+      (setq $width (number-to-string (elt $imgWH 0)))
+      (setq $height (number-to-string (elt $imgWH 1))))
 
-    (delete-region -p1 -p2)
+    (delete-region $p1 $p2)
     (insert
-     (if (or (equal -width "0") (equal -height "0"))
+     (if (or (equal $width "0") (equal $height "0"))
          (concat
           "<img src=\""
-          -hrefValue
-          "\"" " " "alt=\"" -altText "\"" " />")
+          $hrefValue
+          "\"" " " "alt=\"" $altText "\"" " />")
        (concat
         "<img src=\""
-        -hrefValue
-        "\"" " " "alt=\"" -altText "\""
-        " width=\"" -width "\""
-        " height=\"" -height "\" />")))
-    -altText
+        $hrefValue
+        "\"" " " "alt=\"" $altText "\""
+        " width=\"" $width "\""
+        " height=\"" $height "\" />")))
+    $altText
     ))
 
 (defun xah-html-wikipedia-url-linkify ()
@@ -1830,54 +1830,54 @@ URL `http://ergoemacs.org/emacs/elisp_html_wikipedia_url_linkify.html'
 Version 2016-06-29."
   (interactive)
   (let (
-        -p1 -p2
-        -input-str
-        -link-text
-        -output-str
+        $p1 $p2
+        $input-str
+        $link-text
+        $output-str
         )
     (if (use-region-p)
         (progn
-          (setq -p1 (region-beginning))
-          (setq -p2 (region-end)))
+          (setq $p1 (region-beginning))
+          (setq $p2 (region-end)))
       (progn
-        (let (-p0)
+        (let ($p0)
           (progn
-            (setq -p0 (point))
+            (setq $p0 (point))
             (skip-chars-backward "^ \t\n<>[]")
-            (setq -p1 (point))
-            (goto-char -p0)
+            (setq $p1 (point))
+            (goto-char $p0)
             (skip-chars-forward "^ \t\n<>[]")
-            (setq -p2 (point))))))
-    (setq -input-str (buffer-substring-no-properties -p1 -p2))
+            (setq $p2 (point))))))
+    (setq $input-str (buffer-substring-no-properties $p1 $p2))
     (require 'url-util)
-    (setq -link-text
+    (setq $link-text
           (replace-regexp-in-string
            "_" " "
-           (decode-coding-string (url-unhex-string (file-name-nondirectory -input-str)) 'utf-8)))
-    (setq -output-str
+           (decode-coding-string (url-unhex-string (file-name-nondirectory $input-str)) 'utf-8)))
+    (setq $output-str
           (format
            "<a class=\"wikipedia-69128\" href=\"%s\" data-accessed=\"%s\">%s</a>"
-           (url-encode-url -input-str)
+           (url-encode-url $input-str)
            (format-time-string "%Y-%m-%d")
-           -link-text
+           $link-text
            ))
     (progn
-      (delete-region -p1 -p2)
-      (insert -output-str))))
+      (delete-region $p1 $p2)
+      (insert $output-str))))
 
 (defun xah-html-wrap-url ()
   "Make the URL at cursor point into a HTML link.
 Work on current char sequence or text selection.
 Version 2016-10-18"
   (interactive)
-  (let ( -bds -p1 -p2 -input-str )
+  (let ( $bds $p1 $p2 $input-str )
     (progn
-        (setq -bds (xah-get-bounds-of-thing-or-region 'url))
-        (setq -p1 (car -bds))
-        (setq -p2 (cdr -bds)))
-    (setq -input-str (buffer-substring-no-properties -p1 -p2))
-    (delete-region -p1 -p2)
-    (insert (concat "<a href=\"" (url-encode-url -input-str) "\">" -input-str "</a>" ))))
+        (setq $bds (xah-get-bounds-of-thing-or-region 'url))
+        (setq $p1 (car $bds))
+        (setq $p2 (cdr $bds)))
+    (setq $input-str (buffer-substring-no-properties $p1 $p2))
+    (delete-region $p1 $p2)
+    (insert (concat "<a href=\"" (url-encode-url $input-str) "\">" $input-str "</a>" ))))
 
 (defun xah-html-wrap-p-tag ()
   "Add <p>…</p> tag to current block or text selection.
@@ -1886,12 +1886,12 @@ If there's a text selection, wrap p around each text block.
 Version 2016-10-19"
   (interactive)
   (let* (
-         (-bds (xah-get-bounds-of-thing-or-region 'block))
-         (-p1 (car -bds))
-         (-p2 (cdr -bds))
-         (-inputText (buffer-substring-no-properties -p1 -p2)))
-    (delete-region -p1 -p2 )
-    (insert "<p>" (replace-regexp-in-string "\n\n+" "</p>\n\n<p>" (xah-html--trim-string -inputText)) "</p>")))
+         ($bds (xah-get-bounds-of-thing-or-region 'block))
+         ($p1 (car $bds))
+         ($p2 (cdr $bds))
+         ($inputText (buffer-substring-no-properties $p1 $p2)))
+    (delete-region $p1 $p2 )
+    (insert "<p>" (replace-regexp-in-string "\n\n+" "</p>\n\n<p>" (xah-html--trim-string $inputText)) "</p>")))
 
 (defun xah-html-insert-br-tag ()
   "Insert <br /> tag.
@@ -1920,11 +1920,11 @@ Version 2017-01-11"
     (goto-char (point-min))
     (let ((case-fold-search nil))
       (mapc
-       (lambda (-x)
+       (lambda ($x)
          (goto-char (point-min))
          (while
-             (search-forward (aref -x 0) nil t)
-           (replace-match (aref -x 1) "FIXEDCASE")))
+             (search-forward (aref $x 0) nil t)
+           (replace-match (aref $x 1) "FIXEDCASE")))
        [
         ["<prior>" "PageUp"]
         ["<next>" "PageDown"]
@@ -1946,11 +1946,11 @@ Version 2017-01-11"
 
     (let ((case-fold-search nil))
       (mapc
-       (lambda (-x)
+       (lambda ($x)
          (goto-char (point-min))
          (while
-             (re-search-forward (aref -x 0) nil t)
-           (replace-match (aref -x 1) "FIXEDCASE")))
+             (re-search-forward (aref $x 0) nil t)
+           (replace-match (aref $x 1) "FIXEDCASE")))
        [
         ["<C-\\(.\\)>" "C-<\\1>"]
         ["<C-s-\\(.\\)>" "C-s-<\\1>"]
@@ -1997,7 +1997,7 @@ Version 2017-03-17"
    (if (use-region-p)
        (list (region-beginning) (region-end))
      (list (line-beginning-position) (line-end-position))))
-  (let ((-changedItems '()) -mStr)
+  (let (($changedItems '()) $mStr)
     (save-excursion
       (save-restriction
         (narrow-to-region *begin *end)
@@ -2006,38 +2006,38 @@ Version 2017-03-17"
           (while (re-search-forward
                   "「\\([:-A-Za-z0-9]+\\)」"
                   (point-max) t)
-            (setq -mStr (match-string 1))
+            (setq $mStr (match-string 1))
             (cond
-             ((and (intern-soft -mStr) (fboundp (intern-soft -mStr)))
+             ((and (intern-soft $mStr) (fboundp (intern-soft $mStr)))
               (progn
-                (push (format "ƒ %s" -mStr) -changedItems)
-                (replace-match (concat "<code class=\"elisp-ƒ\">" -mStr "</code>") t t)
-                (let (-p1 -p2)
+                (push (format "ƒ %s" $mStr) $changedItems)
+                (replace-match (concat "<code class=\"elisp-ƒ\">" $mStr "</code>") t t)
+                (let ($p1 $p2)
                   (search-backward "</code>" )
-                  (setq -p2 (point))
+                  (setq $p2 (point))
                   (search-backward "<code class=\"elisp-ƒ\">" )
                   (search-forward "<code class=\"elisp-ƒ\">")
-                  (setq -p1 (point))
-                  (overlay-put (make-overlay -p1 -p2) 'face (list :background "yellow"))
+                  (setq $p1 (point))
+                  (overlay-put (make-overlay $p1 $p2) 'face (list :background "yellow"))
                   (search-forward "</code>"))))
-             ((and (intern-soft -mStr) (boundp (intern-soft -mStr)))
+             ((and (intern-soft $mStr) (boundp (intern-soft $mStr)))
               (progn
-                (push (format "υ %s" -mStr) -changedItems)
-                (replace-match (concat "<var class=\"elisp\">" -mStr "</var>") t t)
-                (let (-p1 -p2)
+                (push (format "υ %s" $mStr) $changedItems)
+                (replace-match (concat "<var class=\"elisp\">" $mStr "</var>") t t)
+                (let ($p1 $p2)
                   (search-backward "</var>" )
-                  (setq -p2 (point))
+                  (setq $p2 (point))
                   (search-backward "<var class=\"elisp\">" )
                   (search-forward "<var class=\"elisp\">")
-                  (setq -p1 (point))
-                  (overlay-put (make-overlay -p1 -p2) 'face (list :background "green"))
+                  (setq $p1 (point))
+                  (overlay-put (make-overlay $p1 $p2) 'face (list :background "green"))
                   (search-forward "</var>"))))
              (t "do nothing"))))))
     (mapcar
-     (lambda (-x)
-       (princ -x)
+     (lambda ($x)
+       (princ $x)
        (terpri))
-     (reverse -changedItems))))
+     (reverse $changedItems))))
 
 (defun xah-html-brackets-to-html (*begin *end)
   "Replace bracketed text to HTML markup in current line or text selection.
@@ -2055,9 +2055,9 @@ Changes are reported to message buffer with char position.
 When called in lisp code, *begin *end are region begin/end positions.
 Version 2017-06-13"
   (interactive
-   (let ((-bds (xah-get-bounds-of-thing-or-region 'block)))
-     (list (car -bds) (cdr -bds))))
-  (let ((-changedItems '()))
+   (let (($bds (xah-get-bounds-of-thing-or-region 'block)))
+     (list (car $bds) (cdr $bds))))
+  (let (($changedItems '()))
     (save-excursion
       (save-restriction
         (narrow-to-region *begin *end)
@@ -2066,7 +2066,7 @@ Version 2017-06-13"
         (progn
           (goto-char (point-min))
           (while (re-search-forward "「\\([^」]+?\\)」" nil t)
-            (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
+            (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) $changedItems)
             (save-restriction
               (narrow-to-region (match-beginning 0) (match-end 0))
               (goto-char (point-min))
@@ -2081,78 +2081,78 @@ Version 2017-06-13"
               (insert "</code>"))))
         (goto-char (point-min))
         (while (re-search-forward "〈\\([^〉]+?\\)〉" nil t)
-          (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
+          (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) $changedItems)
           (replace-match "<cite>\\1</cite>" t)
-          (let (-p1 -p2)
+          (let ($p1 $p2)
             (search-backward "</cite>" )
-            (setq -p2 (point))
+            (setq $p2 (point))
             (search-backward "<cite>" )
             (search-forward "<cite>" )
-            (setq -p1 (point))
-            (overlay-put (make-overlay -p1 -p2) 'face 'highlight)
+            (setq $p1 (point))
+            (overlay-put (make-overlay $p1 $p2) 'face 'highlight)
             (search-forward "</cite>" )))
         (goto-char (point-min))
         (while (re-search-forward "《\\([^》]+?\\)》" nil t)
-          (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
+          (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) $changedItems)
           (replace-match "<cite class=\"book\">\\1</cite>" t)
-          (let (-p1 -p2)
+          (let ($p1 $p2)
             (search-backward "</cite>" )
-            (setq -p2 (point))
+            (setq $p2 (point))
             (search-backward "<cite class=\"book\">" )
             (search-forward "<cite class=\"book\">" )
-            (setq -p1 (point))
-            (overlay-put (make-overlay -p1 -p2) 'face 'highlight)
+            (setq $p1 (point))
+            (overlay-put (make-overlay $p1 $p2) 'face 'highlight)
             (search-forward "</cite>" )))
         (goto-char (point-min))
         (while (re-search-forward "‹\\([^›]+?\\)›" nil t)
-          (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
+          (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) $changedItems)
           (replace-match "<var class=\"d\">\\1</var>" t)
-          (let (-p1 -p2)
+          (let ($p1 $p2)
             (search-backward "</var>" )
-            (setq -p2 (point))
+            (setq $p2 (point))
             (search-backward "<var class=\"d\">" )
             (search-forward "<var class=\"d\">" )
-            (setq -p1 (point))
-            (overlay-put (make-overlay -p1 -p2) 'face 'highlight)
+            (setq $p1 (point))
+            (overlay-put (make-overlay $p1 $p2) 'face 'highlight)
             (search-forward "</var>" )))
         (goto-char (point-min))
         (while (re-search-forward "〔<a href=" nil t)
-          (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
+          (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) $changedItems)
           (replace-match "〔►see <a href=" t)
-          (let (-p1 -p2)
+          (let ($p1 $p2)
             (search-backward "〔►see <a href=" )
-            (setq -p1 (point))
+            (setq $p1 (point))
             (search-forward "〔►see <a href=" )
-            (setq -p2 (point))
-            (overlay-put (make-overlay -p1 -p2) 'face 'highlight)))
+            (setq $p2 (point))
+            (overlay-put (make-overlay $p1 $p2) 'face 'highlight)))
         (goto-char (point-min))
         (while (re-search-forward "〔\\([ -_/\\:~.A-Za-z0-9%]+?\\)〕" nil t)
-          (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
+          (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) $changedItems)
           (replace-match "<code class=\"path-xl\">\\1</code>" t)
-          (let (-p1 -p2)
+          (let ($p1 $p2)
             (search-backward "</code>" )
-            (setq -p2 (point))
+            (setq $p2 (point))
             (search-backward "<code class=\"path-xl\">" )
             (search-forward "<code class=\"path-xl\">")
-            (setq -p1 (point))
-            (overlay-put (make-overlay -p1 -p2) 'face 'highlight)
+            (setq $p1 (point))
+            (overlay-put (make-overlay $p1 $p2) 'face 'highlight)
             (search-forward "</code>")))
         (progn
           (goto-char (point-min))
           (while (re-search-forward "\\.\\.\\." nil t)
-            (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) -changedItems)
+            (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) $changedItems)
             (replace-match "…" t)
-            (let (-p1 -p2)
+            (let ($p1 $p2)
               (search-backward "…" )
-              (setq -p1 (point))
+              (setq $p1 (point))
               (search-forward "…")
-              (setq -p2 (point))
-              (overlay-put (make-overlay -p1 -p2) 'face 'highlight))))))
+              (setq $p2 (point))
+              (overlay-put (make-overlay $p1 $p2) 'face 'highlight))))))
     (mapcar
-     (lambda (-x)
-       (princ -x)
+     (lambda ($x)
+       (princ $x)
        (terpri))
-     (reverse -changedItems))))
+     (reverse $changedItems))))
 
 (defun xah-html-htmlize-keyboard-shortcut-notation (*begin *end)
   "Markup keyboard shortcut notation in HTML tag, on text selection or current line.
@@ -2168,7 +2168,7 @@ Version 2017-06-10"
        (list (region-beginning) (region-end))
      (list (line-beginning-position) (line-end-position))))
   (let* (
-         (-replaceList
+         ($replaceList
           [
            ;; case must match
            ["Ctrl" "<kbd>Ctrl</kbd>"]
@@ -2260,15 +2260,15 @@ Version 2017-06-10"
       (narrow-to-region *begin *end)
       (xah-html-emacs-to-windows-kbd-notation (point-min) (point-max))
 
-      (xah-replace-pairs-region (point-min) (point-max) -replaceList 'REPORT 'HILIGHT)
+      (xah-replace-pairs-region (point-min) (point-max) $replaceList 'REPORT 'HILIGHT)
 
       (let ((case-fold-search nil))
         (mapc
-         (lambda (-x)
+         (lambda ($x)
            (goto-char (point-min))
            (while
-               (re-search-forward (aref -x 0) nil t)
-             (replace-match (aref -x 1) "FIXEDCASE")))
+               (re-search-forward (aref $x 0) nil t)
+             (replace-match (aref $x 1) "FIXEDCASE")))
          [
           ["\+\\([^<]\\) \\(.\\) \\(.\\)\\'" "+<kbd>\\1</kbd> <kbd>\\2</kbd> <kbd>\\3</kbd>"]
           ["\+\\([^<]\\) \\([A-Za-z0-0]\\)\\'" "+<kbd>\\1</kbd> <kbd>\\2</kbd>"]
@@ -2300,18 +2300,18 @@ Version 2017-06-10"
 This function does not `save-excursion'.
 2016-12-07"
   (let* (
-         (-class-str (if (not *class-name)
+         ($class-str (if (not *class-name)
                          ""
                        (format " class=\"%s\"" *class-name)))
-         (-str-left (format "<%s%s>" *tag-name -class-str))
-         (-str-right (format "</%s>" *tag-name )))
+         ($str-left (format "<%s%s>" *tag-name $class-str))
+         ($str-right (format "</%s>" *tag-name )))
     (goto-char *p1)
     (if (xah-html--tag-self-closing-p *tag-name)
-        (insert (format "<%s%s />" *tag-name -class-str))
+        (insert (format "<%s%s />" *tag-name $class-str))
       (progn
-        (insert -str-left )
-        (goto-char (+ *p2 (length -str-left)))
-        (insert -str-right)))))
+        (insert $str-left )
+        (goto-char (+ *p2 (length $str-left)))
+        (insert $str-right)))))
 
 (defun xah-html-wrap-html-tag (*tag-name &optional *class-name)
   "Insert HTML open/close tags to current text unit or text selection.
@@ -2328,27 +2328,27 @@ Version 2017-05-28
         (read-string "class:" nil xah-html-class-input-history "")
       nil )))
   (let* (
-         (-wrap-type (xah-html-get-tag-type *tag-name))
-         (-bds
+         ($wrap-type (xah-html-get-tag-type *tag-name))
+         ($bds
           (if (use-region-p)
               (cons (region-beginning) (region-end))
             (cond
-             ((equal -wrap-type "w") (bounds-of-thing-at-point 'word ))
-             ((equal -wrap-type "l") (cons (line-beginning-position) (line-end-position)))
-             ;; ((equal -wrap-type "l") (xah-get-bounds-of-thing 'line))
-             ((equal -wrap-type "b") (xah-get-bounds-of-thing 'block))
+             ((equal $wrap-type "w") (bounds-of-thing-at-point 'word ))
+             ((equal $wrap-type "l") (cons (line-beginning-position) (line-end-position)))
+             ;; ((equal $wrap-type "l") (xah-get-bounds-of-thing 'line))
+             ((equal $wrap-type "b") (xah-get-bounds-of-thing 'block))
              (t (xah-get-bounds-of-thing 'word)))))
-         (-p1 (car -bds))
-         (-p2 (cdr -bds)))
+         ($p1 (car $bds))
+         ($p2 (cdr $bds)))
     (save-restriction
-      (narrow-to-region -p1 -p2)
+      (narrow-to-region $p1 $p2)
 
       (when ; trim whitespace
           (and
            (not (use-region-p))
            (or
-            (equal -wrap-type "l")
-            (equal -wrap-type "b"))
+            (equal $wrap-type "l")
+            (equal $wrap-type "b"))
            (not (or
                  (string-equal *tag-name "pre")
                  (string-equal *tag-name "code"))))
@@ -2359,7 +2359,7 @@ Version 2017-05-28
           (delete-horizontal-space)))
 
       ;; add blank at start/end
-      (when (equal -wrap-type "b")
+      (when (equal $wrap-type "b")
         (progn
           (goto-char (point-min))
           (insert "\n")
@@ -2371,7 +2371,7 @@ Version 2017-05-28
     (when ; put cursor between when input text is empty
         (not (xah-html--tag-self-closing-p *tag-name))
       (when (and
-             (= -p1 -p2))
+             (= $p1 $p2))
         (search-backward "</" )))))
 
 (defun xah-html-insert-wrap-source-code (&optional *lang-code)
@@ -2379,8 +2379,8 @@ Version 2017-05-28
   (interactive
    (list
     (ido-completing-read "lang code:" (mapcar (lambda (x) (car x)) xah-html-lang-name-map) "PREDICATE" "REQUIRE-MATCH" nil xah-html-html-tag-input-history "code")))
-  (let ((-bds (xah-get-bounds-of-thing 'block)))
-    (xah-html-insert-open-close-tags "pre" *lang-code (car -bds) (cdr -bds))))
+  (let (($bds (xah-get-bounds-of-thing 'block)))
+    (xah-html-insert-open-close-tags "pre" *lang-code (car $bds) (cdr $bds))))
 
 (defun xah-html-mark-unicode (*pos)
   "Wrap a special <mark> tag around the character before cursor.
@@ -2393,22 +2393,22 @@ When called in elisp program, wrap the tag around char before position *pos.
 Version 2017-07-08"
   (interactive (list (point)))
   (let* (
-         (-codepoint (string-to-char (buffer-substring-no-properties (- *pos 1) *pos )))
-         (-name (if describe-char-unicodedata-file
+         ($codepoint (string-to-char (buffer-substring-no-properties (- *pos 1) *pos )))
+         ($name (if describe-char-unicodedata-file
                     (progn
                       (require 'descr-text)
-                      (car (cdr (car (describe-char-unicode-data  -codepoint)))))
-                  (get-char-code-property -codepoint 'name)))
-         (-char (buffer-substring-no-properties (- *pos 1) *pos)))
+                      (car (cdr (car (describe-char-unicode-data  $codepoint)))))
+                  (get-char-code-property $codepoint 'name)))
+         ($char (buffer-substring-no-properties (- *pos 1) *pos)))
     (goto-char (- *pos 1))
-    (insert (format "<mark class=\"unicode\" title=\"U+%X: %s\">" -codepoint -name))
+    (insert (format "<mark class=\"unicode\" title=\"U+%X: %s\">" $codepoint $name))
     (right-char 1)
     (insert (format "</mark>"))
 
     (cond
-     ((string-equal -char "&") (search-backward "<" ) (insert "amp;"))
-     ((string-equal -char "<") (search-backward "<" ) (delete-char -1) (insert "&lt;"))
-     ((string-equal -char ">") (search-backward "<" ) (delete-char -1) (insert "&gt;")))))
+     ((string-equal $char "&") (search-backward "<" ) (insert "amp;"))
+     ((string-equal $char "<") (search-backward "<" ) (delete-char -1) (insert "&lt;"))
+     ((string-equal $char ">") (search-backward "<" ) (delete-char -1) (insert "&gt;")))))
 
 (defun xah-html-markup-ruby (&optional *begin *end)
   "Wrap HTML ruby annotation tag on current line or selection.
@@ -2457,12 +2457,12 @@ Work on text selection or whole buffer.
 This is heuristic based, does not remove ALL possible redundant whitespace."
   (interactive)
   (let* (
-         (-bds (xah-get-bounds-of-thing 'buffer))
-         (-p1 (car -bds))
-         (-p2 (cdr -bds)))
+         ($bds (xah-get-bounds-of-thing 'buffer))
+         ($p1 (car $bds))
+         ($p2 (cdr $bds)))
     (save-excursion
       (save-restriction
-        (narrow-to-region -p1 -p2)
+        (narrow-to-region $p1 $p2)
         (progn
           (goto-char (point-min))
           (while (re-search-forward "[ \t]+\n" nil "NOERROR")
@@ -2510,19 +2510,19 @@ To encode, see `xah-html-encode-percent-encoded-url'.
 URL `http://ergoemacs.org/emacs/elisp_decode_uri_percent_encoding.html'
 Version 2015-09-14."
   (interactive)
-  (let (-bds -p1 -p2 -input-str)
+  (let ($bds $p1 $p2 $input-str)
     (if (use-region-p)
         (progn
-          (setq -p1 (region-beginning))
-          (setq -p2 (region-end)))
+          (setq $p1 (region-beginning))
+          (setq $p2 (region-end)))
       (progn
-        (setq -bds (bounds-of-thing-at-point 'url))
-        (setq -p1 (car -bds))
-        (setq -p2 (cdr -bds))))
-    (setq -input-str (buffer-substring-no-properties -p1 -p2))
+        (setq $bds (bounds-of-thing-at-point 'url))
+        (setq $p1 (car $bds))
+        (setq $p2 (cdr $bds))))
+    (setq $input-str (buffer-substring-no-properties $p1 $p2))
     (require 'url-util)
-    (delete-region -p1 -p2)
-    (insert (decode-coding-string (url-unhex-string -input-str) 'utf-8))))
+    (delete-region $p1 $p2)
+    (insert (decode-coding-string (url-unhex-string $input-str) 'utf-8))))
 
 (defun xah-html-encode-percent-encoded-url ()
   "Percent encode URL under cursor or selection.
@@ -2540,19 +2540,19 @@ becomes
 URL `http://ergoemacs.org/emacs/elisp_decode_uri_percent_encoding.html'
 Version 2015-09-14."
   (interactive)
-  (let (-bds -p1 -p2 -input-str)
+  (let ($bds $p1 $p2 $input-str)
     (if (use-region-p)
         (progn
-          (setq -p1 (region-beginning))
-          (setq -p2 (region-end)))
+          (setq $p1 (region-beginning))
+          (setq $p2 (region-end)))
       (progn
-        (setq -bds (bounds-of-thing-at-point 'url))
-        (setq -p1 (car -bds))
-        (setq -p2 (cdr -bds))))
-    (setq -input-str (buffer-substring-no-properties -p1 -p2))
+        (setq $bds (bounds-of-thing-at-point 'url))
+        (setq $p1 (car $bds))
+        (setq $p2 (cdr $bds))))
+    (setq $input-str (buffer-substring-no-properties $p1 $p2))
     (require 'url-util)
-    (delete-region -p1 -p2)
-    (insert (url-encode-url -input-str))))
+    (delete-region $p1 $p2)
+    (insert (url-encode-url $input-str))))
 
 
 
@@ -2560,8 +2560,8 @@ Version 2015-09-14."
   "Return t if not in string or comment. Else nil.
 This is for abbrev table property `:enable-function'.
 Version 2016-10-24"
-  (let ((-syntax-state (syntax-ppss)))
-    (not (or (nth 3 -syntax-state) (nth 4 -syntax-state)))))
+  (let (($syntax-state (syntax-ppss)))
+    (not (or (nth 3 $syntax-state) (nth 4 $syntax-state)))))
 
 (defun xah-html-expand-abbrev ()
   "Expand the symbol before cursor,
@@ -2570,23 +2570,23 @@ Returns the abbrev symbol if there's a expansion, else nil.
 Version 2017-01-13"
   (interactive)
   (when (xah-html-abbrev-enable-function) ; abbrev property :enable-function doesn't seem to work, so check here instead
-    (let ( (-p0 (point))
-           -p1 -p2
-           -abrStr
-           -abrSymbol
+    (let ( ($p0 (point))
+           $p1 $p2
+           $abrStr
+           $abrSymbol
            )
       (save-excursion
         (forward-symbol -1)
-        (setq -p1 (point))
-        (goto-char -p0)
-        (setq -p2 -p0))
-      (setq -abrStr (buffer-substring-no-properties -p1 -p2))
-      (setq -abrSymbol (abbrev-symbol -abrStr))
-      (if -abrSymbol
+        (setq $p1 (point))
+        (goto-char $p0)
+        (setq $p2 $p0))
+      (setq $abrStr (buffer-substring-no-properties $p1 $p2))
+      (setq $abrSymbol (abbrev-symbol $abrStr))
+      (if $abrSymbol
           (progn
-            (abbrev-insert -abrSymbol -abrStr -p1 -p2 )
-            (xah-html--abbrev-position-cursor -p1)
-            -abrSymbol)
+            (abbrev-insert $abrSymbol $abrStr $p1 $p2 )
+            (xah-html--abbrev-position-cursor $p1)
+            $abrSymbol)
         nil))))
 
 (defun xah-html--abbrev-position-cursor (&optional *pos)
@@ -2594,9 +2594,9 @@ Version 2017-01-13"
 Return true if found, else false.
 Version 2016-10-24"
   (interactive)
-  (let ((-found-p (search-backward "▮" (if *pos *pos (max (point-min) (- (point) 100))) t )))
-    (when -found-p (forward-char ))
-    -found-p
+  (let (($found-p (search-backward "▮" (if *pos *pos (max (point-min) (- (point) 100))) t )))
+    (when $found-p (forward-char ))
+    $found-p
     ))
 
 (defun xah-html--ahf ()
