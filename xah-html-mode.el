@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.6.7
+;; Version: 5.6.8
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -2622,43 +2622,40 @@ Version 2016-10-24"
     ("hei" "height" xah-html--ahf)
     ("bgc" "background-color" xah-html--ahf)
 
-    ("zcss" "<link rel=\"stylesheet\" href=\"lbasic.css\" />")
-    ("zstyle" "<style type=\"text/css\">\np {line-height:130%}\n</style>")
-    ("zrefresh" "<meta http-equiv=\"refresh\" content=\"0; url=http://example.com/\">")
+    ("css3" "<link rel=\"stylesheet\" href=\"lbasic.css\" />")
+    ("style3" "<style type=\"text/css\">\np {line-height:130%}\n</style>")
 
     ("iframe" "<iframe src=\"some.html\" width=\"200\" height=\"300\"></iframe>")
-
-    ("mx" "<kbd>Alt</kbd>+<kbd>x</kbd>")
 
     ;; todo
     ;; http://xahlee.info/js/css_colors.html
     ;; http://xahlee.info/js/css_color_names.html
-    ("zwhite" "#ffffff" xah-html--ahf)
-    ("zsilver" "#c0c0c0" xah-html--ahf)
-    ("zgray" "#808080" xah-html--ahf)
-    ("zblack" "#000000" xah-html--ahf)
-    ("zred" "#ff0000" xah-html--ahf)
-    ("zmaroon" "#800000" xah-html--ahf)
-    ("zyellow" "#ffff00" xah-html--ahf)
-    ("zolive" "#808000" xah-html--ahf)
-    ("zlime" "#00ff00" xah-html--ahf)
-    ("zgreen" "#008000" xah-html--ahf)
-    ("zaqua" "#00ffff" xah-html--ahf)
-    ("zteal" "#008080" xah-html--ahf)
-    ("zblue" "#0000ff" xah-html--ahf)
-    ("znavy" "#000080" xah-html--ahf)
-    ("zfuchsia" "#ff00ff" xah-html--ahf)
-    ("zpurple" "#800080" xah-html--ahf)
-    ("zorange" "#ffa500" xah-html--ahf)
+    ("white3" "#ffffff" xah-html--ahf)
+    ("silver3" "#c0c0c0" xah-html--ahf)
+    ("gray3" "#808080" xah-html--ahf)
+    ("black3" "#000000" xah-html--ahf)
+    ("red3" "#ff0000" xah-html--ahf)
+    ("maroon3" "#800000" xah-html--ahf)
+    ("yellow3" "#ffff00" xah-html--ahf)
+    ("olive3" "#808000" xah-html--ahf)
+    ("lime3" "#00ff00" xah-html--ahf)
+    ("green3" "#008000" xah-html--ahf)
+    ("aqua3" "#00ffff" xah-html--ahf)
+    ("teal3" "#008080" xah-html--ahf)
+    ("blue3" "#0000ff" xah-html--ahf)
+    ("navy3" "#000080" xah-html--ahf)
+    ("fuchsia3" "#ff00ff" xah-html--ahf)
+    ("purple3" "#800080" xah-html--ahf)
+    ("orange3" "#ffa500" xah-html--ahf)
     ("hsl" "hsl(0,100%,50%)" xah-html--ahf)
 
     ("og" "<meta property=\"og:image\" content=\"http://ergoemacs.org/emacs/i/geek_vs_non_geek_repetitive_tasks.png\" />" xah-html--ahf)
 
-    ("uhtml4s" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">" xah-html--ahf)
-    ("uhtml4t" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">" xah-html--ahf)
-    ("uxhtml" "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">" xah-html--ahf)
-    ("uhtml5" "<!DOCTYPE html>" xah-html--ahf)
-    ("uhtml" "<!doctype html><html><head><meta charset=\"utf-8\" />
+    ("html4s" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">" xah-html--ahf)
+    ("html4t" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">" xah-html--ahf)
+    ("xhtml3" "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">" xah-html--ahf)
+    ("html53" "<!DOCTYPE html>" xah-html--ahf)
+    ("html3" "<!doctype html><html><head><meta charset=\"utf-8\" />
 <title>ttt</title>
 </head>
 <body>
