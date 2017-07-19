@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.6.9
+;; Version: 5.6.10
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1107,9 +1107,11 @@ becomes:
 <li>cat</li>
 <li>dog</li>
 </ul>
-Version 2016-03-19"
+
+Version 2017-07-19"
   (interactive)
-  (let ($bds $p1 $p2 $input-str $resultStr)
+  (let ($bds $p1 $p2 $input-str $resultStr
+             ($bfn (buffer-file-name)))
     (setq $bds (xah-get-bounds-of-thing 'block))
     (setq $p1 (car $bds))
     (setq $p2 (cdr $bds))
@@ -1119,14 +1121,21 @@ Version 2016-03-19"
             (with-temp-buffer
               (insert $input-str)
               (delete-trailing-whitespace)
-
-              (when (fboundp 'xah-all-linkify)
-                (goto-char 1)
-                (while
-                    (re-search-forward  "\.html$" nil t)
-                  (backward-char 1)
-                  (xah-all-linkify)))
-
+              (if (string-match "^/home/xah/web/" $bfn )
+                  (progn
+                    (goto-char 1)
+                    (while
+                        (re-search-forward  "\.html$" nil t)
+                      (backward-char 1)
+                      (if (fboundp 'xah-all-linkify)
+                          (xah-all-linkify)
+                        (xah-html-wrap-url))))
+                (progn
+                  (goto-char 1)
+                  (while
+                      (re-search-forward  "\.html$" nil t)
+                    (backward-char 1)
+                    (xah-html-wrap-url))))
               (goto-char 1)
               (while
                   (not (equal (line-end-position) (point-max)))
