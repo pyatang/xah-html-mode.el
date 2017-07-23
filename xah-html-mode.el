@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.6.10
+;; Version: 5.6.11
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -87,9 +87,9 @@ And, on the right side of cursor, there exist a >, and there's no < between > an
 Version 2016-10-18"
   (interactive)
   (let (($bracketPos
-         (if (null *bracketPositions)
-             (xah-html--get-bracket-positions)
-           *bracketPositions))
+         (if *bracketPositions
+             *bracketPositions
+           (xah-html--get-bracket-positions)))
         -posPrev< -posPrev> -posNext> -posNext< )
     (progn
       (setq -posPrev< (elt $bracketPos 0))
@@ -97,13 +97,13 @@ Version 2016-10-18"
       (setq -posNext< (elt $bracketPos 2))
       (setq -posNext> (elt $bracketPos 3)))
     (if (and
-         (not (null -posPrev< ))
-         (not (null -posNext> ))
-         (if (not (null -posPrev> ))
+         -posPrev<
+         -posNext>
+         (if -posPrev>
              (< -posPrev> -posPrev<)
            t
            )
-         (if (not (null -posNext< ))
+         (if -posNext<
              (< -posNext> -posNext<)
            t
            ))
@@ -200,12 +200,12 @@ Version 2017-01-11"
           ;; hackish. grab the first occurence of width height in file
           (insert-file-contents *file-path)
           (goto-char (point-min))
-          (when (re-search-forward "width=\"\\([0-9]+\\).*\"" nil "NOERROR")
+          (when (re-search-forward "width=\"\\([0-9]+\\).\\{0,2\\}\"" nil "NOERROR")
             (setq $x (match-string 1 )))
           (goto-char (point-min))
-          (if (re-search-forward "height=\"\\([0-9]+\\).*\"" nil "NOERROR")
+          (if (re-search-forward "height=\"\\([0-9]+\\).\\{0,2\\}\"" nil "NOERROR")
               (setq $y (match-string 1 ))))
-        (if (and (not (null $x)) (not (null $y)))
+        (if (and $x $y)
             (progn (vector (string-to-number $x) (string-to-number $y)))
           (progn [0 0]))))
      (t
@@ -533,9 +533,9 @@ Version 2017-01-11"
       (split-window-below)
       (delete-region $p1 $p2 )
       (switch-to-buffer $buf)
-      (if (null $majorMode)
-          (fundamental-mode)
-        (funcall (intern-soft $majorMode)))
+      (if $majorMode
+          (funcall (intern-soft $majorMode))
+        (fundamental-mode))
       (setq buffer-offer-save t)
       (insert $textContent)
       (when (xah-html-precode-htmlized-p (point-min) (point-max))
@@ -588,14 +588,10 @@ Version 2017-01-10"
       ;; (intern-soft "tuareg-mode")
 
       (intern-soft "xah-elisp-mode")
-      (if (null $majorModeSym)
-          (progn
-            (fundamental-mode))
-        ;; (fboundp 'tuareg-mode)
-        (if (fboundp $majorModeSym)
-            (progn
-              (funcall $majorModeSym))
-          (fundamental-mode)))
+
+      (if (fboundp $majorModeSym)
+          (funcall $majorModeSym)
+        (fundamental-mode))
       (font-lock-ensure)
       (setq $output-buff (htmlize-buffer)))
     ;; extract the fontified source code in htmlize output
@@ -702,7 +698,7 @@ Version 2017-01-11"
 (defun xah-html-redo-syntax-coloring-buffer ()
   "redo all pre lang code syntax coloring in current HTML page.
 Returns 0 if nothing is done. Else a positive integer of the count of <pre class=lang>.
-Version 2017-02-04"
+Version 2017-07-23"
   (interactive)
   (let ($langCode $p1 $p2 ($count 0)
                   $majorModeNameStr
@@ -713,8 +709,7 @@ Version 2017-02-04"
           (re-search-forward "<pre class=\"\\([-A-Za-z0-9]+\\)\">" nil "NOERROR")
         (setq $langCode (match-string 1))
         (setq $majorModeNameStr (xah-html-langcode-to-major-mode-name $langCode xah-html-lang-name-map))
-        (if (null $majorModeNameStr)
-            nil
+        (when $majorModeNameStr
           (progn
             (setq $p1 (point))
             (backward-char 1)
@@ -912,7 +907,7 @@ When called in lisp code, *begin *end are region begin/end positions. If entity-
 See also: `xah-html-replace-html-named-entities', `xah-html-replace-html-chars-to-unicode'
 
 URL `http://ergoemacs.org/emacs/elisp_replace_html_entities_command.html'
-Version 2017-01-11"
+Version 2017-07-23"
   (interactive
    (list
     ;; These are done separately here
@@ -923,8 +918,8 @@ Version 2017-01-11"
     (if (use-region-p) (region-end))
     (if current-prefix-arg t nil)))
 
-  (if (null *begin) (setq *begin (line-beginning-position)))
-  (if (null *end) (setq *end (line-end-position)))
+  (when (null *begin) (setq *begin (line-beginning-position)))
+  (when (null *end) (setq *end (line-end-position)))
 
   (let (($changedItems '())
         ($findReplaceMap
@@ -1350,20 +1345,20 @@ If *change-entity-p is true, convert HTML entities to char.
   "Delete HTML tags in in current text block or text selection.
  a “text block” is text between blank lines
  WARNING: this command does not cover all HTML tags or convert all HTML entities. For robust solution you might use: lynx $dump -display_charset=utf-8 URL.
-Version 2016-10-18"
+Version 2017-07-23"
   (interactive)
   (let ($p1 $p2 $input-str $output-str)
-    (if (null *begin)
-        (if (use-region-p)
-            (progn
-              (setq $p1 (region-beginning))
-              (setq $p2 (region-end)))
-          (let (($bds (xah-get-bounds-of-thing 'block)))
-            (setq $p1 (car $bds))
-            (setq $p2 (cdr $bds))))
-      (progn
-        (setq $p1 *begin)
-        (setq $p2 *end)))
+    (if *begin
+        (progn
+          (setq $p1 *begin)
+          (setq $p2 *end))
+      (if (use-region-p)
+          (progn
+            (setq $p1 (region-beginning))
+            (setq $p2 (region-end)))
+        (let (($bds (xah-get-bounds-of-thing 'block)))
+          (setq $p1 (car $bds))
+          (setq $p2 (cdr $bds)))))
     (setq $input-str (buffer-substring-no-properties $p1 $p2))
     (setq $output-str
           (let ((case-fold-search t) ($tempStr $input-str))
@@ -2625,7 +2620,7 @@ Version 2016-10-24"
     ("hr" "<hr />" xah-html--ahf)
     ("br" "<br />" xah-html--ahf)
     ("cl" "class=\"▮\"" xah-html--ahf)
-    ("id" "id=\"▮\"" xah-html--ahf)
+    ("id3" "id=\"▮\"" xah-html--ahf)
 
     ("wi" "width" xah-html--ahf)
     ("hei" "height" xah-html--ahf)
