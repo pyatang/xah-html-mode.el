@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.6.11
+;; Version: 5.6.12
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -515,7 +515,7 @@ The numbers in the file name are datestamp and a random integer.
 If file already exist, emacs will ask to overwrite.
 
 If there's a text selection, use that region as content.
-Version 2017-01-11"
+Version 2017-07-25"
   (interactive (list xah-html-lang-name-map))
   (let* (
          ($langcodeinfo (xah-html-get-precode-langCode))
@@ -525,6 +525,11 @@ Version 2017-01-11"
          ($textContent (buffer-substring-no-properties $p1 $p2))
          ($fileSuffix (elt (cdr (assoc $langCode lang-name-map)) 1))
          ($majorMode (elt (cdr (assoc $langCode lang-name-map)) 0))
+         ($fnTemp (format "%s.%s.%d.%s"
+                          "xxtemp"
+                          (format-time-string "%Y%m%d")
+                          (random 999)
+                          $fileSuffix))
          $fname
          ($buf (generate-new-buffer "untitled")))
     (when (null $majorMode)
@@ -540,26 +545,18 @@ Version 2017-01-11"
       (insert $textContent)
       (when (xah-html-precode-htmlized-p (point-min) (point-max))
         (xah-html-remove-span-tag-region (point-min) (point-max))))
-    (if (equal $fileSuffix "java")
-        (progn
-          (goto-char (point-min))
-          (if (re-search-forward "public class \\([A-Za-z0-9]+\\) [\n ]*{" nil "NOERROR")
+    (setq $fname
+          (if (equal $fileSuffix "java")
               (progn
-                (setq $fname
-                      (format "%s.java" (match-string 1))))
-            (progn (setq $fname
-                         (format "%s.%s.%d.%s"
-                                 "xxtemp"
-                                 (format-time-string "%Y%m%d%M%S")
-                                 (random 99999)
-                                 $fileSuffix)))))
-      (progn
-        (setq $fname
-              (format "%s.%s.%d.%s"
-                      "xxtemp"
-                      (format-time-string "%Y%m%d%M%S")
-                      (random 99999)
-                      $fileSuffix))))
+                (goto-char (point-min))
+                (if (re-search-forward "class \\([A-Za-z0-9]+\\)[\n ]*{" nil t)
+                    (progn
+                      (format "%s.java" (match-string 1)))
+                  (if (re-search-forward "class \\([A-Za-z0-9]+\\)[\n ]*{" nil t)
+                      (progn
+                        (format "%s.java" (match-string 1)))
+                    $fnTemp)))
+            $fnTemp))
     (write-file $fname "CONFIRM")
     (goto-char (point-min))))
 
