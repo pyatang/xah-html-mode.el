@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.6.12
+;; Version: 5.7.0
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1103,7 +1103,7 @@ becomes:
 Version 2017-07-19"
   (interactive)
   (let ($bds $p1 $p2 $input-str $resultStr
-             ($bfn (buffer-file-name)))
+             (buffer-file-name))
     (setq $bds (xah-get-bounds-of-thing 'block))
     (setq $p1 (car $bds))
     (setq $p2 (cdr $bds))
@@ -1113,9 +1113,9 @@ Version 2017-07-19"
             (with-temp-buffer
               (insert $input-str)
               (delete-trailing-whitespace)
-              (if (string-match "^/home/xah/web/" $bfn )
+              (if (string-match "^/home/xah/web/" (or (buffer-file-name) default-directory))
                   (progn
-                    (goto-char 1)
+                    (goto-char (point-min))
                     (while
                         (re-search-forward  "\.html$" nil t)
                       (backward-char 1)
@@ -1123,12 +1123,12 @@ Version 2017-07-19"
                           (xah-all-linkify)
                         (xah-html-wrap-url))))
                 (progn
-                  (goto-char 1)
+                  (goto-char (point-min))
                   (while
                       (re-search-forward  "\.html$" nil t)
                     (backward-char 1)
                     (xah-html-wrap-url))))
-              (goto-char 1)
+              (goto-char (point-min))
               (while
                   (not (equal (line-end-position) (point-max)))
                 (beginning-of-line) (insert "<li>")
@@ -1140,12 +1140,12 @@ Version 2017-07-19"
 
               (if current-prefix-arg
                   (progn
-                    (goto-char 1)
+                    (goto-char (point-min))
                     (insert "<ol>\n")
                     (goto-char (point-max))
                     (insert "\n</ol>"))
                 (progn
-                  (goto-char 1)
+                  (goto-char (point-min))
                   (insert "<ul>\n")
                   (goto-char (point-max))
                   (insert "\n</ul>")))
@@ -1437,7 +1437,7 @@ Version 2017-06-24"
   "Replace current HTML inline image's file name.
 This command is for interactive use only.
 When cursor is in HTML link file path, e.g.  <img src=\"img/cats.jpg\" > and this command is called, it'll prompt user for a new name. The link path will be changed to the new name, the corresponding file will also be renamed. The operation is aborted if a name exists.
-Version 2017-03-26"
+Version 2017-07-27"
   (interactive)
   (let* (
          ($bounds (bounds-of-thing-at-point 'filename))
@@ -1453,7 +1453,12 @@ Version 2017-03-26"
         (rename-file $expandedPath $newPath t)
         (message "rename to %s" $newPath)
         (delete-region (car $bounds) (cdr $bounds))
-        (insert (xahsite-filepath-to-href-value $newPath (or (buffer-file-name) default-directory)))))))
+        (insert
+         (if (and (string-match "^/home/xah/web/" (or (buffer-file-name) default-directory))
+                  (fboundp 'xahsite-filepath-to-href-value))
+             (progn (xahsite-filepath-to-href-value $newPath (or (buffer-file-name) default-directory)))
+           (progn
+             (file-relative-name $newPath))))))))
 
 (defun xah-html-extract-url (*begin *end &optional *full-path-p)
   "Extract URLs in current block or region to `kill-ring'.
@@ -1869,16 +1874,22 @@ Version 2016-06-29."
 (defun xah-html-wrap-url ()
   "Make the URL at cursor point into a HTML link.
 Work on current char sequence or text selection.
-Version 2016-10-18"
+Version 2017-07-27"
   (interactive)
-  (let ( $bds $p1 $p2 $input-str )
-    (progn
-        (setq $bds (xah-get-bounds-of-thing-or-region 'url))
-        (setq $p1 (car $bds))
-        (setq $p2 (cdr $bds)))
-    (setq $input-str (buffer-substring-no-properties $p1 $p2))
+  (let ( $p1 $p2
+             $new-str
+             )
+    (if (region-active-p)
+        (progn (setq $p1 (region-beginning) $p2 (region-end)))
+      (save-excursion
+        (skip-chars-backward "^ \n\t")
+        (setq $p1 (point))
+        (skip-chars-forward "^ \n\t" )
+        (setq $p2 (point))))
+
+    (setq $new-str (file-relative-name (buffer-substring-no-properties $p1 $p2)))
     (delete-region $p1 $p2)
-    (insert (concat "<a href=\"" (url-encode-url $input-str) "\">" $input-str "</a>" ))))
+    (insert (concat "<a href=\"" (url-encode-url $new-str) "\">" $new-str "</a>" ))))
 
 (defun xah-html-wrap-p-tag ()
   "Add <p>…</p> tag to current block or text selection.
