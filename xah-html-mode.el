@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.7.0
+;; Version: 5.8.0
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1100,7 +1100,7 @@ becomes:
 <li>dog</li>
 </ul>
 
-Version 2017-07-19"
+Version 2017-08-01"
   (interactive)
   (let ($bds $p1 $p2 $input-str $resultStr
              (buffer-file-name))
@@ -1113,21 +1113,12 @@ Version 2017-07-19"
             (with-temp-buffer
               (insert $input-str)
               (delete-trailing-whitespace)
-              (if (string-match "^/home/xah/web/" (or (buffer-file-name) default-directory))
-                  (progn
+              (progn
                     (goto-char (point-min))
                     (while
                         (re-search-forward  "\.html$" nil t)
                       (backward-char 1)
-                      (if (fboundp 'xah-all-linkify)
-                          (xah-all-linkify)
-                        (xah-html-wrap-url))))
-                (progn
-                  (goto-char (point-min))
-                  (while
-                      (re-search-forward  "\.html$" nil t)
-                    (backward-char 1)
-                    (xah-html-wrap-url))))
+                      (xah-html-any-linkify)))
               (goto-char (point-min))
               (while
                   (not (equal (line-end-position) (point-max)))
@@ -1662,6 +1653,250 @@ Version 2015-09-12"
     (delete-region $p1 $p2)
     (insert $newLinkStr)))
 
+(defun xah-html-path-ends-in-image-suffix-p (*path)
+  "Returns t if *path ends in .jpg .png .gif .svg, else nil."
+  (string-match-p "\.jpg\\'\\|\.png\\'\\|\.gif\\'\\|\.svg\\'" *path))
+
+(defun xah-html-image-figure-linkify ()
+  "Replace a image file's path under cursor with a HTML img tag,
+and wrap it with “figure” and “figcaption” tags.
+
+Example, if cursor is on the word “i/cat.png”, then it will became
+
+<figure>
+<img src=\"cat.png\" alt=\"cat\" width=\"707\" height=\"517\" />
+<figcaption>▮</figcaption>
+</figure>
+
+If there's a text selection, use that as image path.
+
+This function calls `xah-html-image-linkify'.
+Version 2017-07-20"
+  (interactive)
+  (let ($p1 $p2 $altStr)
+    (setq $altStr (xah-html-image-linkify))
+
+    ;; (search-backward "alt=\"")
+    ;; (forward-char 5)
+
+    ;; (progn
+    ;;   (setq $p1 (point))
+    ;;   (search-forward "\"")
+    ;;   (setq $p2 (- (point) 1) )
+    ;;   (setq $altStr (buffer-substring $p1 $p2)))
+
+    (search-backward "<img ")
+    (insert "<figure>\n")
+    (search-forward ">")
+    (insert "\n<figcaption>\n")
+    (insert $altStr "\n</figcaption>\n</figure>\n")
+
+    (search-backward "</figcaption>")
+
+    (while (looking-back "[ 0-9\n]" 200 )
+      (delete-char -1))
+    (insert "\n")
+    ;;
+    ))
+
+(defun xah-html-image-linkify ()
+  "Replace image file path under cursor to HTML img inline link.
+Example:
+ img/my_cats.jpg
+become
+ <img src=\"img/my_cats.jpg\" alt=\"emacs logo\" width=\"470\" height=\"456\" />
+
+Returns the string used in the alt attribute.
+
+URL `http://ergoemacs.org/emacs/elisp_image_tag.html'
+Version 2017-06-09"
+  (interactive)
+  (let ( $p1 $p2 $imgPath
+             $hrefValue $altText $imgWH $width $height)
+    (save-excursion
+      ;; get image file path begin end pos
+      (let ($p0)
+        (setq $p0 (point))
+        ;; chars that are likely to be delimiters of full path, e.g. space, tabs, brakets.
+        (skip-chars-backward "^  \"\t\n'|()[]{}<>〔〕“”〈〉《》【】〖〗«»‹›·。\\`")
+        (setq $p1 (point))
+        (goto-char $p0)
+        (skip-chars-forward "^  \"\t\n'|()[]{}<>〔〕“”〈〉《》【】〖〗«»‹›·。\\'")
+        (setq $p2 (point))
+        (goto-char $p0))
+      (setq $imgPath
+            (if (and (fboundp 'xahsite-web-path-to-filepath)
+                     (fboundp 'xah-local-url-to-file-path))
+                (xahsite-web-path-to-filepath
+                 (xah-local-url-to-file-path
+                  (buffer-substring-no-properties $p1 $p2 )))
+              (buffer-substring-no-properties $p1 $p2 )))
+      (when (not (file-exists-p $imgPath))
+        (user-error "file not exist at %s"  $imgPath))
+      (setq $hrefValue
+            (file-relative-name
+             $imgPath
+             (file-name-directory (or (buffer-file-name) default-directory))))
+      (setq $altText
+            (replace-regexp-in-string
+             "-" " "
+             (replace-regexp-in-string
+              "_" " "
+              (replace-regexp-in-string
+               "\\.[A-Za-z]\\{3,4\\}$" "" (file-name-nondirectory $imgPath) t t) t t)))
+      (setq $imgWH (xah-html--get-image-dimensions $imgPath))
+      (setq $width (number-to-string (elt $imgWH 0)))
+      (setq $height (number-to-string (elt $imgWH 1))))
+
+    (delete-region $p1 $p2)
+    (insert
+     (if (or (equal $width "0") (equal $height "0"))
+         (concat
+          "<img src=\""
+          $hrefValue
+          "\"" " " "alt=\"" $altText "\"" " />")
+       (concat
+        "<img src=\""
+        $hrefValue
+        "\"" " " "alt=\"" $altText "\""
+        " width=\"" $width "\""
+        " height=\"" $height "\" />")))
+    $altText
+    ))
+
+(defun xah-html-css-linkify ()
+  "Make the path under cursor into a HTML link.
+ e.g. /home/xah/web/xahlee_org/lit.css
+becomes
+<link rel=\"stylesheet\" href=\"../lit.css\" />
+Version 2016-10-31"
+  (interactive)
+  (let* (
+         ($bds (xah-get-bounds-of-thing-or-region 'filepath))
+         ($p1 (car $bds))
+         ($p2 (cdr $bds))
+         ($inputStr (buffer-substring-no-properties $p1 $p2))
+         ($src (if (string-match "^http" $inputStr ) $inputStr (file-relative-name $inputStr))))
+    (delete-region $p1 $p2)
+    (insert (format "<link rel=\"stylesheet\" href=\"%s\" />" $src))))
+
+(defun xah-html-javascript-linkify ()
+  "Make the path under cursor into a HTML link.
+ eg <script src=\"xyz.js\"></script>
+Version 2016-10-31"
+  (interactive)
+  (let* (
+         ($bds (xah-get-bounds-of-thing-or-region 'filepath))
+         ($p1 (car $bds))
+         ($p2 (cdr $bds))
+         ($inputStr (buffer-substring-no-properties $p1 $p2))
+         ($src
+          (if (string-match "^http" $inputStr )
+              $inputStr
+            (file-relative-name $inputStr))))
+    (delete-region $p1 $p2)
+    (insert (format "<script defer src=\"%s\"></script>" $src))))
+
+(defun xah-html-audio-file-linkify ()
+  "Make the path under cursor into a HTML link.
+e.g. xyz.mp3
+becomes
+<audio src=\"xyz.mp3\"></audio>"
+  (interactive)
+  (let* (
+         ($bds (xah-get-bounds-of-thing-or-region 'filepath))
+         ($p1 (car $bds))
+         ($p2 (cdr $bds))
+         ($inputStr (buffer-substring-no-properties $p1 $p2))
+         ($src
+          (if (string-match "^http" $inputStr )
+              $inputStr
+            (file-relative-name $inputStr))))
+    (delete-region $p1 $p2)
+    (insert (format "<audio src=\"%s\" controls></audio>" $src))))
+
+(defun xah-html-video-file-linkify ()
+  "Make the path under cursor into a HTML video tag link.
+e.g. xyz.webm
+becomes
+<video src=\"i/xyz.webm\" controls loop autoplay></video>
+Version 2017-02-12"
+  (interactive)
+  (let* (
+         ($bds (bounds-of-thing-at-point 'filename ))
+         ($p1 (car $bds))
+         ($p2 (cdr $bds))
+         ($inputStr (buffer-substring-no-properties $p1 $p2 ))
+         ($src
+          (if (string-match "^http" $inputStr )
+              $inputStr
+            (if (file-exists-p $inputStr)
+                (file-relative-name $inputStr)
+              (user-error "file not found: 「%s」" $inputStr)))))
+    (delete-region $p1 $p2)
+    (insert (format "<video src=\"%s\" controls loop autoplay></video>" $src))))
+
+(defun xah-html-any-linkify ()
+  "Make the text under cursor into a HTML link.
+
+Exactly what tag is used depends on the suffix.
+e.g.
+
+ <a href=\"xyz.html\">xyz.html</a>
+ <link rel=\"stylesheet\" href=\"xyz.css\" />
+ <script defer src=\"xyz.js\"></script>
+ <img src=\"xyz.png\" alt=\"xyz\" width=\"960\" height=\"720\" />
+ <video src=\"xyz.mp4\" controls></video>
+ <audio src=\"xyz.mp3\" controls></audio>
+
+If region is active, use it as input.
+Version 2017-08-01"
+  (interactive)
+
+  (let ( $p1 $p2 $input)
+    ;; (if (string-match "%" $input )
+    ;;     (decode-coding-string (url-unhex-string "https://mysticsiva.wordpress.com/2016/11/04/%E3%82%AD%E3%83%BC%E3%82%AD%E3%83%A3%E3%83%83%E3%83%97%E4%BA%A4%E6%8F%9B3/") 'utf-8)
+    ;;   $input)
+
+    (if (use-region-p)
+        (setq $p1 (region-beginning) $p2 (region-end))
+      (save-excursion
+        (let ($p0)
+          (setq $p0 (point))
+          ;; chars that are likely to be delimiters of full path, e.g. space, tabs, brakets.
+          (skip-chars-backward "^  \"\t\n'|[]{}<>〔〕“”〈〉《》【】〖〗«»‹›·。\\`")
+          (setq $p1 (point))
+          (goto-char $p0)
+          (skip-chars-forward "^  \"\t\n'|[]{}<>〔〕“”〈〉《》【】〖〗«»‹›·。\\'")
+          (setq $p2 (point)))))
+    (setq $input (buffer-substring-no-properties $p1 $p2))
+    (cond
+
+     ((string-match-p "\\.css\\'" $input) (xah-html-css-linkify))
+     ((string-match-p "\\.js\\'\\|\\.ts\\'" $input) (xah-html-javascript-linkify))
+     ((string-match-p "\\.mp3\\'\\|\\.ogg\\'" $input) (xah-html-audio-file-linkify))
+     ((string-match-p "\\.mp4\\'\\|\\.mov\\'\\|\\.mkv\\'\\|\\.webm\\'" $input) (xah-html-video-file-linkify))
+
+     ((or (string-match-p "wikipedia.org/" $input)
+          (string-match-p "wiktionary.org/" $input))
+      (let ((case-fold-search nil))
+        (if (xah-html-path-ends-in-image-suffix-p $input)
+            (xah-html-source-url-linkify 0)
+          (xah-html-wikipedia-url-linkify ))))
+
+     ((xah-html-path-ends-in-image-suffix-p $input) (xah-html-image-figure-linkify))
+
+     ((string-match-p "\\`https?://" $input) (xah-html-source-url-linkify 0))
+
+     ((string-match "^/home/xah/web/" (or (buffer-file-name) default-directory))
+      (if (fboundp 'xah-all-linkify)
+          (xah-all-linkify)
+        (xah-html-wrap-url)))
+
+     (t (xah-html-wrap-url)))
+    ;;
+    ))
+
 (defun xah-html-source-url-linkify (*prefixArg)
   "Make URL at cursor point into a HTML link.
 If there's a text selection, use the text selection as input.
@@ -1756,71 +1991,6 @@ Version 2015-09-12"
              $url (format-time-string "%Y-%m-%d") $linkText
              ))))
 
-(defun xah-html-image-linkify ()
-  "Replace image file path under cursor to HTML img inline link.
-Example:
- img/my_cats.jpg
-become
- <img src=\"img/my_cats.jpg\" alt=\"emacs logo\" width=\"470\" height=\"456\" />
-
-Returns the string used in the alt attribute.
-
-URL `http://ergoemacs.org/emacs/elisp_image_tag.html'
-Version 2017-06-09"
-  (interactive)
-  (let ( $p1 $p2 $imgPath
-             $hrefValue $altText $imgWH $width $height)
-    (save-excursion
-      ;; get image file path begin end pos
-      (let ($p0)
-        (setq $p0 (point))
-        ;; chars that are likely to be delimiters of full path, e.g. space, tabs, brakets.
-        (skip-chars-backward "^  \"\t\n'|()[]{}<>〔〕“”〈〉《》【】〖〗«»‹›·。\\`")
-        (setq $p1 (point))
-        (goto-char $p0)
-        (skip-chars-forward "^  \"\t\n'|()[]{}<>〔〕“”〈〉《》【】〖〗«»‹›·。\\'")
-        (setq $p2 (point))
-        (goto-char $p0))
-      (setq $imgPath
-            (if (and (fboundp 'xahsite-web-path-to-filepath)
-                     (fboundp 'xah-local-url-to-file-path))
-                (xahsite-web-path-to-filepath
-                 (xah-local-url-to-file-path
-                  (buffer-substring-no-properties $p1 $p2 )))
-              (buffer-substring-no-properties $p1 $p2 )))
-      (when (not (file-exists-p $imgPath))
-        (user-error "file not exist at %s"  $imgPath))
-      (setq $hrefValue
-            (file-relative-name
-             $imgPath
-             (file-name-directory (or (buffer-file-name) default-directory))))
-      (setq $altText
-            (replace-regexp-in-string
-             "-" " "
-             (replace-regexp-in-string
-              "_" " "
-              (replace-regexp-in-string
-               "\\.[A-Za-z]\\{3,4\\}$" "" (file-name-nondirectory $imgPath) t t) t t)))
-      (setq $imgWH (xah-html--get-image-dimensions $imgPath))
-      (setq $width (number-to-string (elt $imgWH 0)))
-      (setq $height (number-to-string (elt $imgWH 1))))
-
-    (delete-region $p1 $p2)
-    (insert
-     (if (or (equal $width "0") (equal $height "0"))
-         (concat
-          "<img src=\""
-          $hrefValue
-          "\"" " " "alt=\"" $altText "\"" " />")
-       (concat
-        "<img src=\""
-        $hrefValue
-        "\"" " " "alt=\"" $altText "\""
-        " width=\"" $width "\""
-        " height=\"" $height "\" />")))
-    $altText
-    ))
-
 (defun xah-html-wikipedia-url-linkify ()
   "Change Wikipedia URL under cursor into a HTML link.
 If there is a text selection, use that as input.
@@ -1873,8 +2043,8 @@ Version 2016-06-29."
 
 (defun xah-html-wrap-url ()
   "Make the URL at cursor point into a HTML link.
-Work on current char sequence or text selection.
-Version 2017-07-27"
+Work on current non-whitespace char sequence or text selection.
+Version 2017-08-01"
   (interactive)
   (let ( $p1 $p2
              $new-str
@@ -1886,7 +2056,6 @@ Version 2017-07-27"
         (setq $p1 (point))
         (skip-chars-forward "^ \n\t" )
         (setq $p2 (point))))
-
     (setq $new-str (file-relative-name (buffer-substring-no-properties $p1 $p2)))
     (delete-region $p1 $p2)
     (insert (concat "<a href=\"" (url-encode-url $new-str) "\">" $new-str "</a>" ))))
@@ -2722,7 +2891,7 @@ Version 2016-10-24"
   (define-key xah-html-mode-no-chord-map (kbd "e") 'xah-html-source-url-linkify)
   (define-key xah-html-mode-no-chord-map (kbd "f") 'xah-html-image-linkify)
   (define-key xah-html-mode-no-chord-map (kbd "g") 'xah-html-brackets-to-html)
-  (define-key xah-html-mode-no-chord-map (kbd "h") 'xah-html-wrap-url)
+  (define-key xah-html-mode-no-chord-map (kbd "h") 'xah-html-any-linkify)
   (define-key xah-html-mode-no-chord-map (kbd "i") nil)
   (define-key xah-html-mode-no-chord-map (kbd "j") nil)
   (define-key xah-html-mode-no-chord-map (kbd "k") 'xah-html-htmlize-keyboard-shortcut-notation)
