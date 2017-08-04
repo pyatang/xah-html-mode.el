@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.9.0
+;; Version: 5.9.1
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1671,7 +1671,7 @@ Example, if cursor is on the word “i/cat.png”, then it will became
 If there's a text selection, use that as image path.
 
 This function calls `xah-html-image-linkify'.
-Version 2017-07-20"
+Version 2017-08-03"
   (interactive)
   (let ($p1 $p2 $altStr)
     (setq $altStr (xah-html-image-linkify))
@@ -1693,9 +1693,6 @@ Version 2017-07-20"
 
     (search-backward "</figcaption>")
 
-    (while (looking-back "[ 0-9\n]" 200 )
-      (delete-char -1))
-    (insert "\n")
     ;;
     ))
 
