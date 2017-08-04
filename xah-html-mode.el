@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.8.0
+;; Version: 5.9.0
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1836,6 +1836,101 @@ Version 2017-02-12"
     (delete-region $p1 $p2)
     (insert (format "<video src=\"%s\" controls loop autoplay></video>" $src))))
 
+(defun xah-html-amazon-linkify (&optional *tracking-id)
+  "Make the current amazon URL or selection into a link.
+
+Examples of amazon product URL formats
+http://www.amazon.com/Cyborg-R-T-Gaming-Mouse/dp/B003CP0BHM/ref=pd_sim_e_1
+http://www.amazon.com/gp/product/B003CP0BHM
+http://www.amazon.com/exec/obidos/ASIN/B003CP0BHM/xahh-20
+http://www.amazon.com/exec/obidos/tg/detail/-/B003CP0BHM/
+http://www.amazon.com/dp/B003CP0BHM?tag=xahhome-20
+http://amzn.to/1F5M1hA
+https://alexa.design/2okfMcj
+
+Example output:
+<a class=\"amz\" href=\"http://www.amazon.com/dp/B003CP0BHM/?tag=xahh-20\" title=\"Cyborg R T Gaming Mouse\">amazon</a>
+
+ASIN is a 10 character string that's a product id.
+
+URL `http://ergoemacs.org/emacs/elisp_amazon-linkify.html'
+Version 2017-07-22"
+  (interactive)
+  (let (($bds (bounds-of-thing-at-point 'url))
+        $p1 $p2 $url $asin $thingName
+        ($trackId (if *tracking-id *tracking-id "xahh-20" )))
+    (if (use-region-p)
+        (setq $p1 (region-beginning) $p2 (region-end))
+      (setq $p1 (car $bds) $p2 (cdr $bds)))
+    (setq $url (buffer-substring-no-properties $p1 $p2))
+    (if (or (string-match "//amzn.to/" $url)
+            (string-match "//alexa.design/" $url))
+        (progn (delete-region $p1 $p2)
+               (insert (format "<a class=\"amz_search\" href=\"%s\">amazon</a>" $url)))
+      (progn
+        (setq $asin
+              (cond
+               ((string-match "/dp/\\([[:alnum:]]\\{10\\}\\)/?" $url) (match-string 1 $url))
+               ((string-match "/dp/\\([[:alnum:]]\\{10\\}\\)\\?tag=" $url) (match-string 1 $url))
+               ((string-match "/gp/product/\\([[:alnum:]]\\{10\\}\\)" $url) (match-string 1 $url))
+               ((string-match "/ASIN/\\([[:alnum:]]\\{10\\}\\)" $url) (match-string 1 $url))
+               ((string-match "/tg/detail/-/\\([[:alnum:]]\\{10\\}\\)/" $url) (match-string 1 $url))
+               ((and
+                 (equal 10 (length $url ))
+                 (string-match "\\`\\([[:alnum:]]\\{10\\}\\)\\'" $url))
+                $url)
+               (t (error "no amazon ASIN found"))))
+        (setq
+         $thingName
+         (replace-regexp-in-string
+          "-" " "
+          (if (string-match "amazon\.com/\\([^/]+?\\)/dp/" $url)
+              (progn (match-string 1 $url))
+            (progn
+              (message "no product name found" ))
+            ""
+            )))
+        (delete-region $p1 $p2)
+        (insert
+         (format "<a class=\"amz\" href=\"http://www.amazon.com/dp/%s/?tag=%s\" title=\"%s\">Buy at amazon</a>" $asin $trackId $thingName))
+        (search-backward "\">")))))
+
+(defun xah-html-youtube-linkify ()
+  "Make the current line of youtube url into a embeded video.
+
+The line can be a youtube ID “bFSS826ETlk” or full URL e.g. “http://www.youtube.com/watch?v=bFSS826ETlk”. URL with more parameters usually will work too.
+
+Here's sample result:
+
+<figure>
+<iframe width=\"640\" height=\"480\" src=\"https://www.youtube.com/embed/yQw3DvqEbxI?rel=0\" allowfullscreen></iframe>
+<figcaption>
+</figcaption>
+</figure>
+
+Version 2017-08-03"
+  (interactive)
+  (let ( $p1 $p2 $inputStr $id
+             ($youtubeLinkChars "-_?.:/=&A-Za-z0-9"))
+    (skip-chars-backward $youtubeLinkChars (min 1 (- (point) 100)))
+    (setq $p1 (point))
+
+    (skip-chars-forward $youtubeLinkChars (+ $p1 100))
+    (setq $p2 (point))
+
+    (setq $inputStr (buffer-substring-no-properties $p1 $p2))
+
+    (string-match "v=\\(.\\{11\\}\\)" $inputStr)
+    (setq $id (match-string 1 $inputStr))
+    (delete-region $p1 $p2)
+    (insert "\n<figure>\n")
+    (insert (concat "<iframe width=\"640\" height=\"480\" src=\"https://www.youtube.com/embed/" $id "?rel=0\" allowfullscreen></iframe>"))
+    (insert "\n<figcaption>\n")
+    (insert "</figcaption>\n")
+    (insert "</figure>\n")
+    (search-backward "</figcaption>" )
+    (backward-char 1)))
+
 (defun xah-html-any-linkify ()
   "Make the text under cursor into a HTML link.
 
@@ -1849,8 +1944,10 @@ e.g.
  <video src=\"xyz.mp4\" controls></video>
  <audio src=\"xyz.mp3\" controls></audio>
 
+and YouTube url.
+
 If region is active, use it as input.
-Version 2017-08-01"
+Version 2017-08-03"
   (interactive)
 
   (let ( $p1 $p2 $input)
@@ -1883,6 +1980,10 @@ Version 2017-08-01"
         (if (xah-html-path-ends-in-image-suffix-p $input)
             (xah-html-source-url-linkify 0)
           (xah-html-wikipedia-url-linkify ))))
+
+     ((string-match-p "www\.youtube\.com/watch" $input) (xah-html-youtube-linkify))
+
+     ((string-match-p "www\.amazon\.com/\\|//amzn\.to/" $input) (xah-html-amazon-linkify))
 
      ((xah-html-path-ends-in-image-suffix-p $input) (xah-html-image-figure-linkify))
 
@@ -3067,8 +3168,9 @@ Version 2016-10-24"
             )
         `(
 
-          ;; todo these multiline regex are bad. see elisp manual
           ("<!--\\|-->" . font-lock-comment-delimiter-face)
+
+          ;; todo these multiline regex are very slow when there are long lines.
           (,(format "<!--%s-->" textNodeRegex) . (1 font-lock-comment-face))
           (,(format "<h\\([1-6]\\)>%s</h\\1>" textNodeRegex) . (2 'bold))
           (,(format "‘%s’" textNodeRegex) . (1 'xah-html-single-curly-quote-f))
