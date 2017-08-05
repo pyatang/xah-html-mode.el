@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.9.1
+;; Version: 5.9.2
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -38,10 +38,10 @@
 
 
 
-(defun xah-html--tag-self-closing-p (*tag-name)
+(defun xah-html--tag-self-closing-p (@tag-name)
   "Return true if the tag is a self-closing tag, <br> or <br />"
   (interactive)
-  (member *tag-name  xah-html-html5-self-close-tags))
+  (member @tag-name  xah-html-html5-self-close-tags))
 
 (defun xah-html--get-bracket-positions ()
   "Returns HTML angle bracket positions.
@@ -79,16 +79,16 @@ Version 2016-10-18"
               ))
       (vector -posPrev< -posPrev> -posNext< -posNext>))))
 
-(defun xah-html--cursor-in-tag-markup-p (&optional *bracketPositions)
+(defun xah-html--cursor-in-tag-markup-p (&optional @bracketPositions)
   "Return t if cursor is between angle brackets like this: 「<…▮…>」, where the … is any char except angle brackets.
 More precisely: on the left side of cursor, there exist a <, and there's no > between < and cursor.
 And, on the right side of cursor, there exist a >, and there's no < between > and cursor.
- *bracketPositions is optional. If nil, then `xah-html--get-bracket-positions' is called to get it.
+ @bracketPositions is optional. If nil, then `xah-html--get-bracket-positions' is called to get it.
 Version 2016-10-18"
   (interactive)
   (let (($bracketPos
-         (if *bracketPositions
-             *bracketPositions
+         (if @bracketPositions
+             @bracketPositions
            (xah-html--get-bracket-positions)))
         -posPrev< -posPrev> -posNext> -posNext< )
     (progn
@@ -146,8 +146,8 @@ Version 2016-12-18"
 
 ;; (defvar xah-html--weekday-names '("Monday" "Tuesday" "Wednesday" "Thursday" "Friday" "Saturday" "Sunday") "list of English weekday full names.")
 
-(defun xah-html--is-datetimestamp-p (*input-string)
-  "Return t if *input-string is a date/time stamp, else nil.
+(defun xah-html--is-datetimestamp-p (@input-string)
+  "Return t if @input-string is a date/time stamp, else nil.
 This is based on heuristic, so it's not 100% correct.
 If the string contains any month names, weekday names, or of the form dddd-dd-dd, dddd-dd-dddd, dddd-dd-dd, or using slash, then it's considered a date.
 
@@ -158,19 +158,19 @@ Version 2017-07-10"
          ($someMonthAbbrevs (mapcar (lambda (x) (substring x 0 3)) $someMonthNames))
          ($weekDayNames '("Monday" "Tuesday" "Wednesday" "Thursday" "Friday" "Saturday" "Sunday")))
     (cond
-     ((string-match (regexp-opt (append $someMonthNames $someMonthAbbrevs $weekDayNames) 'words) *input-string) t)
+     ((string-match (regexp-opt (append $someMonthNames $someMonthAbbrevs $weekDayNames) 'words) @input-string) t)
      ;; mm/dd/yyyy
-     ((string-match "\\b[0-9][0-9]/[0-9][0-9]/[0-9][0-9][0-9][0-9]\\b" *input-string) t)
+     ((string-match "\\b[0-9][0-9]/[0-9][0-9]/[0-9][0-9][0-9][0-9]\\b" @input-string) t)
      ;; yyyy/mm/dd
-     ((string-match "\\b[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9]\\b" *input-string) t)
+     ((string-match "\\b[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9]\\b" @input-string) t)
      ;; mm/dd/yy
-     ((string-match "\\b[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\\b" *input-string) t)
+     ((string-match "\\b[0-9][0-9]/[0-9][0-9]/[0-9][0-9]\\b" @input-string) t)
      ;; mm-dd-yyyy
-     ((string-match "\\b[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]\\b" *input-string) t)
+     ((string-match "\\b[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]\\b" @input-string) t)
      ;; yyyy-mm-dd
-     ((string-match "\\b[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\\b" *input-string) t)
+     ((string-match "\\b[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\\b" @input-string) t)
      ;; mm-dd-yy
-     ((string-match "\\b[0-9][0-9]-[0-9][0-9]-[0-9][0-9]\\b" *input-string) t)
+     ((string-match "\\b[0-9][0-9]-[0-9][0-9]-[0-9][0-9]\\b" @input-string) t)
      (t nil))))
 
 
@@ -183,7 +183,7 @@ Note: in emacs GNU Emacs 24.4+ and later, there's `string-trim' function. You ne
 "
   (replace-regexp-in-string "\\`[ \t\n]*" "" (replace-regexp-in-string "[ \t\n]*\\'" "" string)))
 
-(defun xah-html--get-image-dimensions (*file-path)
+(defun xah-html--get-image-dimensions (@file-path)
   "Returns a vector [width height] of a image's dimension.
 The elements are integer datatype.
 Support png jpg svg gif and any image type emacs supports.
@@ -194,11 +194,11 @@ Version 2017-01-11"
   (let (($x nil)
         ($y nil))
     (cond
-     ((string-match "\.svg$" *file-path)
+     ((string-match "\.svg$" @file-path)
       (progn
         (with-temp-buffer
           ;; hackish. grab the first occurence of width height in file
-          (insert-file-contents *file-path)
+          (insert-file-contents @file-path)
           (goto-char (point-min))
           (when (re-search-forward "width=\"\\([0-9]+\\).\\{0,2\\}\"" nil "NOERROR")
             (setq $x (match-string 1 )))
@@ -214,9 +214,9 @@ Version 2017-01-11"
           (clear-image-cache t)
           (setq $xy (image-size
                      (create-image
-                      (if (file-name-absolute-p *file-path)
-                          *file-path
-                        (concat default-directory *file-path)))
+                      (if (file-name-absolute-p @file-path)
+                          @file-path
+                        (concat default-directory @file-path)))
                      t)))
         (vector (car $xy) (cdr $xy)))))))
 
@@ -477,13 +477,13 @@ For example:
 (defvar xah-html-lang-mode-list nil "List of supported language mode names.")
 (setq xah-html-lang-mode-list (mapcar (lambda (x) (aref (cdr x) 0)) xah-html-lang-name-map))
 
-(defun xah-html-precode-htmlized-p (*begin *end )
-  "Return true if region *BEGIN *END is htmlized code.
+(defun xah-html-precode-htmlized-p (@begin @end )
+  "Return true if region @BEGIN @END is htmlized code.
 WARNING: it just losely check if it contains span tag.
 Version 2017-01-16"
   (progn
-    (goto-char *begin)
-    (re-search-forward "<span class=" *end t)))
+    (goto-char @begin)
+    (re-search-forward "<span class=" @end t)))
 
 (defun xah-html-get-precode-langCode ()
   "Get the langCode and position boundary of current HTML pre block.
@@ -562,26 +562,26 @@ Version 2017-07-25"
 
 
 
-(defun xah-html-htmlize-string (*source-code-str *major-mode-name)
-  "Take *source-code-str and return a htmlized version using major mode *major-mode-name.
+(defun xah-html-htmlize-string (@source-code-str @major-mode-name)
+  "Take @source-code-str and return a htmlized version using major mode @major-mode-name.
 The purpose is to syntax color source code in HTML.
 
-If *MAJOR-MODE-NAME is string. It'll be converted to symbol and if is not in `obarray', `fundamental-mode' is used.
+If @MAJOR-MODE-NAME is string. It'll be converted to symbol and if is not in `obarray', `fundamental-mode' is used.
 
 This function requires the `htmlize-buffer' from htmlize.el by Hrvoje Niksic.
 
 Version 2017-01-10"
   (interactive)
   (let ($output-buff $resultStr
-                     ($majorModeSym (intern-soft *major-mode-name)))
+                     ($majorModeSym (intern-soft @major-mode-name)))
 
-    ;; (message "*major-mode-name is %s" *major-mode-name)
+    ;; (message "@major-mode-name is %s" @major-mode-name)
     ;; (message "-majorModeSym is %s" $majorModeSym)
 
     ;; put code in a temp buffer, set the mode, fontify
 
     (with-temp-buffer
-      (insert *source-code-str)
+      (insert @source-code-str)
       ;; (intern-soft "tuareg-mode")
 
       (intern-soft "xah-elisp-mode")
@@ -600,14 +600,14 @@ Version 2017-01-10"
     (kill-buffer $output-buff)
     $resultStr ))
 
-(defun xah-html-langcode-to-major-mode-name (*lang-code *lang-code-map)
-  "get the `major-mode' name associated with *lang-code.
+(defun xah-html-langcode-to-major-mode-name (@lang-code @lang-code-map)
+  "get the `major-mode' name associated with @lang-code.
 return major-mode name as string. If none found, return nil.
 Version 2017-01-10"
   (interactive)
-  (elt (cdr (assoc *lang-code *lang-code-map)) 0))
+  (elt (cdr (assoc @lang-code @lang-code-map)) 0))
 
-(defun xah-html-htmlize-precode (*lang-code-map)
+(defun xah-html-htmlize-precode (@lang-code-map)
   "Replace text enclosed by “pre” tag to htmlized code.
 
 For example, if the cursor is inside the pre tags <pre class=\"‹langCode›\">…▮…</pre>, then after calling, the text inside the pre tag will be htmlized. That is, wrapped with many span tags for syntax coloring.
@@ -625,12 +625,12 @@ Version 2017-01-08"
          ($langCode (elt $temp78730 0))
          ($p1 (elt $temp78730 1))
          ($p2 (elt $temp78730 2))
-         ;; ($modeName (elt (cdr (assoc $langCode *lang-code-map)) 0))
-         ($modeName (xah-html-langcode-to-major-mode-name $langCode *lang-code-map)))
+         ;; ($modeName (elt (cdr (assoc $langCode @lang-code-map)) 0))
+         ($modeName (xah-html-langcode-to-major-mode-name $langCode @lang-code-map)))
     (xah-html-htmlize-region $p1 $p2 $modeName t)))
 
-(defun xah-html-htmlize-region (*p1 *p2 *mode-name &optional *trim-whitespace-boundary-p)
-  "Htmlized region *p1 *p2 using `major-mode' *mode-name.
+(defun xah-html-htmlize-region (@p1 @p2 @mode-name &optional @trim-whitespace-boundary-p)
+  "Htmlized region @p1 @p2 using `major-mode' @mode-name.
 This function requires the `htmlize-buffer' from 〔htmlize.el〕 by Hrvoje Niksic.
 Version 2016-12-18"
   (interactive
@@ -638,19 +638,19 @@ Version 2016-12-18"
          (region-end)
          (ido-completing-read "Chose mode for coloring:" xah-html-lang-mode-list)))
   (let* (
-         ($input-str (buffer-substring-no-properties *p1 *p2))
+         ($input-str (buffer-substring-no-properties @p1 @p2))
          ($out-str
-          (xah-html-htmlize-string (if *trim-whitespace-boundary-p
+          (xah-html-htmlize-string (if @trim-whitespace-boundary-p
                                        (replace-regexp-in-string "\\`[ \t\n]*" "" (replace-regexp-in-string "[ \t\n]*\\'" "" $input-str))
                                      $input-str
-                                     ) *mode-name)))
+                                     ) @mode-name)))
     (if (string= $input-str $out-str)
         nil
       (progn
-        (delete-region *p1 *p2)
+        (delete-region @p1 @p2)
         (insert $out-str)))))
 
-(defun xah-html-dehtmlize-precode (*begin *end)
+(defun xah-html-dehtmlize-precode (@begin @end)
   "Delete span tags between pre tags.
 Note: only span tags of the form 「<span class=\"…\">…</span>」 are deleted.
 This command does the inverse of `xah-html-htmlize-precode'."
@@ -658,7 +658,7 @@ This command does the inverse of `xah-html-htmlize-precode'."
    (let* ( ($xx (xah-html-get-precode-langCode)))
      (list (elt $xx 1) (elt $xx 2))))
   (save-restriction
-    (narrow-to-region *begin *end)
+    (narrow-to-region @begin @end)
     (xah-html-remove-span-tag-region (point-min) (point-max))
     (xah-html-code-tag-to-brackets (point-min) (point-max))))
 
@@ -673,22 +673,22 @@ This command does the inverse of `xah-html-htmlize-precode'."
         (xah-html-dehtmlize-precode $p1 $p2)
       (xah-html-htmlize-precode lang-name-map))))
 
-(defun xah-html-redo-syntax-coloring-file ( *file-path )
+(defun xah-html-redo-syntax-coloring-file ( @file-path )
   "redo all pre lang code syntax coloring in current HTML page.
 Returns 0 if nothing is done. Else a positive integer of the count of <pre class=lang>.
 Version 2017-01-11"
   (interactive (read-file-name "file path:" nil nil t))
   (let ( ($result 0))
     (with-temp-buffer
-      (insert-file-contents *file-path)
+      (insert-file-contents @file-path)
       (goto-char (point-min))
       (xah-html-mode)
       (setq $result (xah-html-redo-syntax-coloring-buffer))
       (when (> $result 0)
         (let (($backup-path
-               (concat *file-path "~htmlize" (format-time-string "%Y%m%dT%H%M%S") "~")))
-          (copy-file *file-path $backup-path t))
-        (write-region 1 (point-max) *file-path)))
+               (concat @file-path "~htmlize" (format-time-string "%Y%m%dT%H%M%S") "~")))
+          (copy-file @file-path $backup-path t))
+        (write-region 1 (point-max) @file-path)))
     $result
     ))
 
@@ -888,7 +888,7 @@ version 2016-12-18"
 ;;       (xah-replace-pairs-region p1 p2 '( ["&amp;" "&"] ["&lt;" "<"] ["&gt;" ">"] ))
 ;;     (xah-replace-pairs-region p1 p2 '( ["&" "&amp;"] ["<" "&lt;"] [">" "&gt;"] ))))
 
-(defun xah-html-replace-html-chars-to-entities (*begin *end &optional *entity-to-char-p)
+(defun xah-html-replace-html-chars-to-entities (@begin @end &optional @entity-to-char-p)
   "Replace HTML chars & < > to HTML entities on current line or selection.
 The string replaced are:
  & ⇒ &amp;
@@ -899,7 +899,7 @@ Print to message buffer occurrences of replacement (if any), with position.
 
 If `universal-argument' is called, the replacement direction is reversed.
 
-When called in lisp code, *begin *end are region begin/end positions. If entity-to-char-p is true, change entities to chars instead.
+When called in lisp code, @begin @end are region begin/end positions. If entity-to-char-p is true, change entities to chars instead.
 
 See also: `xah-html-replace-html-named-entities', `xah-html-replace-html-chars-to-unicode'
 
@@ -915,12 +915,12 @@ Version 2017-07-23"
     (if (use-region-p) (region-end))
     (if current-prefix-arg t nil)))
 
-  (when (null *begin) (setq *begin (line-beginning-position)))
-  (when (null *end) (setq *end (line-end-position)))
+  (when (null @begin) (setq @begin (line-beginning-position)))
+  (when (null @end) (setq @end (line-end-position)))
 
   (let (($changedItems '())
         ($findReplaceMap
-         (if *entity-to-char-p
+         (if @entity-to-char-p
              ;; this to prevent creating a replacement sequence out of blue
              [
               ["&amp;" "螽⛫1"] ["&lt;" "螽⛫2"] ["&gt;" "螽⛫3"]
@@ -930,7 +930,7 @@ Version 2017-07-23"
            )))
     (save-excursion
       (save-restriction
-        (narrow-to-region *begin *end)
+        (narrow-to-region @begin @end)
         (let ( (case-fold-search nil))
           (mapc
            (lambda ($x)
@@ -940,13 +940,13 @@ Version 2017-07-23"
                (replace-match (elt $x 1) "FIXEDCASE" "LITERAL")))
            $findReplaceMap))))))
 
-(defun xah-html-replace-html-chars-to-unicode (*begin *end &optional *fullwidth-to-ascii-p)
+(defun xah-html-replace-html-chars-to-unicode (@begin @end &optional @fullwidth-to-ascii-p)
   "Replace chars <>& to fullwidth version ＜＞＆ in current line or text selection.
 
 If `universal-argument' is called, the replacement direction is reversed.
 
-When called in lisp code, *begin *end are region begin/end positions.
-If *fullwidth-to-ascii-p is true, change entities to chars instead.
+When called in lisp code, @begin @end are region begin/end positions.
+If @fullwidth-to-ascii-p is true, change entities to chars instead.
 
 See also: `xah-html-replace-html-named-entities', `xah-html-replace-html-chars-to-unicode'
 
@@ -958,8 +958,8 @@ Version 2015-04-23"
      (list (line-beginning-position) (line-end-position) current-prefix-arg)))
 
   (save-restriction
-    (narrow-to-region *begin *end)
-    (if *fullwidth-to-ascii-p
+    (narrow-to-region @begin @end)
+    (if @fullwidth-to-ascii-p
         (progn
           (goto-char (point-min))
           (while (search-forward "＆" nil t) (replace-match "&" nil t))
@@ -975,7 +975,7 @@ Version 2015-04-23"
         (goto-char (point-min))
         (while (search-forward ">" nil t) (replace-match "＞" nil ))))))
 
-(defun xah-html-replace-html-named-entities (*begin *end)
+(defun xah-html-replace-html-named-entities (@begin @end)
   "Replace HTML entities to Unicode character in current line or selection.
 For example, “&copy;” becomes “©”.
 
@@ -984,7 +984,7 @@ The following HTML Entities are not replaced:
  &lt; <
  &gt; >
 
-When called in lisp code, *begin *end are region begin/end positions.
+When called in lisp code, @begin @end are region begin/end positions.
 
 See also:
 `xah-html-replace-html-chars-to-entities'
@@ -1058,7 +1058,7 @@ Version 2017-01-11"
           ["&lsaquo;" "‹"] ["&rsaquo;" "›"] ["&euro;" "€"]
           ]))
     (save-restriction
-      (narrow-to-region *begin *end)
+      (narrow-to-region @begin @end)
       (let ( (case-fold-search nil))
         (mapc
          (lambda ($x)
@@ -1145,13 +1145,13 @@ Version 2017-08-01"
     (delete-region $p1 $p2)
     (insert $resultStr)))
 
-(defun xah-html-make-html-table (*separator)
+(defun xah-html-make-html-table (@separator)
   "Transform the current text block or selection into a HTML table.
 
 If there's a text selection, use the selection as input.
 Otherwise, used current text block delimited by empty lines.
 
-*SEPARATOR is a string used as a delimitor for columns.
+@SEPARATOR is a string used as a delimitor for columns.
 
 For example:
 
@@ -1181,7 +1181,7 @@ Version 2017-03-03"
           (insert "\n")
 
           (goto-char (point-min))
-          (while (search-forward *separator nil "NOERROR")
+          (while (search-forward @separator nil "NOERROR")
             (replace-match "</td><td>"))
 
           (goto-char (point-min))
@@ -1251,7 +1251,7 @@ Version 2015-07-27"
                     (replace-regexp-in-string " " "_" $linkText)
                     "\">" $linkText "</a>"))))
 
-(defun xah-html-remove-span-tag-region (*begin *end)
+(defun xah-html-remove-span-tag-region (@begin @end)
   "Delete HTML “span” tags in region.
 And the following HTML entities are changed:
  &amp; ⇒ &
@@ -1260,16 +1260,16 @@ And the following HTML entities are changed:
 
 Note: only span tags of the form 「<span class=\"…\">…</span>」 are deleted.
 
-When done, the cursor is placed at *end."
+When done, the cursor is placed at @end."
   (interactive "r")
   (save-restriction
-    (narrow-to-region *begin *end)
+    (narrow-to-region @begin @end)
     (xah-replace-regexp-pairs-region (point-min) (point-max) '(["<span class=\"[^\"]+\">" ""]))
     (xah-replace-pairs-region (point-min) (point-max) '( ["</span>" ""] ))
     (xah-html-replace-html-chars-to-entities (point-min) (point-max) "ENTITY-TO-CHAR-P")
     (goto-char (point-max))))
 
-(defun xah-html-code-tag-to-brackets (*begin *end &optional *change-entity-p)
+(defun xah-html-code-tag-to-brackets (@begin @end &optional @change-entity-p)
   "Change HTML code tags to brackets in text selection or current text block.
 
  <code>…</code>
@@ -1286,17 +1286,17 @@ The HTML entities &amp; &lt; &gt; are changed to & < >.
 
 if `universal-argument' is called first, don't convert the HTML entities.
 
-When done, the cursor is placed at *end.
+When done, the cursor is placed at @end.
 
 when called in lisp program,
-*begin *end are region begin/end.
-If *change-entity-p is true, convert HTML entities to char.
+@begin @end are region begin/end.
+If @change-entity-p is true, convert HTML entities to char.
 "
   (interactive
    (let (($bds (xah-get-bounds-of-thing 'block)))
      (list (car $bds) (cdr $bds) (if current-prefix-arg nil t))))
   (save-restriction
-    (narrow-to-region *begin *end)
+    (narrow-to-region @begin @end)
     (xah-replace-regexp-pairs-region (point-min) (point-max) '(["<code class=\"[^\"]+\">" "「"] ["<var class=\"[^\"]+\">" "‹"]))
     (xah-replace-pairs-region
      (point-min) (point-max)
@@ -1305,7 +1305,7 @@ If *change-entity-p is true, convert HTML entities to char.
        ["</code>" "」"]
        ["<var>" "‹"]
        ["</var>" "›"] ))
-    (when *change-entity-p (xah-html-replace-html-chars-to-entities (point-min) (point-max) "ENTITY-TO-CHAR-P"))
+    (when @change-entity-p (xah-html-replace-html-chars-to-entities (point-min) (point-max) "ENTITY-TO-CHAR-P"))
     (goto-char (point-max))))
 
 ;; '(
@@ -1329,17 +1329,17 @@ If *change-entity-p is true, convert HTML entities to char.
 ;; ["&gt;" ">"]
 ;; )
 
-(defun xah-html-remove-html-tags (&optional *begin *end)
+(defun xah-html-remove-html-tags (&optional @begin @end)
   "Delete HTML tags in in current text block or text selection.
  a “text block” is text between blank lines
  WARNING: this command does not cover all HTML tags or convert all HTML entities. For robust solution you might use: lynx $dump -display_charset=utf-8 URL.
 Version 2017-07-23"
   (interactive)
   (let ($p1 $p2 $input-str $output-str)
-    (if *begin
+    (if @begin
         (progn
-          (setq $p1 *begin)
-          (setq $p2 *end))
+          (setq $p1 @begin)
+          (setq $p2 @end))
       (if (use-region-p)
           (progn
             (setq $p1 (region-beginning))
@@ -1451,7 +1451,7 @@ Version 2017-07-27"
            (progn
              (file-relative-name $newPath))))))))
 
-(defun xah-html-extract-url (*begin *end &optional *full-path-p)
+(defun xah-html-extract-url (@begin @end &optional @full-path-p)
   "Extract URLs in current block or region to `kill-ring'.
 
 If `universal-argument' is called first, convert relative URL to full path.
@@ -1461,7 +1461,7 @@ This command extracts all text of the forms
  <‹letter› … src=\"…\" …>
 that is on a a single line, by regex. The quote may be single quote.
 
-When called in lisp code, *begin *end are region begin/end positions.
+When called in lisp code, @begin @end are region begin/end positions.
 Returns a list.
 
 URL `http://ergoemacs.org/emacs/elisp_extract_url_command.html'
@@ -1483,7 +1483,7 @@ Version 2016-07-28"
            (setq $p2 (point)))))
      (list $p1 $p2 current-prefix-arg)))
 
-  (let (($regionText (buffer-substring-no-properties *begin *end))
+  (let (($regionText (buffer-substring-no-properties @begin @end))
         ($urlList (list)))
     (with-temp-buffer
       (insert $regionText)
@@ -1498,7 +1498,7 @@ Version 2016-07-28"
         (push (match-string 3) $urlList)))
     (setq $urlList (reverse $urlList))
 
-    (when *full-path-p
+    (when @full-path-p
       (setq $urlList
             (mapcar
              (lambda ($x)
@@ -1653,9 +1653,9 @@ Version 2015-09-12"
     (delete-region $p1 $p2)
     (insert $newLinkStr)))
 
-(defun xah-html-path-ends-in-image-suffix-p (*path)
-  "Returns t if *path ends in .jpg .png .gif .svg, else nil."
-  (string-match-p "\.jpg\\'\\|\.png\\'\\|\.gif\\'\\|\.svg\\'" *path))
+(defun xah-html-path-ends-in-image-suffix-p (@path)
+  "Returns t if @path ends in .jpg .png .gif .svg, else nil."
+  (string-match-p "\.jpg\\'\\|\.png\\'\\|\.gif\\'\\|\.svg\\'" @path))
 
 (defun xah-html-image-figure-linkify ()
   "Replace a image file's path under cursor with a HTML img tag,
@@ -1833,7 +1833,7 @@ Version 2017-02-12"
     (delete-region $p1 $p2)
     (insert (format "<video src=\"%s\" controls loop autoplay></video>" $src))))
 
-(defun xah-html-amazon-linkify (&optional *tracking-id)
+(defun xah-html-amazon-linkify (&optional @tracking-id)
   "Make the current amazon URL or selection into a link.
 
 Examples of amazon product URL formats
@@ -1855,7 +1855,7 @@ Version 2017-07-22"
   (interactive)
   (let (($bds (bounds-of-thing-at-point 'url))
         $p1 $p2 $url $asin $thingName
-        ($trackId (if *tracking-id *tracking-id "xahh-20" )))
+        ($trackId (if @tracking-id @tracking-id "xahh-20" )))
     (if (use-region-p)
         (setq $p1 (region-beginning) $p2 (region-end))
       (setq $p1 (car $bds) $p2 (cdr $bds)))
@@ -1995,7 +1995,7 @@ Version 2017-08-03"
     ;;
     ))
 
-(defun xah-html-source-url-linkify (*prefixArg)
+(defun xah-html-source-url-linkify (@prefixArg)
   "Make URL at cursor point into a HTML link.
 If there's a text selection, use the text selection as input.
 
@@ -2064,9 +2064,9 @@ Version 2015-09-12"
 
     (setq $linkText
           (cond
-           ((equal *prefixArg 1) $url) ; full url
-           ((or (equal *prefixArg 2) (equal *prefixArg 4) (equal *prefixArg '(4))) (concat $domainName "…")) ; ‹domain›…
-           ((equal *prefixArg 3) "img src") ; img src
+           ((equal @prefixArg 1) $url) ; full url
+           ((or (equal @prefixArg 2) (equal @prefixArg 4) (equal @prefixArg '(4))) (concat $domainName "…")) ; ‹domain›…
+           ((equal @prefixArg 3) "img src") ; img src
            (t (if
                   (or
                    (string-match "wikipedia\\.org.+jpg$" $url)
@@ -2178,7 +2178,7 @@ Version 2017-04-28"
   (interactive)
   (insert "<br />"))
 
-(defun xah-html-emacs-to-windows-kbd-notation (*begin *end)
+(defun xah-html-emacs-to-windows-kbd-notation (@begin @end)
   "Change emacs key notation to Windows's notation on text selection or current line.
 
 For example:
@@ -2188,14 +2188,14 @@ For example:
 
 This command will do most emacs syntax correctly, but not 100% correct, especially on notations like <C-M-down>. But works if it's written as C-M-<down>
 
-When called in lisp code, *begin *end are region begin/end positions.
+When called in lisp code, @begin @end are region begin/end positions.
 Version 2017-01-11"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
      (list (line-beginning-position) (line-end-position))))
   (save-restriction
-    (narrow-to-region *begin *end)
+    (narrow-to-region @begin @end)
     (goto-char (point-min))
     (let ((case-fold-search nil))
       (mapc
@@ -2248,7 +2248,7 @@ Version 2017-01-11"
         ["\\bDEL\\b" "Delete"]
         ]))))
 
-(defun xah-html-htmlize-elisp-keywords (*begin *end)
+(defun xah-html-htmlize-elisp-keywords (@begin @end)
   "Replace 「square-bracketed」 elisp names to HTML markup, in current line or text selection.
 
 Example:
@@ -2256,7 +2256,7 @@ Example:
     becomes
   <code class=\"elisp-ƒ\">sort-lines</code>
 
-When called in lisp code, *begin *end are region begin/end positions.
+When called in lisp code, @begin @end are region begin/end positions.
 
 Note: a word is changed only if all of the following are true:
 
@@ -2279,7 +2279,7 @@ Version 2017-03-17"
   (let (($changedItems '()) $mStr)
     (save-excursion
       (save-restriction
-        (narrow-to-region *begin *end)
+        (narrow-to-region @begin @end)
         (progn
           (goto-char (point-min))
           (while (re-search-forward
@@ -2318,7 +2318,7 @@ Version 2017-03-17"
        (terpri))
      (reverse $changedItems))))
 
-(defun xah-html-brackets-to-html (*begin *end)
+(defun xah-html-brackets-to-html (@begin @end)
   "Replace bracketed text to HTML markup in current line or text selection.
 
 • 「emacs-lisp-function-name」 → <code class=\"elisp-ƒ\">emacs-lisp-function-name</code> if in xah elisp mode
@@ -2331,7 +2331,7 @@ Version 2017-03-17"
 
 Changes are reported to message buffer with char position.
 
-When called in lisp code, *begin *end are region begin/end positions.
+When called in lisp code, @begin @end are region begin/end positions.
 Version 2017-06-13"
   (interactive
    (let (($bds (xah-get-bounds-of-thing-or-region 'block)))
@@ -2339,9 +2339,9 @@ Version 2017-06-13"
   (let (($changedItems '()))
     (save-excursion
       (save-restriction
-        (narrow-to-region *begin *end)
+        (narrow-to-region @begin @end)
         (when (string-match "/ergoemacs_org/" (buffer-file-name))
-          (xah-html-htmlize-elisp-keywords *begin *end))
+          (xah-html-htmlize-elisp-keywords @begin @end))
         (progn
           (goto-char (point-min))
           (while (re-search-forward "「\\([^」]+?\\)」" nil t)
@@ -2433,13 +2433,13 @@ Version 2017-06-13"
        (terpri))
      (reverse $changedItems))))
 
-(defun xah-html-htmlize-keyboard-shortcut-notation (*begin *end)
+(defun xah-html-htmlize-keyboard-shortcut-notation (@begin @end)
   "Markup keyboard shortcut notation in HTML tag, on text selection or current line.
 Example:
  C-w ⇒ <kbd>Ctrl</kbd>+<kbd>w</kbd>
  ctrl+w ⇒ <kbd>Ctrl</kbd>+<kbd>w</kbd>
 
-When called in lisp code, *begin *end are region begin/end positions.
+When called in lisp code, @begin @end are region begin/end positions.
 
 Version 2017-06-10"
   (interactive
@@ -2536,7 +2536,7 @@ Version 2017-06-10"
            ]))
 
     (save-restriction
-      (narrow-to-region *begin *end)
+      (narrow-to-region @begin @end)
       (xah-html-emacs-to-windows-kbd-notation (point-min) (point-max))
 
       (xah-replace-pairs-region (point-min) (point-max) $replaceList 'REPORT 'HILIGHT)
@@ -2574,25 +2574,25 @@ Version 2017-06-10"
 (defvar xah-html-class-input-history nil "for input history of `xah-html-wrap-html-tag'")
 (setq xah-html-class-input-history (list))
 
-(defun xah-html-insert-open-close-tags (*tag-name *class-name *p1 *p2)
-  "Add HTML open/close tags around region boundary *p1 *p2.
+(defun xah-html-insert-open-close-tags (@tag-name @class-name @p1 @p2)
+  "Add HTML open/close tags around region boundary @p1 @p2.
 This function does not `save-excursion'.
 2016-12-07"
   (let* (
-         ($class-str (if (not *class-name)
+         ($class-str (if (not @class-name)
                          ""
-                       (format " class=\"%s\"" *class-name)))
-         ($str-left (format "<%s%s>" *tag-name $class-str))
-         ($str-right (format "</%s>" *tag-name )))
-    (goto-char *p1)
-    (if (xah-html--tag-self-closing-p *tag-name)
-        (insert (format "<%s%s />" *tag-name $class-str))
+                       (format " class=\"%s\"" @class-name)))
+         ($str-left (format "<%s%s>" @tag-name $class-str))
+         ($str-right (format "</%s>" @tag-name )))
+    (goto-char @p1)
+    (if (xah-html--tag-self-closing-p @tag-name)
+        (insert (format "<%s%s />" @tag-name $class-str))
       (progn
         (insert $str-left )
-        (goto-char (+ *p2 (length $str-left)))
+        (goto-char (+ @p2 (length $str-left)))
         (insert $str-right)))))
 
-(defun xah-html-wrap-html-tag (*tag-name &optional *class-name)
+(defun xah-html-wrap-html-tag (@tag-name &optional @class-name)
   "Insert HTML open/close tags to current text unit or text selection.
 When there's no text selection, the tag will be wrapped around current {word, line, text-block}, depending on the tag used.
 
@@ -2607,7 +2607,7 @@ Version 2017-05-28
         (read-string "class:" nil xah-html-class-input-history "")
       nil )))
   (let* (
-         ($wrap-type (xah-html-get-tag-type *tag-name))
+         ($wrap-type (xah-html-get-tag-type @tag-name))
          ($bds
           (if (use-region-p)
               (cons (region-beginning) (region-end))
@@ -2629,8 +2629,8 @@ Version 2017-05-28
             (equal $wrap-type "l")
             (equal $wrap-type "b"))
            (not (or
-                 (string-equal *tag-name "pre")
-                 (string-equal *tag-name "code"))))
+                 (string-equal @tag-name "pre")
+                 (string-equal @tag-name "code"))))
         (progn
           (goto-char (point-min))
           (delete-horizontal-space)
@@ -2645,41 +2645,41 @@ Version 2017-05-28
           (goto-char (point-max))
           (insert "\n")))
 
-      (xah-html-insert-open-close-tags *tag-name *class-name (point-min) (point-max)))
+      (xah-html-insert-open-close-tags @tag-name @class-name (point-min) (point-max)))
 
     (when ; put cursor between when input text is empty
-        (not (xah-html--tag-self-closing-p *tag-name))
+        (not (xah-html--tag-self-closing-p @tag-name))
       (when (and
              (= $p1 $p2))
         (search-backward "</" )))))
 
-(defun xah-html-insert-wrap-source-code (&optional *lang-code)
-  "Insert/wrap a <pre class=\"‹*lang-code›\"> tags to text selection or current text block."
+(defun xah-html-insert-wrap-source-code (&optional @lang-code)
+  "Insert/wrap a <pre class=\"‹@lang-code›\"> tags to text selection or current text block."
   (interactive
    (list
     (ido-completing-read "lang code:" (mapcar (lambda (x) (car x)) xah-html-lang-name-map) "PREDICATE" "REQUIRE-MATCH" nil xah-html-html-tag-input-history "code")))
   (let (($bds (xah-get-bounds-of-thing 'block)))
-    (xah-html-insert-open-close-tags "pre" *lang-code (car $bds) (cdr $bds))))
+    (xah-html-insert-open-close-tags "pre" @lang-code (car $bds) (cdr $bds))))
 
-(defun xah-html-mark-unicode (*pos)
+(defun xah-html-mark-unicode (@pos)
   "Wrap a special <mark> tag around the character before cursor.
 like this:
  <mark class=\"unicode\" title=\"U+3B1: GREEK SMALL LETTER ALPHA\">α</mark>
 
 If the char is any of 「&」 「<」 「>」, then replace them with 「&amp;」「&lt;」「&gt;」.
 
-When called in elisp program, wrap the tag around char before position *pos.
+When called in elisp program, wrap the tag around char before position @pos.
 Version 2017-07-08"
   (interactive (list (point)))
   (let* (
-         ($codepoint (string-to-char (buffer-substring-no-properties (- *pos 1) *pos )))
+         ($codepoint (string-to-char (buffer-substring-no-properties (- @pos 1) @pos )))
          ($name (if describe-char-unicodedata-file
                     (progn
                       (require 'descr-text)
                       (car (cdr (car (describe-char-unicode-data  $codepoint)))))
                   (get-char-code-property $codepoint 'name)))
-         ($char (buffer-substring-no-properties (- *pos 1) *pos)))
-    (goto-char (- *pos 1))
+         ($char (buffer-substring-no-properties (- @pos 1) @pos)))
+    (goto-char (- @pos 1))
     (insert (format "<mark class=\"unicode\" title=\"U+%X: %s\">" $codepoint $name))
     (right-char 1)
     (insert (format "</mark>"))
@@ -2689,7 +2689,7 @@ Version 2017-07-08"
      ((string-equal $char "<") (search-backward "<" ) (delete-char -1) (insert "&lt;"))
      ((string-equal $char ">") (search-backward "<" ) (delete-char -1) (insert "&gt;")))))
 
-(defun xah-html-markup-ruby (&optional *begin *end)
+(defun xah-html-markup-ruby (&optional @begin @end)
   "Wrap HTML ruby annotation tag on current line or selection.
 Chars inside paren are wrapped with “rt” tag.
 For example
@@ -2697,26 +2697,26 @@ For example
 becomes
  <ruby class=\"ruby88\">abc <rt>xyz</rt></ruby>
 
-When called in lisp code, *begin *end are region begin/end positions.
+When called in lisp code, @begin @end are region begin/end positions.
 
 URL `http://ergoemacs.org/emacs/elisp_html-ruby-annotation-markup.html'
 Version 2017-01-11"
   (interactive)
   (progn
-    (if (not *begin)
+    (if (not @begin)
         (progn
           (if (use-region-p)
               (progn
-                (setq *begin (region-beginning))
-                (setq *end (region-end)))
+                (setq @begin (region-beginning))
+                (setq @end (region-end)))
             (progn
-              (setq *begin (line-beginning-position))
-              (setq *end (line-end-position)))))
+              (setq @begin (line-beginning-position))
+              (setq @end (line-end-position)))))
       (progn
-        (setq *begin (line-beginning-position))
-        (setq *end (line-end-position))))
+        (setq @begin (line-beginning-position))
+        (setq @end (line-end-position))))
     (save-restriction
-      (narrow-to-region *begin *end)
+      (narrow-to-region @begin @end)
       (progn
         (goto-char (point-min))
         (while (search-forward "(" nil "NOERROR")
@@ -2868,12 +2868,12 @@ Version 2017-01-13"
             $abrSymbol)
         nil))))
 
-(defun xah-html--abbrev-position-cursor (&optional *pos)
+(defun xah-html--abbrev-position-cursor (&optional @pos)
   "Move cursor back to ▮ if exist, else put at end.
 Return true if found, else false.
 Version 2016-10-24"
   (interactive)
-  (let (($found-p (search-backward "▮" (if *pos *pos (max (point-min) (- (point) 100))) t )))
+  (let (($found-p (search-backward "▮" (if @pos @pos (max (point-min) (- (point) 100))) t )))
     (when $found-p (forward-char ))
     $found-p
     ))
