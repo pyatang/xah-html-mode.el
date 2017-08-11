@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.9.2
+;; Version: 5.9.3
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1654,8 +1654,10 @@ Version 2015-09-12"
     (insert $newLinkStr)))
 
 (defun xah-html-path-ends-in-image-suffix-p (@path)
-  "Returns t if @path ends in .jpg .png .gif .svg, else nil."
-  (string-match-p "\.jpg\\'\\|\.png\\'\\|\.gif\\'\\|\.svg\\'" @path))
+  "Returns t if @path ends in .jpg .png .gif .svg, else nil.
+Version 2017-08-11"
+  (let ((case-fold-search t))
+    (string-match-p "\.jpg\\'\\|\.png\\'\\|\.gif\\'\\|\.svg\\'" @path)))
 
 (defun xah-html-image-figure-linkify ()
   "Replace a image file's path under cursor with a HTML img tag,
@@ -1671,28 +1673,17 @@ Example, if cursor is on the word “i/cat.png”, then it will became
 If there's a text selection, use that as image path.
 
 This function calls `xah-html-image-linkify'.
-Version 2017-08-03"
+Version 2017-08-08"
   (interactive)
   (let ($p1 $p2 $altStr)
     (setq $altStr (xah-html-image-linkify))
-
-    ;; (search-backward "alt=\"")
-    ;; (forward-char 5)
-
-    ;; (progn
-    ;;   (setq $p1 (point))
-    ;;   (search-forward "\"")
-    ;;   (setq $p2 (- (point) 1) )
-    ;;   (setq $altStr (buffer-substring $p1 $p2)))
-
     (search-backward "<img ")
     (insert "<figure>\n")
     (search-forward ">")
     (insert "\n<figcaption>\n")
-    (insert $altStr "\n</figcaption>\n</figure>\n")
-
+    (insert $altStr "\n</figcaption>\n</figure>\n\n")
     (search-backward "</figcaption>")
-
+    (backward-char )
     ;;
     ))
 
@@ -1931,8 +1922,7 @@ Version 2017-08-03"
 (defun xah-html-any-linkify ()
   "Make the text under cursor into a HTML link.
 
-Exactly what tag is used depends on the suffix.
-e.g.
+Exactly what tag is used depends on the suffix. Here's example of result:
 
  <a href=\"xyz.html\">xyz.html</a>
  <link rel=\"stylesheet\" href=\"xyz.css\" />
@@ -1973,10 +1963,12 @@ Version 2017-08-03"
 
      ((or (string-match-p "wikipedia.org/" $input)
           (string-match-p "wiktionary.org/" $input))
-      (let ((case-fold-search nil))
+      (progn
         (if (xah-html-path-ends-in-image-suffix-p $input)
-            (xah-html-source-url-linkify 0)
-          (xah-html-wikipedia-url-linkify ))))
+            (progn
+              (xah-html-source-url-linkify 3))
+          (progn
+(xah-html-wikipedia-url-linkify )))))
 
      ((string-match-p "www\.youtube\.com/watch" $input) (xah-html-youtube-linkify))
 
@@ -2011,30 +2003,27 @@ The anchor text may be of 4 possibilities, depending on value of `universal-argu
 0 or any → smartly decide.
 
 URL `http://ergoemacs.org/emacs/elisp_html-linkify.html'
-Version 2015-09-12"
+Version 2017-08-11"
   (interactive "P")
   (let (
-         $bds
-         $p1-input
-         $p2-input
-         $input-str
-         $p1-url $p2-url $p1-tag $p2-tag
-         $url $domainName $linkText )
-
+        $p1
+        $p2
+        $input
+        $p1-url $p2-url $p1-tag $p2-tag
+        $url $domainName $linkText )
     (if (use-region-p)
         (progn
-          (setq $p1-input (region-beginning))
-          (setq $p2-input (region-end))
-          (setq $input-str (buffer-substring-no-properties $p1-input $p2-input)))
-      (progn
-        (setq $bds (bounds-of-thing-at-point 'url))
-        (setq $p1-input (car $bds))
-        (setq $p2-input (cdr $bds))
-        (setq $input-str (buffer-substring-no-properties $p1-input $p2-input))))
+          (setq $p1 (region-beginning))
+          (setq $p2 (region-end)))
+      (let (($bds (bounds-of-thing-at-point 'url)))
+        (setq $p1 (car $bds))
+        (setq $p2 (cdr $bds))))
+
+    (setq $input (buffer-substring-no-properties $p1 $p2))
 
     ;; check if it's just plain URL or already in linked form 「<a href=…>…</a>」
     ;; If latter, you need to get the boundaries for the entire link too.
-    (if (string-match "href=\"" $input-str)
+    (if (string-match "href=\"" $input)
         (save-excursion
           (search-backward "href=" (- (point) 104)) ; search boundary as extra guard for error
           (forward-char 6)
@@ -2049,10 +2038,10 @@ Version 2015-09-12"
           (search-forward "</a>" (+ $p2-url 140))
           (setq $p2-tag (point)))
       (progn
-        (setq $p1-url $p1-input)
-        (setq $p2-url $p2-input)
-        (setq $p1-tag $p1-input)
-        (setq $p2-tag $p2-input)))
+        (setq $p1-url $p1)
+        (setq $p2-url $p2)
+        (setq $p1-tag $p1)
+        (setq $p2-tag $p2)))
 
     (setq $url (replace-regexp-in-string "&amp;" "&" (buffer-substring-no-properties $p1-url $p2-url) nil "LITERAL")) ; in case it's already encoded. TODO this is only 99% correct.
 
