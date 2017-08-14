@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.9.3
+;; Version: 5.9.4 2017-08-13
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1934,14 +1934,12 @@ Exactly what tag is used depends on the suffix. Here's example of result:
 and YouTube url.
 
 If region is active, use it as input.
-Version 2017-08-03"
+Version 2017-08-13"
   (interactive)
-
   (let ( $p1 $p2 $input)
     ;; (if (string-match "%" $input )
     ;;     (decode-coding-string (url-unhex-string "https://mysticsiva.wordpress.com/2016/11/04/%E3%82%AD%E3%83%BC%E3%82%AD%E3%83%A3%E3%83%83%E3%83%97%E4%BA%A4%E6%8F%9B3/") 'utf-8)
     ;;   $input)
-
     (if (use-region-p)
         (setq $p1 (region-beginning) $p2 (region-end))
       (save-excursion
@@ -1953,14 +1951,12 @@ Version 2017-08-03"
           (goto-char $p0)
           (skip-chars-forward "^  \"\t\n'|[]{}<>〔〕“”〈〉《》【】〖〗«»‹›·。\\'")
           (setq $p2 (point)))))
-    (setq $input (buffer-substring-no-properties $p1 $p2))
+    (setq $input (replace-regexp-in-string "^file:///" "/" (buffer-substring-no-properties $p1 $p2) t t))
     (cond
-
      ((string-match-p "\\.css\\'" $input) (xah-html-css-linkify))
      ((string-match-p "\\.js\\'\\|\\.ts\\'" $input) (xah-html-javascript-linkify))
      ((string-match-p "\\.mp3\\'\\|\\.ogg\\'" $input) (xah-html-audio-file-linkify))
      ((string-match-p "\\.mp4\\'\\|\\.mov\\'\\|\\.mkv\\'\\|\\.webm\\'" $input) (xah-html-video-file-linkify))
-
      ((or (string-match-p "wikipedia.org/" $input)
           (string-match-p "wiktionary.org/" $input))
       (progn
@@ -1968,8 +1964,7 @@ Version 2017-08-03"
             (progn
               (xah-html-source-url-linkify 3))
           (progn
-(xah-html-wikipedia-url-linkify )))))
-
+            (xah-html-wikipedia-url-linkify )))))
      ((string-match-p "www\.youtube\.com/watch" $input) (xah-html-youtube-linkify))
 
      ((string-match-p "www\.amazon\.com/\\|//amzn\.to/" $input) (xah-html-amazon-linkify))
@@ -2131,7 +2126,8 @@ Version 2016-06-29."
 (defun xah-html-wrap-url ()
   "Make the URL at cursor point into a HTML link.
 Work on current non-whitespace char sequence or text selection.
-Version 2017-08-01"
+
+Version 2017-08-13"
   (interactive)
   (let ( $p1 $p2
              $new-str
@@ -2143,7 +2139,8 @@ Version 2017-08-01"
         (setq $p1 (point))
         (skip-chars-forward "^ \n\t" )
         (setq $p2 (point))))
-    (setq $new-str (file-relative-name (buffer-substring-no-properties $p1 $p2)))
+    (setq $new-str (file-relative-name
+                    (replace-regexp-in-string "^file:///" "/" (buffer-substring-no-properties $p1 $p2) t t)))
     (delete-region $p1 $p2)
     (insert (concat "<a href=\"" (url-encode-url $new-str) "\">" $new-str "</a>" ))))
 
