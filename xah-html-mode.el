@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.9.5 2017-08-13
+;; Version: 5.10.0 2017-08-15
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1919,6 +1919,53 @@ Version 2017-08-03"
     (search-backward "</figcaption>" )
     (backward-char 1)))
 
+(defun xah-html-file-linkify (&optional @begin @end)
+  "Make the path under cursor into a HTML link for xah site.
+
+For Example, if you cursor is on the text “../emacs/emacs.html”,
+then it'll become:
+“<a href=\"../emacs/emacs.html\">Emacs Tutorial</a>”.
+The link text is pulled from the file's <title> tag if exists.
+
+If there is text selection, use it as file path.
+
+The file path can also be a full path or URL.
+Version 2017-08-15"
+  (interactive
+   (if (use-region-p)
+       (list (region-beginning) (region-end))
+     (save-excursion
+       (let ($p0 $p1 $p2)
+         (setq $p0 (point))
+         ;; chars that are likely to be delimiters of full path, e.g. space, tabs, brakets.
+         (skip-chars-backward "^  \"\t\n'|()[]{}<>〔〕“”〈〉《》【】〖〗«»‹›·。\\`")
+         (setq $p1 (point))
+         (goto-char $p0)
+         (skip-chars-forward "^  \"\t\n'|()[]{}<>〔〕“”〈〉《》【】〖〗«»‹›·。\\'")
+         (setq $p2 (point))
+         (list $p1 $p2)))))
+  (let* (
+         ($inputStr (buffer-substring-no-properties @begin @end))
+         ($inputStParts (xah-html-split-uri-hashmark $inputStr))
+         ($pt1 (aref $inputStParts 0))
+         ($fragPart (aref $inputStParts 1))
+         ($fPath (expand-file-name $pt1 default-directory)))
+    (message "$fPath is %s" $fPath)
+    (if (file-exists-p $fPath)
+       (let* (
+              ($rPath (file-relative-name $fPath (file-name-directory (or (buffer-file-name) default-directory))))
+              ($title
+               (if (string-match-p ".+html\\'" $fPath)
+                   (concat (xah-html-get-html-file-title $fPath t) $fragPart)
+                 (file-name-nondirectory $fPath)))
+              ($resultStr
+               (format "<a href=\"%s\">%s</a>"
+                       (concat $rPath $fragPart)
+                       (if (string-equal $title "") $rPath $title ))))
+          (delete-region @begin @end)
+          (insert $resultStr))
+      (progn (user-error "Cannot locate the file: 「%s」" $fPath)))))
+
 (defun xah-html-any-linkify ()
   "Make the text under cursor into a HTML link.
 
@@ -1934,7 +1981,7 @@ Exactly what tag is used depends on the suffix. Here's example of result:
 and YouTube url.
 
 If region is active, use it as input.
-Version 2017-08-13"
+Version 2017-08-15"
   (interactive)
   (let ( $p1 $p2 $input)
     ;; (if (string-match "%" $input )
@@ -1977,6 +2024,8 @@ Version 2017-08-13"
       (if (fboundp 'xah-all-linkify)
           (xah-all-linkify)
         (xah-html-wrap-url)))
+
+     ((file-exists-p $input) (xah-html-file-linkify $p1 $p2))
 
      (t (xah-html-wrap-url)))
     ;;
@@ -2129,9 +2178,7 @@ Work on current non-whitespace char sequence or text selection.
 
 Version 2017-08-13"
   (interactive)
-  (let ( $p1 $p2
-             $new-str
-             )
+  (let ( $p1 $p2 $new-str )
     (if (region-active-p)
         (progn (setq $p1 (region-beginning) $p2 (region-end)))
       (save-excursion
@@ -2427,7 +2474,7 @@ Example:
 
 When called in lisp code, @begin @end are region begin/end positions.
 
-Version 2017-06-10"
+Version 2017-08-15"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -2482,7 +2529,7 @@ Version 2017-06-10"
            ["Pause" "<kbd>Pause</kbd>"]
            ["Break" "<kbd>Pause</kbd>"]
            ["PrtScn" "<kbd>PrtScn</kbd>"]
-           ["printscreen" "<kbd>PrtScn</kbd>"]
+           ["ps" "<kbd>PrtScn</kbd>"]
            ["sysrq" "<kbd>SysRq</kbd>"]
            ["scrlk" "<kbd>Scroll Lock</kbd>"]
            ["ScrLk" "<kbd>Scroll Lock</kbd>"]
@@ -2736,6 +2783,46 @@ This is heuristic based, does not remove ALL possible redundant whitespace."
           (goto-char (point-min))
           (while (re-search-forward " *<p>\n+" nil "NOERROR")
             (replace-match "<p>")))))))
+
+(defun xah-html-remove-uri-fragment (@href-value)
+  "remove URL @href-value fragment, anything after first 「#」 char, including the #.
+See also `xah-html-split-uri-hashmark'
+Version 2017-08-15"
+  ;; test
+  ;; (xah-html-remove-uri-fragment "a#b") ; "a"
+  ;; (xah-html-remove-uri-fragment "#3") ; ""
+  ;; (xah-html-remove-uri-fragment "4") ; "4"
+  ;; (xah-html-remove-uri-fragment "#") ; ""
+  ;; (xah-html-remove-uri-fragment "") ; ""
+  (let (($x (string-match-p "#" @href-value )))
+    (if $x
+        (substring @href-value 0 $x)
+      @href-value )))
+
+(defun xah-html-split-uri-hashmark (@href-value)
+  "Split a URL @href-value by 「#」 char, return a vector.
+ e.g. \"y.html#z\" ⇒ [\"y.html\", \"#z\"]
+
+Examples:
+ 「a#b」 ⇒ 「a」 「#b」
+ 「#」 ⇒ 「」 「#」
+ 「#3」 ⇒ 「」 「#3」
+ 「3#」 ⇒ 「3」 「#」
+ 「4」 ⇒  「4」 「」
+ 「」 ⇒  「」 「」
+
+See also: `xah-remove-uri-fragment'
+Version 2017-08-15"
+  ;; test
+  ;; (xah-html-split-uri-hashmark "a#b") ; ["a" "#b"]
+  ;; (xah-html-split-uri-hashmark "#3") ; ["" "#3"]
+  ;; (xah-html-split-uri-hashmark "#") ; ["" "#"]
+  ;; (xah-html-split-uri-hashmark "4") ; ["4" ""]
+  ;; (xah-html-split-uri-hashmark "") ; ["" ""]
+  (let (($x (string-match-p "#" @href-value )))
+    (if $x
+        (vector (substring @href-value 0 $x) (substring @href-value $x))
+      (vector @href-value "" ))))
 
 (defun xah-html-url-percent-decode-string (string)
   "Returns string URL percent-encoded
