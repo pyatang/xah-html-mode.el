@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.10.0 2017-08-15
+;; Version: 5.10.1 2017-08-16
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1659,34 +1659,6 @@ Version 2017-08-11"
   (let ((case-fold-search t))
     (string-match-p "\.jpg\\'\\|\.png\\'\\|\.gif\\'\\|\.svg\\'" @path)))
 
-(defun xah-html-image-figure-linkify ()
-  "Replace a image file's path under cursor with a HTML img tag,
-and wrap it with “figure” and “figcaption” tags.
-
-Example, if cursor is on the word “i/cat.png”, then it will became
-
-<figure>
-<img src=\"cat.png\" alt=\"cat\" width=\"707\" height=\"517\" />
-<figcaption>▮</figcaption>
-</figure>
-
-If there's a text selection, use that as image path.
-
-This function calls `xah-html-image-linkify'.
-Version 2017-08-08"
-  (interactive)
-  (let ($p1 $p2 $altStr)
-    (setq $altStr (xah-html-image-linkify))
-    (search-backward "<img ")
-    (insert "<figure>\n")
-    (search-forward ">")
-    (insert "\n<figcaption>\n")
-    (insert $altStr "\n</figcaption>\n</figure>\n\n")
-    (search-backward "</figcaption>")
-    (backward-char )
-    ;;
-    ))
-
 (defun xah-html-image-linkify ()
   "Replace image file path under cursor to HTML img inline link.
 Example:
@@ -1752,6 +1724,71 @@ Version 2017-06-09"
     $altText
     ))
 
+(defun xah-html-wrap-figure-tag (&optional @begin @end @figcaption)
+  "Wrap <figure> tag around @begin @end, also add <figcaption>.
+If no @begin @end are given, use current line.
+
+<figure>
+<img src=\"cat.png\" alt=\"cat\" width=\"707\" height=\"517\" />
+<figcaption>▮</figcaption>
+</figure>
+
+If there's a text selection, use that as image path.
+
+Version 2017-08-16"
+  (interactive)
+  (let ($p1 $p2
+            ($figcapStr (if @figcaption
+                       @figcaption
+                     ""
+                     )))
+
+    (if (and @begin @end)
+        (progn (setq $p1 @begin $p2 @end))
+      (progn
+        (setq $p1 (line-beginning-position) $p2 (line-end-position))))
+
+    (goto-char $p2)
+    (insert "\n<figcaption>\n")
+    (insert $figcapStr "\n</figcaption>\n</figure>\n\n")
+
+    (goto-char $p1)
+    (insert "<figure>\n")
+
+    (search-forward "</figcaption>" nil t)
+    (search-backward "<")
+    (backward-char )
+    ;;
+    ))
+
+(defun xah-html-image-figure-linkify ()
+  "Replace a image file's path under cursor with a HTML img tag,
+and wrap it with “figure” and “figcaption” tags.
+
+Example, if cursor is on the word “i/cat.png”, then it will became
+
+<figure>
+<img src=\"cat.png\" alt=\"cat\" width=\"707\" height=\"517\" />
+<figcaption>▮</figcaption>
+</figure>
+
+If there's a text selection, use that as image path.
+
+This function calls `xah-html-image-linkify'.
+Version 2017-08-08"
+  (interactive)
+  (let ($p1 $p2 $altStr)
+    (setq $altStr (xah-html-image-linkify))
+    (search-backward "<img ")
+    (insert "<figure>\n")
+    (search-forward ">")
+    (insert "\n<figcaption>\n")
+    (insert $altStr "\n</figcaption>\n</figure>\n\n")
+    (search-backward "</figcaption>")
+    (backward-char )
+    ;;
+    ))
+
 (defun xah-html-css-linkify ()
   "Make the path under cursor into a HTML link.
  e.g. /home/xah/web/xahlee_org/lit.css
@@ -1808,7 +1845,7 @@ becomes
 e.g. xyz.webm
 becomes
 <video src=\"i/xyz.webm\" controls loop autoplay></video>
-Version 2017-02-12"
+Version 2017-08-16"
   (interactive)
   (let* (
          ($bds (bounds-of-thing-at-point 'filename ))
@@ -1822,7 +1859,7 @@ Version 2017-02-12"
                 (file-relative-name $inputStr)
               (user-error "file not found: 「%s」" $inputStr)))))
     (delete-region $p1 $p2)
-    (insert (format "<video src=\"%s\" controls loop autoplay></video>" $src))))
+    (insert (format "<video src=\"%s\" controls loop></video>" $src))))
 
 (defun xah-html-amazon-linkify (&optional @tracking-id)
   "Make the current amazon URL or selection into a link.
@@ -1945,23 +1982,23 @@ Version 2017-08-15"
          (setq $p2 (point))
          (list $p1 $p2)))))
   (let* (
-         ($inputStr (buffer-substring-no-properties @begin @end))
+         ($inputStr (replace-regexp-in-string "^file://" "" (buffer-substring-no-properties @begin @end)))
          ($inputStParts (xah-html-split-uri-hashmark $inputStr))
          ($pt1 (aref $inputStParts 0))
          ($fragPart (aref $inputStParts 1))
          ($fPath (expand-file-name $pt1 default-directory)))
     (message "$fPath is %s" $fPath)
     (if (file-exists-p $fPath)
-       (let* (
-              ($rPath (file-relative-name $fPath (file-name-directory (or (buffer-file-name) default-directory))))
-              ($title
-               (if (string-match-p ".+html\\'" $fPath)
-                   (concat (xah-html-get-html-file-title $fPath t) $fragPart)
-                 (file-name-nondirectory $fPath)))
-              ($resultStr
-               (format "<a href=\"%s\">%s</a>"
-                       (concat $rPath $fragPart)
-                       (if (string-equal $title "") $rPath $title ))))
+        (let* (
+               ($rPath (file-relative-name $fPath (file-name-directory (or (buffer-file-name) default-directory))))
+               ($title
+                (if (string-match-p ".+html\\'" $fPath)
+                    (concat (xah-html-get-html-file-title $fPath t) $fragPart)
+                  (file-name-nondirectory $fPath)))
+               ($resultStr
+                (format "<a href=\"%s\">%s</a>"
+                        (concat $rPath $fragPart)
+                        (if (string-equal $title "") $rPath $title ))))
           (delete-region @begin @end)
           (insert $resultStr))
       (progn (user-error "Cannot locate the file: 「%s」" $fPath)))))
@@ -1981,7 +2018,7 @@ Exactly what tag is used depends on the suffix. Here's example of result:
 and YouTube url.
 
 If region is active, use it as input.
-Version 2017-08-15"
+Version 2017-08-16"
   (interactive)
   (let ( $p1 $p2 $input)
     ;; (if (string-match "%" $input )
@@ -2003,7 +2040,9 @@ Version 2017-08-15"
      ((string-match-p "\\.css\\'" $input) (xah-html-css-linkify))
      ((string-match-p "\\.js\\'\\|\\.ts\\'" $input) (xah-html-javascript-linkify))
      ((string-match-p "\\.mp3\\'\\|\\.ogg\\'" $input) (xah-html-audio-file-linkify))
-     ((string-match-p "\\.mp4\\'\\|\\.mov\\'\\|\\.mkv\\'\\|\\.webm\\'\\|\\.m1v\\'\\|\\.m4v\\'" $input) (xah-html-video-file-linkify))
+     ((string-match-p "\\.mp4\\'\\|\\.mov\\'\\|\\.mkv\\'\\|\\.webm\\'\\|\\.m1v\\'\\|\\.m4v\\'" $input)
+      (xah-html-video-file-linkify)
+      (xah-html-wrap-figure-tag))
      ((or (string-match-p "wikipedia.org/" $input)
           (string-match-p "wiktionary.org/" $input))
       (progn
