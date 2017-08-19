@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.10.1 2017-08-16
+;; Version: 5.11.0 2017-08-19
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1822,6 +1822,25 @@ Version 2016-10-31"
     (delete-region $p1 $p2)
     (insert (format "<script defer src=\"%s\"></script>" $src))))
 
+(defun xah-html-pdf-embed-linkify ()
+  "Make the path under cursor into a embedded pdf.
+e.g. math.pdf
+becomes
+<embed src=\"math.pdf\" width=\"1100\" height=\"1000\" />
+Version 2017-08-17"
+  (interactive)
+  (let* (
+         ($bds (xah-get-bounds-of-thing-or-region 'filepath))
+         ($p1 (car $bds))
+         ($p2 (cdr $bds))
+         ($inputStr (buffer-substring-no-properties $p1 $p2))
+         ($src
+          (if (string-match "^http" $inputStr )
+              $inputStr
+            (file-relative-name $inputStr))))
+    (delete-region $p1 $p2)
+    (insert (format "<embed src=\"%s\" width=\"1100\" height=\"1000\" />" $src))))
+
 (defun xah-html-audio-file-linkify ()
   "Make the path under cursor into a HTML link.
 e.g. xyz.mp3
@@ -2038,11 +2057,13 @@ Version 2017-08-16"
     (setq $input (replace-regexp-in-string "^file:///" "/" (buffer-substring-no-properties $p1 $p2) t t))
     (cond
      ((string-match-p "\\.css\\'" $input) (xah-html-css-linkify))
+     ((string-match-p "\\.pdf" $input) (xah-html-pdf-embed-linkify))
      ((string-match-p "\\.js\\'\\|\\.ts\\'" $input) (xah-html-javascript-linkify))
      ((string-match-p "\\.mp3\\'\\|\\.ogg\\'" $input) (xah-html-audio-file-linkify))
      ((string-match-p "\\.mp4\\'\\|\\.mov\\'\\|\\.mkv\\'\\|\\.webm\\'\\|\\.m1v\\'\\|\\.m4v\\'" $input)
       (xah-html-video-file-linkify)
       (xah-html-wrap-figure-tag))
+
      ((or (string-match-p "wikipedia.org/" $input)
           (string-match-p "wiktionary.org/" $input))
       (progn
