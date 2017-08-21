@@ -7,13 +7,10 @@
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
+;; License: GPL v3
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
 
 ;; This file is not part of GNU Emacs.
-
-;;; License:
-
-;; You can redistribute this program and/or modify it under the terms of the GNU General Public License version 3.
 
 ;;; Commentary:
 ;; Major mode for editing pure HTML5 files.
