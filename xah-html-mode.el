@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.11.20170823
+;; Version: 5.11.20170824
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1511,16 +1511,16 @@ Version 2016-07-28"
         (message "%s" $printedResult)))
     $urlList ))
 
-(defun xah-html-update-title ( newTitle)
-  "Update a HTML article's title and h1 tags.
-Update the <title>…</title> and <h1>…</h1> of current buffer."
+(defun xah-html-update-title ( @title)
+  "Update the <title>…</title> and <h1>…</h1> of current buffer.
+Version 2017-08-24"
   (interactive
-   (let (oldTitle)
+   (let ($oldTitle)
      (save-excursion
        (goto-char 1)
        (re-search-forward "<title>\\([^<]+?\\)</title>")
-       (setq oldTitle (match-string 1 )))
-     (list (read-string "New title:" oldTitle nil oldTitle "INHERIT-INPUT-METHOD"))))
+       (setq $oldTitle (match-string 1 )))
+     (list (read-string "New title:" $oldTitle nil $oldTitle "INHERIT-INPUT-METHOD"))))
   (let ($p1 $p2)
     (save-excursion
       (goto-char 1)
@@ -1531,7 +1531,7 @@ Update the <title>…</title> and <h1>…</h1> of current buffer."
              (setq $p2 (point))
              (delete-region $p1 $p2 )
              (goto-char $p1)
-             (insert newTitle ))
+             (insert @title ))
       (if (search-forward "<h1>")
           (progn
             (setq $p1 (point))
@@ -1540,7 +1540,7 @@ Update the <title>…</title> and <h1>…</h1> of current buffer."
             (setq $p2 (point))
             (delete-region $p1 $p2 )
             (goto-char $p1)
-            (insert newTitle ))
+            (insert @title ))
         (progn
           (message "<h1> tag not found. adding"))))))
 
@@ -3069,7 +3069,7 @@ Version 2016-10-24"
   (define-key xah-html-mode-no-chord-map (kbd "1") 'xah-html-get-precode-make-new-file)
   (define-key xah-html-mode-no-chord-map (kbd "2") 'xah-html-toggle-syntax-coloring-markup)
 
-  (define-key xah-html-mode-no-chord-map (kbd "3") 'xah-html-update-title)
+  (define-key xah-html-mode-no-chord-map (kbd "3") nil)
   (define-key xah-html-mode-no-chord-map (kbd "4") 'xah-html-markup-ruby)
   (define-key xah-html-mode-no-chord-map (kbd "5") 'xah-html-mark-unicode)
   (define-key xah-html-mode-no-chord-map (kbd "6") 'xah-html-html-to-text)
@@ -3092,7 +3092,7 @@ Version 2016-10-24"
   (define-key xah-html-mode-no-chord-map (kbd "k") 'xah-html-htmlize-keyboard-shortcut-notation)
   (define-key xah-html-mode-no-chord-map (kbd "l") 'xah-html-htmlize-elisp-keywords)
   (define-key xah-html-mode-no-chord-map (kbd "m") 'xah-html-insert-wrap-source-code)
-  (define-key xah-html-mode-no-chord-map (kbd "n") nil)
+  (define-key xah-html-mode-no-chord-map (kbd "n") 'xah-html-update-title)
   (define-key xah-html-mode-no-chord-map (kbd "o") nil)
   (define-key xah-html-mode-no-chord-map (kbd "p") 'browse-url-of-buffer)
   (define-key xah-html-mode-no-chord-map (kbd "q") 'xah-html-make-link-defunct)
