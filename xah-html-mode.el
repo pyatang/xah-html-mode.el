@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.11.20170820
+;; Version: 5.11.20170823
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1824,7 +1824,7 @@ Version 2016-10-31"
 e.g. math.pdf
 becomes
 <embed src=\"math.pdf\" width=\"1100\" height=\"1000\" />
-Version 2017-08-17"
+Version 2017-08-22"
   (interactive)
   (let* (
          ($bds (xah-get-bounds-of-thing-or-region 'filepath))
@@ -1836,7 +1836,7 @@ Version 2017-08-17"
               $inputStr
             (file-relative-name $inputStr))))
     (delete-region $p1 $p2)
-    (insert (format "<embed src=\"%s\" width=\"1100\" height=\"1000\" />" $src))))
+    (insert (format "<embed src=\"%s\" width=\"1100\" height=\"1000\" type=\"application/pdf\" />" $src))))
 
 (defun xah-html-audio-file-linkify ()
   "Make the path under cursor into a HTML link.
@@ -2053,6 +2053,16 @@ Version 2017-08-16"
           (setq $p2 (point)))))
     (setq $input (replace-regexp-in-string "^file:///" "/" (buffer-substring-no-properties $p1 $p2) t t))
     (cond
+     ((or (string-match-p "wikipedia.org/" $input)
+          (string-match-p "wiktionary.org/" $input)
+          (string-match-p "wikimedia.org/" $input))
+      (progn
+        (if (xah-html-path-ends-in-image-suffix-p $input)
+            (progn
+              (xah-html-source-url-linkify 3))
+          (progn
+            (xah-html-wikipedia-url-linkify )))))
+
      ((string-match-p "\\.css\\'" $input) (xah-html-css-linkify))
      ((string-match-p "\\.pdf" $input) (xah-html-pdf-embed-linkify))
      ((string-match-p "\\.js\\'\\|\\.ts\\'" $input) (xah-html-javascript-linkify))
@@ -2061,14 +2071,6 @@ Version 2017-08-16"
       (xah-html-video-file-linkify)
       (xah-html-wrap-figure-tag))
 
-     ((or (string-match-p "wikipedia.org/" $input)
-          (string-match-p "wiktionary.org/" $input))
-      (progn
-        (if (xah-html-path-ends-in-image-suffix-p $input)
-            (progn
-              (xah-html-source-url-linkify 3))
-          (progn
-            (xah-html-wikipedia-url-linkify )))))
      ((string-match-p "www\.youtube\.com/watch" $input) (xah-html-youtube-linkify))
 
      ((string-match-p "www\.amazon\.com/\\|//amzn\.to/" $input) (xah-html-amazon-linkify))
@@ -2104,13 +2106,12 @@ The anchor text may be of 4 possibilities, depending on value of `universal-argu
 0 or any → smartly decide.
 
 URL `http://ergoemacs.org/emacs/elisp_html-linkify.html'
-Version 2017-08-11"
+Version 2017-08-23"
   (interactive "P")
   (let (
         $p1
         $p2
         $input
-        $p1-url $p2-url $p1-tag $p2-tag
         $url $domainName $linkText )
     (if (use-region-p)
         (progn
@@ -2119,61 +2120,27 @@ Version 2017-08-11"
       (let (($bds (bounds-of-thing-at-point 'url)))
         (setq $p1 (car $bds))
         (setq $p2 (cdr $bds))))
-
     (setq $input (buffer-substring-no-properties $p1 $p2))
-
-    ;; check if it's just plain URL or already in linked form 「<a href=…>…</a>」
-    ;; If latter, you need to get the boundaries for the entire link too.
-    (if (string-match "href=\"" $input)
-        (save-excursion
-          (search-backward "href=" (- (point) 104)) ; search boundary as extra guard for error
-          (forward-char 6)
-          (setq $p1-url (point))
-          (search-forward "\"" (+ $p1-url 104))
-          (setq $p2-url (- (point) 1))
-
-          (goto-char $p1-url)
-          (search-backward "<a" (- $p1-url 30))
-          (setq $p1-tag (point))
-          (goto-char $p2-url)
-          (search-forward "</a>" (+ $p2-url 140))
-          (setq $p2-tag (point)))
-      (progn
-        (setq $p1-url $p1)
-        (setq $p2-url $p2)
-        (setq $p1-tag $p1)
-        (setq $p2-tag $p2)))
-
-    (setq $url (replace-regexp-in-string "&amp;" "&" (buffer-substring-no-properties $p1-url $p2-url) nil "LITERAL")) ; in case it's already encoded. TODO this is only 99% correct.
-
-    ;; get the domain name
+    (setq $url (replace-regexp-in-string "&amp;" "&" $input nil "LITERAL"))
+    ;; in case it's already encoded. TODO this is only 99% correct.
     (setq $domainName
           (progn
             (string-match "://\\([^\/]+?\\)/" $url)
             (match-string 1 $url)))
-
     (setq $linkText
           (cond
-           ((equal @prefixArg 1) $url) ; full url
-           ((or (equal @prefixArg 2) (equal @prefixArg 4) (equal @prefixArg '(4))) (concat $domainName "…")) ; ‹domain›…
-           ((equal @prefixArg 3) "img src") ; img src
+           ((equal @prefixArg 1) $url)
+           ((or (equal @prefixArg 2) (equal @prefixArg 4) (equal @prefixArg '(4))) (concat $domainName "…"))
+           ((equal @prefixArg 3) "image source")
            (t (if
-                  (or
-                   (string-match "wikipedia\\.org.+jpg$" $url)
-                   (string-match "wikipedia\\.org.+JPG$" $url)
-                   (string-match "wikipedia\\.org.+png$" $url)
-                   (string-match "wikipedia\\.org.+PNG$" $url)
-                   (string-match "wikipedia\\.org.+svg$" $url)
-                   (string-match "wikipedia\\.org.+SVG$" $url))
+                  (let ((case-fold-search t))
+                    (string-match "\\(wikimedia\\.org\\|wikipedia\\.org\\).+\\(jpg\\|png\\|svg\\)$" $url))
                   "image source"
                 $url
-                )) ; smart
-           ))
-
+                ))))
     (setq $url (replace-regexp-in-string "&" "&amp;" $url))
-
     ;; delete URL and insert the link
-    (delete-region $p1-tag $p2-tag)
+    (delete-region $p1 $p2)
     (insert (format
              "<a class=\"sorc\" href=\"%s\" data-accessed=\"%s\">%s</a>"
              $url (format-time-string "%Y-%m-%d") $linkText
