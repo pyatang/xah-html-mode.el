@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.11.20170824
+;; Version: 5.12.20170905
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1661,12 +1661,16 @@ Version 2017-08-11"
 Example:
  img/my_cats.jpg
 become
- <img src=\"img/my_cats.jpg\" alt=\"emacs logo\" width=\"470\" height=\"456\" />
+ <img src=\"img/my_cats.jpg\" alt=\"my cats\" />
+
+If `univers-argument' is called before, add width and height attribute, e.g.:
+
+ <img src=\"img/my_cats.jpg\" alt=\"my cats\" width=\"470\" height=\"456\" />
 
 Returns the string used in the alt attribute.
 
 URL `http://ergoemacs.org/emacs/elisp_image_tag.html'
-Version 2017-06-09"
+Version 2017-09-04"
   (interactive)
   (let ( $p1 $p2 $imgPath
              $hrefValue $altText $imgWH $width $height)
@@ -1680,44 +1684,55 @@ Version 2017-06-09"
         (goto-char $p0)
         (skip-chars-forward "^  \"\t\n'|()[]{}<>〔〕“”〈〉《》【】〖〗«»‹›·。\\'")
         (setq $p2 (point))
-        (goto-char $p0))
-      (setq $imgPath
-            (if (and (fboundp 'xahsite-web-path-to-filepath)
-                     (fboundp 'xah-local-url-to-file-path))
-                (xahsite-web-path-to-filepath
-                 (xah-local-url-to-file-path
-                  (buffer-substring-no-properties $p1 $p2 )))
-              (buffer-substring-no-properties $p1 $p2 )))
-      (when (not (file-exists-p $imgPath))
-        (user-error "file not exist at %s"  $imgPath))
-      (setq $hrefValue
-            (file-relative-name
-             $imgPath
-             (file-name-directory (or (buffer-file-name) default-directory))))
-      (setq $altText
-            (replace-regexp-in-string
-             "-" " "
-             (replace-regexp-in-string
-              "_" " "
-              (replace-regexp-in-string
-               "\\.[A-Za-z]\\{3,4\\}$" "" (file-name-nondirectory $imgPath) t t) t t)))
-      (setq $imgWH (xah-html--get-image-dimensions $imgPath))
-      (setq $width (number-to-string (elt $imgWH 0)))
-      (setq $height (number-to-string (elt $imgWH 1))))
+        (goto-char $p0)))
 
-    (delete-region $p1 $p2)
-    (insert
-     (if (or (equal $width "0") (equal $height "0"))
+    (setq $imgPath
+          (if (and (fboundp 'xahsite-web-path-to-filepath)
+                   (fboundp 'xah-local-url-to-file-path))
+              (xahsite-web-path-to-filepath
+               (xah-local-url-to-file-path
+                (buffer-substring-no-properties $p1 $p2 )))
+            (buffer-substring-no-properties $p1 $p2 )))
+    (when (not (file-exists-p $imgPath))
+      (user-error "file not exist at %s"  $imgPath))
+    (setq $hrefValue
+          (file-relative-name
+           $imgPath
+           (file-name-directory (or (buffer-file-name) default-directory))))
+    (setq $altText
+          (replace-regexp-in-string
+           "-" " "
+           (replace-regexp-in-string
+            "_" " "
+            (replace-regexp-in-string
+             "\\.[A-Za-z]\\{3,4\\}$" "" (file-name-nondirectory $imgPath) t t) t t)))
+
+    (if current-prefix-arg
+        (progn
+          (setq $imgWH (xah-html--get-image-dimensions $imgPath))
+          (setq $width (number-to-string (elt $imgWH 0)))
+          (setq $height (number-to-string (elt $imgWH 1)))
+
+          (delete-region $p1 $p2)
+          (insert
+           (if (or (equal $width "0") (equal $height "0"))
+               (concat
+                "<img src=\""
+                $hrefValue
+                "\"" " " "alt=\"" $altText "\"" " />")
+             (concat
+              "<img src=\""
+              $hrefValue
+              "\"" " " "alt=\"" $altText "\""
+              " width=\"" $width "\""
+              " height=\"" $height "\" />"))))
+      (progn
+        (delete-region $p1 $p2)
+        (insert
          (concat
           "<img src=\""
           $hrefValue
-          "\"" " " "alt=\"" $altText "\"" " />")
-       (concat
-        "<img src=\""
-        $hrefValue
-        "\"" " " "alt=\"" $altText "\""
-        " width=\"" $width "\""
-        " height=\"" $height "\" />")))
+          "\"" " " "alt=\"" $altText "\"" " />"))))
     $altText
     ))
 
@@ -1837,6 +1852,28 @@ Version 2017-08-22"
             (file-relative-name $inputStr))))
     (delete-region $p1 $p2)
     (insert (format "<embed src=\"%s\" width=\"1100\" height=\"1000\" type=\"application/pdf\" />" $src))))
+
+(defun xah-html-pdf-linkify ()
+  "Make the pdf file path under cursor into a link.
+e.g.
+ doc/cat.pdf
+becomes
+ <a href=\"doc/cat.pdf\">cat.pdf</a>
+
+Version 2017-08-24"
+  (interactive)
+  (let* (
+         ($bds (xah-get-bounds-of-thing-or-region 'filepath))
+         ($p1 (car $bds))
+         ($p2 (cdr $bds))
+         ($inputStr (buffer-substring-no-properties $p1 $p2))
+         ($fname (file-name-nondirectory $inputStr))
+         ($src
+          (if (string-match "^http" $inputStr )
+              $inputStr
+            (file-relative-name $inputStr))))
+    (delete-region $p1 $p2)
+    (insert (format " <a href=\"%s\">%s</a>" $src $fname))))
 
 (defun xah-html-audio-file-linkify ()
   "Make the path under cursor into a HTML link.
