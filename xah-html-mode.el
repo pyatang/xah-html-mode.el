@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.12.20170905
+;; Version: 5.12.20170913
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1860,7 +1860,7 @@ e.g.
 becomes
  <a href=\"doc/cat.pdf\">cat.pdf</a>
 
-Version 2017-08-24"
+Version 2017-09-13"
   (interactive)
   (let* (
          ($bds (xah-get-bounds-of-thing-or-region 'filepath))
@@ -1873,7 +1873,7 @@ Version 2017-08-24"
               $inputStr
             (file-relative-name $inputStr))))
     (delete-region $p1 $p2)
-    (insert (format " <a href=\"%s\">%s</a>" $src $fname))))
+    (insert (format "<a href=\"%s\">%s</a>" $src $fname))))
 
 (defun xah-html-audio-file-linkify ()
   "Make the path under cursor into a HTML link.
