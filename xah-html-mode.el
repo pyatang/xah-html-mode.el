@@ -1442,8 +1442,11 @@ Version 2017-07-27"
         (message "rename to %s" $newPath)
         (delete-region (car $bounds) (cdr $bounds))
         (insert
-         (if (and (string-match "^/home/xah/web/" (or (buffer-file-name) default-directory))
-                  (fboundp 'xahsite-filepath-to-href-value))
+
+         (if (and
+              (string-match (concat "^" (expand-file-name "~/" ) "web/")
+                            (or (buffer-file-name) default-directory))
+              (fboundp 'xahsite-filepath-to-href-value))
              (progn (xahsite-filepath-to-href-value $newPath (or (buffer-file-name) default-directory)))
            (progn
              (file-relative-name $newPath))))))))
@@ -1803,7 +1806,7 @@ Version 2017-08-08"
 
 (defun xah-html-css-linkify ()
   "Make the path under cursor into a HTML link.
- e.g. /home/xah/web/xahlee_org/lit.css
+ e.g. ~/web/xahlee_org/lit.css
 becomes
 <link rel=\"stylesheet\" href=\"../lit.css\" />
 Version 2016-10-31"
@@ -2116,7 +2119,9 @@ Version 2017-08-16"
 
      ((string-match-p "\\`https?://" $input) (xah-html-source-url-linkify 0))
 
-     ((string-match "^/home/xah/web/" (or (buffer-file-name) default-directory))
+     ((string-match
+       (concat "^" (expand-file-name "~/" ) "web/")
+       (or (buffer-file-name) default-directory))
       (if (fboundp 'xah-all-linkify)
           (xah-all-linkify)
         (xah-html-wrap-url)))
@@ -3140,7 +3145,6 @@ Version 2016-10-24"
     ("br" "<br />" xah-html--ahf)
     ("cl" "class=\"▮\"" xah-html--ahf)
     ("id3" "id=\"▮\"" xah-html--ahf)
-
 
     ("wi" "width" xah-html--ahf)
     ("hei" "height" xah-html--ahf)
