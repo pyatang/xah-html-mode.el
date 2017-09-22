@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.13.20170916
+;; Version: 5.13.20170922
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -3129,7 +3129,7 @@ Version 2016-10-24"
 ("time3" "<time>▮</time>" xah-html--ahf)
 ("title3" "<title>▮</title>" xah-html--ahf)
 ("tr" "<tr>▮</tr>" xah-html--ahf)
-("u" "<u>▮</u>" xah-html--ahf)
+("u3" "<u>▮</u>" xah-html--ahf)
 ("ul" "<ul>▮</ul>" xah-html--ahf)
 ("var3" "<var>▮</var>" xah-html--ahf)
 ("video3" "<video>▮</video>" xah-html--ahf)
