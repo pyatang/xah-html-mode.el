@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.13.20170922
+;; Version: 5.14.20170922
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -3079,7 +3079,7 @@ Version 2016-10-24"
 ("header3" "<header>▮</header>" xah-html--ahf)
 ("hr" "<hr>▮</hr>" xah-html--ahf)
 ("html3" "<html>▮</html>" xah-html--ahf)
-("i" "<i>▮</i>" xah-html--ahf)
+("i3" "<i>▮</i>" xah-html--ahf)
 ("iframe" "<iframe>▮</iframe>" xah-html--ahf)
 ("img" "<img>▮</img>" xah-html--ahf)
 ("input3" "<input>▮</input>" xah-html--ahf)
