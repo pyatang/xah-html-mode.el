@@ -1673,7 +1673,7 @@ If `univers-argument' is called before, add width and height attribute, e.g.:
 Returns the string used in the alt attribute.
 
 URL `http://ergoemacs.org/emacs/elisp_image_tag.html'
-Version 2017-09-04"
+Version 2017-09-23"
   (interactive)
   (let ( $p1 $p2 $imgPath
              $hrefValue $altText $imgWH $width $height)
@@ -1704,11 +1704,13 @@ Version 2017-09-04"
            (file-name-directory (or (buffer-file-name) default-directory))))
     (setq $altText
           (replace-regexp-in-string
-           "-" " "
+           "^ztn " ""
            (replace-regexp-in-string
-            "_" " "
+            "-" " "
             (replace-regexp-in-string
-             "\\.[A-Za-z]\\{3,4\\}$" "" (file-name-nondirectory $imgPath) t t) t t)))
+             "_" " "
+             (replace-regexp-in-string
+              "\\.[A-Za-z]\\{3,4\\}$" "" (file-name-nondirectory $imgPath) t t) t t)) t t))
 
     (if current-prefix-arg
         (progn
@@ -3068,7 +3070,7 @@ Version 2016-10-24"
 ("figcaption" "<figcaption>▮</figcaption>" xah-html--ahf)
 ("figure" "<figure>▮</figure>" xah-html--ahf)
 ("footer" "<footer>▮</footer>" xah-html--ahf)
-("form" "<form>▮</form>" xah-html--ahf)
+("form3" "<form>▮</form>" xah-html--ahf)
 ("h1" "<h1>▮</h1>" xah-html--ahf)
 ("h2" "<h2>▮</h2>" xah-html--ahf)
 ("h3" "<h3>▮</h3>" xah-html--ahf)
