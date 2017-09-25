@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.14.20170922
+;; Version: 5.14.20170924
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1664,11 +1664,10 @@ Version 2017-08-11"
 Example:
  img/my_cats.jpg
 become
- <img src=\"img/my_cats.jpg\" alt=\"my cats\" />
-
-If `univers-argument' is called before, add width and height attribute, e.g.:
 
  <img src=\"img/my_cats.jpg\" alt=\"my cats\" width=\"470\" height=\"456\" />
+
+If `univers-argument' is called before, don't width and height attribute.
 
 Returns the string used in the alt attribute.
 
@@ -1688,7 +1687,6 @@ Version 2017-09-23"
         (skip-chars-forward "^  \"\t\n'|()[]{}<>〔〕“”〈〉《》【】〖〗«»‹›·。\\'")
         (setq $p2 (point))
         (goto-char $p0)))
-
     (setq $imgPath
           (if (and (fboundp 'xahsite-web-path-to-filepath)
                    (fboundp 'xah-local-url-to-file-path))
@@ -1711,33 +1709,32 @@ Version 2017-09-23"
              "_" " "
              (replace-regexp-in-string
               "\\.[A-Za-z]\\{3,4\\}$" "" (file-name-nondirectory $imgPath) t t) t t)) t t))
-
     (if current-prefix-arg
         (progn
-          (setq $imgWH (xah-html--get-image-dimensions $imgPath))
-          (setq $width (number-to-string (elt $imgWH 0)))
-          (setq $height (number-to-string (elt $imgWH 1)))
-
           (delete-region $p1 $p2)
           (insert
-           (if (or (equal $width "0") (equal $height "0"))
-               (concat
-                "<img src=\""
-                $hrefValue
-                "\"" " " "alt=\"" $altText "\"" " />")
+           (concat
+            "<img src=\""
+            $hrefValue
+            "\"" " " "alt=\"" $altText "\"" " />")))
+      (progn
+        (setq $imgWH (xah-html--get-image-dimensions $imgPath))
+        (setq $width (number-to-string (elt $imgWH 0)))
+        (setq $height (number-to-string (elt $imgWH 1)))
+
+        (delete-region $p1 $p2)
+        (insert
+         (if (or (equal $width "0") (equal $height "0"))
              (concat
               "<img src=\""
               $hrefValue
-              "\"" " " "alt=\"" $altText "\""
-              " width=\"" $width "\""
-              " height=\"" $height "\" />"))))
-      (progn
-        (delete-region $p1 $p2)
-        (insert
-         (concat
-          "<img src=\""
-          $hrefValue
-          "\"" " " "alt=\"" $altText "\"" " />"))))
+              "\"" " " "alt=\"" $altText "\"" " />")
+           (concat
+            "<img src=\""
+            $hrefValue
+            "\"" " " "alt=\"" $altText "\""
+            " width=\"" $width "\""
+            " height=\"" $height "\" />")))))
     $altText
     ))
 
@@ -2699,7 +2696,7 @@ When there's no text selection, the tag will be wrapped around current {word, li
 
 If current line or word is empty, then insert open/end tags and place cursor between them.
 If `universal-argument' is called first, then also prompt for a “class” attribute. Empty value means don't add the attribute.
-Version 2017-05-28
+Version 2017-09-24
 "
   (interactive
    (list
@@ -2718,8 +2715,12 @@ Version 2017-05-28
              ;; ((equal $wrap-type "l") (xah-get-bounds-of-thing 'line))
              ((equal $wrap-type "b") (xah-get-bounds-of-thing 'block))
              (t (xah-get-bounds-of-thing 'word)))))
-         ($p1 (car $bds))
-         ($p2 (cdr $bds)))
+
+         $p1 $p2
+         )
+    (if $bds
+        (setq $p1 (car $bds) $p2 (cdr $bds))
+      (setq $p1 (point) $p2 (point)))
     (save-restriction
       (narrow-to-region $p1 $p2)
 
