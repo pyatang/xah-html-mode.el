@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.14.20170924
+;; Version: 5.14.20170930
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -2287,7 +2287,7 @@ For example:
 This command will do most emacs syntax correctly, but not 100% correct, especially on notations like <C-M-down>. But works if it's written as C-M-<down>
 
 When called in lisp code, @begin @end are region begin/end positions.
-Version 2017-01-11"
+Version 2017-09-30"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -2310,7 +2310,7 @@ Version 2017-01-11"
         ["<f1>" "F1"] ["<f2>" "F2"] ["<f3>" "F3"] ["<f4>" "F4"] ["<f5>" "F5"] ["<f6>" "F6"] ["<f7>" "F7"] ["<f8>" "F8"] ["<f9>" "F9"] ["<f10>" "F10"] ["<f11>" "F11"] ["<f12>" "F12"]
         ["<return>" "Return"]
         ["<tab>" "Tab"]
-        ["<escape>" "Esc"]
+        ["<escape>" "Escape"]
         ["<right>" "→"]
         ["<left>" "←"]
         ["<up>" "↑"]
@@ -2342,7 +2342,7 @@ Version 2017-01-11"
         ["\\bRET\\b" "Enter"]
         ["\\bSPC\\b" "Space"]
         ["\\bTAB\\b" "Tab"]
-        ["\\bESC\\b" "Esc"]
+        ["\\bESC\\b" "Escape"]
         ["\\bDEL\\b" "Delete"]
         ]))))
 
@@ -2539,7 +2539,7 @@ Example:
 
 When called in lisp code, @begin @end are region begin/end positions.
 
-Version 2017-08-15"
+Version 2017-09-30"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -2550,7 +2550,8 @@ Version 2017-08-15"
            ;; case must match
            ["Ctrl" "<kbd>Ctrl</kbd>"]
            ["Control" "<kbd>Ctrl</kbd>"]
-           ["AltGr" "<kbd>AltGr</kbd>"]
+           ["AltGr" "<kbd>Alt Graph</kbd>"]
+           ["AltGraph" "<kbd>Alt Graph</kbd>"]
            ["Compose" "<kbd>⎄ Compose</kbd>"]
            ["Alt" "<kbd>Alt</kbd>"]
            ["Shift" "<kbd>Shift</kbd>"]
@@ -2559,7 +2560,7 @@ Version 2017-08-15"
            ["Opt" "<kbd>⌥ option</kbd>"]
            ["Win" "<kbd>❖ Window</kbd>"]
            ["Menu" "<kbd>▤ Menu</kbd>"]
-           ["Meta" "<kbd>◆ Meta</kbd>"]
+           ["Meta" "<kbd>Meta</kbd>"]
            ["Super" "<kbd>Super</kbd>"]
            ["Hyper" "<kbd>Hyper</kbd>"]
 
@@ -2580,7 +2581,8 @@ Version 2017-08-15"
            ["Help" "<kbd>Help</kbd>"]
            ["Power" "<kbd>Power</kbd>"]
            ["Tab" "<kbd>Tab</kbd>"]
-           ["Esc" "<kbd>Esc</kbd>"]
+           ["Esc" "<kbd>Escape</kbd>"]
+           ["escape" "<kbd>Escape</kbd>"]
            ["Home" "<kbd>Home</kbd>"]
            ["End" "<kbd>End</kbd>"]
            ["Page Up" "<kbd>Page Up</kbd>"]
@@ -2593,11 +2595,10 @@ Version 2017-08-15"
            ["INS" "<kbd>Insert</kbd>"]
            ["Pause" "<kbd>Pause</kbd>"]
            ["Break" "<kbd>Pause</kbd>"]
-           ["PrtScn" "<kbd>PrtScn</kbd>"]
-           ["ps" "<kbd>PrtScn</kbd>"]
+           ["PrtScn" "<kbd>Print Screen</kbd>"]
+           ["ps" "<kbd>Print Screen</kbd>"]
            ["sysrq" "<kbd>SysRq</kbd>"]
            ["scrlk" "<kbd>Scroll Lock</kbd>"]
-           ["ScrLk" "<kbd>Scroll Lock</kbd>"]
            ["scrolllock" "<kbd>Scroll Lock</kbd>"]
            ["Fn" "<kbd>Fn</kbd>"]
 
