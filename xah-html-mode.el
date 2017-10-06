@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.14.20170930
+;; Version: 5.14.20171006
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1111,11 +1111,13 @@ Version 2017-08-01"
               (insert $input-str)
               (delete-trailing-whitespace)
               (progn
-                    (goto-char (point-min))
-                    (while
-                        (re-search-forward  "\.html$" nil t)
-                      (backward-char 1)
-                      (xah-html-any-linkify)))
+                (goto-char (point-min))
+                (while
+                    (re-search-forward  "\.html$" nil t)
+                  (backward-char 1)
+                  (xah-html-file-linkify)
+                  ;; (xah-html-any-linkify)
+                  ))
               (goto-char (point-min))
               (while
                   (not (equal (line-end-position) (point-max)))
@@ -2022,7 +2024,7 @@ The link text is pulled from the file's <title> tag if exists.
 If there is text selection, use it as file path.
 
 The file path can also be a full path or URL.
-Version 2017-08-15"
+Version 2017-10-06"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -2036,13 +2038,14 @@ Version 2017-08-15"
          (skip-chars-forward "^  \"\t\n'|()[]{}<>〔〕“”〈〉《》【】〖〗«»‹›·。\\'")
          (setq $p2 (point))
          (list $p1 $p2)))))
+  (when (or (null @begin) (null @end))
+    (setq @begin (line-beginning-position) @end (line-end-position)))
   (let* (
          ($inputStr (replace-regexp-in-string "^file://" "" (buffer-substring-no-properties @begin @end)))
          ($inputStParts (xah-html-split-uri-hashmark $inputStr))
          ($pt1 (aref $inputStParts 0))
          ($fragPart (aref $inputStParts 1))
          ($fPath (expand-file-name $pt1 default-directory)))
-    (message "$fPath is %s" $fPath)
     (if (file-exists-p $fPath)
         (let* (
                ($rPath (file-relative-name $fPath (file-name-directory (or (buffer-file-name) default-directory))))
@@ -3064,7 +3067,7 @@ Version 2016-10-24"
 ("details" "<details>▮</details>" xah-html--ahf)
 ("dfn" "<dfn>▮</dfn>" xah-html--ahf)
 ("div" "<div>▮</div>" xah-html--ahf)
-("dl" "<dl>▮</dl>" xah-html--ahf)
+("dl3" "<dl>▮</dl>" xah-html--ahf)
 ("dt" "<dt>▮</dt>" xah-html--ahf)
 ("em" "<em>▮</em>" xah-html--ahf)
 ("embed3" "<embed>▮</embed>" xah-html--ahf)
@@ -3125,9 +3128,9 @@ Version 2016-10-24"
 ("span3" "<span>▮</span>" xah-html--ahf)
 ("strong3" "<strong>▮</strong>" xah-html--ahf)
 ("style3" "<style>▮</style>" xah-html--ahf)
-("sub" "<sub>▮</sub>" xah-html--ahf)
+("sub3" "<sub>▮</sub>" xah-html--ahf)
 ("summary3" "<summary>▮</summary>" xah-html--ahf)
-("sup" "<sup>▮</sup>" xah-html--ahf)
+("sup3" "<sup>▮</sup>" xah-html--ahf)
 ("table" "<table>▮</table>" xah-html--ahf)
 ("tbody" "<tbody>▮</tbody>" xah-html--ahf)
 ("td" "<td>▮</td>" xah-html--ahf)
