@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.14.20171006
+;; Version: 5.14.20171008
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -2428,12 +2428,12 @@ Version 2017-03-17"
 • 《…》 → <cite class=\"book\">…</cite>
 • 〔…〕 → <code class=\"path-xl\">\\1</code>
 •  ‹…› → <var class=\"d\">…</var>
-• 〔<…〕 → 〔► <…〕
+• [<a href=] → [see <a href=] 
 
 Changes are reported to message buffer with char position.
 
 When called in lisp code, @begin @end are region begin/end positions.
-Version 2017-06-13"
+Version 2017-10-07"
   (interactive
    (let (($bds (xah-get-bounds-of-thing-or-region 'block)))
      (list (car $bds) (cdr $bds))))
@@ -2496,13 +2496,13 @@ Version 2017-06-13"
             (overlay-put (make-overlay $p1 $p2) 'face 'highlight)
             (search-forward "</var>" )))
         (goto-char (point-min))
-        (while (re-search-forward "〔<a href=" nil t)
+        (while (search-forward "[<a href=" nil t)
           (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) $changedItems)
-          (replace-match "〔►see <a href=" t)
+          (replace-match "[see <a href=" t)
           (let ($p1 $p2)
-            (search-backward "〔►see <a href=" )
+            (search-backward "[see <a href=" )
             (setq $p1 (point))
-            (search-forward "〔►see <a href=" )
+            (search-forward "[see <a href=" )
             (setq $p2 (point))
             (overlay-put (make-overlay $p1 $p2) 'face 'highlight)))
         (goto-char (point-min))
