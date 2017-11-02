@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.14.20171008
+;; Version: 5.14.20171102
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -2542,7 +2542,7 @@ Example:
 
 When called in lisp code, @begin @end are region begin/end positions.
 
-Version 2017-09-30"
+Version 2017-11-01"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -2567,7 +2567,7 @@ Version 2017-09-30"
            ["Super" "<kbd>Super</kbd>"]
            ["Hyper" "<kbd>Hyper</kbd>"]
 
-           ["Return" "<kbd>Return ↩</kbd>"]
+           ["Return" "<kbd>Return</kbd>"]
            ["Enter" "<kbd>Enter ↵</kbd>"]
            ["Backspace" "<kbd>⌫ Backspace</kbd>"]
            ["bs" "<kbd>⌫ Backspace</kbd>"]
@@ -3073,8 +3073,8 @@ Version 2016-10-24"
 ("embed3" "<embed>▮</embed>" xah-html--ahf)
 ("fieldset" "<fieldset>▮</fieldset>" xah-html--ahf)
 ("figcaption" "<figcaption>▮</figcaption>" xah-html--ahf)
-("figure" "<figure>▮</figure>" xah-html--ahf)
-("footer" "<footer>▮</footer>" xah-html--ahf)
+("figure3" "<figure>▮</figure>" xah-html--ahf)
+("footer3" "<footer>▮</footer>" xah-html--ahf)
 ("form3" "<form>▮</form>" xah-html--ahf)
 ("h1" "<h1>▮</h1>" xah-html--ahf)
 ("h2" "<h2>▮</h2>" xah-html--ahf)
@@ -3131,12 +3131,12 @@ Version 2016-10-24"
 ("sub3" "<sub>▮</sub>" xah-html--ahf)
 ("summary3" "<summary>▮</summary>" xah-html--ahf)
 ("sup3" "<sup>▮</sup>" xah-html--ahf)
-("table" "<table>▮</table>" xah-html--ahf)
+("table3" "<table>▮</table>" xah-html--ahf)
 ("tbody" "<tbody>▮</tbody>" xah-html--ahf)
 ("td" "<td>▮</td>" xah-html--ahf)
 ("textarea" "<textarea>▮</textarea>" xah-html--ahf)
 ("tfoot" "<tfoot>▮</tfoot>" xah-html--ahf)
-("th" "<th>▮</th>" xah-html--ahf)
+("th3" "<th>▮</th>" xah-html--ahf)
 ("thead" "<thead>▮</thead>" xah-html--ahf)
 ("time3" "<time>▮</time>" xah-html--ahf)
 ("title3" "<title>▮</title>" xah-html--ahf)
