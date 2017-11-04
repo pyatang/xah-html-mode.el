@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.14.20171102
+;; Version: 5.14.20171104
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -2775,11 +2775,11 @@ like this:
 If the char is any of 「&」 「<」 「>」, then replace them with 「&amp;」「&lt;」「&gt;」.
 
 When called in elisp program, wrap the tag around char before position @pos.
-Version 2017-07-08"
+Version 2017-11-04"
   (interactive (list (point)))
   (let* (
          ($codepoint (string-to-char (buffer-substring-no-properties (- @pos 1) @pos )))
-         ($name (if describe-char-unicodedata-file
+         ($name (if (boundp 'describe-char-unicodedata-file)
                     (progn
                       (require 'descr-text)
                       (car (cdr (car (describe-char-unicode-data  $codepoint)))))
