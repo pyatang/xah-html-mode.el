@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.14.20171104
+;; Version: 5.14.20171109
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -2433,7 +2433,7 @@ Version 2017-03-17"
 Changes are reported to message buffer with char position.
 
 When called in lisp code, @begin @end are region begin/end positions.
-Version 2017-10-07"
+Version 2017-11-08"
   (interactive
    (let (($bds (xah-get-bounds-of-thing-or-region 'block)))
      (list (car $bds) (cdr $bds))))
@@ -2498,11 +2498,11 @@ Version 2017-10-07"
         (goto-char (point-min))
         (while (search-forward "[<a href=" nil t)
           (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) $changedItems)
-          (replace-match "[see <a href=" t)
+          (replace-match "[see <a href=" t)
           (let ($p1 $p2)
-            (search-backward "[see <a href=" )
+            (search-backward "[see <a href=" )
             (setq $p1 (point))
-            (search-forward "[see <a href=" )
+            (search-forward "[see <a href=" )
             (setq $p2 (point))
             (overlay-put (make-overlay $p1 $p2) 'face 'highlight)))
         (goto-char (point-min))
@@ -2568,7 +2568,7 @@ Version 2017-11-01"
            ["Hyper" "<kbd>Hyper</kbd>"]
 
            ["Return" "<kbd>Return</kbd>"]
-           ["Enter" "<kbd>Enter ↵</kbd>"]
+           ["Enter" "<kbd>Enter</kbd>"]
            ["Backspace" "<kbd>⌫ Backspace</kbd>"]
            ["bs" "<kbd>⌫ Backspace</kbd>"]
            ["Delete" "<kbd>⌦ Delete</kbd>"]
@@ -2588,11 +2588,7 @@ Version 2017-11-01"
            ["escape" "<kbd>Escape</kbd>"]
            ["Home" "<kbd>Home</kbd>"]
            ["End" "<kbd>End</kbd>"]
-           ["Page Up" "<kbd>Page Up</kbd>"]
-           ["pageup" "<kbd>Page Up</kbd>"]
            ["PgUp" "<kbd>Page Up</kbd>"]
-           ["Page Down" "<kbd>Page Down</kbd>"]
-           ["pagedown" "<kbd>Page Down</kbd>"]
            ["PgDn" "<kbd>Page Down</kbd>"]
            ["Insert" "<kbd>Insert</kbd>"]
            ["INS" "<kbd>Insert</kbd>"]
@@ -2606,10 +2602,10 @@ Version 2017-11-01"
            ["Fn" "<kbd>Fn</kbd>"]
 
            ["Copy" "<kbd>Copy</kbd>"]
-           ["Cut" "<kbd>✂ Cut</kbd>"]
+           ["Cut" "<kbd>Cut</kbd>"]
            ["Paste" "<kbd>Paste</kbd>"]
-           ["Undo" "<kbd>⎌ Undo</kbd>"]
-           ["Redo" "<kbd>↷</kbd>"]
+           ["Undo" "<kbd>Undo</kbd>"]
+           ["Redo" "<kbd>Redo</kbd>"]
 
            ["F10" "<kbd>F10</kbd>"] ["F11" "<kbd>F11</kbd>"] ["F12" "<kbd>F12</kbd>"] ["F13" "<kbd>F13</kbd>"] ["F14" "<kbd>F14</kbd>"] ["F15" "<kbd>F15</kbd>"] ["F16" "<kbd>F16</kbd>"] ["F17" "<kbd>F17</kbd>"] ["F18" "<kbd>F18</kbd>"] ["F19" "<kbd>F19</kbd>"] ["F20" "<kbd>F20</kbd>"] ["F21" "<kbd>F21</kbd>"] ["F22" "<kbd>F22</kbd>"] ["F23" "<kbd>F23</kbd>"] ["F24" "<kbd>F24</kbd>"]
 
