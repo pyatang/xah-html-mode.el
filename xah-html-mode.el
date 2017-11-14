@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.14.20171109
+;; Version: 5.14.20171114
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -316,6 +316,7 @@ Version 2017-01-11"
 ("link" . ["z"])
 ("map" . ["z"])
 ("menu" . ["z"])
+("menuitem" . ["z"])
 ("meta" . ["z"])
 ("meter" . ["z"])
 ("noscript" . ["l"])
@@ -342,6 +343,7 @@ Version 2017-01-11"
 ("thead" . ["z"])
 ("title" . ["l"])
 ("tr" . ["b"])
+("track" . ["b"])
 ("u" . ["w"])
 ("ul" . ["b"])
 ("video" . ["l"])
