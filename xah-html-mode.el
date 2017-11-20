@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.14.20171114
+;; Version: 5.14.20171120
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1402,7 +1402,7 @@ Version 2017-06-24"
             ["</li>" "" ]
 
             ["<code>" "「" ]
-            ["<code class=\"elisp-ƒ\">" "「" ]
+            ["<code class=\"elisp_f_3d841\">" "「" ]
             ["</code>" "」" ]
 
             ["<cite>" "“" ]
@@ -2357,7 +2357,7 @@ Version 2017-09-30"
 Example:
  「sort-lines」
     becomes
-  <code class=\"elisp-ƒ\">sort-lines</code>
+  <code class=\"elisp_f_3d841\">sort-lines</code>
 
 When called in lisp code, @begin @end are region begin/end positions.
 
@@ -2393,12 +2393,12 @@ Version 2017-03-17"
              ((and (intern-soft $mStr) (fboundp (intern-soft $mStr)))
               (progn
                 (push (format "ƒ %s" $mStr) $changedItems)
-                (replace-match (concat "<code class=\"elisp-ƒ\">" $mStr "</code>") t t)
+                (replace-match (concat "<code class=\"elisp_f_3d841\">" $mStr "</code>") t t)
                 (let ($p1 $p2)
                   (search-backward "</code>" )
                   (setq $p2 (point))
-                  (search-backward "<code class=\"elisp-ƒ\">" )
-                  (search-forward "<code class=\"elisp-ƒ\">")
+                  (search-backward "<code class=\"elisp_f_3d841\">" )
+                  (search-forward "<code class=\"elisp_f_3d841\">")
                   (setq $p1 (point))
                   (overlay-put (make-overlay $p1 $p2) 'face (list :background "yellow"))
                   (search-forward "</code>"))))
@@ -2424,7 +2424,7 @@ Version 2017-03-17"
 (defun xah-html-brackets-to-html (@begin @end)
   "Replace bracketed text to HTML markup in current line or text selection.
 
-• 「emacs-lisp-function-name」 → <code class=\"elisp-ƒ\">emacs-lisp-function-name</code> if in xah elisp mode
+• 「emacs-lisp-function-name」 → <code class=\"elisp_f_3d841\">emacs-lisp-function-name</code> if in xah elisp mode
 • 「…」 → <code>…</code>
 • 〈…〉 → <cite>…</cite>
 • 《…》 → <cite class=\"book\">…</cite>
@@ -2773,11 +2773,14 @@ like this:
 If the char is any of 「&」 「<」 「>」, then replace them with 「&amp;」「&lt;」「&gt;」.
 
 When called in elisp program, wrap the tag around char before position @pos.
-Version 2017-11-04"
+
+Version 2017-11-19"
   (interactive (list (point)))
   (let* (
          ($codepoint (string-to-char (buffer-substring-no-properties (- @pos 1) @pos )))
-         ($name (if (boundp 'describe-char-unicodedata-file)
+         ($name (if (and
+                     (boundp 'describe-char-unicodedata-file)
+                     (not describe-char-unicodedata-file))
                     (progn
                       (require 'descr-text)
                       (car (cdr (car (describe-char-unicode-data  $codepoint)))))
@@ -3187,7 +3190,6 @@ Version 2016-10-24"
     ("html4s" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">" xah-html--ahf)
     ("html4t" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">" xah-html--ahf)
     ("xhtml3" "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">" xah-html--ahf)
-    ("html53" "<!DOCTYPE html>" xah-html--ahf)
     ("html3" "<!doctype html><html><head><meta charset=\"utf-8\" />
 <title>ttt</title>
 </head>
