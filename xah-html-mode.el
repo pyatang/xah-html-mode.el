@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.14.20171120
+;; Version: 5.15.20171128
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -149,7 +149,7 @@ This is based on heuristic, so it's not 100% correct.
 If the string contains any month names, weekday names, or of the form dddd-dd-dd, dddd-dd-dddd, dddd-dd-dd, or using slash, then it's considered a date.
 
 2015-09-27 issue: if a sentence “You May Do So”, it's be thought as date. Similar for containing word “March”.
-Version 2017-07-10"
+Version 2017-11-22"
   (let* ((case-fold-search t)
          ($someMonthNames '("January" "February" "April" "June" "July" "August" "September" "October" "November" "December"))
          ($someMonthAbbrevs (mapcar (lambda (x) (substring x 0 3)) $someMonthNames))
@@ -168,6 +168,7 @@ Version 2017-07-10"
      ((string-match "\\b[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\\b" @input-string) t)
      ;; mm-dd-yy
      ((string-match "\\b[0-9][0-9]-[0-9][0-9]-[0-9][0-9]\\b" @input-string) t)
+     ((string-match "\\b[0-9][0-9][0-9][0-9]\\b" @input-string) t)
      (t nil))))
 
 
@@ -660,6 +661,35 @@ This command does the inverse of `xah-html-htmlize-precode'."
     (narrow-to-region @begin @end)
     (xah-html-remove-span-tag-region (point-min) (point-max))
     (xah-html-code-tag-to-brackets (point-min) (point-max))))
+
+(defun xah-html-dehtmlize-pre-code-buffer ()
+  "Remove the htmlizing for all pre code syntax coloring in current HTML page.
+Returns 0 if nothing is done. Else a positive integer of the count of <pre class=lang>.
+Version 2017-11-28"
+  (interactive)
+  (let ($langCode $p1 $p2 ($count 0)
+                  $majorModeNameStr
+                  )
+    (save-excursion
+      (goto-char (point-min))
+      (while
+          (re-search-forward "<pre class=\"\\([-A-Za-z0-9]+\\)\">" nil "NOERROR")
+        (setq $langCode (match-string 1))
+        (setq $majorModeNameStr (xah-html-langcode-to-major-mode-name $langCode xah-html-lang-name-map))
+        (when $majorModeNameStr
+          (progn
+            (setq $p1 (point))
+            (backward-char 1)
+            (xah-html-skip-tag-forward)
+            (search-backward "</pre>")
+            (setq $p2 (point))
+            (save-restriction
+              (narrow-to-region $p1 $p2)
+              (xah-html-dehtmlize-precode (point-min) (point-max))
+              (setq $count (1+ $count)))))))
+    (message "dehtmlized %s pre" $count)
+    $count
+    ))
 
 (defun xah-html-toggle-syntax-coloring-markup (lang-name-map)
   "Call `xah-html-htmlize-precode' or `xah-html-dehtmlize-precode'."
