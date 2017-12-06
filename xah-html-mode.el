@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.15.20171128
+;; Version: 5.15.20171206
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1933,8 +1933,8 @@ becomes
   "Make the path under cursor into a HTML video tag link.
 e.g. xyz.webm
 becomes
-<video src=\"i/xyz.webm\" controls loop autoplay></video>
-Version 2017-08-16"
+<video src=\"i/xyz.webm\" controls></video>
+Version 2017-12-06"
   (interactive)
   (let* (
          ($bds (bounds-of-thing-at-point 'filename ))
@@ -1948,7 +1948,7 @@ Version 2017-08-16"
                 (file-relative-name $inputStr)
               (user-error "file not found: 「%s」" $inputStr)))))
     (delete-region $p1 $p2)
-    (insert (format "<video src=\"%s\" controls loop></video>" $src))))
+    (insert (format "<video src=\"%s\" controls></video>" $src))))
 
 (defun xah-html-amazon-linkify (&optional @tracking-id)
   "Make the current amazon URL or selection into a link.
