@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.15.20171206
+;; Version: 5.15.20171209
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1929,12 +1929,18 @@ becomes
     (delete-region $p1 $p2)
     (insert (format "<audio src=\"%s\" controls></audio>" $src))))
 
-(defun xah-html-video-file-linkify ()
+(defun xah-html-video-file-linkify ( &optional @figure)
   "Make the path under cursor into a HTML video tag link.
-e.g. xyz.webm
+e.g. xyz.mp4
 becomes
-<video src=\"i/xyz.webm\" controls></video>
-Version 2017-12-06"
+<video src=\"i/xyz.mp4\" controls></video>
+
+if
+@add-figure is not nil, wrap figure and figcaption tags around it.
+
+Returns a alt string based on the file name.
+
+Version 2017-12-09"
   (interactive)
   (let* (
          ($bds (bounds-of-thing-at-point 'filename ))
@@ -1948,7 +1954,17 @@ Version 2017-12-06"
                 (file-relative-name $inputStr)
               (user-error "file not found: 「%s」" $inputStr)))))
     (delete-region $p1 $p2)
-    (insert (format "<video src=\"%s\" controls></video>" $src))))
+    (if @figure
+        (progn
+          (goto-char $p1)
+          (insert "<figure>\n")
+          (insert (format "<video src=\"%s\" controls></video>\n" $src))
+          (insert "<figcaption>\n")
+          (insert (replace-regexp-in-string "_" " " (file-name-nondirectory $src)))
+          (insert "\n</figcaption>\n</figure>\n\n")
+          (search-backward "</figcaption>" ))
+      (progn
+        (insert (format "<video src=\"%s\" controls></video>" $src))))))
 
 (defun xah-html-amazon-linkify (&optional @tracking-id)
   "Make the current amazon URL or selection into a link.
@@ -2142,8 +2158,7 @@ Version 2017-08-16"
      ((string-match-p "\\.js\\'\\|\\.ts\\'" $input) (xah-html-javascript-linkify))
      ((string-match-p "\\.mp3\\'\\|\\.ogg\\'" $input) (xah-html-audio-file-linkify))
      ((string-match-p "\\.mp4\\'\\|\\.mov\\'\\|\\.mkv\\'\\|\\.webm\\'\\|\\.m1v\\'\\|\\.m4v\\'" $input)
-      (xah-html-video-file-linkify)
-      (xah-html-wrap-figure-tag))
+      (xah-html-video-file-linkify t))
 
      ((string-match-p "www\.youtube\.com/watch" $input) (xah-html-youtube-linkify))
 
