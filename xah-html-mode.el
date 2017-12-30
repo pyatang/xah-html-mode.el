@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.15.20171209
+;; Version: 5.15.20171229
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -2072,7 +2072,7 @@ The link text is pulled from the file's <title> tag if exists.
 If there is text selection, use it as file path.
 
 The file path can also be a full path or URL.
-Version 2017-10-06"
+Version 2017-12-20"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -2107,7 +2107,7 @@ Version 2017-10-06"
                         (if (string-equal $title "") $rPath $title ))))
           (delete-region @begin @end)
           (insert $resultStr))
-      (progn (user-error "Cannot locate the file: 「%s」" $fPath)))))
+      (progn (message "Cannot locate the file: 「%s」" $fPath)))))
 
 (defun xah-html-any-linkify ()
   "Make the text under cursor into a HTML link.
@@ -2152,7 +2152,6 @@ Version 2017-08-16"
               (xah-html-source-url-linkify 3))
           (progn
             (xah-html-wikipedia-url-linkify )))))
-
      ((string-match-p "\\.css\\'" $input) (xah-html-css-linkify))
      ((string-match-p "\\.pdf" $input) (xah-html-pdf-embed-linkify))
      ((string-match-p "\\.js\\'\\|\\.ts\\'" $input) (xah-html-javascript-linkify))
@@ -3110,7 +3109,7 @@ Version 2016-10-24"
 ("datalist" "<datalist>▮</datalist>" xah-html--ahf)
 ("dd" "<dd>▮</dd>" xah-html--ahf)
 ("del" "<del>▮</del>" xah-html--ahf)
-("details" "<details>▮</details>" xah-html--ahf)
+("details3" "<details>▮</details>" xah-html--ahf)
 ("dfn" "<dfn>▮</dfn>" xah-html--ahf)
 ("div" "<div>▮</div>" xah-html--ahf)
 ("dl3" "<dl>▮</dl>" xah-html--ahf)
@@ -3281,6 +3280,8 @@ Version 2016-10-24"
   (define-key xah-html-mode-no-chord-map (kbd "7") nil)
   (define-key xah-html-mode-no-chord-map (kbd "8") nil)
   (define-key xah-html-mode-no-chord-map (kbd "9") 'xah-html-redo-syntax-coloring-buffer)
+  (define-key xah-html-mode-no-chord-map (kbd "0") 'xah-html-dehtmlize-pre-code-buffer)
+
   (define-key xah-html-mode-no-chord-map (kbd "DEL") 'xah-html-remove-html-tags)
 
   (define-key xah-html-mode-no-chord-map (kbd "a") 'xah-html-rename-html-inline-image)
