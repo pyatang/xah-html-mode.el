@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.15.20171229
+;; Version: 5.15.20180112
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -2818,13 +2818,13 @@ If the char is any of 「&」 「<」 「>」, then replace them with 「&amp;�
 
 When called in elisp program, wrap the tag around char before position @pos.
 
-Version 2017-11-19"
+Version 2018-01-12"
   (interactive (list (point)))
   (let* (
          ($codepoint (string-to-char (buffer-substring-no-properties (- @pos 1) @pos )))
          ($name (if (and
                      (boundp 'describe-char-unicodedata-file)
-                     (not describe-char-unicodedata-file))
+                     describe-char-unicodedata-file)
                     (progn
                       (require 'descr-text)
                       (car (cdr (car (describe-char-unicode-data  $codepoint)))))
@@ -3162,7 +3162,7 @@ Version 2016-10-24"
 ("q3" "<q>▮</q>" xah-html--ahf)
 ("rp" "<rp>▮</rp>" xah-html--ahf)
 ("rt" "<rt>▮</rt>" xah-html--ahf)
-("ruby" "<ruby>▮</ruby>" xah-html--ahf)
+("ruby3" "<ruby>▮</ruby>" xah-html--ahf)
 ("s3" "<s>▮</s>" xah-html--ahf)
 ("samp" "<samp>▮</samp>" xah-html--ahf)
 ("script3" "<script>▮</script>" xah-html--ahf)
