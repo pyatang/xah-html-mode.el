@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.15.20180112
+;; Version: 5.15.20180120
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1455,35 +1455,49 @@ Version 2017-06-24"
     (delete-region $p1 $p2 )
     (insert $output-str)))
 
-(defun xah-html-rename-html-inline-image ()
-  "Replace current HTML inline image's file name.
+(defun xah-html-rename-source-file-path ()
+  "Rename HTML source file path.
+
+Place cursor anywhere inside a HTML source local file path, e.g.
+
+<img src=\"img/▮cats.jpg\" >
+or
+<a href=\"js_▮canvas_tutorial.html\">
+
+Call this command, it'll prompt for a new name/path. The path can be full path or relative path.
+
+The file name will be renamed/moved to the new path. The link will be changed too.
+
 This command is for interactive use only.
-When cursor is in HTML link file path, e.g.  <img src=\"img/cats.jpg\" > and this command is called, it'll prompt user for a new name. The link path will be changed to the new name, the corresponding file will also be renamed. The operation is aborted if a name exists.
-Version 2017-07-27"
+Version 2018-01-20"
   (interactive)
   (let* (
          ($bounds (bounds-of-thing-at-point 'filename))
-         ($inputPath (buffer-substring-no-properties (car $bounds) (cdr $bounds)))
-         ($expandedPath (expand-file-name $inputPath (file-name-directory (or (buffer-file-name) default-directory ))))
-         ($newPath (replace-regexp-in-string " " "_" (read-string "New name: " $expandedPath nil $expandedPath )))
+         ($input (buffer-substring-no-properties (car $bounds) (cdr $bounds)))
+         ($fullPath (expand-file-name $input (file-name-directory (or (buffer-file-name) default-directory ))))
+         ($newPath (replace-regexp-in-string " " "_" (read-string "New name: " $fullPath nil $fullPath )))
+         ($newFullPath (if (file-name-absolute-p $newPath)
+                           $newPath
+                         (expand-file-name $newPath )))
          ($doit-p nil))
-    (if (file-exists-p $newPath)
+    (if (file-exists-p $newFullPath)
         (setq $doit-p (y-or-n-p "file exist. Replace?"))
       (setq $doit-p t))
     (when $doit-p
       (progn
-        (rename-file $expandedPath $newPath t)
-        (message "rename to %s" $newPath)
+        (rename-file $fullPath $newFullPath t)
+        (message "rename to %s (full/relative path ok):" $newFullPath)
         (delete-region (car $bounds) (cdr $bounds))
         (insert
-
          (if (and
               (string-match (concat "^" (expand-file-name "~/" ) "web/")
                             (or (buffer-file-name) default-directory))
               (fboundp 'xahsite-filepath-to-href-value))
-             (progn (xahsite-filepath-to-href-value $newPath (or (buffer-file-name) default-directory)))
+             (progn (xahsite-filepath-to-href-value $newFullPath (or (buffer-file-name) default-directory)))
            (progn
-             (file-relative-name $newPath))))))))
+             (file-relative-name $newFullPath))))))))
+
+
 
 (defun xah-html-extract-url (@begin @end &optional @full-path-p)
   "Extract URLs in current block or region to `kill-ring'.
@@ -3284,7 +3298,7 @@ Version 2016-10-24"
 
   (define-key xah-html-mode-no-chord-map (kbd "DEL") 'xah-html-remove-html-tags)
 
-  (define-key xah-html-mode-no-chord-map (kbd "a") 'xah-html-rename-html-inline-image)
+  (define-key xah-html-mode-no-chord-map (kbd "a") 'xah-html-rename-source-file-path)
   (define-key xah-html-mode-no-chord-map (kbd "b") 'xah-html-wikipedia-url-linkify)
   (define-key xah-html-mode-no-chord-map (kbd "c") 'xah-html-lines-to-html-list)
   (define-key xah-html-mode-no-chord-map (kbd "d") 'xah-html-extract-url)
