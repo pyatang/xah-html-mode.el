@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.15.20180120
+;; Version: 5.15.20180205
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -38,7 +38,7 @@
 (defun xah-html--tag-self-closing-p (@tag-name)
   "Return true if the tag is a self-closing tag, <br> or <br />"
   (interactive)
-  (member @tag-name  xah-html-html5-self-close-tags))
+  (member @tag-name xah-html-html5-self-close-tags))
 
 (defun xah-html--get-bracket-positions ()
   "Returns HTML angle bracket positions.
@@ -1497,8 +1497,6 @@ Version 2018-01-20"
            (progn
              (file-relative-name $newFullPath))))))))
 
-
-
 (defun xah-html-extract-url (@begin @end &optional @full-path-p)
   "Extract URLs in current block or region to `kill-ring'.
 
@@ -1856,7 +1854,7 @@ Version 2017-08-08"
  e.g. ~/web/xahlee_org/lit.css
 becomes
 <link rel=\"stylesheet\" href=\"../lit.css\" />
-Version 2016-10-31"
+Version 2018-01-30"
   (interactive)
   (let* (
          ($bds (xah-get-bounds-of-thing-or-region 'filepath))
@@ -1889,7 +1887,7 @@ Version 2016-10-31"
 e.g. math.pdf
 becomes
 <embed src=\"math.pdf\" width=\"1100\" height=\"1000\" />
-Version 2017-08-22"
+Version 2018-01-30"
   (interactive)
   (let* (
          ($bds (xah-get-bounds-of-thing-or-region 'filepath))
@@ -3199,7 +3197,7 @@ Version 2016-10-24"
 ("thead" "<thead>▮</thead>" xah-html--ahf)
 ("time3" "<time>▮</time>" xah-html--ahf)
 ("title3" "<title>▮</title>" xah-html--ahf)
-("tr" "<tr>▮</tr>" xah-html--ahf)
+("tr3" "<tr>▮</tr>" xah-html--ahf)
 ("u3" "<u>▮</u>" xah-html--ahf)
 ("ul" "<ul>▮</ul>" xah-html--ahf)
 ("var3" "<var>▮</var>" xah-html--ahf)
