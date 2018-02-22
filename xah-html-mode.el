@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.15.20180205
+;; Version: 5.15.20180221
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -757,19 +757,25 @@ If cursor is on a src=… or href=…, then if it a file path, open file, if htt
 Else call `newline'.
 Version 2017-02-04"
   (interactive)
-  (if (xah-html-point-in-src-or-href-q)
+  (if (xah-html-cursor-in-link-q)
       (let (($srcStr (xah-get-thing-at-point 'filepath )))
         (if (string-match "^http:\\|^https:" $srcStr)
             (browse-url $srcStr)
           (if (file-exists-p $srcStr)
-            (find-file $srcStr)
+              (let ; open f.ts instead of f.js
+                  ( ($ext (file-name-extension $srcStr))
+                    ($fnamecore (file-name-sans-extension $srcStr)))
+                (if (and (string-equal $ext "js")
+                         (file-exists-p (concat $fnamecore ".ts")))
+                    (find-file (concat $fnamecore ".ts"))
+                  (progn (find-file $srcStr))))
             (when (y-or-n-p (format "file no exist at 「%s」. Create new?" $srcStr))
               (find-file $srcStr)))))
     (newline)))
 
-(defun xah-html-point-in-src-or-href-q ()
+(defun xah-html-cursor-in-link-q ()
   "Return true if curser is inside a string of src or href.
-Version 2017-02-04"
+Version 2018-02-21"
   (interactive)
   (let ((in-string-q (nth 3 (syntax-ppss))))
     (if in-string-q
@@ -2208,7 +2214,7 @@ The anchor text may be of 4 possibilities, depending on value of `universal-argu
 0 or any → smartly decide.
 
 URL `http://ergoemacs.org/emacs/elisp_html-linkify.html'
-Version 2017-08-23"
+Version 2018-02-17"
   (interactive "P")
   (let (
         $p1
@@ -2227,7 +2233,7 @@ Version 2017-08-23"
     ;; in case it's already encoded. TODO this is only 99% correct.
     (setq $domainName
           (progn
-            (string-match "://\\([^\/]+?\\)/" $url)
+            (string-match "://\\([^\/]+?\\)/?" $url)
             (match-string 1 $url)))
     (setq $linkText
           (cond
@@ -2727,9 +2733,6 @@ Version 2017-11-01"
 (defvar xah-html-class-input-history nil "for input history of `xah-html-wrap-html-tag'")
 (setq xah-html-class-input-history (list))
 
-(defvar xah-html-class-input-history nil "for input history of `xah-html-wrap-html-tag'")
-(setq xah-html-class-input-history (list))
-
 (defun xah-html-insert-open-close-tags (@tag-name @class-name @p1 @p2)
   "Add HTML open/close tags around region boundary @p1 @p2.
 This function does not `save-excursion'.
@@ -2803,7 +2806,7 @@ Version 2017-09-24
           (goto-char (point-min))
           (insert "\n")
           (goto-char (point-max))
-          (insert "\n")))
+          (insert "\n\n")))
 
       (xah-html-insert-open-close-tags @tag-name @class-name (point-min) (point-max)))
 
