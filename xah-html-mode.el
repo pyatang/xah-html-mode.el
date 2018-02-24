@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 5.15.20180221
+;; Version: 6.0.20180224
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -2497,7 +2497,7 @@ Version 2017-03-17"
 Changes are reported to message buffer with char position.
 
 When called in lisp code, @begin @end are region begin/end positions.
-Version 2017-11-08"
+Version 2018-02-24"
   (interactive
    (let (($bds (xah-get-bounds-of-thing-or-region 'block)))
      (list (car $bds) (cdr $bds))))
@@ -2505,7 +2505,7 @@ Version 2017-11-08"
     (save-excursion
       (save-restriction
         (narrow-to-region @begin @end)
-        (when (string-match "/ergoemacs_org/" (buffer-file-name))
+        (when (and (buffer-file-name) (string-match "/ergoemacs_org/" (buffer-file-name)))
           (xah-html-htmlize-elisp-keywords @begin @end))
         (progn
           (goto-char (point-min))
