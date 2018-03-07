@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 6.0.20180224
+;; Version: 6.1.20180306
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1153,8 +1153,7 @@ Version 2017-08-01"
                 (while
                     (re-search-forward  "\.html$" nil t)
                   (backward-char 1)
-                  (xah-html-file-linkify)
-                  ;; (xah-html-any-linkify)
+                  (xah-html-any-linkify)
                   ))
               (goto-char (point-min))
               (while
@@ -2183,7 +2182,13 @@ Version 2017-08-16"
 
      ((xah-html-path-ends-in-image-suffix-p $input) (xah-html-image-figure-linkify))
 
-     ((string-match-p "\\`https?://" $input) (xah-html-source-url-linkify 0))
+     ((string-match-p "\\`https?://" $input)
+      (progn
+        (if (fboundp 'xahsite-url-is-xah-website-p)
+            (if (xahsite-url-is-xah-website-p $input)
+                (xah-file-linkify $p1 $p2)
+              (xah-html-source-url-linkify 0))
+          (xah-html-source-url-linkify 0))))
 
      ((string-match
        (concat "^" (expand-file-name "~/" ) "web/")
