@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 6.1.20180306
+;; Version: 6.1.20180322
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -2195,11 +2195,11 @@ Version 2017-08-16"
        (or (buffer-file-name) default-directory))
       (if (fboundp 'xah-all-linkify)
           (xah-all-linkify)
-        (xah-html-wrap-url)))
+        (xah-html-url-linkify)))
 
      ((file-exists-p $input) (xah-html-file-linkify $p1 $p2))
 
-     (t (xah-html-wrap-url)))
+     (t (xah-html-url-linkify)))
     ;;
     ))
 
@@ -2309,11 +2309,13 @@ Version 2016-06-29."
       (delete-region $p1 $p2)
       (insert $output-str))))
 
-(defun xah-html-wrap-url ()
+(defun xah-html-url-linkify ()
   "Make the URL at cursor point into a HTML link.
 Work on current non-whitespace char sequence or text selection.
 
-Version 2017-08-13"
+URL `http://ergoemacs.org/emacs/wrap-url.html'
+
+Version 2018-03-22"
   (interactive)
   (let ( $p1 $p2 $new-str )
     (if (region-active-p)
@@ -2331,8 +2333,11 @@ Version 2017-08-13"
 (defun xah-html-wrap-p-tag ()
   "Add <p>…</p> tag to current block or text selection.
 If there's a text selection, wrap p around each text block.
- 〔a block is separated by blank lines.〕
-Version 2016-10-19"
+A text block is separated by blank lines.
+
+URL `http://ergoemacs.org/emacs/emacs_html_wrap_tags.html'
+
+Version 2018-03-22"
   (interactive)
   (let* (
          ($bds (xah-get-bounds-of-thing-or-region 'block))
@@ -2497,7 +2502,7 @@ Version 2017-03-17"
 • 《…》 → <cite class=\"book\">…</cite>
 • 〔…〕 → <code class=\"path-xl\">\\1</code>
 •  ‹…› → <var class=\"d\">…</var>
-• [<a href=] → [see <a href=] 
+• [<a href=] → [see <a href=]
 
 Changes are reported to message buffer with char position.
 
@@ -3102,119 +3107,8 @@ Version 2016-10-24"
 (define-abbrev-table 'xah-html-mode-abbrev-table
   '(
 
-("a3" "<a>▮</a>" xah-html--ahf)
-("abbr" "<abbr>▮</abbr>" xah-html--ahf)
-("address3" "<address>▮</address>" xah-html--ahf)
-("applet3" "<applet>▮</applet>" xah-html--ahf)
-("area3" "<area>▮</area>" xah-html--ahf)
-("article3" "<article>▮</article>" xah-html--ahf)
-("aside3" "<aside>▮</aside>" xah-html--ahf)
-("audio3" "<audio>▮</audio>" xah-html--ahf)
-("b3" "<b>▮</b>" xah-html--ahf)
-("base3" "<base>▮</base>" xah-html--ahf)
-("basefont" "<basefont>▮</basefont>" xah-html--ahf)
-("bdi" "<bdi>▮</bdi>" xah-html--ahf)
-("bdo" "<bdo>▮</bdo>" xah-html--ahf)
-("blockquote" "<blockquote>▮</blockquote>" xah-html--ahf)
-("body3" "<body>▮</body>" xah-html--ahf)
-("br" "<br>▮</br>" xah-html--ahf)
-("button3" "<button>▮</button>" xah-html--ahf)
-("canvas3" "<canvas>▮</canvas>" xah-html--ahf)
-("caption3" "<caption>▮</caption>" xah-html--ahf)
-("cite3" "<cite>▮</cite>" xah-html--ahf)
-("code3" "<code>▮</code>" xah-html--ahf)
-("col" "<col>▮</col>" xah-html--ahf)
-("colgroup" "<colgroup>▮</colgroup>" xah-html--ahf)
-("command3" "<command>▮</command>" xah-html--ahf)
-("datalist" "<datalist>▮</datalist>" xah-html--ahf)
-("dd" "<dd>▮</dd>" xah-html--ahf)
-("del" "<del>▮</del>" xah-html--ahf)
-("details3" "<details>▮</details>" xah-html--ahf)
-("dfn" "<dfn>▮</dfn>" xah-html--ahf)
-("div" "<div>▮</div>" xah-html--ahf)
-("dl3" "<dl>▮</dl>" xah-html--ahf)
-("dt" "<dt>▮</dt>" xah-html--ahf)
-("em" "<em>▮</em>" xah-html--ahf)
-("embed3" "<embed>▮</embed>" xah-html--ahf)
-("fieldset" "<fieldset>▮</fieldset>" xah-html--ahf)
-("figcaption" "<figcaption>▮</figcaption>" xah-html--ahf)
-("figure3" "<figure>▮</figure>" xah-html--ahf)
-("footer3" "<footer>▮</footer>" xah-html--ahf)
-("form3" "<form>▮</form>" xah-html--ahf)
-("h1" "<h1>▮</h1>" xah-html--ahf)
-("h2" "<h2>▮</h2>" xah-html--ahf)
-("h3" "<h3>▮</h3>" xah-html--ahf)
-("h4" "<h4>▮</h4>" xah-html--ahf)
-("h5" "<h5>▮</h5>" xah-html--ahf)
-("h6" "<h6>▮</h6>" xah-html--ahf)
-("head3" "<head>▮</head>" xah-html--ahf)
-("header3" "<header>▮</header>" xah-html--ahf)
-("hr" "<hr>▮</hr>" xah-html--ahf)
-("html3" "<html>▮</html>" xah-html--ahf)
-("i3" "<i>▮</i>" xah-html--ahf)
-("iframe" "<iframe>▮</iframe>" xah-html--ahf)
-("img" "<img>▮</img>" xah-html--ahf)
-("input3" "<input>▮</input>" xah-html--ahf)
-("ins" "<ins>▮</ins>" xah-html--ahf)
-("kbd" "<kbd>▮</kbd>" xah-html--ahf)
-("keygen" "<keygen>▮</keygen>" xah-html--ahf)
-("label3" "<label>▮</label>" xah-html--ahf)
-("legend3" "<legend>▮</legend>" xah-html--ahf)
-("li" "<li>▮</li>" xah-html--ahf)
-("link3" "<link>▮</link>" xah-html--ahf)
-("main3" "<main>▮</main>" xah-html--ahf)
-("map3" "<map>▮</map>" xah-html--ahf)
-("mark3" "<mark>▮</mark>" xah-html--ahf)
-("menu3" "<menu>▮</menu>" xah-html--ahf)
-("meta3" "<meta>▮</meta>" xah-html--ahf)
-("meter3" "<meter>▮</meter>" xah-html--ahf)
-("nav" "<nav>▮</nav>" xah-html--ahf)
-("noscript" "<noscript>▮</noscript>" xah-html--ahf)
-("object3" "<object>▮</object>" xah-html--ahf)
-("ol" "<ol>▮</ol>" xah-html--ahf)
-("optgroup" "<optgroup>▮</optgroup>" xah-html--ahf)
-("option3" "<option>▮</option>" xah-html--ahf)
-("output3" "<output>▮</output>" xah-html--ahf)
-("p3" "<p>▮</p>" xah-html--ahf)
-("param" "<param>▮</param>" xah-html--ahf)
-("pre3" "<pre>▮</pre>" xah-html--ahf)
-("progress3" "<progress>▮</progress>" xah-html--ahf)
-("q3" "<q>▮</q>" xah-html--ahf)
-("rp" "<rp>▮</rp>" xah-html--ahf)
-("rt" "<rt>▮</rt>" xah-html--ahf)
-("ruby3" "<ruby>▮</ruby>" xah-html--ahf)
-("s3" "<s>▮</s>" xah-html--ahf)
-("samp" "<samp>▮</samp>" xah-html--ahf)
-("script3" "<script>▮</script>" xah-html--ahf)
-("section3" "<section>▮</section>" xah-html--ahf)
-("select3" "<select>▮</select>" xah-html--ahf)
-("small3" "<small>▮</small>" xah-html--ahf)
-("source3" "<source>▮</source>" xah-html--ahf)
-("span3" "<span>▮</span>" xah-html--ahf)
-("strong3" "<strong>▮</strong>" xah-html--ahf)
-("style3" "<style>▮</style>" xah-html--ahf)
-("sub3" "<sub>▮</sub>" xah-html--ahf)
-("summary3" "<summary>▮</summary>" xah-html--ahf)
-("sup3" "<sup>▮</sup>" xah-html--ahf)
-("table3" "<table>▮</table>" xah-html--ahf)
-("tbody" "<tbody>▮</tbody>" xah-html--ahf)
-("td" "<td>▮</td>" xah-html--ahf)
-("textarea" "<textarea>▮</textarea>" xah-html--ahf)
-("tfoot" "<tfoot>▮</tfoot>" xah-html--ahf)
-("th3" "<th>▮</th>" xah-html--ahf)
-("thead" "<thead>▮</thead>" xah-html--ahf)
-("time3" "<time>▮</time>" xah-html--ahf)
-("title3" "<title>▮</title>" xah-html--ahf)
-("tr3" "<tr>▮</tr>" xah-html--ahf)
-("u3" "<u>▮</u>" xah-html--ahf)
-("ul" "<ul>▮</ul>" xah-html--ahf)
-("var3" "<var>▮</var>" xah-html--ahf)
-("video3" "<video>▮</video>" xah-html--ahf)
-("wbr" "<wbr>▮</wbr>" xah-html--ahf)
-
     ("cdata" "<![CDATA[▮]]>" xah-html--ahf)
-    ("hr" "<hr />" xah-html--ahf)
-    ("br" "<br />" xah-html--ahf)
+    
     ("cl" "class=\"▮\"" xah-html--ahf)
     ("id3" "id=\"▮\"" xah-html--ahf)
 
@@ -3226,28 +3120,6 @@ Version 2016-10-24"
     ("style3" "<style type=\"text/css\">\np {line-height:130%}\n</style>")
 
     ("iframe" "<iframe src=\"some.html\" width=\"200\" height=\"300\"></iframe>")
-
-    ;; todo
-    ;; http://xahlee.info/js/css_colors.html
-    ;; http://xahlee.info/js/css_color_names.html
-    ("white3" "#ffffff" xah-html--ahf)
-    ("silver3" "#c0c0c0" xah-html--ahf)
-    ("gray3" "#808080" xah-html--ahf)
-    ("black3" "#000000" xah-html--ahf)
-    ("red3" "#ff0000" xah-html--ahf)
-    ("maroon3" "#800000" xah-html--ahf)
-    ("yellow3" "#ffff00" xah-html--ahf)
-    ("olive3" "#808000" xah-html--ahf)
-    ("lime3" "#00ff00" xah-html--ahf)
-    ("green3" "#008000" xah-html--ahf)
-    ("aqua3" "#00ffff" xah-html--ahf)
-    ("teal3" "#008080" xah-html--ahf)
-    ("blue3" "#0000ff" xah-html--ahf)
-    ("navy3" "#000080" xah-html--ahf)
-    ("fuchsia3" "#ff00ff" xah-html--ahf)
-    ("purple3" "#800080" xah-html--ahf)
-    ("orange3" "#ffa500" xah-html--ahf)
-    ("hsl" "hsl(0,100%,50%)" xah-html--ahf)
 
     ("og" "<meta property=\"og:image\" content=\"http://ergoemacs.org/emacs/i/geek_vs_non_geek_repetitive_tasks.png\" />" xah-html--ahf)
 
