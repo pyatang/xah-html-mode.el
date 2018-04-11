@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 6.1.20180322
+;; Version: 6.1.20180410
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1403,7 +1403,7 @@ Version 2017-07-23"
 
 (defun xah-html-html-to-text ()
   "Convert HTML to plain text on current text block or text selection.
-Version 2017-06-24"
+Version 2018-03-24"
   (interactive)
   (let ( $p1 $p2 $input-str $output-str)
     (let ($bds)
@@ -1425,7 +1425,7 @@ Version 2017-06-24"
            ["<var class=\"d\">\\([^<]+?\\)</var>" "‹\\1›"]
            ["<script>\\([^\\<]+?\\)</script>" ""]
            ["<a +href=\"\\([^\"]+?\\)\" *>\\([^<]+?\\)</a>" "\\2 \n  \\1\n"]
-           ["<img +src=\"\\([^\"]+?\\)\" +alt=\"\\([^\"]+?\\)\" +width=\"[0-9]+\" +height=\"[0-9]+\" */?>" "〔IMAGE “\\2” \\1 〕"]
+           ["<img +src=\"\\([^\"]+?\\)\" +alt=\"\\([^\"]+?\\)\" +width=\"[0-9]+\" +height=\"[0-9]+\" */?>" "[IMAGE “\\2” \\1 ]"]
            ]
           "FIXEDCASE" )
          (xah-replace-pairs-region
@@ -1602,19 +1602,20 @@ Version 2017-08-24"
   "Reformat current text block or selection into a canonical citation format.
 For example, place cursor somewhere in the following block:
 
-Circus Maximalist
-By PAUL GRAY
-Monday, Sep. 12, 1994
-http://www.time.com/time/magazine/article/0,9171,981408,00.html
+Why Utopian Communities Fail
+https://areomagazine.com/2018/03/08/why-utopian-communities-fail/
+2018-03-08
+by Ewan Morrison
 
-After execution, the lines will become
+becomes
 
- 〔<cite>Circus Maximalist</cite> <time>1994-09-12</time> By Paul Gray. At <a href=\"http://www.time.com/time/magazine/article/0,9171,981408,00.html\">Source www.time.com</a>〕
+ [<cite>Why Utopian Communities Fail</cite> <time>2018-03-08</time> By Ewan Morrison. At <a class=\"sorc\" href=\"https://areomagazine.com/2018/03/08/why-utopian-communities-fail/\" data-accessed=\"2018-03-24\">https://areomagazine.com/2018/03/08/why-utopian-communities-fail/</a> ]
 
 If there's a text selection, use it for input, otherwise the input is a text block between blank lines.
 
 The order of lines for {title, author, date/time, url} needs not be in that order. Author should start with “by”.
-Version 2017-07-11"
+
+Version 2018-03-24"
   (interactive)
   (let* (
          ($bds (xah-get-bounds-of-thing 'block))
@@ -1658,11 +1659,11 @@ Version 2017-07-11"
     (setq $url (with-temp-buffer (insert $url) (xah-html-source-url-linkify 1) (buffer-string)))
 
     (delete-region $p1 $p2 )
-    (insert (concat "〔 <cite>" $title "</cite> ")
+    (insert (concat "[<cite>" $title "</cite> ")
             "<time>" $date "</time>"
             " By " $author
             ". At " $url
-            " 〕")))
+            " ]")))
 
 (defun xah-html-make-link-defunct ()
   "Make the HTML link under cursor to a defunct form.
@@ -2050,12 +2051,12 @@ The line can be a youtube ID “bFSS826ETlk” or full URL e.g. “http://www.yo
 Here's sample result:
 
 <figure>
-<iframe width=\"640\" height=\"480\" src=\"https://www.youtube.com/embed/yQw3DvqEbxI?rel=0\" allowfullscreen></iframe>
+<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/yQw3DvqEbxI?rel=0\" allowfullscreen></iframe>
 <figcaption>
 </figcaption>
 </figure>
 
-Version 2017-08-03"
+Version 2018-04-10"
   (interactive)
   (let ( $p1 $p2 $inputStr $id
              ($youtubeLinkChars "-_?.:/=&A-Za-z0-9"))
@@ -2071,7 +2072,7 @@ Version 2017-08-03"
     (setq $id (match-string 1 $inputStr))
     (delete-region $p1 $p2)
     (insert "\n<figure>\n")
-    (insert (concat "<iframe width=\"640\" height=\"480\" src=\"https://www.youtube.com/embed/" $id "?rel=0\" allowfullscreen></iframe>"))
+    (insert (concat "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/" $id "?rel=0\" allowfullscreen></iframe>"))
     (insert "\n<figcaption>\n")
     (insert "</figcaption>\n")
     (insert "</figure>\n")
