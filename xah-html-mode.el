@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 6.1.20180410
+;; Version: 6.1.20180424075226
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1474,7 +1474,7 @@ Call this command, it'll prompt for a new name/path. The path can be full path o
 The file name will be renamed/moved to the new path. The link will be changed too.
 
 This command is for interactive use only.
-Version 2018-01-20"
+Version 2018-04-24"
   (interactive)
   (let* (
          ($bounds (bounds-of-thing-at-point 'filename))
@@ -1490,7 +1490,7 @@ Version 2018-01-20"
       (setq $doit-p t))
     (when $doit-p
       (progn
-        (rename-file $fullPath $newFullPath t)
+        (rename-file $fullPath $newFullPath)
         (message "rename to %s (full/relative path ok):" $newFullPath)
         (delete-region (car $bounds) (cdr $bounds))
         (insert
@@ -2051,12 +2051,12 @@ The line can be a youtube ID “bFSS826ETlk” or full URL e.g. “http://www.yo
 Here's sample result:
 
 <figure>
-<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/yQw3DvqEbxI?rel=0\" allowfullscreen></iframe>
+<iframe width=\"640\" height=\"480\" src=\"https://www.youtube.com/embed/yQw3DvqEbxI?rel=0\" allowfullscreen></iframe>
 <figcaption>
 </figcaption>
 </figure>
 
-Version 2018-04-10"
+Version 2018-04-21"
   (interactive)
   (let ( $p1 $p2 $inputStr $id
              ($youtubeLinkChars "-_?.:/=&A-Za-z0-9"))
@@ -2072,7 +2072,7 @@ Version 2018-04-10"
     (setq $id (match-string 1 $inputStr))
     (delete-region $p1 $p2)
     (insert "\n<figure>\n")
-    (insert (concat "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/" $id "?rel=0\" allowfullscreen></iframe>"))
+    (insert (concat "<iframe width=\"640\" height=\"480\" src=\"https://www.youtube.com/embed/" $id "?rel=0\" allowfullscreen></iframe>"))
     (insert "\n<figcaption>\n")
     (insert "</figcaption>\n")
     (insert "</figure>\n")
@@ -2784,10 +2784,8 @@ Version 2017-09-24
             (cond
              ((equal $wrap-type "w") (bounds-of-thing-at-point 'word ))
              ((equal $wrap-type "l") (cons (line-beginning-position) (line-end-position)))
-             ;; ((equal $wrap-type "l") (xah-get-bounds-of-thing 'line))
              ((equal $wrap-type "b") (xah-get-bounds-of-thing 'block))
              (t (xah-get-bounds-of-thing 'word)))))
-
          $p1 $p2
          )
     (if $bds
