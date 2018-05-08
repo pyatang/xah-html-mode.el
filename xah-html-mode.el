@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 6.1.20180424075226
+;; Version: 6.2.20180508151923
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -23,6 +23,7 @@
 (require 'browse-url)
 (require 'url-util)
 (require 'thingatpt)
+(require 'seq)
 
 (require 'xah-replace-pairs)
 (require 'xah-get-thing)
@@ -32,6 +33,52 @@
 ;; (load "html-util.el" )
 
 (defvar xah-html-mode-hook nil "Standard hook for `xah-html-mode'")
+
+(defvar xah-html-webroot-list nil "a list of web root full paths.
+this is used by `xah-html-get-webroot', and commands that create link with relative path.")
+
+(setq
+ xah-html-webroot-list
+ '(
+
+   "/Users/xah/web/ergoemacs_org/"
+   "/Users/xah/web/wordyenglish_com/"
+   "/Users/xah/web/xaharts_org/"
+   "/Users/xah/web/xahlee_info/"
+   "/Users/xah/web/xahlee_org/"
+   "/Users/xah/web/xahmusic_org/"
+   "/Users/xah/web/xahsl_org/"
+   ))
+
+(defun xah-html-get-webroot (@path)
+  "Return the webroot of @path.
+Webroot dir are defined in `xah-html-webroot-list'.
+All path should be full path here.
+Version 2018-05-08"
+  (interactive)
+  (seq-find
+   (lambda (x)
+     (string-match
+      (concat "^" x)
+      @path ))
+   xah-html-webroot-list
+   nil
+   ))
+
+(defun xah-html-get-relative-path-to-webroot (@path)
+  "Return the relative path of @path with respect to its webroot.
+ @path should be full path here.
+Webroot dir are defined in `xah-html-webroot-list'.
+If @path is not there, return relative path to parent dir.
+Version 2018-05-08"
+  (interactive)
+  (let (($webroot (xah-html-get-webroot @path))
+        ($current_dir (file-name-directory (or (buffer-file-name) default-directory))))
+    (if $webroot
+        (progn
+          (concat (file-relative-name $webroot $current_dir)
+                  (file-relative-name @path $webroot)))
+      (file-relative-name @path $current_dir))))
 
 
 
@@ -544,21 +591,27 @@ Version 2017-07-25"
       (setq buffer-offer-save t)
       (insert $textContent)
       (when (xah-html-precode-htmlized-p (point-min) (point-max))
-        (xah-html-remove-span-tag-region (point-min) (point-max))))
+        (xah-html-remove-span-tag-region (point-min) (point-max))
+        ))
+
     (setq $fname
-          (if (equal $fileSuffix "java")
-              (progn
-                (goto-char (point-min))
-                (if (re-search-forward "class \\([A-Za-z0-9]+\\)[\n ]*{" nil t)
-                    (progn
-                      (format "%s.java" (match-string 1)))
-                  (if (re-search-forward "class \\([A-Za-z0-9]+\\)[\n ]*{" nil t)
-                      (progn
-                        (format "%s.java" (match-string 1)))
-                    $fnTemp)))
-            $fnTemp))
+              (if (equal $fileSuffix "java")
+                  (progn
+                    (goto-char (point-min))
+                    (if (re-search-forward "class \\([A-Za-z0-9]+\\)[\n ]*{" nil t)
+                        (progn
+                          (format "%s.java" (match-string 1)))
+                      (if (re-search-forward "class \\([A-Za-z0-9]+\\)[\n ]*{" nil t)
+                          (progn
+                            (format "%s.java" (match-string 1)))
+                        $fnTemp)))
+                $fnTemp))
+
     (write-file $fname "CONFIRM")
-    (goto-char (point-min))))
+
+    (goto-char (point-min))
+
+    ))
 
 
 
@@ -1490,8 +1543,7 @@ Version 2018-04-24"
       (setq $doit-p t))
     (when $doit-p
       (progn
-        (rename-file $fullPath $newFullPath)
-        (message "rename to %s (full/relative path ok):" $newFullPath)
+        (rename-file $fullPath $newFullPath t)
         (delete-region (car $bounds) (cdr $bounds))
         (insert
          (if (and
@@ -3107,7 +3159,7 @@ Version 2016-10-24"
   '(
 
     ("cdata" "<![CDATA[▮]]>" xah-html--ahf)
-    
+
     ("cl" "class=\"▮\"" xah-html--ahf)
     ("id3" "id=\"▮\"" xah-html--ahf)
 
