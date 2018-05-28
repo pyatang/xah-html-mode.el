@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2017, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 6.2.20180516164107
+;; Version: 6.3.20180528122356
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -3236,7 +3236,7 @@ Version 2016-10-24"
   (define-key xah-html-mode-no-chord-map (kbd "g") 'xah-html-brackets-to-html)
   (define-key xah-html-mode-no-chord-map (kbd "h") 'xah-html-any-linkify)
   (define-key xah-html-mode-no-chord-map (kbd "i") nil)
-  (define-key xah-html-mode-no-chord-map (kbd "j") nil)
+  (define-key xah-html-mode-no-chord-map (kbd "j") 'xah-html-url-linkify)
   (define-key xah-html-mode-no-chord-map (kbd "k") 'xah-html-htmlize-keyboard-shortcut-notation)
   (define-key xah-html-mode-no-chord-map (kbd "l") 'xah-html-htmlize-elisp-keywords)
   (define-key xah-html-mode-no-chord-map (kbd "m") 'xah-html-insert-wrap-source-code)
