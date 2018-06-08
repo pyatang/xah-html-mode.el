@@ -1,9 +1,9 @@
 ;;; xah-html-mode.el --- Major mode for editing pure html5. -*- coding: utf-8; lexical-binding: t; -*-
 
-;; Copyright © 2013-2017, by Xah Lee
+;; Copyright © 2013-2018, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 6.3.20180528122356
+;; Version: 7.0.20180608010252
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1157,9 +1157,9 @@ Version 2018-05-16"
 
 (defun xah-html-get-html-file-title (fname &optional no-error-p)
   "Return fname <title> tag's text.
-Assumes that the file contains the string “<title>…</title>”. If not, and if no-error-p is true, then return nil.
+Assumes that the file contains the string “<title>…</title>”. If not, and if no-error-p is true, then return empty string.
 
-Version 2016-07-12"
+Version 2018-06-06"
   (with-temp-buffer
     (insert-file-contents fname nil nil nil t)
     (goto-char 1)
@@ -1167,7 +1167,7 @@ Version 2016-07-12"
         (buffer-substring-no-properties
          (point)
          (- (search-forward "</title>") 8))
-      nil
+      ""
       )))
 
 (defun xah-html-lines-to-html-list ()
@@ -1420,9 +1420,12 @@ If @change-entity-p is true, convert HTML entities to char.
 
 (defun xah-html-remove-html-tags (&optional @begin @end)
   "Delete HTML tags in in current text block or text selection.
- a “text block” is text between blank lines
- WARNING: this command does not cover all HTML tags or convert all HTML entities. For robust solution you might use: lynx $dump -display_charset=utf-8 URL.
-Version 2017-07-23"
+A “text block” is text between blank lines
+
+Use `xah-html-html-to-text' if you want the html link URL to remain.
+
+ WARNING: this command does not cover all HTML tags or convert all HTML entities. For robust solution you might use the terminal command “lynx” or other.
+Version 2018-06-08"
   (interactive)
   (let ($p1 $p2 $input-str $output-str)
     (if @begin
@@ -1456,7 +1459,7 @@ Version 2017-07-23"
 
 (defun xah-html-html-to-text ()
   "Convert HTML to plain text on current text block or text selection.
-Version 2018-03-24"
+Version 2018-06-08"
   (interactive)
   (let ( $p1 $p2 $input-str $output-str)
     (let ($bds)
@@ -1468,6 +1471,21 @@ Version 2018-03-24"
      $output-str
      (with-temp-buffer
        (insert $input-str)
+
+       (goto-char 1)
+       (while (re-search-forward "href=\"\\([^\"]+?\\)\"" nil t)
+         (let (($matchString (match-string 1)))
+           (search-forward ">" )
+           (search-forward ">" )
+           (insert (format " [ %s ] " $matchString))))
+
+       (goto-char 1)
+       (while (re-search-forward "src=\"\\([^\"]+?\\)\""  nil t)
+         (let (($matchString (match-string 1)))
+           (search-forward ">" )
+           (search-forward ">" )
+           (insert (format " [ %s ] " $matchString))))
+
        (goto-char 1)
        (let ((case-fold-search nil))
          (xah-replace-regexp-pairs-region
@@ -1477,7 +1495,12 @@ Version 2018-03-24"
            [" class=\"\\([A-Za-z0-9]+\\)\" " " "]
            ["<var class=\"d\">\\([^<]+?\\)</var>" "‹\\1›"]
            ["<script>\\([^\\<]+?\\)</script>" ""]
-           ["<a +href=\"\\([^\"]+?\\)\" *>\\([^<]+?\\)</a>" "\\2 \n  \\1\n"]
+
+           ;; ["<a +href=\"\\([^\"]+?\\)\" *>\\([^<]+?\\)</a>" "\\2"]
+           ;; ["<a +href=\"\\([^\"]+?\\)\" *>\\([^<]+?\\)</a>" "\\2 [ \\1 ]"]
+           ;; ["href=\"\\([^\"]+?\\)\"" " \\1 "]
+           ;; [">\\([^<]+?\\)</a>" ">\\1\n"]
+
            ["<img +src=\"\\([^\"]+?\\)\" +alt=\"\\([^\"]+?\\)\" +width=\"[0-9]+\" +height=\"[0-9]+\" */?>" "[IMAGE “\\2” \\1 ]"]
            ]
           "FIXEDCASE" )
@@ -3259,64 +3282,64 @@ Version 2016-10-24"
 
 
 
-(defvar xah-html-mode-syntax-table nil "Syntax table for `xah-html-mode'.")
+;; (defvar xah-html-mode-syntax-table nil "Syntax table for `xah-html-mode'.")
 
-(setq xah-html-mode-syntax-table
-      (let ((synTable (make-syntax-table)))
-        (modify-syntax-entry ?\! "." synTable)
-        (modify-syntax-entry ?\# "." synTable)
+;; (setq xah-html-mode-syntax-table
+;;       (let ((synTable (make-syntax-table)))
+;;         (modify-syntax-entry ?\! "." synTable)
+;;         (modify-syntax-entry ?\# "." synTable)
 
-        (modify-syntax-entry ?\$ "." synTable)
+;;         (modify-syntax-entry ?\$ "." synTable)
 
-        (modify-syntax-entry ?\% "." synTable)
-        (modify-syntax-entry ?\& "." synTable)
-        (modify-syntax-entry ?\' "." synTable)
-        (modify-syntax-entry ?\* "." synTable)
-        (modify-syntax-entry ?\+ "." synTable)
-        (modify-syntax-entry ?\, "." synTable)
-        (modify-syntax-entry ?\- "_" synTable)
-        (modify-syntax-entry ?\. "." synTable)
-        (modify-syntax-entry ?\/ "." synTable)
-        (modify-syntax-entry ?\: "." synTable)
-        (modify-syntax-entry ?\; "." synTable)
-        (modify-syntax-entry ?\< "." synTable)
-        (modify-syntax-entry ?\= "." synTable)
-        (modify-syntax-entry ?\> "." synTable)
-        (modify-syntax-entry ?\? "." synTable)
-        (modify-syntax-entry ?\@ "." synTable)
+;;         (modify-syntax-entry ?\% "." synTable)
+;;         (modify-syntax-entry ?\& "." synTable)
+;;         (modify-syntax-entry ?\' "." synTable)
+;;         (modify-syntax-entry ?\* "." synTable)
+;;         (modify-syntax-entry ?\+ "." synTable)
+;;         (modify-syntax-entry ?\, "." synTable)
+;;         (modify-syntax-entry ?\- "_" synTable)
+;;         (modify-syntax-entry ?\. "." synTable)
+;;         (modify-syntax-entry ?\/ "." synTable)
+;;         (modify-syntax-entry ?\: "." synTable)
+;;         (modify-syntax-entry ?\; "." synTable)
+;;         (modify-syntax-entry ?\< "." synTable)
+;;         (modify-syntax-entry ?\= "." synTable)
+;;         (modify-syntax-entry ?\> "." synTable)
+;;         (modify-syntax-entry ?\? "." synTable)
+;;         (modify-syntax-entry ?\@ "." synTable)
 
-        (modify-syntax-entry ?\" "\"" synTable)
+;;         (modify-syntax-entry ?\" "\"" synTable)
 
-        (modify-syntax-entry ?\\ "\\" synTable)
+;;         (modify-syntax-entry ?\\ "\\" synTable)
 
-        (modify-syntax-entry ?^ "." synTable) ; can't use blackslash, because it became control
-        (modify-syntax-entry ?\_ "_" synTable)
-        (modify-syntax-entry ?\` "." synTable)
-        (modify-syntax-entry ?\{ "(}" synTable)
-        (modify-syntax-entry ?\| "." synTable)
-        (modify-syntax-entry ?\} "){" synTable)
-        (modify-syntax-entry ?\~ "." synTable)
+;;         (modify-syntax-entry ?^ "." synTable) ; can't use blackslash, because it became control
+;;         (modify-syntax-entry ?\_ "_" synTable)
+;;         (modify-syntax-entry ?\` "." synTable)
+;;         (modify-syntax-entry ?\{ "(}" synTable)
+;;         (modify-syntax-entry ?\| "." synTable)
+;;         (modify-syntax-entry ?\} "){" synTable)
+;;         (modify-syntax-entry ?\~ "." synTable)
 
-        (modify-syntax-entry ?\( "()" synTable)
-        (modify-syntax-entry ?\) ")(" synTable)
+;;         (modify-syntax-entry ?\( "()" synTable)
+;;         (modify-syntax-entry ?\) ")(" synTable)
 
-        (modify-syntax-entry ?\[ "(]" synTable)
-        (modify-syntax-entry ?\] ")[" synTable)
+;;         (modify-syntax-entry ?\[ "(]" synTable)
+;;         (modify-syntax-entry ?\] ")[" synTable)
 
-        (modify-syntax-entry ?\‹ "(›" synTable)
-        (modify-syntax-entry ?\› ")‹" synTable)
+;;         (modify-syntax-entry ?\‹ "(›" synTable)
+;;         (modify-syntax-entry ?\› ")‹" synTable)
 
-        (modify-syntax-entry ?\« "(»" synTable)
-        (modify-syntax-entry ?\» ")«" synTable)
+;;         (modify-syntax-entry ?\« "(»" synTable)
+;;         (modify-syntax-entry ?\» ")«" synTable)
 
-        (modify-syntax-entry ?\“ "(”" synTable)
-        (modify-syntax-entry ?\” ")“" synTable)
+;;         (modify-syntax-entry ?\“ "(”" synTable)
+;;         (modify-syntax-entry ?\” ")“" synTable)
 
-        (modify-syntax-entry ?‘ "(’" synTable)
-        (modify-syntax-entry ?’ ")‘" synTable)
+;;         (modify-syntax-entry ?‘ "(’" synTable)
+;;         (modify-syntax-entry ?’ ")‘" synTable)
 
-        synTable)
-)
+;;         synTable)
+;; )
 
 (defface xah-html-double-curly-quote-f
   '((t :foreground "black"
@@ -3445,7 +3468,7 @@ Version 2016-10-24"
 ;;;###autoload
 (define-derived-mode
     xah-html-mode
-    prog-mode
+    mhtml-mode
     "∑html"
   "A simple major mode for HTML5.
 HTML5 keywords are colored.
