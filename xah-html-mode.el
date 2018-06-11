@@ -3,9 +3,9 @@
 ;; Copyright © 2013-2018, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.0.20180608010252
+;; Version: 7.0.20180610204150
 ;; Created: 12 May 2012
-;; Package-Requires: ((emacs "24.1"))
+;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
 ;; License: GPL v3
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -380,7 +380,7 @@ Version 2017-01-11"
 ("section" . ["b"])
 ("select" . ["z"])
 ("source" . ["z"])
-("style" . ["l"])
+("style" . ["b"])
 ("summary" . ["z"])
 ("table" . ["b"])
 ("tbody" . ["z"])
@@ -3163,10 +3163,7 @@ Version 2017-01-13"
 Return true if found, else false.
 Version 2016-10-24"
   (interactive)
-  (let (($found-p (search-backward "▮" (if @pos @pos (max (point-min) (- (point) 100))) t )))
-    (when $found-p (forward-char ))
-    $found-p
-    ))
+  (search-backward "▮" (if @pos @pos (max (point-min) (- (point) 100))) t ))
 
 (defun xah-html--ahf ()
   "Abbrev hook function, used for `define-abbrev'.
