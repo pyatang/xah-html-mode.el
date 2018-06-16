@@ -3,9 +3,9 @@
 ;; Copyright © 2013-2018, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.0.20180610204150
+;; Version: 7.1.20180616040130
 ;; Created: 12 May 2012
-;; Package-Requires: ((emacs "26.1"))
+;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
 ;; License: GPL v3
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -1799,7 +1799,7 @@ If `univers-argument' is called before, don't width and height attribute.
 Returns the string used in the alt attribute.
 
 URL `http://ergoemacs.org/emacs/elisp_image_tag.html'
-Version 2017-09-23"
+Version 2018-06-14"
   (interactive)
   (let ( $p1 $p2 $imgPath
              $hrefValue $altText $imgWH $width $height)
@@ -1829,13 +1829,9 @@ Version 2017-09-23"
            (file-name-directory (or (buffer-file-name) default-directory))))
     (setq $altText
           (replace-regexp-in-string
-           "^ztn " ""
-           (replace-regexp-in-string
-            "-" " "
-            (replace-regexp-in-string
              "_" " "
              (replace-regexp-in-string
-              "\\.[A-Za-z]\\{3,4\\}$" "" (file-name-nondirectory $imgPath) t t) t t)) t t))
+              "\\.[A-Za-z]\\{3,4\\}$" "" (file-name-nondirectory $imgPath) t t) t t))
     (if current-prefix-arg
         (progn
           (delete-region $p1 $p2)
@@ -3279,64 +3275,69 @@ Version 2016-10-24"
 
 
 
-;; (defvar xah-html-mode-syntax-table nil "Syntax table for `xah-html-mode'.")
+(defvar xah-html-mode-syntax-table nil "Syntax table for `xah-html-mode'.")
 
-;; (setq xah-html-mode-syntax-table
-;;       (let ((synTable (make-syntax-table)))
-;;         (modify-syntax-entry ?\! "." synTable)
-;;         (modify-syntax-entry ?\# "." synTable)
+(setq xah-html-mode-syntax-table
+      (let ((synTable (make-syntax-table)))
+        (modify-syntax-entry ?! "." synTable)
+        (modify-syntax-entry ?# "." synTable)
 
-;;         (modify-syntax-entry ?\$ "." synTable)
+        (modify-syntax-entry ?$ "." synTable)
 
-;;         (modify-syntax-entry ?\% "." synTable)
-;;         (modify-syntax-entry ?\& "." synTable)
-;;         (modify-syntax-entry ?\' "." synTable)
-;;         (modify-syntax-entry ?\* "." synTable)
-;;         (modify-syntax-entry ?\+ "." synTable)
-;;         (modify-syntax-entry ?\, "." synTable)
-;;         (modify-syntax-entry ?\- "_" synTable)
-;;         (modify-syntax-entry ?\. "." synTable)
-;;         (modify-syntax-entry ?\/ "." synTable)
-;;         (modify-syntax-entry ?\: "." synTable)
-;;         (modify-syntax-entry ?\; "." synTable)
-;;         (modify-syntax-entry ?\< "." synTable)
-;;         (modify-syntax-entry ?\= "." synTable)
-;;         (modify-syntax-entry ?\> "." synTable)
-;;         (modify-syntax-entry ?\? "." synTable)
-;;         (modify-syntax-entry ?\@ "." synTable)
+        (modify-syntax-entry ?% "." synTable)
+        (modify-syntax-entry ?& "." synTable)
+        (modify-syntax-entry ?' "." synTable)
+        (modify-syntax-entry ?* "." synTable)
+        (modify-syntax-entry ?+ "." synTable)
+        (modify-syntax-entry ?, "." synTable)
+        (modify-syntax-entry ?- "_" synTable)
+        (modify-syntax-entry ?. "." synTable)
+        (modify-syntax-entry ?/ "." synTable)
+        (modify-syntax-entry ?: "." synTable)
+        (modify-syntax-entry ?\; "." synTable)
+        (modify-syntax-entry ?< "." synTable)
+        (modify-syntax-entry ?= "." synTable)
+        (modify-syntax-entry ?> "." synTable)
+        (modify-syntax-entry ?? "." synTable)
+        (modify-syntax-entry ?@ "." synTable)
 
-;;         (modify-syntax-entry ?\" "\"" synTable)
+        (modify-syntax-entry ?\" "\"" synTable)
+        ;; (modify-syntax-entry ?\" "." synTable)
 
-;;         (modify-syntax-entry ?\\ "\\" synTable)
+        (modify-syntax-entry ?\\ "\\" synTable)
 
-;;         (modify-syntax-entry ?^ "." synTable) ; can't use blackslash, because it became control
-;;         (modify-syntax-entry ?\_ "_" synTable)
-;;         (modify-syntax-entry ?\` "." synTable)
-;;         (modify-syntax-entry ?\{ "(}" synTable)
-;;         (modify-syntax-entry ?\| "." synTable)
-;;         (modify-syntax-entry ?\} "){" synTable)
-;;         (modify-syntax-entry ?\~ "." synTable)
+        (modify-syntax-entry ?^ "." synTable)
+        (modify-syntax-entry ?_ "_" synTable)
+        (modify-syntax-entry ?` "." synTable)
+        (modify-syntax-entry ?| "." synTable)
+        (modify-syntax-entry ?~ "." synTable)
 
-;;         (modify-syntax-entry ?\( "()" synTable)
-;;         (modify-syntax-entry ?\) ")(" synTable)
+        (modify-syntax-entry ?{ "(}" synTable)
+        (modify-syntax-entry ?} "){" synTable)
 
-;;         (modify-syntax-entry ?\[ "(]" synTable)
-;;         (modify-syntax-entry ?\] ")[" synTable)
+        (modify-syntax-entry ?\( "()" synTable)
+        (modify-syntax-entry ?\) ")(" synTable)
 
-;;         (modify-syntax-entry ?\‹ "(›" synTable)
-;;         (modify-syntax-entry ?\› ")‹" synTable)
+        (modify-syntax-entry ?\[ "(]" synTable)
+        (modify-syntax-entry ?\] ")[" synTable)
 
-;;         (modify-syntax-entry ?\« "(»" synTable)
-;;         (modify-syntax-entry ?\» ")«" synTable)
+        (modify-syntax-entry ?‹ "(›" synTable)
+        (modify-syntax-entry ?› ")‹" synTable)
 
-;;         (modify-syntax-entry ?\“ "(”" synTable)
-;;         (modify-syntax-entry ?\” ")“" synTable)
+        (modify-syntax-entry ?« "(»" synTable)
+        (modify-syntax-entry ?» ")«" synTable)
 
-;;         (modify-syntax-entry ?‘ "(’" synTable)
-;;         (modify-syntax-entry ?’ ")‘" synTable)
+        ;; (modify-syntax-entry ?« "\"" synTable)
+        ;; (modify-syntax-entry ?» "\"" synTable)
 
-;;         synTable)
-;; )
+        (modify-syntax-entry ?“ "(”" synTable)
+        (modify-syntax-entry ?” ")“" synTable)
+
+        (modify-syntax-entry ?‘ "(’" synTable)
+        (modify-syntax-entry ?’ ")‘" synTable)
+
+        synTable)
+)
 
 (defface xah-html-double-curly-quote-f
   '((t :foreground "black"
@@ -3413,9 +3414,9 @@ Version 2016-10-24"
 
 (setq xah-html-font-lock-keywords
       (let (
-            (htmlElementNamesRegex (regexp-opt xah-html-html5-tag-list))
-            (htmlAttributeNamesRegexp (regexp-opt xah-html-attribute-names))
-            (htmlBooleanAttributeNamesRegexp (regexp-opt xah-html-boolean-attribute-names))
+            (htmlElementNamesRegex (regexp-opt xah-html-html5-tag-list 'words))
+            (htmlAttributeNamesRegexp (regexp-opt xah-html-attribute-names 'words))
+            (htmlBooleanAttributeNamesRegexp (regexp-opt xah-html-boolean-attribute-names 'words))
             (cssPropertieNames (regexp-opt xah-css-property-names 'words))
             (cssValueNames (regexp-opt xah-css-value-kwds 'words))
             (cssColorNames (regexp-opt xah-css-color-names 'words))
@@ -3424,10 +3425,10 @@ Version 2016-10-24"
   ;              (attriRegex " *= *\"\\([ -_a-z]*?\\)\"")
   ;              (attriRegex " +\\(?:[ =\"-_a-z]*?\\)") ; one or more attributes
             (attriRegex " +\\(?:[^\n<>]*?\\)") ; one or more attributes
-  ;              (textNodeRegex "\\([ -_A-Za-z]+?\\)")
   ;              (textNodeRegex "\\([ [:graph:]]+?\\)")
             (textNodeRegex "\\([^\n<]+?\\)") ; ← hack, to avoid multi-line
-            )
+
+)
         `(
 
           ("<!--\\|-->" . font-lock-comment-delimiter-face)
@@ -3435,37 +3436,39 @@ Version 2016-10-24"
           ;; todo these multiline regex are very slow when there are long lines.
           (,(format "<!--%s-->" textNodeRegex) . (1 font-lock-comment-face))
           (,(format "<h\\([1-6]\\)>%s</h\\1>" textNodeRegex) . (2 'bold))
-          (,(format "‘%s’" textNodeRegex) . (1 'xah-html-single-curly-quote-f))
-          (,(format "“%s”" textNodeRegex) . (1 'xah-html-double-curly-quote-f))
-          (,(format "«%s»" textNodeRegex) . (1 'xah-html-french-quote-f))
+
           (,(format "<title>%s</title>" textNodeRegex) . (1 'bold))
           (,(format "<span%s>%s</span>" attriRegex textNodeRegex) . (1 'xah-html-span-f))
           (,(format "<mark>%s</mark>" textNodeRegex) . (1 'xah-html-mark-f))
           (,(format "<mark%s>%s</mark>" attriRegex textNodeRegex) . (1 'xah-html-mark-f))
           (,(format "<b%s>%s</b>" attriRegex textNodeRegex) . (1 'bold))
 
-          (,(concat "</\\(" htmlElementNamesRegex "\\) *>") . (1 font-lock-function-name-face))
-          (,(concat "<\\(" htmlElementNamesRegex "\\).*?>") . (1 font-lock-function-name-face))
+          ;; ("<[^>]+?>" . font-lock-function-name-face)
+          ;; ("</?[A-Za-z0-9]+>" . font-lock-function-name-face)
 
-          (,(concat " +\\(" htmlAttributeNamesRegexp "\\) *= *['\"]") . (1 font-lock-variable-name-face))
+          ;; (,(concat "</\\(" htmlElementNamesRegex "\\) *>") . (1 font-lock-function-name-face))
+          ;; (,(concat "<\\(" htmlElementNamesRegex "\\).*?>") . (1 font-lock-function-name-face))
+
+          (,htmlElementNamesRegex . font-lock-function-name-face)
+
+          ;; (,(concat " +\\(" htmlAttributeNamesRegexp "\\) *= *['\"]") . (1 font-lock-variable-name-face))
+          (,htmlAttributeNamesRegexp . font-lock-variable-name-face)
 
           (,htmlBooleanAttributeNamesRegexp . font-lock-constant-face)
 
           (,cssPropertieNames . font-lock-type-face)
-          ;; (,(concat ":\\(" cssValueNames " *\\)+") . (1 font-lock-keyword-face))
-          ;; (,(concat ": *\\(" cssValueNames "\\)") . (1 font-lock-keyword-face))
-          ;; (,(concat "\\(" cssValueNames "\\).*?;") . (1 font-lock-keyword-face))
-          ;; (,(concat ":.*?\\(" cssValueNames "\\).*?;") . (1 font-lock-keyword-face))
           (,cssValueNames . font-lock-keyword-face)
           (,cssColorNames . font-lock-preprocessor-face)
-          (,cssUnitNames . font-lock-reference-face))))
+          (,cssUnitNames . font-lock-reference-face)
+
+)))
 
 
 
 ;;;###autoload
 (define-derived-mode
     xah-html-mode
-    mhtml-mode
+    fundamental-mode
     "∑html"
   "A simple major mode for HTML5.
 HTML5 keywords are colored.
