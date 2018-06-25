@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2018, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.1.20180616040130
+;; Version: 7.2.20180624182136
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -2117,7 +2117,11 @@ Version 2017-07-22"
 (defun xah-html-youtube-linkify ()
   "Make the current line of youtube url into a embeded video.
 
-The line can be a youtube ID “bFSS826ETlk” or full URL e.g. “http://www.youtube.com/watch?v=bFSS826ETlk”. URL with more parameters usually will work too.
+The line can be any of
+
+ AZNHuFjnmUo
+ https://www.youtube.com/watch?v=AZNHuFjnmUo
+ https://youtu.be/AZNHuFjnmUo
 
 Here's sample result:
 
@@ -2127,7 +2131,7 @@ Here's sample result:
 </figcaption>
 </figure>
 
-Version 2018-04-21"
+Version 2018-06-24"
   (interactive)
   (let ( $p1 $p2 $inputStr $id
              ($youtubeLinkChars "-_?.:/=&A-Za-z0-9"))
@@ -2139,8 +2143,12 @@ Version 2018-04-21"
 
     (setq $inputStr (buffer-substring-no-properties $p1 $p2))
 
-    (string-match "v=\\(.\\{11\\}\\)" $inputStr)
-    (setq $id (match-string 1 $inputStr))
+    (setq $id
+          (cond
+           ((string-match "v=\\(.\\{11\\}\\)" $inputStr) (match-string 1 $inputStr))
+           ((string-match "youtu\\.be/\\([A-Za-z0-9]\\{11\\}\\)" $inputStr) (match-string 1 $inputStr))
+           (t (error "find find the youtube vid id in url" ))))
+
     (delete-region $p1 $p2)
     (insert "\n<figure>\n")
     (insert (concat "<iframe width=\"640\" height=\"480\" src=\"https://www.youtube.com/embed/" $id "?rel=0\" allowfullscreen></iframe>"))
@@ -2248,7 +2256,9 @@ Version 2017-08-16"
      ((string-match-p "\\.mp4\\'\\|\\.mov\\'\\|\\.mkv\\'\\|\\.webm\\'\\|\\.m1v\\'\\|\\.m4v\\'" $input)
       (xah-html-video-file-linkify t))
 
-     ((string-match-p "www\.youtube\.com/watch" $input) (xah-html-youtube-linkify))
+     ((string-match-p "youtube\.com/watch" $input) (xah-html-youtube-linkify))
+
+     ((string-match-p "youtu\.be/[A-Za-z0-9]" $input) (xah-html-youtube-linkify))
 
      ((string-match-p "www\.amazon\.com/\\|//amzn\.to/" $input) (xah-html-amazon-linkify))
 
@@ -3159,7 +3169,10 @@ Version 2017-01-13"
 Return true if found, else false.
 Version 2016-10-24"
   (interactive)
-  (search-backward "▮" (if @pos @pos (max (point-min) (- (point) 100))) t ))
+  (let (($found-p (search-backward "▮" (if @pos @pos (max (point-min) (- (point) 100))) t )))
+    (when $found-p (delete-char 1))
+    $found-p
+    ))
 
 (defun xah-html--ahf ()
   "Abbrev hook function, used for `define-abbrev'.
