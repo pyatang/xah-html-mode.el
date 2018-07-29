@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2018, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.2.20180624182136
+;; Version: 7.2.20180728185407
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -2397,9 +2397,9 @@ Work on current non-whitespace char sequence or text selection.
 
 URL `http://ergoemacs.org/emacs/wrap-url.html'
 
-Version 2018-03-22"
+Version 2018-07-28"
   (interactive)
-  (let ( $p1 $p2 $new-str )
+  (let ( $p1 $p2 $inputStr $new-str )
     (if (region-active-p)
         (progn (setq $p1 (region-beginning) $p2 (region-end)))
       (save-excursion
@@ -2407,8 +2407,11 @@ Version 2018-03-22"
         (setq $p1 (point))
         (skip-chars-forward "^ \n\t" )
         (setq $p2 (point))))
-    (setq $new-str (file-relative-name
-                    (replace-regexp-in-string "^file:///" "/" (buffer-substring-no-properties $p1 $p2) t t)))
+    (setq $inputStr (buffer-substring-no-properties $p1 $p2))
+    (setq $new-str
+          (if (string-match "^http" $inputStr )
+              $inputStr
+            (progn (file-relative-name (replace-regexp-in-string "^file:///" "/" $inputStr t t)))))
     (delete-region $p1 $p2)
     (insert (concat "<a href=\"" (url-encode-url $new-str) "\">" $new-str "</a>" ))))
 
