@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2018, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.2.20180728185407
+;; Version: 7.2.20180820234123
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -79,6 +79,18 @@ Version 2018-05-08"
           (concat (file-relative-name $webroot $current_dir)
                   (file-relative-name @path $webroot)))
       (file-relative-name @path $current_dir))))
+
+(defun xah-html-display-page-break-as-line ()
+  "Display the formfeed ^L char as line.
+Version 2018-08-17"
+  (interactive)
+  ;; 2016-10-11 thanks to Steve Purcell's page-break-lines.el
+  (progn
+    (when (not buffer-display-table)
+      (setq buffer-display-table (make-display-table)))
+    (aset buffer-display-table ?\^L
+          (vconcat (make-list 70 (make-glyph-code ?─ 'font-lock-comment-face))))
+    (redraw-frame)))
 
 
 
@@ -3198,6 +3210,14 @@ Version 2016-10-24"
     ("wi" "width" xah-html--ahf)
     ("hei" "height" xah-html--ahf)
     ("bgc" "background-color" xah-html--ahf)
+    ("bgc" "background-color" xah-html--ahf)
+    ("hr" "<hr />\n\n" xah-html--ahf)
+
+    ("sh" "<section>
+
+▮
+
+</section>" xah-html--ahf)
 
     ("css3" "<link rel=\"stylesheet\" href=\"lbasic.css\" />")
     ("style3" "<style type=\"text/css\">\np {line-height:130%}\n</style>")
@@ -3483,9 +3503,9 @@ Version 2016-10-24"
 
 ;;;###autoload
 (define-derived-mode
-    xah-html-mode
-    fundamental-mode
-    "∑html"
+  xah-html-mode
+  fundamental-mode
+  "∑html"
   "A simple major mode for HTML5.
 HTML5 keywords are colored.
 
@@ -3503,6 +3523,7 @@ URL `http://ergoemacs.org/emacs/xah-html-mode.html'
       (add-hook 'abbrev-expand-functions 'xah-html-expand-abbrev nil t)
     (setq abbrev-expand-function 'xah-html-expand-abbrev))
 
+  (xah-html-display-page-break-as-line)
   (abbrev-mode 1)
 
   :group 'xah-html-mode
