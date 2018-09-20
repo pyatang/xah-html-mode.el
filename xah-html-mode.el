@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2018, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.2.20180820234123
+;; Version: 7.2.20180919224210
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -2012,23 +2012,61 @@ Version 2017-09-13"
     (delete-region $p1 $p2)
     (insert (format "<a href=\"%s\">%s</a>" $src $fname))))
 
-(defun xah-html-audio-file-linkify ()
-  "Make the path under cursor into a HTML link.
-e.g. xyz.mp3
+;; (defun xah-html-audio-file-linkify ()
+;;   "Make the path under cursor into a HTML link.
+;; e.g. xyz.mp3
+;; becomes
+;; <audio src=\"xyz.mp3\"></audio>
+;; Version 2018-09-19"
+;;   (interactive)
+;;   (let* (
+;;          ($bds (xah-get-bounds-of-thing-or-region 'filepath))
+;;          ($p1 (car $bds))
+;;          ($p2 (cdr $bds))
+;;          ($inputStr (buffer-substring-no-properties $p1 $p2))
+;;          ($src
+;;           (if (string-match "^http" $inputStr )
+;;               $inputStr
+;;             (file-relative-name $inputStr))))
+;;     (delete-region $p1 $p2)
+;;     (insert (format "<audio src=\"%s\" controls></audio>" $src))))
+
+(defun xah-html-audio-file-linkify ( &optional @figure)
+  "Make the path under cursor into a HTML audio tag link.
+e.g. xyz.mp4
 becomes
-<audio src=\"xyz.mp3\"></audio>"
+<audio src=\"i/xyz.mp4\" controls></audio>
+
+if
+@add-figure is not nil, wrap figure and figcaption tags around it.
+
+Returns a alt string based on the file name.
+
+Version 2018-09-19"
   (interactive)
   (let* (
-         ($bds (xah-get-bounds-of-thing-or-region 'filepath))
+         ($bds (bounds-of-thing-at-point 'filename ))
          ($p1 (car $bds))
          ($p2 (cdr $bds))
-         ($inputStr (buffer-substring-no-properties $p1 $p2))
+         ($inputStr (buffer-substring-no-properties $p1 $p2 ))
          ($src
           (if (string-match "^http" $inputStr )
               $inputStr
-            (file-relative-name $inputStr))))
+            (if (file-exists-p $inputStr)
+                (file-relative-name $inputStr)
+              (user-error "file not found: 「%s」" $inputStr)))))
     (delete-region $p1 $p2)
-    (insert (format "<audio src=\"%s\" controls></audio>" $src))))
+    (if @figure
+        (progn
+          (goto-char $p1)
+          (insert "<figure>\n")
+          (insert (format "<audio src=\"%s\" controls></audio>\n" $src))
+          (insert "<figcaption>\n")
+          (insert (replace-regexp-in-string "_" " " (file-name-nondirectory $src)))
+          (insert "\n</figcaption>\n</figure>\n\n")
+          (search-backward "</figcaption>" ))
+      (progn
+        (insert (format "<audio src=\"%s\" controls></audio>" $src))))))
 
 (defun xah-html-video-file-linkify ( &optional @figure)
   "Make the path under cursor into a HTML video tag link.
@@ -2159,7 +2197,7 @@ Version 2018-06-24"
           (cond
            ((string-match "v=\\(.\\{11\\}\\)" $inputStr) (match-string 1 $inputStr))
            ((string-match "youtu\\.be/\\([A-Za-z0-9]\\{11\\}\\)" $inputStr) (match-string 1 $inputStr))
-           (t (error "find find the youtube vid id in url" ))))
+           (t (error "cannot find the youtube vid id in url" ))))
 
     (delete-region $p1 $p2)
     (insert "\n<figure>\n")
@@ -2264,7 +2302,7 @@ Version 2017-08-16"
      ((string-match-p "\\.css\\'" $input) (xah-html-css-linkify))
      ((string-match-p "\\.pdf" $input) (xah-html-pdf-embed-linkify))
      ((string-match-p "\\.js\\'\\|\\.ts\\'" $input) (xah-html-javascript-linkify))
-     ((string-match-p "\\.mp3\\'\\|\\.ogg\\'" $input) (xah-html-audio-file-linkify))
+     ((string-match-p "\\.mp3\\'\\|\\.m4a\\'\\|\\.ogg\\'\\|\\.opus\\'" $input) (xah-html-audio-file-linkify t))
      ((string-match-p "\\.mp4\\'\\|\\.mov\\'\\|\\.mkv\\'\\|\\.webm\\'\\|\\.m1v\\'\\|\\.m4v\\'" $input)
       (xah-html-video-file-linkify t))
 
@@ -3279,8 +3317,8 @@ Version 2016-10-24"
 
   (define-key xah-html-mode-no-chord-map (kbd "DEL") 'xah-html-remove-html-tags)
 
-  (define-key xah-html-mode-no-chord-map (kbd "a") 'xah-html-rename-source-file-path)
-  (define-key xah-html-mode-no-chord-map (kbd "b") 'xah-html-wikipedia-url-linkify)
+  (define-key xah-html-mode-no-chord-map (kbd "a") 'xah-html-wikipedia-url-linkify)
+  (define-key xah-html-mode-no-chord-map (kbd "b") 'xah-html-rename-source-file-path)
   (define-key xah-html-mode-no-chord-map (kbd "c") 'xah-html-lines-to-html-list)
   (define-key xah-html-mode-no-chord-map (kbd "d") 'xah-html-extract-url)
   (define-key xah-html-mode-no-chord-map (kbd "e") 'xah-html-source-url-linkify)
