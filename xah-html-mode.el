@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2018, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.2.20180919224210
+;; Version: 7.2.20181002035356
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -503,7 +503,7 @@ For example:
         ("lsl" . ["xlsl-mode" "lsl"])
         ("latex" . ["latex-mode" "txt"])
         ("ocaml" . ["tuareg-mode" "ml"])
-        ("perl" . ["cperl-mode" "pl"])
+        ("perl" . ["perl-mode" "pl"])
         ("php" . ["xah-php-mode" "php"])
         ("povray" . ["pov-mode" "pov"])
         ("powershell" . ["powershell-mode" "ps1"])
@@ -550,7 +550,8 @@ A pre block is text of this form
  <pre class=\"‹langCode›\">…▮…</pre>.
 Your cursor must be between the tags.
 
-Returns a vector [langCode pos1 pos2], where pos1 pos2 are the boundary of the text content."
+Returns a vector [langCode pos1 pos2], where pos1 pos2 are the boundary of the text content.
+Version 2018-09-28"
   (interactive)
   (let ($langCode $p1 $p2)
     (save-excursion
@@ -627,30 +628,22 @@ Version 2017-07-25"
 
 
 
-(defun xah-html-htmlize-string (@source-code-str @major-mode-name)
-  "Take @source-code-str and return a htmlized version using major mode @major-mode-name.
+(defun xah-html-htmlize-string (@input-str @major-mode-name)
+  "Take @input-str and return a htmlized version using @major-mode-name.
 The purpose is to syntax color source code in HTML.
 
-If @MAJOR-MODE-NAME is string. It'll be converted to symbol and if is not in `obarray', `fundamental-mode' is used.
+If @major-mode-name is string. It'll be converted to symbol and if is not in `obarray', `fundamental-mode' is used.
 
 This function requires the `htmlize-buffer' from htmlize.el by Hrvoje Niksic.
 
-Version 2017-01-10"
+Version 2018-09-28"
   (interactive)
-  (let ($output-buff $resultStr
-                     ($majorModeSym (intern-soft @major-mode-name)))
-
-    ;; (message "@major-mode-name is %s" @major-mode-name)
-    ;; (message "-majorModeSym is %s" $majorModeSym)
-
+  (let ($output-buff
+        $resultStr
+        ($majorModeSym (intern-soft @major-mode-name)))
     ;; put code in a temp buffer, set the mode, fontify
-
     (with-temp-buffer
-      (insert @source-code-str)
-      ;; (intern-soft "tuareg-mode")
-
-      (intern-soft "xah-elisp-mode")
-
+      (insert @input-str)
       (if (fboundp $majorModeSym)
           (funcall $majorModeSym)
         (fundamental-mode))
@@ -682,21 +675,20 @@ The opening tag must be of the form <pre class=\"‹langCode›\">.  The ‹lang
 Cursor will end up right before </pre>.
 
 See also: `xah-html-dehtmlize-precode', `xah-html-toggle-syntax-coloring-markup'.
-This function requires the `htmlize-buffer' from 〔htmlize.el〕 by Hrvoje Niksic.
-Version 2017-01-08"
+This function requires the `htmlize-buffer' from htmlize.el by Hrvoje Niksic.
+Version 2018-09-28"
   (interactive (list xah-html-lang-name-map))
   (let* (
-         ($temp78730 (xah-html-get-precode-langCode))
-         ($langCode (elt $temp78730 0))
-         ($p1 (elt $temp78730 1))
-         ($p2 (elt $temp78730 2))
-         ;; ($modeName (elt (cdr (assoc $langCode @lang-code-map)) 0))
+         ($precodeData (xah-html-get-precode-langCode))
+         ($langCode (elt $precodeData 0))
+         ($p1 (elt $precodeData 1))
+         ($p2 (elt $precodeData 2))
          ($modeName (xah-html-langcode-to-major-mode-name $langCode @lang-code-map)))
-    (xah-html-htmlize-region $p1 $p2 $modeName t)))
+    (xah-html-htmlize-region $p1 $p2 $modeName)))
 
-(defun xah-html-htmlize-region (@p1 @p2 @mode-name &optional @trim-whitespace-boundary-p)
+(defun xah-html-htmlize-region (@p1 @p2 @mode-name )
   "Htmlized region @p1 @p2 using `major-mode' @mode-name.
-This function requires the `htmlize-buffer' from 〔htmlize.el〕 by Hrvoje Niksic.
+This function requires the `htmlize-buffer' from htmlize.el by Hrvoje Niksic.
 Version 2016-12-18"
   (interactive
    (list (region-beginning)
@@ -704,12 +696,8 @@ Version 2016-12-18"
          (ido-completing-read "Chose mode for coloring:" xah-html-lang-mode-list)))
   (let* (
          ($input-str (buffer-substring-no-properties @p1 @p2))
-         ($out-str
-          (xah-html-htmlize-string (if @trim-whitespace-boundary-p
-                                       (replace-regexp-in-string "\\`[ \t\n]*" "" (replace-regexp-in-string "[ \t\n]*\\'" "" $input-str))
-                                     $input-str
-                                     ) @mode-name)))
-    (if (string= $input-str $out-str)
+         ($out-str (xah-html-htmlize-string $input-str @mode-name)))
+    (if (string-equal $input-str $out-str)
         nil
       (progn
         (delete-region @p1 @p2)
@@ -718,7 +706,8 @@ Version 2016-12-18"
 (defun xah-html-dehtmlize-precode (@begin @end)
   "Delete span tags between pre tags.
 Note: only span tags of the form 「<span class=\"…\">…</span>」 are deleted.
-This command does the inverse of `xah-html-htmlize-precode'."
+This command does the inverse of `xah-html-htmlize-precode'.
+Version 2018-09-28"
   (interactive
    (let* ( ($xx (xah-html-get-precode-langCode)))
      (list (elt $xx 1) (elt $xx 2))))
@@ -810,7 +799,7 @@ Version 2017-07-23"
             (save-restriction
               (narrow-to-region $p1 $p2)
               (xah-html-dehtmlize-precode (point-min) (point-max))
-              (xah-html-htmlize-region (point-min) (point-max) $majorModeNameStr t)
+              (xah-html-htmlize-region (point-min) (point-max) $majorModeNameStr )
               (setq $count (1+ $count)))))))
     (message "xah-html-redo-syntax-coloring-buffer %s redone" $count)
     $count
@@ -2751,7 +2740,7 @@ Example:
 
 When called in lisp code, @begin @end are region begin/end positions.
 
-Version 2017-11-01"
+Version 2018-09-29"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -2802,7 +2791,7 @@ Version 2017-11-01"
            ["Insert" "<kbd>Insert</kbd>"]
            ["INS" "<kbd>Insert</kbd>"]
            ["Pause" "<kbd>Pause</kbd>"]
-           ["Break" "<kbd>Pause</kbd>"]
+           ["Break" "<kbd>Break</kbd>"]
            ["PrtScn" "<kbd>Print Screen</kbd>"]
            ["ps" "<kbd>Print Screen</kbd>"]
            ["sysrq" "<kbd>SysRq</kbd>"]
@@ -3243,7 +3232,7 @@ Version 2016-10-24"
     ("cdata" "<![CDATA[▮]]>" xah-html--ahf)
 
     ("cl" "class=\"▮\"" xah-html--ahf)
-    ("id3" "id=\"▮\"" xah-html--ahf)
+    ("idh" "id=\"▮\"" xah-html--ahf)
 
     ("wi" "width" xah-html--ahf)
     ("hei" "height" xah-html--ahf)
@@ -3257,8 +3246,8 @@ Version 2016-10-24"
 
 </section>" xah-html--ahf)
 
-    ("css3" "<link rel=\"stylesheet\" href=\"lbasic.css\" />")
-    ("style3" "<style type=\"text/css\">\np {line-height:130%}\n</style>")
+    ("cssh" "<link rel=\"stylesheet\" href=\"lbasic.css\" />")
+    ("styleh" "<style type=\"text/css\">\np {line-height:130%}\n</style>")
 
     ("iframe" "<iframe src=\"some.html\" width=\"200\" height=\"300\"></iframe>")
 
@@ -3266,8 +3255,8 @@ Version 2016-10-24"
 
     ("html4s" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">" xah-html--ahf)
     ("html4t" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">" xah-html--ahf)
-    ("xhtml3" "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">" xah-html--ahf)
-    ("html3" "<!doctype html><html><head><meta charset=\"utf-8\" />
+    ("xhtmlh" "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">" xah-html--ahf)
+    ("htmlh" "<!doctype html><html><head><meta charset=\"utf-8\" />
 <title>ttt</title>
 </head>
 <body>
