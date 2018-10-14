@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2018, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.2.20181011214211
+;; Version: 7.2.20181013230947
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1294,7 +1294,7 @@ becomes:
 <li>dog</li>
 </ul>
 
-Version 2018-10-11"
+Version 2018-10-13"
   (interactive)
   (let ($bds $p1 $p2 $input-str $resultStr )
     (setq $bds (xah-get-bounds-of-thing 'block))
@@ -1305,36 +1305,36 @@ Version 2018-10-11"
       (setq $resultStr
             (with-temp-buffer
               (insert $input-str)
-              (delete-trailing-whitespace)
+              (goto-char (point-max))
+              (insert "\n")
               (progn
                 (goto-char (point-min))
                 (while
                     (re-search-forward  "\.html$" nil t)
                   (backward-char 1)
-                  (xah-html-any-linkify)
-                  ))
+                  (xah-html-any-linkify)))
               (goto-char (point-min))
               (while
                   (not (equal (line-end-position) (point-max)))
-                (beginning-of-line) (insert "<li>")
+                (beginning-of-line)
+                (when (looking-at "• ")
+                  (delete-char 2))
+                (when (looking-at "* ")
+                  (delete-char 2))
+                (insert "<li>")
                 (end-of-line) (insert "</li>")
                 (forward-line 1 ))
-
-              (beginning-of-line) (insert "<li>")
-              (end-of-line) (insert "</li>")
-
               (if current-prefix-arg
                   (progn
                     (goto-char (point-min))
                     (insert "<ol>\n")
                     (goto-char (point-max))
-                    (insert "\n</ol>"))
+                    (insert "</ol>"))
                 (progn
                   (goto-char (point-min))
                   (insert "<ul>\n")
                   (goto-char (point-max))
-                  (insert "\n</ul>")))
-
+                  (insert "</ul>")))
               (buffer-string))))
     (delete-region $p1 $p2)
     (insert $resultStr)))
@@ -1372,7 +1372,7 @@ Version 2018-10-11"
     (if current-prefix-arg
         (progn
           (setq $sep (read-string "separator char between dt dd:" )))
-      (setq $sep "\\. +" ))
+      (setq $sep "\\. *" ))
     (save-excursion
       (setq $resultStr
             (with-temp-buffer
@@ -1385,8 +1385,6 @@ Version 2018-10-11"
                 (setq $endpos (line-end-position))
                 (if (re-search-forward $sep $endpos )
                     (progn
-                     ;; (when (looking-at " ")
-                     ;; (delete-char 1))
                      (delete-region (match-beginning 0) (match-end 0))
                      (insert "</dt><dd>")
                      (end-of-line)
@@ -3500,7 +3498,7 @@ Version 2016-10-24"
   (define-key xah-html-mode-no-chord-map (kbd "p") 'browse-url-of-buffer)
   (define-key xah-html-mode-no-chord-map (kbd "q") 'xah-html-make-link-defunct)
   (define-key xah-html-mode-no-chord-map (kbd "r") 'xah-html-word-to-wikipedia-linkify)
-  (define-key xah-html-mode-no-chord-map (kbd "s") nil)
+  (define-key xah-html-mode-no-chord-map (kbd "s") 'xah-html-lines-to-dl)
   (define-key xah-html-mode-no-chord-map (kbd "t") 'xah-html-wrap-p-tag)
   (define-key xah-html-mode-no-chord-map (kbd "u") nil)
   (define-key xah-html-mode-no-chord-map (kbd "v") 'xah-html-make-html-table)
