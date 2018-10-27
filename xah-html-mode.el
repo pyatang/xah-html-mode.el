@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2018, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.2.20181013230947
+;; Version: 7.2.20181026200806
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -318,6 +318,7 @@ Version 2017-01-11"
 ("h6" . ["l"])
 ("dl" . ["l"])
 ("dt" . ["l"])
+("marquee" . ["l"])
 
 ("img" . ["l"])
 ("input" . ["l"])
@@ -423,6 +424,8 @@ Version 2017-01-11"
 "maxlength"
 "rows"
 "cols"
+"min"
+"max"
 
 "target"
 "enctype"
@@ -1617,7 +1620,7 @@ Version 2018-06-08"
 
 (defun xah-html-html-to-text ()
   "Convert HTML to plain text on current text block or text selection.
-Version 2018-06-08"
+Version 2018-10-24"
   (interactive)
   (let ( $p1 $p2 $input-str $output-str)
     (let ($bds)
@@ -1688,6 +1691,8 @@ Version 2018-06-08"
             ["</h5>" "" ]
             ["<h6>" "──────────\n" ]
             ["</h6>" "" ]
+            ["</td><td>" " | " ]
+            ["</th><th>" " | " ]
             )))
        (xah-html-remove-html-tags (point-min) (point-max))
        (buffer-substring 1 (point-max))))
@@ -3267,83 +3272,77 @@ Version 2017-08-15"
   "Returns string URL percent-encoded
 
 Example:
-    http://en.wikipedia.org/wiki/Saint_Jerome_in_His_Study_%28D%C3%BCrer%29
+    http://example.org/%28D%C3%BCrer%29
 becomes
-    http://en.wikipedia.org/wiki/Saint_Jerome_in_His_Study_(Dürer)
+    http://example.org/(Dürer)
 
 Example:
-    http://zh.wikipedia.org/wiki/%E6%96%87%E6%9C%AC%E7%BC%96%E8%BE%91%E5%99%A8
+    http://example.org/%E6%96%87%E6%9C%AC%E7%BC%96%E8%BE%91%E5%99%A8
 becomes
-    http://zh.wikipedia.org/wiki/文本编辑器
-
-To encode, use `url-encode-url' in url-util.el.
+    http://example.org/文本编辑器
 
 URL `http://ergoemacs.org/emacs/elisp_decode_uri_percent_encoding.html'
-Version 2015-09-14"
+Version 2018-10-26"
   (require 'url-util)
   (decode-coding-string (url-unhex-string string) 'utf-8))
 
 (defun xah-html-decode-percent-encoded-url ()
-  "Decode percent encoded URI of URI under cursor or selection.
+  "Decode percent encoded URL of current line or selection.
 
 Example:
-    http://en.wikipedia.org/wiki/Saint_Jerome_in_His_Study_%28D%C3%BCrer%29
+ %28D%C3%BCrer%29
 becomes
-    http://en.wikipedia.org/wiki/Saint_Jerome_in_His_Study_(Dürer)
+ (Dürer)
 
 Example:
-    http://zh.wikipedia.org/wiki/%E6%96%87%E6%9C%AC%E7%BC%96%E8%BE%91%E5%99%A8
+ %E6%96%87%E6%9C%AC%E7%BC%96%E8%BE%91%E5%99%A8
 becomes
-    http://zh.wikipedia.org/wiki/文本编辑器
+ 文本编辑器
 
-For string version, see `xah-html-url-percent-decode-string'.
-To encode, see `xah-html-encode-percent-encoded-url'.
-URL `http://ergoemacs.org/emacs/elisp_decode_uri_percent_encoding.html'
-Version 2015-09-14."
+URL `http://ergoemacs.org/emacs/emacs_url_percent_decode.html'
+Version 2018-10-26"
   (interactive)
-  (let ($bds $p1 $p2 $input-str)
+  (let ( $p1 $p2 $input-str $newStr)
     (if (use-region-p)
-        (progn
-          (setq $p1 (region-beginning))
-          (setq $p2 (region-end)))
-      (progn
-        (setq $bds (bounds-of-thing-at-point 'url))
-        (setq $p1 (car $bds))
-        (setq $p2 (cdr $bds))))
+        (setq $p1 (region-beginning) $p2 (region-end))
+      (setq $p1 (line-beginning-position) $p2 (line-end-position)))
     (setq $input-str (buffer-substring-no-properties $p1 $p2))
     (require 'url-util)
-    (delete-region $p1 $p2)
-    (insert (decode-coding-string (url-unhex-string $input-str) 'utf-8))))
+    (setq $newStr (url-unhex-string $input-str))
+    (if (string-equal $newStr $input-str)
+        (progn (message "no change" ))
+      (progn
+        (delete-region $p1 $p2)
+        (insert (decode-coding-string $newStr 'utf-8))))))
 
 (defun xah-html-encode-percent-encoded-url ()
-  "Percent encode URL under cursor or selection.
+  "Percent encode URL in current line or selection.
 
 Example:
-    http://en.wikipedia.org/wiki/Saint_Jerome_in_His_Study_(Dürer)
+    http://example.org/(Dürer)
 becomes
-    http://en.wikipedia.org/wiki/Saint_Jerome_in_His_Study_(D%C3%BCrer)
+    http://example.org/(D%C3%BCrer)
 
 Example:
-    http://zh.wikipedia.org/wiki/文本编辑器
+    http://example.org/文本编辑器
 becomes
-    http://zh.wikipedia.org/wiki/%E6%96%87%E6%9C%AC%E7%BC%96%E8%BE%91%E5%99%A8
+    http://example.org/%E6%96%87%E6%9C%AC%E7%BC%96%E8%BE%91%E5%99%A8
 
-URL `http://ergoemacs.org/emacs/elisp_decode_uri_percent_encoding.html'
-Version 2015-09-14."
+URL `http://ergoemacs.org/emacs/emacs_url_percent_decode.html'
+Version 2018-10-26"
   (interactive)
-  (let ($bds $p1 $p2 $input-str)
+  (let ($p1 $p2 $input-str $newStr)
     (if (use-region-p)
-        (progn
-          (setq $p1 (region-beginning))
-          (setq $p2 (region-end)))
-      (progn
-        (setq $bds (bounds-of-thing-at-point 'url))
-        (setq $p1 (car $bds))
-        (setq $p2 (cdr $bds))))
+        (setq $p1 (region-beginning) $p2 (region-end))
+      (setq $p1 (line-beginning-position) $p2 (line-end-position)))
     (setq $input-str (buffer-substring-no-properties $p1 $p2))
     (require 'url-util)
-    (delete-region $p1 $p2)
-    (insert (url-encode-url $input-str))))
+    (setq $newStr (url-encode-url $input-str))
+    (if (string-equal $newStr $input-str)
+        (progn (message "no change" ))
+      (progn
+        (delete-region $p1 $p2)
+        (insert $newStr)))))
 
 
 
@@ -3462,9 +3461,11 @@ Version 2016-10-24"
   (define-key xah-html-mode-no-chord-map (kbd "<right>") 'xah-html-skip-tag-forward)
   (define-key xah-html-mode-no-chord-map (kbd "<left>") 'xah-html-skip-tag-backward)
 
+  (define-key xah-html-mode-no-chord-map (kbd "'") 'xah-html-encode-percent-encoded-url)
   (define-key xah-html-mode-no-chord-map (kbd ",") 'xah-html-replace-ampersand)
-  (define-key xah-html-mode-no-chord-map (kbd ";") 'xah-html-emacs-to-windows-kbd-notation)
   (define-key xah-html-mode-no-chord-map (kbd ".") 'xah-html-decode-percent-encoded-url)
+  (define-key xah-html-mode-no-chord-map (kbd ";") 'xah-html-emacs-to-windows-kbd-notation)
+
   (define-key xah-html-mode-no-chord-map (kbd "1") 'xah-html-get-precode-make-new-file)
   (define-key xah-html-mode-no-chord-map (kbd "2") 'xah-html-toggle-syntax-coloring-markup)
 
@@ -3480,7 +3481,7 @@ Version 2016-10-24"
 
   (define-key xah-html-mode-no-chord-map (kbd "DEL") 'xah-html-remove-html-tags)
 
-  (define-key xah-html-mode-no-chord-map (kbd "a") 'xah-html-wikipedia-url-linkify)
+  (define-key xah-html-mode-no-chord-map (kbd "a") nil)
   (define-key xah-html-mode-no-chord-map (kbd "b") 'xah-html-rename-source-file-path)
   (define-key xah-html-mode-no-chord-map (kbd "c") 'xah-html-lines-to-list)
   (define-key xah-html-mode-no-chord-map (kbd "d") 'xah-html-extract-url)
@@ -3497,10 +3498,16 @@ Version 2016-10-24"
   (define-key xah-html-mode-no-chord-map (kbd "o") nil)
   (define-key xah-html-mode-no-chord-map (kbd "p") 'browse-url-of-buffer)
   (define-key xah-html-mode-no-chord-map (kbd "q") 'xah-html-make-link-defunct)
-  (define-key xah-html-mode-no-chord-map (kbd "r") 'xah-html-word-to-wikipedia-linkify)
+
+  (define-key xah-html-mode-no-chord-map (kbd "r") nil)
+
   (define-key xah-html-mode-no-chord-map (kbd "s") 'xah-html-lines-to-dl)
   (define-key xah-html-mode-no-chord-map (kbd "t") 'xah-html-wrap-p-tag)
+
   (define-key xah-html-mode-no-chord-map (kbd "u") nil)
+  (define-key xah-html-mode-no-chord-map (kbd "u t") 'xah-html-word-to-wikipedia-linkify)
+  (define-key xah-html-mode-no-chord-map (kbd "u h") 'xah-html-wikipedia-url-linkify)
+
   (define-key xah-html-mode-no-chord-map (kbd "v") 'xah-html-make-html-table)
   (define-key xah-html-mode-no-chord-map (kbd "w") 'xah-html-replace-html-named-entities)
   (define-key xah-html-mode-no-chord-map (kbd "x") 'xah-html-replace-ampersand-to-unicode)
