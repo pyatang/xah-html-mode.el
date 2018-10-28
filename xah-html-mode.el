@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2018, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.2.20181028112059
+;; Version: 7.3.0
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1401,6 +1401,187 @@ Version 2018-10-11"
               (buffer-string))))
     (delete-region $p1 $p2)
     (insert $resultStr)))
+
+(defun xah-html-table-to-dl ()
+  "Change html table to dl.
+Cursor must be inside table tags.
+ <caption> is removed.
+ <th> are also removed.
+Currently, assume there are only 2 columns.
+
+Version 2018-10-19"
+  (interactive )
+  (let ($p1 $p2)
+    (if (use-region-p)
+        (progn
+          (setq $p1 (region-beginning))
+          (setq $p2 (region-end)))
+      (save-excursion
+        (search-backward "<table" )
+        (setq $p1 (point))
+        (search-forward "</table>")
+        (setq $p2 (point))))
+
+    (save-restriction
+      (narrow-to-region $p1 $p2)
+
+      (goto-char (point-min))
+
+      (search-forward "<table *\\([^\"]+?\\)>")
+      (replace-match "<dl>" t t )
+
+      (goto-char (point-min))
+      (search-forward "</table>")
+      (replace-match "</dl>" t t )
+
+      (goto-char (point-min))
+      (when
+          (search-forward "<caption>" nil t)
+        (delete-region (line-beginning-position) (line-end-position))
+        (when (looking-at "\n")
+          (delete-char 1)))
+
+      (goto-char (point-min))
+      (when
+          (search-forward "<th>" nil t)
+        (delete-region (line-beginning-position) (line-end-position))
+        (when (looking-at "\n")
+          (delete-char 1)))
+
+      (goto-char (point-min))
+      (while (search-forward "<tr><td>" nil t)
+        (replace-match "<dt>" t t ))
+
+      (goto-char (point-min))
+      (while (search-forward "</td><td>" nil t)
+        (replace-match "</dt><dd>" t t ))
+
+      (goto-char (point-min))
+      (while (search-forward "</td></tr>" nil t)
+        (replace-match "</dd>" t t ))
+      (goto-char (point-max))
+
+      ;;
+      )))
+
+(defun xah-html-table-to-ul ()
+  "Change html table to ul
+Cursor must be inside table tags.
+ <caption> is removed.
+ <th> are also removed.
+Currently, assume there are only 2 columns.
+“ → ” is used to separate columns.
+
+If `universal-argument' is called first, prompt for separator string.
+
+Version 2018-10-28"
+  (interactive )
+  (let (
+        $p1 $p2
+        ($sep (if current-prefix-arg
+                  (read-string "Seperator:" "→")
+                "→"
+                )))
+    (if (use-region-p)
+        (progn
+          (setq $p1 (region-beginning))
+          (setq $p2 (region-end)))
+      (save-excursion
+        (search-backward "<table" )
+        (setq $p1 (point))
+        (search-forward "</table>")
+        (setq $p2 (point))))
+    (save-restriction
+      (narrow-to-region $p1 $p2)
+
+      (goto-char (point-min))
+      (when
+          (search-forward "<caption>" nil t)
+        (delete-region (line-beginning-position) (line-end-position))
+        (when (looking-at "\n")
+          (delete-char 1)))
+
+      (goto-char (point-min))
+      (when
+          (search-forward "<th>" nil t)
+        (delete-region (line-beginning-position) (line-end-position))
+        (when (looking-at "\n")
+          (delete-char 1)))
+
+      (goto-char (point-min))
+      (re-search-forward "<table *\\([^\"]+?\\)>")
+      (replace-match "<ul>" t t )
+
+      (goto-char (point-min))
+      (search-forward "</table>")
+      (replace-match "</ul>" t t )
+
+      (goto-char (point-min))
+      (while (search-forward "<tr><td>" nil t)
+        (replace-match "<li>" t t ))
+
+      (goto-char (point-min))
+      (while (search-forward "</td><td>" nil t)
+        (replace-match $sep t t ))
+
+      (goto-char (point-min))
+      (while (search-forward "</td></tr>" nil t)
+        (replace-match "</li>" t t ))
+
+      (goto-char (point-max))
+      ;;
+      )))
+
+(defun xah-html-ul-to-dl ()
+  "Change html ul to dl
+Cursor must be inside ul tags.
+
+If `universal-argument' is called first, prompt for separator string.
+
+Version 2018-10-28"
+  (interactive )
+  (let (
+        $p1 $p2
+        ($sep (if current-prefix-arg
+                  (read-string "Seperator:" "→")
+                "→"
+                )))
+    (if (use-region-p)
+        (progn
+          (setq $p1 (region-beginning))
+          (setq $p2 (region-end)))
+      (save-excursion
+        (search-backward "<ul " )
+        (setq $p1 (point))
+        (search-forward "</ul>")
+        (setq $p2 (point))))
+
+    (save-restriction
+      (narrow-to-region $p1 $p2)
+
+      (goto-char (point-min))
+      (search-forward "<ul>")
+      (replace-match "<dl>" t t )
+
+      (goto-char (point-min))
+      (search-forward "</ul>")
+      (replace-match "</dl>" t t )
+
+      (goto-char (point-min))
+      (while (search-forward "<li>" nil t)
+        (replace-match "<dt>" t t ))
+
+      (goto-char (point-min))
+      (while (search-forward "</li>" nil t)
+        (replace-match "</dd>" t t ))
+
+      (goto-char (point-min))
+      (while (search-forward $sep nil t)
+        (replace-match "</dt><dd>" t t ))
+      (goto-char (point-max))
+
+      ;;
+      )))
 
 (defun xah-html-make-html-table (@separator)
   "Transform the current text block or selection into a HTML table.
