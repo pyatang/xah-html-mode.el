@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2018, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.2.20181026200806
+;; Version: 7.2.20181028112059
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1347,8 +1347,8 @@ Version 2018-10-13"
 
 e.g.
 
-cat. 4 legs
-bird. has wings
+cat . 4 legs
+bird . has wings
 
 becomes
 
@@ -1357,7 +1357,7 @@ becomes
 <dt>bird</dt><dd>has wings</dd>
 </dl>
 
-First period in each line is used to separate dt and dd. If none found, it's an error.
+First occurence of “. ” in each line is used to separate dt and dd. If none found, it's an error. Note, must have space after the period.
 
 If `universal-argument' is called first, ask user to enter a separater marker for dt and dd.
 For example, if the input is
@@ -1375,7 +1375,7 @@ Version 2018-10-11"
     (if current-prefix-arg
         (progn
           (setq $sep (read-string "separator char between dt dd:" )))
-      (setq $sep "\\. *" ))
+      (setq $sep "\\. +" ))
     (save-excursion
       (setq $resultStr
             (with-temp-buffer
