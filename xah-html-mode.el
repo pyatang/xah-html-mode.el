@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2018, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.3.0
+;; Version: 7.3.20181031145909
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1409,13 +1409,11 @@ Cursor must be inside table tags.
  <th> are also removed.
 Currently, assume there are only 2 columns.
 
-Version 2018-10-19"
+Version 2018-10-29"
   (interactive )
   (let ($p1 $p2)
     (if (use-region-p)
-        (progn
-          (setq $p1 (region-beginning))
-          (setq $p2 (region-end)))
+        (setq $p1 (region-beginning) $p2 (region-end))
       (save-excursion
         (search-backward "<table" )
         (setq $p1 (point))
@@ -1427,7 +1425,7 @@ Version 2018-10-19"
 
       (goto-char (point-min))
 
-      (search-forward "<table *\\([^\"]+?\\)>")
+      (re-search-forward "<table *\\([^>]+?\\)>")
       (replace-match "<dl>" t t )
 
       (goto-char (point-min))
@@ -1483,9 +1481,7 @@ Version 2018-10-28"
                 "→"
                 )))
     (if (use-region-p)
-        (progn
-          (setq $p1 (region-beginning))
-          (setq $p2 (region-end)))
+         (setq $p1 (region-beginning) $p2 (region-end))
       (save-excursion
         (search-backward "<table" )
         (setq $p1 (point))
@@ -1509,7 +1505,7 @@ Version 2018-10-28"
           (delete-char 1)))
 
       (goto-char (point-min))
-      (re-search-forward "<table *\\([^\"]+?\\)>")
+      (re-search-forward "<table *\\([^>]+?\\)>")
       (replace-match "<ul>" t t )
 
       (goto-char (point-min))
@@ -1547,9 +1543,7 @@ Version 2018-10-28"
                 "→"
                 )))
     (if (use-region-p)
-        (progn
-          (setq $p1 (region-beginning))
-          (setq $p2 (region-end)))
+         (setq $p1 (region-beginning) $p2 (region-end))
       (save-excursion
         (search-backward "<ul " )
         (setq $p1 (point))
@@ -1672,9 +1666,7 @@ Version 2015-07-27"
   (interactive)
   (let ($p0 $p1 $p2 $linkText)
     (if (region-active-p)
-        (progn
-          (setq $p1 (region-beginning))
-          (setq $p2 (region-end)))
+         (setq $p1 (region-beginning) $p2 (region-end))
       (progn
         (setq $p0 (point))
         (skip-chars-backward "^ \t\n")
@@ -1775,12 +1767,9 @@ Version 2018-06-08"
           (setq $p1 @begin)
           (setq $p2 @end))
       (if (use-region-p)
-          (progn
-            (setq $p1 (region-beginning))
-            (setq $p2 (region-end)))
+          (setq $p1 (region-beginning) $p2 (region-end))
         (let (($bds (xah-get-bounds-of-thing 'block)))
-          (setq $p1 (car $bds))
-          (setq $p2 (cdr $bds)))))
+          (setq $p1 (car $bds) $p2 (cdr $bds)))))
     (setq $input-str (buffer-substring-no-properties $p1 $p2))
     (setq $output-str
           (let ((case-fold-search t) ($tempStr $input-str))
@@ -1806,8 +1795,7 @@ Version 2018-10-24"
   (let ( $p1 $p2 $input-str $output-str)
     (let ($bds)
       (setq $bds (xah-get-bounds-of-thing-or-region 'block))
-      (setq $p1 (car $bds))
-      (setq $p2 (cdr $bds)))
+      (setq $p1 (car $bds) $p2 (cdr $bds)))
     (setq $input-str (buffer-substring-no-properties $p1 $p2))
     (setq
      $output-str
@@ -1940,8 +1928,7 @@ Version 2016-07-28"
    (let ($p1 $p2)
      ;; set region boundary $p1 $p2
      (if (use-region-p)
-         (progn (setq $p1 (region-beginning))
-                (setq $p2 (region-end)))
+         (setq $p1 (region-beginning) $p2 (region-end))
        (save-excursion
          (if (re-search-backward "\n[ \t]*\n" nil "NOERROR")
              (progn (re-search-forward "\n[ \t]*\n")
@@ -2603,7 +2590,7 @@ Exactly what tag is used depends on the suffix. Here's example of result:
 and YouTube url.
 
 If region is active, use it as input.
-Version 2017-08-16"
+Version 2018-10-31"
   (interactive)
   (let ( $p1 $p2 $input)
     ;; (if (string-match "%" $input )
@@ -2625,12 +2612,9 @@ Version 2017-08-16"
      ((or (string-match-p "wikipedia.org/" $input)
           (string-match-p "wiktionary.org/" $input)
           (string-match-p "wikimedia.org/" $input))
-      (progn
-        (if (xah-html-path-ends-in-image-suffix-p $input)
-            (progn
-              (xah-html-source-url-linkify 3))
-          (progn
-            (xah-html-wikipedia-url-linkify )))))
+      (if (xah-html-path-ends-in-image-suffix-p $input)
+          (xah-html-source-url-linkify 3)
+        (xah-html-wikipedia-url-linkify )))
      ((string-match-p "\\.css\\'" $input) (xah-html-css-linkify))
      ((string-match-p "\\.pdf" $input) (xah-html-pdf-embed-linkify))
      ((string-match-p "\\.js\\'\\|\\.ts\\'" $input) (xah-html-javascript-linkify))
@@ -2644,8 +2628,6 @@ Version 2017-08-16"
 
      ((string-match-p "www\.amazon\.com/\\|//amzn\.to/" $input) (xah-html-amazon-linkify))
 
-     ((xah-html-path-ends-in-image-suffix-p $input) (xah-html-image-figure-linkify))
-
      ((string-match-p "\\`https?://" $input)
       (progn
         (if (fboundp 'xahsite-url-is-xah-website-p)
@@ -2653,6 +2635,8 @@ Version 2017-08-16"
                 (xah-file-linkify $p1 $p2)
               (xah-html-source-url-linkify 0))
           (xah-html-source-url-linkify 0))))
+
+     ((xah-html-path-ends-in-image-suffix-p $input) (xah-html-image-figure-linkify))
 
      ((string-match
        (concat "^" (expand-file-name "~/" ) "web/")
@@ -2691,12 +2675,9 @@ Version 2018-02-17"
         $input
         $url $domainName $linkText )
     (if (use-region-p)
-        (progn
-          (setq $p1 (region-beginning))
-          (setq $p2 (region-end)))
+         (setq $p1 (region-beginning) $p2 (region-end))
       (let (($bds (bounds-of-thing-at-point 'url)))
-        (setq $p1 (car $bds))
-        (setq $p2 (cdr $bds))))
+        (setq $p1 (car $bds) $p2 (cdr $bds))))
     (setq $input (buffer-substring-no-properties $p1 $p2))
     (setq $url (replace-regexp-in-string "&amp;" "&" $input nil "LITERAL"))
     ;; in case it's already encoded. TODO this is only 99% correct.
@@ -2744,9 +2725,7 @@ Version 2016-06-29."
         $output-str
         )
     (if (use-region-p)
-        (progn
-          (setq $p1 (region-beginning))
-          (setq $p2 (region-end)))
+         (setq $p1 (region-beginning) $p2 (region-end))
       (progn
         (let ($p0)
           (progn
