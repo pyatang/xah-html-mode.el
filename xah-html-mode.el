@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2018, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.3.20181031145909
+;; Version: 7.3.20181108214217
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -279,7 +279,8 @@ Version 2017-01-11"
 
 
 (defcustom xah-html-html5-tag-names nil
-  "A alist of HTML5 tag names. For each element, the key is tag name, value is a vector of one element of string: “w” means word, “l” means line, “b” means block, others are placeholder for unknown. The purpose of the value is to indicate the default way to wrap the tag around cursor. "
+  "A alist of HTML5 tag names. 
+For each element, the key is tag name, value is a vector of one element of string: “w” means word, “l” means line, “b” means block, others are placeholder for unknown. The purpose of the value is to indicate the default way to wrap the tag around cursor. "
 ; todo: need to go the the list and look at the type carefully. Right now it's just quickly done. lots are “z”, for unkown. Also, some are self closing tags, current has mark of “n”.
 :group 'xah-html-mode
 )
@@ -413,7 +414,10 @@ Version 2017-01-11"
 )
  )
 
-(defvar xah-html-html5-tag-list nil "list version of `xah-html-html5-tag-names'")
+(defvar xah-html-html5-tag-list nil
+  "list of html tag names.
+Extracted from `xah-html-html5-tag-names'
+Version 2018-11-02")
 (setq xah-html-html5-tag-list (mapcar (lambda (x) (car x)) xah-html-html5-tag-names))
 
 (defcustom xah-html-attribute-names nil
@@ -457,7 +461,8 @@ Version 2017-01-11"
 
 
 (defun xah-html-get-tag-type (tag-name)
-  "Return the wrap-type info of tag-name in `xah-html-html5-tag-names'"
+  "Return the wrap-type info of tag-name in `xah-html-html5-tag-names'
+Version 2018-11-02"
   (elt
    (cdr
     (assoc tag-name xah-html-html5-tag-names)
@@ -913,10 +918,10 @@ Version 2017-07-23"
   "Open the link under cursor or insert newline.
 If cursor is on a src=… or href=…, then if it a file path, open file, if http, open in browser.
 Else call `newline'.
-Version 2017-02-04"
+Version 2018-11-07"
   (interactive)
   (if (xah-html-cursor-in-link-q)
-      (let (($srcStr (xah-get-thing-at-point 'filepath )))
+      (let (($srcStr  (xah-html-remove-uri-fragment (xah-get-thing-at-point 'filepath ))))
         (if (string-match "^http:\\|^https:" $srcStr)
             (browse-url $srcStr)
           (if (file-exists-p $srcStr)
@@ -2783,7 +2788,7 @@ A text block is separated by blank lines.
 
 URL `http://ergoemacs.org/emacs/emacs_html_wrap_tags.html'
 
-Version 2018-03-22"
+Version 2018-11-02"
   (interactive)
   (let* (
          ($bds (xah-get-bounds-of-thing-or-region 'block))
@@ -2791,7 +2796,8 @@ Version 2018-03-22"
          ($p2 (cdr $bds))
          ($inputText (buffer-substring-no-properties $p1 $p2)))
     (delete-region $p1 $p2 )
-    (insert "<p>" (replace-regexp-in-string "\n\n+" "</p>\n\n<p>" (xah-html--trim-string $inputText)) "</p>")))
+    (insert "<p>" (replace-regexp-in-string "\n\n+" "</p>\n\n<p>" (xah-html--trim-string $inputText)) "</p>")
+    (skip-chars-forward "\n" )))
 
 (defun xah-html-insert-br-tag ()
   "Insert <br /> tag.
@@ -3572,7 +3578,7 @@ Version 2016-10-24"
     ("bgc" "background-color" xah-html--ahf)
     ("bgc" "background-color" xah-html--ahf)
     ("hr" "<hr />\n\n" xah-html--ahf)
-
+    ("spanh" "<span class=\"x\">▮</span>\n\n" xah-html--ahf)
     ("sh" "<section>
 
 ▮
