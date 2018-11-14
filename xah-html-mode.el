@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2018, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.3.20181108214217
+;; Version: 7.3.20181114151336
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -535,6 +535,8 @@ For example:
         ("haml" . ["haml-mode" "haml"])
         ("sass" . ["sass-mode" "sass"])
         ("scss" . ["xah-css-mode" "css"])
+
+        ("poem" . ["text-mode" "txt"])
 
         ("vimrc" . ["vimrc-mode" "vim"])))
 
@@ -2116,7 +2118,20 @@ Version 2015-09-12"
     (delete-region $p1 $p2)
     (insert $newLinkStr)))
 
-(defun xah-html-path-ends-in-image-suffix-p (@path)
+(defun xah-html-video-file-suffix-p (@path)
+  "Returns t if @path has video file suffix e.g. mp4, else nil.
+Version 2018-11-14"
+  (let ((case-fold-search t))
+    (string-match-p
+     "\\.mp4\\'\\|\\.mov\\'\\|\\.mkv\\'\\|\\.webm\\'\\|\\.m1v\\'\\|\\.m4v\\'" @path)))
+
+(defun xah-html-audio-file-suffix-p (@path)
+  "Returns t if @path has audio file suffix e.g. m4a, else nil.
+Version 2018-11-14"
+  (let ((case-fold-search t))
+    (string-match-p "\\.mp3\\'\\|\\.m4a\\'\\|\\.ogg\\'\\|\\.opus\\'\\|\\.oga\\'" @path)))
+
+(defun xah-html-image-file-suffix-p (@path)
   "Returns t if @path ends in .jpg .png .gif .svg, else nil.
 Version 2017-08-11"
   (let ((case-fold-search t))
@@ -2359,7 +2374,7 @@ Version 2017-09-13"
   "Make the path under cursor into a HTML audio tag link.
 e.g. xyz.mp4
 becomes
-<audio src=\"i/xyz.mp4\" controls></audio>
+<audio src=\"i/xyz.m4a\" controls></audio>
 
 if
 @add-figure is not nil, wrap figure and figcaption tags around it.
@@ -2617,15 +2632,14 @@ Version 2018-10-31"
      ((or (string-match-p "wikipedia.org/" $input)
           (string-match-p "wiktionary.org/" $input)
           (string-match-p "wikimedia.org/" $input))
-      (if (xah-html-path-ends-in-image-suffix-p $input)
+      (if (xah-html-image-file-suffix-p $input)
           (xah-html-source-url-linkify 3)
         (xah-html-wikipedia-url-linkify )))
      ((string-match-p "\\.css\\'" $input) (xah-html-css-linkify))
      ((string-match-p "\\.pdf" $input) (xah-html-pdf-embed-linkify))
      ((string-match-p "\\.js\\'\\|\\.ts\\'" $input) (xah-html-javascript-linkify))
-     ((string-match-p "\\.mp3\\'\\|\\.m4a\\'\\|\\.ogg\\'\\|\\.opus\\'" $input) (xah-html-audio-file-linkify t))
-     ((string-match-p "\\.mp4\\'\\|\\.mov\\'\\|\\.mkv\\'\\|\\.webm\\'\\|\\.m1v\\'\\|\\.m4v\\'" $input)
-      (xah-html-video-file-linkify t))
+     ((xah-html-audio-file-suffix-p $input) (xah-html-audio-file-linkify t))
+     ((xah-html-video-file-suffix-p $input) (xah-html-video-file-linkify t))
 
      ((string-match-p "youtube\.com/watch" $input) (xah-html-youtube-linkify))
 
@@ -2641,7 +2655,7 @@ Version 2018-10-31"
               (xah-html-source-url-linkify 0))
           (xah-html-source-url-linkify 0))))
 
-     ((xah-html-path-ends-in-image-suffix-p $input) (xah-html-image-figure-linkify))
+     ((xah-html-image-file-suffix-p $input) (xah-html-image-figure-linkify))
 
      ((string-match
        (concat "^" (expand-file-name "~/" ) "web/")
