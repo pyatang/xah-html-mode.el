@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2018, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.3.20181114151336
+;; Version: 7.4.20181127220332
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1766,7 +1766,7 @@ A “text block” is text between blank lines
 Use `xah-html-html-to-text' if you want the html link URL to remain.
 
  WARNING: this command does not cover all HTML tags or convert all HTML entities. For robust solution you might use the terminal command “lynx” or other.
-Version 2018-06-08"
+Version 2018-11-27"
   (interactive)
   (let ($p1 $p2 $input-str $output-str)
     (if @begin
@@ -1793,7 +1793,8 @@ Version 2018-06-08"
             $tempStr
             ))
     (delete-region $p1 $p2)
-    (insert $output-str)))
+    (insert $output-str))
+  (skip-chars-forward "\n" ))
 
 (defun xah-html-html-to-text ()
   "Convert HTML to plain text on current text block or text selection.
@@ -2368,13 +2369,13 @@ Version 2017-09-13"
 ;;               $inputStr
 ;;             (file-relative-name $inputStr))))
 ;;     (delete-region $p1 $p2)
-;;     (insert (format "<audio src=\"%s\" controls></audio>" $src))))
+;;     (insert (format "<audio src=\"%s\" controls loop></audio>" $src))))
 
 (defun xah-html-audio-file-linkify ( &optional @figure)
   "Make the path under cursor into a HTML audio tag link.
 e.g. xyz.mp4
 becomes
-<audio src=\"i/xyz.m4a\" controls></audio>
+<audio src=\"i/xyz.m4a\" controls loop></audio>
 
 if
 @add-figure is not nil, wrap figure and figcaption tags around it.
@@ -2399,19 +2400,19 @@ Version 2018-09-19"
         (progn
           (goto-char $p1)
           (insert "<figure>\n")
-          (insert (format "<audio src=\"%s\" controls></audio>\n" $src))
+          (insert (format "<audio src=\"%s\" controls loop></audio>\n" $src))
           (insert "<figcaption>\n")
           (insert (replace-regexp-in-string "_" " " (file-name-nondirectory $src)))
           (insert "\n</figcaption>\n</figure>\n\n")
           (search-backward "</figcaption>" ))
       (progn
-        (insert (format "<audio src=\"%s\" controls></audio>" $src))))))
+        (insert (format "<audio src=\"%s\" controls loop></audio>" $src))))))
 
 (defun xah-html-video-file-linkify ( &optional @figure)
   "Make the path under cursor into a HTML video tag link.
 e.g. xyz.mp4
 becomes
-<video src=\"i/xyz.mp4\" controls></video>
+<video src=\"i/xyz.mp4\" controls loop></video>
 
 if
 @add-figure is not nil, wrap figure and figcaption tags around it.
@@ -2436,13 +2437,13 @@ Version 2017-12-09"
         (progn
           (goto-char $p1)
           (insert "<figure>\n")
-          (insert (format "<video src=\"%s\" controls></video>\n" $src))
+          (insert (format "<video src=\"%s\" controls loop></video>\n" $src))
           (insert "<figcaption>\n")
           (insert (replace-regexp-in-string "_" " " (file-name-nondirectory $src)))
           (insert "\n</figcaption>\n</figure>\n\n")
           (search-backward "</figcaption>" ))
       (progn
-        (insert (format "<video src=\"%s\" controls></video>" $src))))))
+        (insert (format "<video src=\"%s\" controls loop></video>" $src))))))
 
 (defun xah-html-amazon-linkify (&optional @tracking-id)
   "Make the current amazon URL or selection into a link.
@@ -2604,8 +2605,8 @@ Exactly what tag is used depends on the suffix. Here's example of result:
  <link rel=\"stylesheet\" href=\"xyz.css\" />
  <script defer src=\"xyz.js\"></script>
  <img src=\"xyz.png\" alt=\"xyz\" width=\"960\" height=\"720\" />
- <video src=\"xyz.mp4\" controls></video>
- <audio src=\"xyz.mp3\" controls></audio>
+ <video src=\"xyz.mp4\" controls loop></video>
+ <audio src=\"xyz.mp3\" controls loop></audio>
 
 and YouTube url.
 
@@ -3228,19 +3229,20 @@ This function does not `save-excursion'.
         (insert $str-right)))))
 
 (defun xah-html-wrap-html-tag (@tag-name &optional @class-name)
-  "Insert HTML open/close tags to current text unit or text selection.
-When there's no text selection, the tag will be wrapped around current {word, line, text-block}, depending on the tag used.
+  "Insert HTML open/close tags.
 
+Wrap around text selection.
+If there's no text selection, the tag will be wrapped around current {word, line, text-block}, depending on the tag used.
 If current line or word is empty, then insert open/end tags and place cursor between them.
 If `universal-argument' is called first, then also prompt for a “class” attribute. Empty value means don't add the attribute.
-Version 2017-09-24
-"
+Version 2018-11-16"
   (interactive
    (list
     (ido-completing-read "HTML tag:" xah-html-html5-tag-list "PREDICATE" "REQUIRE-MATCH" nil xah-html-html-tag-input-history "div")
-    (if current-prefix-arg
-        (read-string "class:" nil xah-html-class-input-history "")
-      nil )))
+
+    ;; (when current-prefix-arg (read-string "class:" nil xah-html-class-input-history ""))
+
+    (when current-prefix-arg (setq @class-name "x"))))
   (let* (
          ($wrap-type (xah-html-get-tag-type @tag-name))
          ($bds
