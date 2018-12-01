@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2018, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.4.20181127220332
+;; Version: 7.4.20181201021458
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -2780,21 +2780,25 @@ URL `http://ergoemacs.org/emacs/wrap-url.html'
 
 Version 2018-07-28"
   (interactive)
-  (let ( $p1 $p2 $inputStr $new-str )
-    (if (region-active-p)
-        (progn (setq $p1 (region-beginning) $p2 (region-end)))
+  (let ( $p1 $p2 $input $newStr )
+    (if (use-region-p)
+        (setq $p1 (region-beginning) $p2 (region-end))
       (save-excursion
-        (skip-chars-backward "^ \n\t")
-        (setq $p1 (point))
-        (skip-chars-forward "^ \n\t" )
-        (setq $p2 (point))))
-    (setq $inputStr (buffer-substring-no-properties $p1 $p2))
-    (setq $new-str
-          (if (string-match "^http" $inputStr )
-              $inputStr
-            (progn (file-relative-name (replace-regexp-in-string "^file:///" "/" $inputStr t t)))))
+        (let ($p0)
+          (setq $p0 (point))
+          ;; chars that are likely to be delimiters of full path, e.g. space, tabs, brakets.
+          (skip-chars-backward "^  \"\t\n'|[]{}<>〔〕“”〈〉《》【】〖〗«»‹›·。\\`")
+          (setq $p1 (point))
+          (goto-char $p0)
+          (skip-chars-forward "^  \"\t\n'|[]{}<>〔〕“”〈〉《》【】〖〗«»‹›·。\\'")
+          (setq $p2 (point)))))
+    (setq $input (buffer-substring-no-properties $p1 $p2))
+    (setq $newStr
+          (if (string-match "^http" $input )
+              $input
+            (progn (file-relative-name (replace-regexp-in-string "^file:///" "/" $input t t)))))
     (delete-region $p1 $p2)
-    (insert (concat "<a href=\"" (url-encode-url $new-str) "\">" $new-str "</a>" ))))
+    (insert (concat "<a href=\"" (url-encode-url $newStr) "\">" $newStr "</a>" ))))
 
 (defun xah-html-wrap-p-tag ()
   "Add <p>…</p> tag to current block or text selection.
