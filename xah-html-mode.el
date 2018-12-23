@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2018, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.4.20181201021458
+;; Version: 7.4.20181222175257
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -93,6 +93,44 @@ Version 2018-08-17"
     (redraw-frame)))
 
 
+
+(defun xah-html--get-tag-name (&optional left<)
+  "Return the tag name.
+This function assumes your cursor is inside a tag, eg <…▮…>"
+  (let ( $p1 $p2 )
+    (when (not left<)
+      (setq left< (search-backward "<")))
+    (goto-char left<)
+    (forward-char 1)
+    (when (looking-at "/" )
+      (forward-char 1))
+    (setq $p1 (point))
+    (re-search-forward " \\|>")
+    (backward-char 1)
+    (setq $p2 (point))
+    (buffer-substring-no-properties $p1 $p2)))
+
+(defun xah-html--cursor-in-link-p ()
+  "Return true if curser is inside a string of src or href.
+Version 2018-02-21"
+  (interactive)
+  (let ((in-string-q (nth 3 (syntax-ppss))))
+    (if in-string-q
+        (save-excursion
+          (skip-chars-backward "^\"")
+          (backward-char)
+          (if (string-match "=" (char-to-string (char-before)))
+              (progn
+                (backward-char 1)
+                (if (or
+                     (string-match "href" (current-word))
+                     (string-match "src" (current-word))
+                     (string-match "content" (current-word)))
+                    (progn t)
+                  (progn nil)))
+            nil))
+      nil
+      )))
 
 (defun xah-html--tag-self-closing-p (@tag-name)
   "Return true if the tag is a self-closing tag, <br> or <br />"
@@ -460,7 +498,7 @@ Version 2018-11-02")
 
 
 
-(defun xah-html-get-tag-type (tag-name)
+(defun xah-html--get-tag-type (tag-name)
   "Return the wrap-type info of tag-name in `xah-html-html5-tag-names'
 Version 2018-11-02"
   (elt
@@ -922,7 +960,7 @@ If cursor is on a src=… or href=…, then if it a file path, open file, if htt
 Else call `newline'.
 Version 2018-11-07"
   (interactive)
-  (if (xah-html-cursor-in-link-q)
+  (if (xah-html--cursor-in-link-p)
       (let (($srcStr  (xah-html-remove-uri-fragment (xah-get-thing-at-point 'filepath ))))
         (if (string-match "^http:\\|^https:" $srcStr)
             (browse-url $srcStr)
@@ -938,45 +976,7 @@ Version 2018-11-07"
               (find-file $srcStr)))))
     (newline)))
 
-(defun xah-html-cursor-in-link-q ()
-  "Return true if curser is inside a string of src or href.
-Version 2018-02-21"
-  (interactive)
-  (let ((in-string-q (nth 3 (syntax-ppss))))
-    (if in-string-q
-        (save-excursion
-          (skip-chars-backward "^\"")
-          (backward-char)
-          (if (string-match "=" (char-to-string (char-before)))
-              (progn
-                (backward-char 1)
-                (if (or
-                     (string-match "href" (current-word))
-                     (string-match "src" (current-word))
-                     (string-match "content" (current-word)))
-                    (progn t)
-                  (progn nil)))
-            nil))
-      nil
-      )))
-
 
-
-(defun xah-html--get-tag-name (&optional left<)
-  "Return the tag name.
-This function assumes your cursor is inside a tag, eg <…▮…>"
-  (let ( $p1 $p2 )
-    (when (not left<)
-      (setq left< (search-backward "<")))
-    (goto-char left<)
-    (forward-char 1)
-    (when (looking-at "/" )
-      (forward-char 1))
-    (setq $p1 (point))
-    (re-search-forward " \\|>")
-    (backward-char 1)
-    (setq $p2 (point))
-    (buffer-substring-no-properties $p1 $p2)))
 
 (defun xah-html-delete-tag ()
   "work in progress. do nothing.
@@ -2000,6 +2000,21 @@ Version 2017-08-24"
              (delete-region $p1 $p2 )
              (goto-char $p1)
              (insert @title ))
+      (xah-html-update-first-h1 @title))))
+
+(defun xah-html-update-first-h1 ( @h1Text)
+  "Update the first <h1>…</h1> of current buffer.
+Version 2018-12-04"
+  (interactive
+   (let ($oldTitle)
+     (save-excursion
+       (goto-char 1)
+       (re-search-forward "<h1>\\([^<]+?\\)</h1>")
+       (setq $oldTitle (match-string 1 )))
+     (list (read-string "New title:" $oldTitle nil $oldTitle "INHERIT-INPUT-METHOD"))))
+  (let ($p1 $p2)
+    (save-excursion
+      (goto-char 1)
       (if (search-forward "<h1>")
           (progn
             (setq $p1 (point))
@@ -2008,9 +2023,9 @@ Version 2017-08-24"
             (setq $p2 (point))
             (delete-region $p1 $p2 )
             (goto-char $p1)
-            (insert @title ))
+            (insert @h1Text ))
         (progn
-          (message "<h1> tag not found. adding"))))))
+          (message "<h1> tag not found."))))))
 
 (defun xah-html-make-citation ()
   "Reformat current text block or selection into a canonical citation format.
@@ -2652,22 +2667,31 @@ Version 2018-10-31"
       (progn
         (if (fboundp 'xahsite-url-is-xah-website-p)
             (if (xahsite-url-is-xah-website-p $input)
-                (xah-file-linkify $p1 $p2)
-              (xah-html-source-url-linkify 0))
-          (xah-html-source-url-linkify 0))))
-
+                (progn
+                  (message "xah-file-linkify called")
+                  (xah-file-linkify $p1 $p2))
+              (progn
+                (message "xah-html-source-url-linkify called")
+                (xah-html-source-url-linkify 0)))
+          (progn
+            (message "xah-html-source-url-linkify called")
+            (xah-html-source-url-linkify 0)))))
      ((xah-html-image-file-suffix-p $input) (xah-html-image-figure-linkify))
-
      ((string-match
        (concat "^" (expand-file-name "~/" ) "web/")
        (or (buffer-file-name) default-directory))
       (if (fboundp 'xah-all-linkify)
-          (xah-all-linkify)
+          (progn
+            (message "xah-all-linkify called")
+            (xah-all-linkify))
         (xah-html-url-linkify)))
-
-     ((file-exists-p $input) (xah-html-file-linkify $p1 $p2))
-
-     (t (xah-html-url-linkify)))
+     ((file-exists-p $input)
+      (progn
+        (message "xah-html-file-linkify called")
+        (xah-html-file-linkify $p1 $p2)))
+     (t (progn
+          (message "xah-html-url-linkify called")
+          (xah-html-url-linkify))))
     ;;
     ))
 
@@ -2823,6 +2847,21 @@ Version 2018-11-02"
 Version 2017-04-28"
   (interactive)
   (insert "<br />"))
+
+(defun xah-html-add-br ()
+  "Add <br /> to end of current line or in selection.
+Version 2018-12-22"
+  (interactive)
+  (if (use-region-p)
+      (progn
+        (save-restriction
+          (narrow-to-region (region-beginning) (region-end))
+          (goto-char (point-min))
+          (while (search-forward "\n" nil t)
+            (replace-match "<br />\n"))))
+    (progn
+      (end-of-line )
+      (insert "<br />"))))
 
 (defun xah-html-emacs-to-windows-kbd-notation (@begin @end)
   "Change emacs key notation to Windows's notation on text selection or current line.
@@ -3248,7 +3287,7 @@ Version 2018-11-16"
 
     (when current-prefix-arg (setq @class-name "x"))))
   (let* (
-         ($wrap-type (xah-html-get-tag-type @tag-name))
+         ($wrap-type (xah-html--get-tag-type @tag-name))
          ($bds
           (if (use-region-p)
               (cons (region-beginning) (region-end))
