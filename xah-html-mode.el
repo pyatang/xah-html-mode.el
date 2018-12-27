@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2018, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.4.20181222175257
+;; Version: 7.4.20181226191128
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -317,8 +317,8 @@ Version 2017-01-11"
 
 
 (defcustom xah-html-html5-tag-names nil
-  "A alist of HTML5 tag names. 
-For each element, the key is tag name, value is a vector of one element of string: “w” means word, “l” means line, “b” means block, others are placeholder for unknown. The purpose of the value is to indicate the default way to wrap the tag around cursor. "
+  "A alist of HTML5 tag names.
+For each element, the key is tag name, value is a vector of one element of string: “w” means word, “l” means line, “b” means block, “s” means self-closing tag such as br, others are placeholder for unknown. The purpose of the value is to indicate the default way to wrap the tag around cursor. "
 ; todo: need to go the the list and look at the type carefully. Right now it's just quickly done. lots are “z”, for unkown. Also, some are self closing tags, current has mark of “n”.
 :group 'xah-html-mode
 )
@@ -328,7 +328,7 @@ For each element, the key is tag name, value is a vector of one element of strin
 
 ("div" . ["b"])
 ("span" . ["w"])
-("br" . ["n"])
+("br" . ["s"])
 
 ("b" . ["w"])
 ("strong" . ["w"])
@@ -362,7 +362,7 @@ For each element, the key is tag name, value is a vector of one element of strin
 ("img" . ["l"])
 ("input" . ["l"])
 ("ins" . ["z"])
-("hr" . ["n"])
+("hr" . ["s"])
 
 ("a" . ["l"])
 ("blockquote" . ["b"])
@@ -3295,7 +3295,8 @@ Version 2018-11-16"
              ((equal $wrap-type "w") (bounds-of-thing-at-point 'word ))
              ((equal $wrap-type "l") (cons (line-beginning-position) (line-end-position)))
              ((equal $wrap-type "b") (xah-get-bounds-of-thing 'block))
-             (t (xah-get-bounds-of-thing 'word)))))
+             ((equal $wrap-type "s") (cons (point) (point)))
+             (t (cons (point) (point))))))
          $p1 $p2
          )
     (if $bds
