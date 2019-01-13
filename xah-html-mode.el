@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2018, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.4.20181226191128
+;; Version: 7.4.20190113003959
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1846,6 +1846,7 @@ Version 2018-10-24"
           (point-min)
           (point-max)
           '(
+
             ;; todo. something wrong here. not supposed to be regex
             ["<li>" "<li>• " ]
             ["</li>" "" ]
@@ -1854,9 +1855,9 @@ Version 2018-10-24"
             ["<code class=\"elisp_f_3d841\">" "「" ]
             ["</code>" "」" ]
 
-            ["<cite>" "“" ]
-            ["<code class=\"book\">" "“" ]
-            ["</cite>" "”" ]
+            ;; ["<cite>" "〈" ]
+            ;; ["<code class=\"book\">" "〈" ]
+            ;; ["</cite>" "〉" ]
 
             ["<h2>" "────────── ────────── ────────── ────────── ──────────\n" ]
             ["</h2>" "" ]
@@ -1870,6 +1871,7 @@ Version 2018-10-24"
             ["</h6>" "" ]
             ["</td><td>" " | " ]
             ["</th><th>" " | " ]
+
             )))
        (xah-html-remove-html-tags (point-min) (point-max))
        (buffer-substring 1 (point-max))))
@@ -1981,7 +1983,9 @@ Version 2016-07-28"
 
 (defun xah-html-update-title ( @title)
   "Update the <title>…</title> and <h1>…</h1> of current buffer.
-Version 2017-08-24"
+
+URL `http://ergoemacs.org/emacs/elisp_update-html-title.html'
+Version 2019-01-11"
   (interactive
    (let ($oldTitle)
      (save-excursion
@@ -2004,7 +2008,9 @@ Version 2017-08-24"
 
 (defun xah-html-update-first-h1 ( @h1Text)
   "Update the first <h1>…</h1> of current buffer.
-Version 2018-12-04"
+
+URL `http://ergoemacs.org/emacs/elisp_update-html-title.html'
+Version 2019-01-11"
   (interactive
    (let ($oldTitle)
      (save-excursion
@@ -2478,7 +2484,7 @@ Example output:
 ASIN is a 10 character string that's a product id.
 
 URL `http://ergoemacs.org/emacs/elisp_amazon-linkify.html'
-Version 2017-07-22"
+Version 2019-01-12"
   (interactive)
   (let (($bds (bounds-of-thing-at-point 'url))
         $p1 $p2 $url $asin $thingName
@@ -2499,6 +2505,7 @@ Version 2017-07-22"
                ((string-match "/gp/product/\\([[:alnum:]]\\{10\\}\\)" $url) (match-string 1 $url))
                ((string-match "/ASIN/\\([[:alnum:]]\\{10\\}\\)" $url) (match-string 1 $url))
                ((string-match "/tg/detail/-/\\([[:alnum:]]\\{10\\}\\)/" $url) (match-string 1 $url))
+               ((string-match "/\\([[:alnum:]]\\{10\\}\\)/" $url) (match-string 1 $url))
                ((and
                  (equal 10 (length $url ))
                  (string-match "\\`\\([[:alnum:]]\\{10\\}\\)\\'" $url))
@@ -3006,7 +3013,7 @@ Version 2017-03-17"
 (defun xah-html-brackets-to-html (@begin @end)
   "Replace bracketed text to HTML markup in current line or text selection.
 
-• 「emacs-lisp-function-name」 → <code class=\"elisp_f_3d841\">emacs-lisp-function-name</code> if in xah elisp mode
+• 「emacs-lisp-function-name」 → <code class=\"elisp_f_3d841\">emacs-lisp-function-name</code> if current file path contains “emacs”.
 • 「…」 → <code>…</code>
 • 〈…〉 → <cite>…</cite>
 • 《…》 → <cite class=\"book\">…</cite>
@@ -3017,7 +3024,7 @@ Version 2017-03-17"
 Changes are reported to message buffer with char position.
 
 When called in lisp code, @begin @end are region begin/end positions.
-Version 2018-10-08"
+Version 2019-01-13"
   (interactive
    (let (($bds (xah-get-bounds-of-thing-or-region 'block)))
      (list (car $bds) (cdr $bds))))
@@ -3025,7 +3032,7 @@ Version 2018-10-08"
     (save-excursion
       (save-restriction
         (narrow-to-region @begin @end)
-        (when (and (buffer-file-name) (string-match "/ergoemacs_org/" (buffer-file-name)))
+        (when (and (buffer-file-name) (string-match "emacs" (buffer-file-name)))
           (xah-html-htmlize-elisp-keywords @begin @end))
         (progn
           (goto-char (point-min))
