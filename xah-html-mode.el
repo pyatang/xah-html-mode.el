@@ -1,9 +1,9 @@
 ;;; xah-html-mode.el --- Major mode for editing pure html5. -*- coding: utf-8; lexical-binding: t; -*-
 
-;; Copyright © 2013-2018, by Xah Lee
+;; Copyright © 2013-2019, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.4.20190113003959
+;; Version: 7.4.20190305052415
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -2285,7 +2285,7 @@ Example, if cursor is on the word “i/cat.png”, then it will became
 If there's a text selection, use that as image path.
 
 This function calls `xah-html-image-linkify'.
-Version 2017-08-08"
+Version 2019-02-18"
   (interactive)
   (let ($p1 $p2 $altStr)
     (setq $altStr (xah-html-image-linkify))
@@ -2294,8 +2294,8 @@ Version 2017-08-08"
     (search-forward ">")
     (insert "\n<figcaption>\n")
     (insert $altStr "\n</figcaption>\n</figure>\n\n")
-    (search-backward "</figcaption>")
-    (backward-char )
+    ;; (search-backward "</figcaption>")
+    ;; (backward-char )
     ;;
     ))
 
@@ -2850,14 +2850,8 @@ Version 2018-11-02"
     (skip-chars-forward "\n" )))
 
 (defun xah-html-insert-br-tag ()
-  "Insert <br /> tag.
-Version 2017-04-28"
-  (interactive)
-  (insert "<br />"))
-
-(defun xah-html-add-br ()
-  "Add <br /> to end of current line or in selection.
-Version 2018-12-22"
+  "Add <br /> at cursor point, or end of each line in selection.
+Version 2019-03-05"
   (interactive)
   (if (use-region-p)
       (progn
@@ -2866,9 +2860,7 @@ Version 2018-12-22"
           (goto-char (point-min))
           (while (search-forward "\n" nil t)
             (replace-match "<br />\n"))))
-    (progn
-      (end-of-line )
-      (insert "<br />"))))
+    (insert "<br />")))
 
 (defun xah-html-emacs-to-windows-kbd-notation (@begin @end)
   "Change emacs key notation to Windows's notation on text selection or current line.
