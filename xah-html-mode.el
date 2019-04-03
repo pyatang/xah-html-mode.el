@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2019, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.4.20190402234726
+;; Version: 7.4.20190403053440
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -2116,7 +2116,7 @@ where ‹access_date› is of this format 2019-04-02
 It becomes:
  <s data-accessed=\"‹access_date›\" data-defunct-date=\"‹now_date›\">‹url›</s>
 
-URL `http://ergoemacs.org/emacs/elisp_html-linkify.html'
+URL `http://ergoemacs.org/emacs/elisp_html_dead_link.html'
 Version 2019-04-02"
   (interactive)
   (let ($p1 $p2 $wholeLinkStr $newLinkStr $url $accessedDate)
