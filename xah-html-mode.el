@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2019, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.4.20190305052415
+;; Version: 7.4.20190402234726
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1304,7 +1304,7 @@ becomes:
 <li>dog</li>
 </ul>
 
-Version 2018-10-13"
+Version 2019-03-15"
   (interactive)
   (let ($bds $p1 $p2 $input-str $resultStr )
     (setq $bds (xah-get-bounds-of-thing 'block))
@@ -1330,6 +1330,10 @@ Version 2018-10-13"
                 (when (looking-at "• ")
                   (delete-char 2))
                 (when (looking-at "* ")
+                  (delete-char 2))
+                (when (looking-at "- ")
+                  (delete-char 2))
+                (when (looking-at "⓪①②③④⑤⑥⑦⑧⑨⑩")
                   (delete-char 2))
                 (insert "<li>")
                 (end-of-line) (insert "</li>")
@@ -2104,15 +2108,16 @@ Version 2018-03-24"
   "Make the HTML link under cursor to a defunct form.
 Example:
 If cursor is inside this tag
- <a class=\"sorc\" href=\"http://example.com/\" data-accessed=\"2008-12-26\">…</a>
- (and inside the opening tag.)
+ <a href=\"‹url›\">…</a>
+or
+ <a href=\"‹url›\" data-accessed=\"‹access_date›\">…</a>
+where ‹access_date› is of this format 2019-04-02
 
 It becomes:
-
- <s data-accessed=\"2006-03-11\" data-defunct-date=\"2014-01-11\">http://www.math.ca/cgi/kabol/search.pl</s>
+ <s data-accessed=\"‹access_date›\" data-defunct-date=\"‹now_date›\">‹url›</s>
 
 URL `http://ergoemacs.org/emacs/elisp_html-linkify.html'
-Version 2015-09-12"
+Version 2019-04-02"
   (interactive)
   (let ($p1 $p2 $wholeLinkStr $newLinkStr $url $accessedDate)
     (save-excursion
@@ -2120,23 +2125,21 @@ Version 2015-09-12"
       (forward-char 3)
       (search-backward "<a " ) (setq $p1 (point))
       (search-forward "</a>") (setq $p2 (point))
-
-      ;; get $wholeLinkStr
       (setq $wholeLinkStr (buffer-substring-no-properties $p1 $p2))
-
-      ;; generate replacement text
       (with-temp-buffer
+        ;; generate replacement text
         (insert $wholeLinkStr)
-
         (goto-char 1)
         (re-search-forward  "href=\"\\([^\"]+?\\)\"")
         (setq $url (match-string 1))
-
-        (re-search-forward  "data-accessed=\"\\([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\\)\"")
-        (setq $accessedDate (match-string 1))
-
-        (setq $newLinkStr (format "<s data-accessed=\"%s\" data-defunct-date=\"%s\">%s</s>" $accessedDate (format-time-string "%Y-%m-%d") $url ))))
-
+        (setq $accessedDate
+              (if (re-search-forward
+                   "data-accessed=\"\\([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\\)\"" $p2 t)
+                  (match-string 1)
+                ""
+                ))
+        (setq $newLinkStr
+              (format "<s data-accessed=\"%s\" data-defunct-date=\"%s\">%s</s>" $accessedDate (format-time-string "%Y-%m-%d") $url ))))
     (delete-region $p1 $p2)
     (insert $newLinkStr)))
 
@@ -3325,7 +3328,7 @@ Version 2018-11-16"
           (goto-char (point-min))
           (insert "\n")
           (goto-char (point-max))
-          (insert "\n\n")))
+          (insert "\n")))
 
       (xah-html-insert-open-close-tags @tag-name @class-name (point-min) (point-max)))
 
