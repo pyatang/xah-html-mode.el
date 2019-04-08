@@ -509,7 +509,9 @@ Version 2018-11-02"
 (defvar xah-html-lang-name-map nil "a alist that maps lang name. Each element has this form
  (‹lang code› . [‹emacs major mode name› ‹file extension›])
 For example:
- (\"emacs-lisp\" . [\"xah-elisp-mode\" \"el\"])")
+ (\"emacs-lisp\" . [\"xah-elisp-mode\" \"el\"])
+Version 2019-04-08
+")
 
 (setq xah-html-lang-name-map
       '(
@@ -574,7 +576,8 @@ For example:
         ("sass" . ["sass-mode" "sass"])
         ("scss" . ["xah-css-mode" "css"])
 
-        ("poem" . ["text-mode" "txt"])
+        ("poem_xl" . ["text-mode" "txt"])
+        ("lyrics_xl" . ["text-mode" "txt"])
 
         ("vimrc" . ["vimrc-mode" "vim"])))
 
@@ -1859,9 +1862,9 @@ Version 2018-10-24"
             ["<code class=\"elisp_f_3d841\">" "「" ]
             ["</code>" "」" ]
 
-            ;; ["<cite>" "〈" ]
-            ;; ["<code class=\"book\">" "〈" ]
-            ;; ["</cite>" "〉" ]
+            ["<cite>" "〈" ]
+            ["<code class=\"book\">" "〈" ]
+            ["</cite>" "〉" ]
 
             ["<h2>" "────────── ────────── ────────── ────────── ──────────\n" ]
             ["</h2>" "" ]
