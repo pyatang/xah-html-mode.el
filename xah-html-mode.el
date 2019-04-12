@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2019, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.4.20190408010233
+;; Version: 7.5.20190412050812
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1803,9 +1803,46 @@ Version 2018-11-27"
     (insert $output-str))
   (skip-chars-forward "\n" ))
 
+(defun xah-html-link-to-text (&optional @begin @end)
+  "convert html link <a … href …>…</a> to plain text form.
+If the href value and link text is the same, then result is:
+ [ ‹URL› ]
+else
+ 〈link text〉 [ ‹URL› ]
+Version 2019-04-12"
+  (interactive)
+  (let ($p1 $p2)
+    (if @begin
+        (progn
+          (setq $p1 @begin)
+          (setq $p2 @end))
+      (progn
+        (setq $p1 (point-min))
+        (setq $p2 (point-max))))
+    (save-restriction
+      (narrow-to-region $p1 $p2)
+      (goto-char 1)
+      (while (re-search-forward "<a .*href=\"\\([^\"]+?\\)\".*>\\([^<]+?\\)</a>" nil t)
+        (let* (
+               ($hrefVal (match-string 1))
+               ($linkText (match-string 2))
+               ($matchData (match-data 0))
+               ($tagBegin (nth 0 $matchData))
+               ($tagEnd (nth 1 $matchData))
+               ($url (if (string-match "^http" $hrefVal)
+                         $hrefVal
+                       (if (fboundp 'xahsite-web-path-to-filepath)
+                           (xahsite-filepath-to-url (xahsite-web-path-to-filepath $hrefVal))
+                         $hrefVal
+                         ))))
+          (delete-region $tagBegin $tagEnd)
+          (if (string-equal $url $linkText)
+              (progn (insert (format " [ %s ] " $url)))
+            (progn (insert (format " 〈%s〉 [ %s ] " $linkText $url )))))))))
+
 (defun xah-html-html-to-text ()
   "Convert HTML to plain text on current text block or text selection.
-Version 2018-10-24"
+Version 2019-04-12"
   (interactive)
   (let ( $p1 $p2 $input-str $output-str)
     (let ($bds)
@@ -1817,12 +1854,7 @@ Version 2018-10-24"
      (with-temp-buffer
        (insert $input-str)
 
-       (goto-char 1)
-       (while (re-search-forward "href=\"\\([^\"]+?\\)\"" nil t)
-         (let (($matchString (match-string 1)))
-           (search-forward ">" )
-           (search-forward ">" )
-           (insert (format " [ %s ] " $matchString))))
+       (xah-html-link-to-text (point-min) (point-max))
 
        (goto-char 1)
        (while (re-search-forward "src=\"\\([^\"]+?\\)\""  nil t)
@@ -1863,7 +1895,7 @@ Version 2018-10-24"
             ["</code>" "」" ]
 
             ["<cite>" "〈" ]
-            ["<code class=\"book\">" "〈" ]
+            ["<cite class=\"book\">" "〈" ]
             ["</cite>" "〉" ]
 
             ["<h2>" "────────── ────────── ────────── ────────── ──────────\n" ]
