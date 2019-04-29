@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2019, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.5.20190412050812
+;; Version: 7.5.20190429141714
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -546,6 +546,7 @@ Version 2019-04-08
         ("xml" . ["sgml-mode" "xml"])
         ("html6" . ["xah-html6-mode" "html6"])
         ("java" . ["java-mode" "java"])
+        ("csharp" . ["csharp-mode" "cs"])
         ("js" . ["xah-js-mode" "js"])
         ("nodejs" . ["xah-js-mode" "js"])
         ("lsl" . ["xlsl-mode" "lsl"])
@@ -681,7 +682,7 @@ The numbers in the file name are datestamp and a random integer.
 If file already exist, emacs will ask to overwrite.
 
 If there's a text selection, use that region as content.
-Version 2018-10-08"
+Version 2019-04-29"
   (interactive (list xah-html-lang-name-map))
   (let* (
          ($langcodeinfo (xah-html-get-precode-langCode))
@@ -691,6 +692,7 @@ Version 2018-10-08"
          ($textContent (buffer-substring-no-properties $p1 $p2))
          ($fileSuffix (elt (cdr (assoc $langCode lang-name-map)) 1))
          ($majorMode (elt (cdr (assoc $langCode lang-name-map)) 0))
+         ($majorModeSym (intern-soft $majorMode))
          ($fnTemp (format "%s.%s.%x.%s"
                           "xxtemp"
                           (format-time-string "%Y%m%d")
@@ -704,8 +706,8 @@ Version 2018-10-08"
       (split-window-below)
       (delete-region $p1 $p2 )
       (switch-to-buffer $buf)
-      (if $majorMode
-          (funcall (intern-soft $majorMode))
+      (if (fboundp $majorModeSym)
+          (funcall $majorModeSym)
         (fundamental-mode))
       (setq buffer-offer-save t)
       (insert $textContent)
@@ -1931,11 +1933,14 @@ Call this command, it'll prompt for a new name/path. The path can be full path o
 The file name will be renamed/moved to the new path. The link will be changed too.
 
 This command is for interactive use only.
-Version 2018-04-24"
+Version 2019-04-16"
   (interactive)
   (let* (
+         ($p0 (point))
          ($bounds (bounds-of-thing-at-point 'filename))
-         ($input (buffer-substring-no-properties (car $bounds) (cdr $bounds)))
+         ($p1 (car $bounds))
+         ($p2 (cdr $bounds))
+         ($input (buffer-substring-no-properties $p1 $p2))
          ($fullPath (expand-file-name $input (file-name-directory (or (buffer-file-name) default-directory ))))
          ($newPath (replace-regexp-in-string " " "_" (read-string "New name: " $fullPath nil $fullPath )))
          ($newFullPath (if (file-name-absolute-p $newPath)
@@ -1948,7 +1953,8 @@ Version 2018-04-24"
     (when $doit-p
       (progn
         (rename-file $fullPath $newFullPath t)
-        (delete-region (car $bounds) (cdr $bounds))
+        (goto-char $p0)
+        (delete-region $p1 $p2)
         (insert
          (if (and
               (string-match (concat "^" (expand-file-name "~/" ) "web/")
