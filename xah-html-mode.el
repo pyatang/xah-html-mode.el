@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2019, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.5.20190429141714
+;; Version: 7.6.20190527074013
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1418,6 +1418,52 @@ Version 2018-10-11"
     (delete-region $p1 $p2)
     (insert $resultStr)))
 
+(defun xah-html-dl-to-table ()
+  "Change html dl to table.
+Cursor must be inside dl tags.
+Currently, assume there are only 2 columns.
+Version 2019-05-26"
+  (interactive )
+  (let ($p1 $p2)
+    (if (use-region-p)
+        (setq $p1 (region-beginning) $p2 (region-end))
+      (save-excursion
+        (search-backward "<dl>" )
+        (setq $p1 (point))
+        (search-forward "</dl>")
+        (setq $p2 (point))))
+    (save-restriction
+      (narrow-to-region $p1 $p2)
+
+      (goto-char (point-min))
+      (re-search-forward "<dl>")
+      (replace-match "<table>" t t )
+
+      (goto-char (point-min))
+      (search-forward "</dl>")
+      (replace-match "</table>" t t )
+
+      (goto-char (point-min))
+      (while (search-forward "<dt>" nil t)
+        (replace-match "<tr><td>" t t ))
+
+      (goto-char (point-min))
+      (while (search-forward "</dt>" nil t)
+        (replace-match "</td>" t t ))
+
+      (goto-char (point-min))
+      (while (search-forward "<dd>" nil t)
+        (replace-match "<td>" t t ))
+      (goto-char (point-max))
+
+      (goto-char (point-min))
+      (while (search-forward "</dd>" nil t)
+        (replace-match "</td></tr>" t t ))
+      (goto-char (point-max))
+
+      ;;
+      )))
+
 (defun xah-html-table-to-dl ()
   "Change html table to dl.
 Cursor must be inside table tags.
@@ -1435,7 +1481,6 @@ Version 2018-10-29"
         (setq $p1 (point))
         (search-forward "</table>")
         (setq $p2 (point))))
-
     (save-restriction
       (narrow-to-region $p1 $p2)
 
@@ -3169,7 +3214,7 @@ Example:
 
 When called in lisp code, @begin @end are region begin/end positions.
 
-Version 2018-09-29"
+Version 2019-05-20"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -3201,9 +3246,8 @@ Version 2018-09-29"
            ["Delete" "<kbd>⌦ Delete</kbd>"]
            ["DEL" "<kbd>⌦ Delete</kbd>"]
            ["Space" "<kbd>Space</kbd>"]
-           ["Caps Lock" "<kbd>Caps Lock</kbd>"]
-           ["capslock" "<kbd>Caps Lock</kbd>"]
-           ["f-lock" "<kbd>F Lock</kbd>"]
+           ["Caps Lock" "<kbd>CapsLock</kbd>"]
+           ["capslock" "<kbd>CapsLock</kbd>"]
            ["f lock" "<kbd>F Lock</kbd>"]
            ["numlock" "<kbd>Num Lock</kbd>"]
            ["Number Lock" "<kbd>Num Lock</kbd>"]
@@ -3507,6 +3551,9 @@ Version 2017-08-15"
   ;; (xah-html-remove-uri-fragment "4") ; "4"
   ;; (xah-html-remove-uri-fragment "#") ; ""
   ;; (xah-html-remove-uri-fragment "") ; ""
+  ;; (if (string-match "#" xx )
+  ;;     (substring xx 0 (match-beginning 0))
+  ;;   xx )
   (let (($x (string-match-p "#" @href-value )))
     (if $x
         (substring @href-value 0 $x)
