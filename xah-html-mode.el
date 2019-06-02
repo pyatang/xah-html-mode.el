@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2019, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.6.20190527074013
+;; Version: 7.6.20190602013850
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -131,6 +131,30 @@ Version 2018-02-21"
             nil))
       nil
       )))
+
+;; (defun xah-html--cursor-in-link-p ()
+;;   "Return true if curser is inside a string of src or href.
+;; Version 2018-02-21"
+;;   (interactive)
+;;   (let (
+;;         (p0 (point))
+;;         (in-string-q
+;;          (save-excursion
+;;            (beginning-of-line)
+;;            (re-search-forward "src=\"\\|href=\"" (line-end-position) t))))
+;;     (save-excursion
+;;       (skip-chars-backward "^\"")
+;;       (backward-char)
+;;       (if (string-match "=" (char-to-string (char-before)))
+;;           (progn
+;;             (backward-char 1)
+;;             (if (or
+;;                  (string-match "href" (current-word))
+;;                  (string-match "src" (current-word))
+;;                  (string-match "content" (current-word)))
+;;                 (progn t)
+;;               (progn nil)))
+;;         nil))))
 
 (defun xah-html--tag-self-closing-p (@tag-name)
   "Return true if the tag is a self-closing tag, <br> or <br />"
@@ -963,7 +987,8 @@ Version 2017-07-23"
   "Open the link under cursor or insert newline.
 If cursor is on a src=… or href=…, then if it a file path, open file, if http, open in browser.
 Else call `newline'.
-Version 2018-11-07"
+To force insert a newline, you can always press C-q C-RET.
+Version 2019-05-30"
   (interactive)
   (if (xah-html--cursor-in-link-p)
       (let (($srcStr  (xah-html-remove-uri-fragment (xah-get-thing-at-point 'filepath ))))
@@ -3669,6 +3694,12 @@ Version 2016-10-24"
   (let (($syntax-state (syntax-ppss)))
     (not (or (nth 3 $syntax-state) (nth 4 $syntax-state)))))
 
+;; (defun xah-html-abbrev-enable-function ()
+;;   "Return t, always.
+;; This is for abbrev table property `:enable-function'.
+;; Version 2019-05-29"
+;;   t)
+
 (defun xah-html-expand-abbrev ()
   "Expand the symbol before cursor,
 if cursor is not in string or comment.
@@ -3988,7 +4019,7 @@ Version 2016-10-24"
   ;              (textNodeRegex "\\([ [:graph:]]+?\\)")
             (textNodeRegex "\\([^\n<]+?\\)") ; ← hack, to avoid multi-line
 
-)
+            )
         `(
 
           ("<!--\\|-->" . font-lock-comment-delimiter-face)
@@ -4002,6 +4033,8 @@ Version 2016-10-24"
           (,(format "<mark>%s</mark>" textNodeRegex) . (1 'xah-html-mark-f))
           (,(format "<mark%s>%s</mark>" attriRegex textNodeRegex) . (1 'xah-html-mark-f))
           (,(format "<b%s>%s</b>" attriRegex textNodeRegex) . (1 'bold))
+
+          ;; (,"=\"\\([-_/.A-Za-z0-9]+?\\)\"" . (1 'font-lock-string-face))
 
           ;; ("<[^>]+?>" . font-lock-function-name-face)
           ;; ("</?[A-Za-z0-9]+>" . font-lock-function-name-face)
@@ -4019,9 +4052,7 @@ Version 2016-10-24"
           (,cssPropertieNames . font-lock-type-face)
           (,cssValueNames . font-lock-keyword-face)
           (,cssColorNames . font-lock-preprocessor-face)
-          (,cssUnitNames . font-lock-reference-face)
-
-)))
+          (,cssUnitNames . font-lock-reference-face))))
 
 
 
