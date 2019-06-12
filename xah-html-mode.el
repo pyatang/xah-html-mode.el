@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2019, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.6.20190602013850
+;; Version: 7.6.20190611231809
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1663,7 +1663,7 @@ Version 2018-10-28"
       ;;
       )))
 
-(defun xah-html-make-html-table (@separator)
+(defun xah-html-make-html-table ()
   "Transform the current text block or selection into a HTML table.
 
 If there's a text selection, use the selection as input.
@@ -1684,12 +1684,19 @@ with “.” as separator, becomes
 </table>
 
 URL `http://ergoemacs.org/emacs/elisp_make-html-table.html'
-Version 2017-03-03"
-  (interactive "sEnter the string for column separation:")
-  (let ($bds $p1 $p2)
+Version 2019-06-07"
+  (interactive)
+  (let ($bds
+        $p1 $p2
+        ($sep (read-string "String for column separation:" ","))
+        ($i 0)
+        ($j 0))
     (setq $bds (xah-get-bounds-of-thing-or-region 'block))
     (setq $p1 (car $bds))
     (setq $p2 (cdr $bds))
+
+    (when (equal (length $sep) 0) (user-error "separator cannot be empty."))
+
     (save-excursion
       (save-restriction
         (narrow-to-region $p1 $p2)
@@ -1699,19 +1706,27 @@ Version 2017-03-03"
           (insert "\n")
 
           (goto-char (point-min))
-          (while (search-forward @separator nil "NOERROR")
-            (replace-match "</td><td>"))
+          (while (and
+                  (search-forward $sep nil "NOERROR")
+                  (< $i 2000))
+            (replace-match "</td><td>")
+            (1+ $i))
 
           (goto-char (point-min))
-          (while (search-forward "\n" nil "NOERROR")
-            (replace-match "</td></tr>\n<tr><td>"))
+          (while (and
+                  (search-forward "\n" nil "NOERROR")
+                  (< $j 2000))
+            (replace-match "</td></tr>
+<tr><td>")
+            (1+ $j))
 
           (goto-char (point-max))
           (beginning-of-line)
           (delete-char 8)
 
           (goto-char (point-min))
-          (insert "<table class=\"nrm\">\n<tr><td>")
+          (insert "<table class=\"nrm\">
+<tr><td>")
 
           (goto-char (point-max))
           (insert "</table>")
@@ -3365,25 +3380,23 @@ Version 2019-05-20"
 (defvar xah-html-class-input-history nil "for input history of `xah-html-wrap-html-tag'")
 (setq xah-html-class-input-history (list))
 
-(defun xah-html-insert-open-close-tags (@tag-name @class-name @p1 @p2)
+(defun xah-html-insert-open-close-tags (@tag @p1 @p2 &optional @class @id )
   "Add HTML open/close tags around region boundary @p1 @p2.
-This function does not `save-excursion'.
-2016-12-07"
-  (let* (
-         ($class-str (if (not @class-name)
-                         ""
-                       (format " class=\"%s\"" @class-name)))
-         ($str-left (format "<%s%s>" @tag-name $class-str))
-         ($str-right (format "</%s>" @tag-name )))
+@tag is tag name. @class is class value string. @id is id value string.
+version 2019-06-11"
+  (let (($isSelfClose (xah-html--tag-self-closing-p @tag)))
     (goto-char @p1)
-    (if (xah-html--tag-self-closing-p @tag-name)
-        (insert (format "<%s%s />" @tag-name $class-str))
+    (progn
+      (insert "<" @tag)
+      (when @class (insert " " (format "class=\"%s\"" @class)))
+      (when @id (insert " " (format "id=\"%s\"" @id))))
+    (if $isSelfClose
+        (insert " />" )
       (progn
-        (insert $str-left )
-        (goto-char (+ @p2 (length $str-left)))
-        (insert $str-right)))))
+        (insert ">")
+        (insert "</" @tag ">" )))))
 
-(defun xah-html-wrap-html-tag (@tag-name &optional @class-name)
+(defun xah-html-wrap-html-tag (@tag &optional @class @id)
   "Insert HTML open/close tags.
 
 Wrap around text selection.
@@ -3394,12 +3407,11 @@ Version 2018-11-16"
   (interactive
    (list
     (ido-completing-read "HTML tag:" xah-html-html5-tag-list "PREDICATE" "REQUIRE-MATCH" nil xah-html-html-tag-input-history "div")
-
     ;; (when current-prefix-arg (read-string "class:" nil xah-html-class-input-history ""))
-
-    (when current-prefix-arg (setq @class-name "x"))))
+    (when current-prefix-arg "x" )
+    (when current-prefix-arg (format "t%05x" (random (1- (expt 16 5)))))))
   (let* (
-         ($wrap-type (xah-html--get-tag-type @tag-name))
+         ($wrap-type (xah-html--get-tag-type @tag))
          ($bds
           (if (use-region-p)
               (cons (region-beginning) (region-end))
@@ -3424,8 +3436,8 @@ Version 2018-11-16"
             (equal $wrap-type "l")
             (equal $wrap-type "b"))
            (not (or
-                 (string-equal @tag-name "pre")
-                 (string-equal @tag-name "code"))))
+                 (string-equal @tag "pre")
+                 (string-equal @tag "code"))))
         (progn
           (goto-char (point-min))
           (delete-horizontal-space)
@@ -3440,10 +3452,10 @@ Version 2018-11-16"
           (goto-char (point-max))
           (insert "\n")))
 
-      (xah-html-insert-open-close-tags @tag-name @class-name (point-min) (point-max)))
+      (xah-html-insert-open-close-tags @tag (point-min) (point-max) @class @id))
 
     (when ; put cursor between when input text is empty
-        (not (xah-html--tag-self-closing-p @tag-name))
+        (not (xah-html--tag-self-closing-p @tag))
       (when (and
              (= $p1 $p2))
         (search-backward "</" )))))
@@ -3759,7 +3771,9 @@ Version 2016-10-24"
     ("bgc" "background-color" xah-html--ahf)
     ("bgc" "background-color" xah-html--ahf)
     ("hr" "<hr />\n\n" xah-html--ahf)
-    ("spanh" "<span class=\"x\">▮</span>\n\n" xah-html--ahf)
+    ("div" "<div id=\"x\" class=\"x\">\n▮</div>\n" xah-html--ahf)
+    ("span" "<span id=\"x\" class=\"x\">▮</span>\n" xah-html--ahf)
+    ("p" "<p class=\"x\">▮</p>\n\n" xah-html--ahf)
     ("sh" "<section>
 
 ▮
