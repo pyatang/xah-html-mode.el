@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2019, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.6.20190611231809
+;; Version: 7.6.20190612130539
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -3383,18 +3383,21 @@ Version 2019-05-20"
 (defun xah-html-insert-open-close-tags (@tag @p1 @p2 &optional @class @id )
   "Add HTML open/close tags around region boundary @p1 @p2.
 @tag is tag name. @class is class value string. @id is id value string.
-version 2019-06-11"
+version 2019-06-12"
   (let (($isSelfClose (xah-html--tag-self-closing-p @tag)))
-    (goto-char @p1)
-    (progn
-      (insert "<" @tag)
-      (when @class (insert " " (format "class=\"%s\"" @class)))
-      (when @id (insert " " (format "id=\"%s\"" @id))))
-    (if $isSelfClose
-        (insert " />" )
+    (save-restriction
+      (narrow-to-region @p1 @p2)
+      (goto-char (point-min))
       (progn
-        (insert ">")
-        (insert "</" @tag ">" )))))
+        (insert "<" @tag)
+        (when @class (insert " " (format "class=\"%s\"" @class)))
+        (when @id (insert " " (format "id=\"%s\"" @id))))
+      (if $isSelfClose
+          (insert " />" )
+        (progn
+          (insert ">")
+          (goto-char (point-max))
+          (insert "</" @tag ">" ))))))
 
 (defun xah-html-wrap-html-tag (@tag &optional @class @id)
   "Insert HTML open/close tags.
