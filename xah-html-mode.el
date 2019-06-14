@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2019, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.6.20190612130539
+;; Version: 7.6.20190613231054
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -612,15 +612,15 @@ Version 2019-04-08
 (defvar xah-html-lang-mode-list nil "List of supported language mode names.")
 (setq xah-html-lang-mode-list (mapcar (lambda (x) (aref (cdr x) 0)) xah-html-lang-name-map))
 
-(defun xah-html-precode-htmlized-p (@begin @end )
+(defun xah-html-htmlized-p (@begin @end)
   "Return true if region @BEGIN @END is htmlized code.
-WARNING: it just losely check if it contains span tag.
-Version 2017-01-16"
-  (progn
+WARNING: it just check if it contains certain span tags.
+Version 2019-06-13"
+  (save-excursion
     (goto-char @begin)
-    (re-search-forward "<span class=" @end t)))
+    (re-search-forward "<span class=\"comment\">\\|<span class=\"comment-delimiter\">\\|<span class=\"function-name\">\\|<span class=\"string\">\\|<span class=\"variable-name\">\\|<span class=\"keyword\">\\|<span class=\"bold\">\\|<span class=\"builtin\">\\|<span class=\"constant\">\\|<span class=\"doc\">\\|<span class=\"preprocessor\">\\|<span class=\"type\">\\|<span class=\"underline\">\\|<span class=\"warning\">" @end t)))
 
-(defun xah-html-get-precode-langCode ()
+(defun xah-html-get-langcode ()
   "Get the langCode and position boundary of current HTML pre block.
 A pre block is text of this form
  <pre class=\"‹langCode›\">…▮…</pre>.
@@ -709,7 +709,7 @@ If there's a text selection, use that region as content.
 Version 2019-04-29"
   (interactive (list xah-html-lang-name-map))
   (let* (
-         ($langcodeinfo (xah-html-get-precode-langCode))
+         ($langcodeinfo (xah-html-get-langcode))
          ($langCode (elt $langcodeinfo 0))
          ($p1 (elt $langcodeinfo 1))
          ($p2 (elt $langcodeinfo 2))
@@ -735,7 +735,7 @@ Version 2019-04-29"
         (fundamental-mode))
       (setq buffer-offer-save t)
       (insert $textContent)
-      (when (xah-html-precode-htmlized-p (point-min) (point-max))
+      (when (xah-html-htmlized-p (point-min) (point-max))
         (xah-html-remove-span-tag-region (point-min) (point-max)))
       (xah-html-decode-ampersand-region (point-min) (point-max)))
     (setq $fname
@@ -785,14 +785,14 @@ Version 2018-09-28"
     (kill-buffer $output-buff)
     $resultStr ))
 
-(defun xah-html-langcode-to-major-mode-name (@lang-code @lang-code-map)
+(defun xah-html-langcode-to-mode-name (@lang-code @lang-code-map)
   "get the `major-mode' name associated with @lang-code.
 return major-mode name as string. If none found, return nil.
 Version 2017-01-10"
   (interactive)
   (elt (cdr (assoc @lang-code @lang-code-map)) 0))
 
-(defun xah-html-htmlize-precode (@lang-code-map)
+(defun xah-html-htmlize-pre47 (@lang-code-map)
   "Replace text enclosed by “pre” tag to htmlized code.
 
 For example, if the cursor is inside the pre tags <pre class=\"‹langCode›\">…▮…</pre>, then after calling, the text inside the pre tag will be htmlized. That is, wrapped with many span tags for syntax coloring.
@@ -801,16 +801,16 @@ The opening tag must be of the form <pre class=\"‹langCode›\">.  The ‹lang
 
 Cursor will end up right before </pre>.
 
-See also: `xah-html-dehtmlize-precode', `xah-html-toggle-syntax-coloring-markup'.
+See also: `xah-html-dehtml-711', `xah-html-toggle-syntax-coloring-markup'.
 This function requires the `htmlize-buffer' from htmlize.el by Hrvoje Niksic.
 Version 2018-09-28"
   (interactive (list xah-html-lang-name-map))
   (let* (
-         ($precodeData (xah-html-get-precode-langCode))
+         ($precodeData (xah-html-get-langcode))
          ($langCode (elt $precodeData 0))
          ($p1 (elt $precodeData 1))
          ($p2 (elt $precodeData 2))
-         ($modeName (xah-html-langcode-to-major-mode-name $langCode @lang-code-map)))
+         ($modeName (xah-html-langcode-to-mode-name $langCode @lang-code-map)))
     (xah-html-htmlize-region $p1 $p2 $modeName)))
 
 (defun xah-html-htmlize-region (@p1 @p2 @mode-name )
@@ -830,13 +830,13 @@ Version 2016-12-18"
         (delete-region @p1 @p2)
         (insert $out-str)))))
 
-(defun xah-html-dehtmlize-precode (@begin @end)
+(defun xah-html-dehtml-711 (@begin @end)
   "Delete span tags between pre tags.
 Note: only span tags of the form 「<span class=\"…\">…</span>」 are deleted.
-This command does the inverse of `xah-html-htmlize-precode'.
+This command does the inverse of `xah-html-htmlize-pre47'.
 Version 2018-10-08"
   (interactive
-   (let* ( ($xx (xah-html-get-precode-langCode)))
+   (let* ( ($xx (xah-html-get-langcode)))
      (list (elt $xx 1) (elt $xx 2))))
   (save-restriction
     (narrow-to-region @begin @end)
@@ -880,7 +880,7 @@ Version 2018-10-03"
       (while
           (re-search-forward "<pre class=\"\\([-A-Za-z0-9]+\\)\">" nil "NOERROR")
         (setq $langCode (match-string 1))
-        (setq $majorModeNameStr (xah-html-langcode-to-major-mode-name $langCode xah-html-lang-name-map))
+        (setq $majorModeNameStr (xah-html-langcode-to-mode-name $langCode xah-html-lang-name-map))
         (when $majorModeNameStr
           (progn
             (setq $p1 (point))
@@ -890,7 +890,7 @@ Version 2018-10-03"
             (setq $p2 (point))
             (save-restriction
               (narrow-to-region $p1 $p2)
-              (xah-html-dehtmlize-precode (point-min) (point-max))
+              (xah-html-dehtml-711 (point-min) (point-max))
               (setq $count (1+ $count)))))))
     $count
     ))
@@ -908,7 +908,7 @@ Version 2018-10-03"
       (while
           (re-search-forward "<code class=\"\\([-A-Za-z0-9]+\\)\">" nil "NOERROR")
         (setq $langCode (match-string 1))
-        (setq $majorModeNameStr (xah-html-langcode-to-major-mode-name $langCode xah-html-lang-name-map))
+        (setq $majorModeNameStr (xah-html-langcode-to-mode-name $langCode xah-html-lang-name-map))
         (when $majorModeNameStr
           (progn
             (setq $p1 (point))
@@ -918,21 +918,22 @@ Version 2018-10-03"
             (setq $p2 (point))
             (save-restriction
               (narrow-to-region $p1 $p2)
-              (xah-html-dehtmlize-precode (point-min) (point-max))
+              (xah-html-dehtml-711 (point-min) (point-max))
               (setq $count (1+ $count)))))))
     $count
     ))
 
 (defun xah-html-toggle-syntax-coloring-markup (lang-name-map)
-  "Call `xah-html-htmlize-precode' or `xah-html-dehtmlize-precode'."
+  "Call `xah-html-htmlize-pre47' or `xah-html-dehtml-711'.
+Version 2019-06-13"
   (interactive (list xah-html-lang-name-map))
   (let* (
-         ($tmp (xah-html-get-precode-langCode))
+         ($tmp (xah-html-get-langcode))
          ($p1 (elt $tmp 1))
          ($p2 (elt $tmp 2)))
-    (if (xah-html-precode-htmlized-p $p1 $p2)
-        (xah-html-dehtmlize-precode $p1 $p2)
-      (xah-html-htmlize-precode lang-name-map))))
+    (if (xah-html-htmlized-p $p1 $p2)
+        (xah-html-dehtml-711 $p1 $p2)
+      (xah-html-htmlize-pre47 lang-name-map))))
 
 (defun xah-html-redo-syntax-coloring-file ( @file-path )
   "redo all pre lang code syntax coloring in current HTML page.
@@ -956,7 +957,7 @@ Version 2017-01-11"
 (defun xah-html-redo-syntax-coloring-buffer ()
   "redo all pre lang code syntax coloring in current HTML page.
 Returns 0 if nothing is done. Else a positive integer of the count of <pre class=lang>.
-Version 2017-07-23"
+Version 2019-06-13"
   (interactive)
   (let ($langCode $p1 $p2 ($count 0)
                   $majorModeNameStr
@@ -966,7 +967,7 @@ Version 2017-07-23"
       (while
           (re-search-forward "<pre class=\"\\([-A-Za-z0-9]+\\)\">" nil "NOERROR")
         (setq $langCode (match-string 1))
-        (setq $majorModeNameStr (xah-html-langcode-to-major-mode-name $langCode xah-html-lang-name-map))
+        (setq $majorModeNameStr (xah-html-langcode-to-mode-name $langCode xah-html-lang-name-map))
         (when $majorModeNameStr
           (progn
             (setq $p1 (point))
@@ -976,7 +977,8 @@ Version 2017-07-23"
             (setq $p2 (point))
             (save-restriction
               (narrow-to-region $p1 $p2)
-              (xah-html-dehtmlize-precode (point-min) (point-max))
+              (when (xah-html-htmlized-p (point-min) (point-max))
+                (xah-html-dehtml-711 (point-min) (point-max)))
               (xah-html-htmlize-region (point-min) (point-max) $majorModeNameStr )
               (setq $count (1+ $count)))))))
     (message "xah-html-redo-syntax-coloring-buffer %s redone" $count)
