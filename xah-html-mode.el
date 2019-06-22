@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2019, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.6.20190613231054
+;; Version: 7.6.20190621214233
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -24,6 +24,7 @@
 (require 'url-util)
 (require 'thingatpt)
 (require 'seq)
+(require 'subr-x)
 
 (require 'xah-replace-pairs)
 (require 'xah-get-thing)
@@ -294,13 +295,14 @@ Version 2017-11-22"
 
 
 
-(defun xah-html--trim-string (string)
-  "Remove white spaces in beginning and ending of string.
-White space here is any of: space, tab, emacs newline (line feed, ASCII 10).
-
-Note: in emacs GNU Emacs 24.4+ and later, there's `string-trim' function. You need to (require 'subr-x).
-"
-  (replace-regexp-in-string "\\`[ \t\n]*" "" (replace-regexp-in-string "[ \t\n]*\\'" "" string)))
+;; (defun xah-html--trim-string (string)
+;;   "Remove white spaces in beginning and ending of string.
+;; White space here is any of: space, tab, emacs newline (line feed, ASCII 10).
+;; Note: Emacs 24.4 and later, use
+;;  (require 'subr-x)
+;;  (string-trim ‹str›)
+;; "
+;;   (replace-regexp-in-string "\\`[ \t\n]*" "" (replace-regexp-in-string "[ \t\n]*\\'" "" string)))
 
 (defun xah-html--get-image-dimensions (@file-path)
   "Returns a vector [width height] of a image's dimension.
@@ -2210,19 +2212,19 @@ Version 2018-03-24"
     (when (not $url) (error "I can't find “url” %s" $url))
     (when (not $title) (error "I can't find “title” %s" $title))
 
-    (setq $title (xah-html--trim-string $title))
+    (setq $title (string-trim $title))
     (setq $title (replace-regexp-in-string "^\"\\(.+\\)\"$" "\\1" $title))
     (setq $title (xah-replace-pairs-in-string $title '(["’" "'"] ["&" "＆"] )))
 
-    (setq $author (xah-html--trim-string $author))
+    (setq $author (string-trim $author))
     (setq $author (replace-regexp-in-string "\\. " " " $author)) ; remove period in Initals
     (setq $author (replace-regexp-in-string "^ *[Bb]y +" "" $author))
     (setq $author (upcase-initials (downcase $author)))
 
-    (setq $date (xah-html--trim-string $date))
+    (setq $date (string-trim $date))
     (setq $date (xah-fix-datetime-stamp $date))
 
-    (setq $url (xah-html--trim-string $url))
+    (setq $url (string-trim $url))
     (setq $url (with-temp-buffer (insert $url) (xah-html-source-url-linkify 1) (buffer-string)))
 
     (delete-region $p1 $p2 )
@@ -2969,7 +2971,7 @@ A text block is separated by blank lines.
 
 URL `http://ergoemacs.org/emacs/emacs_html_wrap_tags.html'
 
-Version 2018-11-02"
+Version 2019-06-21"
   (interactive)
   (let* (
          ($bds (xah-get-bounds-of-thing-or-region 'block))
@@ -2977,7 +2979,10 @@ Version 2018-11-02"
          ($p2 (cdr $bds))
          ($inputText (buffer-substring-no-properties $p1 $p2)))
     (delete-region $p1 $p2 )
-    (insert "<p>" (replace-regexp-in-string "\n\n+" "</p>\n\n<p>" (xah-html--trim-string $inputText)) "</p>")
+    (insert
+     "<p>\n"
+     (replace-regexp-in-string "\n\n+" "</p>\n\n<p>" (string-trim $inputText))
+     "\n</p>")
     (skip-chars-forward "\n" )))
 
 (defun xah-html-insert-br-tag ()
@@ -3776,6 +3781,7 @@ Version 2016-10-24"
     ("bgc" "background-color" xah-html--ahf)
     ("bgc" "background-color" xah-html--ahf)
     ("hr" "<hr />\n\n" xah-html--ahf)
+    ("br" "<br />\n\n" xah-html--ahf)
     ("div" "<div id=\"x\" class=\"x\">\n▮</div>\n" xah-html--ahf)
     ("span" "<span id=\"x\" class=\"x\">▮</span>\n" xah-html--ahf)
     ("p" "<p class=\"x\">▮</p>\n\n" xah-html--ahf)
