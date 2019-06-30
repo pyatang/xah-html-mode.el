@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2019, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.6.20190621214233
+;; Version: 7.6.20190629215826
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -487,13 +487,35 @@ Version 2018-11-02")
 (defcustom xah-html-attribute-names nil
   "HTML attribute names."
 :group 'xah-html-mode)
-(setq xah-html-attribute-names '( "id" "class" "style" "title" "href" "type" "rel" "http-equiv" "content" "charset" "alt" "src" "width" "height"
-  "preload" "name" "value" "size"
+(setq xah-html-attribute-names '(
+
+"id"
+"class"
+"style"
+"title"
+"href"
+"type"
+"rel"
+"http-equiv"
+"content"
+"charset"
+"alt"
+"src"
+"width"
+"height"
+
+"preload"
+"name"
+"value"
+"size"
 "maxlength"
 "rows"
 "cols"
 "min"
 "max"
+"step"
+"for"
+"list"
 
 "target"
 "enctype"
@@ -3390,15 +3412,15 @@ Version 2019-05-20"
 (defun xah-html-insert-open-close-tags (@tag @p1 @p2 &optional @class @id )
   "Add HTML open/close tags around region boundary @p1 @p2.
 @tag is tag name. @class is class value string. @id is id value string.
-version 2019-06-12"
+version 2019-06-29"
   (let (($isSelfClose (xah-html--tag-self-closing-p @tag)))
     (save-restriction
       (narrow-to-region @p1 @p2)
       (goto-char (point-min))
       (progn
         (insert "<" @tag)
-        (when @class (insert " " (format "class=\"%s\"" @class)))
-        (when @id (insert " " (format "id=\"%s\"" @id))))
+        (when @id (insert " " (format "id=\"%s\"" @id)))
+        (when @class (insert " " (format "class=\"%s\"" @class))))
       (if $isSelfClose
           (insert " />" )
         (progn
@@ -3413,13 +3435,13 @@ Wrap around text selection.
 If there's no text selection, the tag will be wrapped around current {word, line, text-block}, depending on the tag used.
 If current line or word is empty, then insert open/end tags and place cursor between them.
 If `universal-argument' is called first, then also prompt for a “class” attribute. Empty value means don't add the attribute.
-Version 2018-11-16"
+Version 2019-06-29"
   (interactive
    (list
     (ido-completing-read "HTML tag:" xah-html-html5-tag-list "PREDICATE" "REQUIRE-MATCH" nil xah-html-html-tag-input-history "div")
     ;; (when current-prefix-arg (read-string "class:" nil xah-html-class-input-history ""))
     (when current-prefix-arg "x" )
-    (when current-prefix-arg (format "t%05x" (random (1- (expt 16 5)))))))
+    (when current-prefix-arg (format "x%05x" (random (1- (expt 16 5)))))))
   (let* (
          ($wrap-type (xah-html--get-tag-type @tag))
          ($bds
