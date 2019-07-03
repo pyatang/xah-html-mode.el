@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2019, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.6.20190629215826
+;; Version: 7.6.20190703053935
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -2075,21 +2075,24 @@ Version 2019-04-16"
            (progn
              (file-relative-name $newFullPath))))))))
 
-(defun xah-html-extract-url (@begin @end &optional @full-path-p)
+(defun xah-html-extract-url (@begin @end &optional @not-full-path-p)
   "Extract URLs in current block or region to `kill-ring'.
+When called interactively, copy result to `kill-ring'. Each URL in a line. 
 
-If `universal-argument' is called first, convert relative URL to full path.
+If the URL is a local file relative path, convert it to full path.
+
+If `universal-argument' is called first, don't convert relative URL to full path.
 
 This command extracts all text of the forms
- <‹letter› … href=\"…\" …>
- <‹letter› … src=\"…\" …>
-that is on a a single line, by regex. The quote may be single quote.
+ <‹letter› … href=‹path› …>
+ <‹letter› … src=‹path› …>
+that is on a a single line, by regex. The quote for ‹path› may be double or single quote.
 
 When called in lisp code, @begin @end are region begin/end positions.
-Returns a list.
+Returns a list of strings.
 
 URL `http://ergoemacs.org/emacs/elisp_extract_url_command.html'
-Version 2016-07-28"
+Version 2019-07-02"
   (interactive
    (let ($p1 $p2)
      ;; set region boundary $p1 $p2
@@ -2104,7 +2107,7 @@ Version 2016-07-28"
              (progn (re-search-backward "\n[ \t]*\n")
                     (setq $p2 (point)))
            (setq $p2 (point)))))
-     (list $p1 $p2 current-prefix-arg)))
+     (list $p1 $p2 (not current-prefix-arg))))
 
   (let (($regionText (buffer-substring-no-properties @begin @end))
         ($urlList (list)))
@@ -2121,7 +2124,7 @@ Version 2016-07-28"
         (push (match-string 3) $urlList)))
     (setq $urlList (reverse $urlList))
 
-    (when @full-path-p
+    (when @not-full-path-p
       (setq $urlList
             (mapcar
              (lambda ($x)
@@ -3802,16 +3805,10 @@ Version 2016-10-24"
     ("hei" "height" xah-html--ahf)
     ("bgc" "background-color" xah-html--ahf)
     ("bgc" "background-color" xah-html--ahf)
-    ("hr" "<hr />\n\n" xah-html--ahf)
-    ("br" "<br />\n\n" xah-html--ahf)
-    ("div" "<div id=\"x\" class=\"x\">\n▮</div>\n" xah-html--ahf)
-    ("span" "<span id=\"x\" class=\"x\">▮</span>\n" xah-html--ahf)
-    ("p" "<p class=\"x\">▮</p>\n\n" xah-html--ahf)
-    ("sh" "<section>
-
-▮
-
-</section>" xah-html--ahf)
+    ("brh" "<br />\n\n" xah-html--ahf)
+    ("divh" "<div id=\"x\" class=\"x\">\n▮</div>\n" xah-html--ahf)
+    ("spanh" "<span id=\"x\" class=\"x\">▮</span>\n" xah-html--ahf)
+    ("ph" "<p class=\"x\">▮</p>\n\n" xah-html--ahf)
 
     ("cssh" "<link rel=\"stylesheet\" href=\"lbasic.css\" />")
     ("styleh" "<style type=\"text/css\">\np {line-height:130%}\n</style>")
