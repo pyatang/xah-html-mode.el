@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2019, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.6.20190703053935
+;; Version: 7.6.20190819184634
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1953,6 +1953,66 @@ Version 2019-04-12"
               (progn (insert (format " [ %s ] " $url)))
             (progn (insert (format " 〈%s〉 [ %s ] " $linkText $url )))))))))
 
+(defun xah-html-youtube-to-text ()
+  "Remove embedded YouTube html block to url and caption.
+Works on text block or region.
+
+Example, this:
+
+<figure>
+<iframe width=\"640\" height=\"480\" src=\"https://www.youtube.com/embed/Vn7U7S0-5CQ?rel=0\" allowfullscreen></iframe>
+<figcaption>
+xah talk show 2019-08-19 Deseret/Shavian Alphabets, IPA, font size, fugue, elisp coding youtube html
+</figcaption>
+</figure>
+
+becomes:
+
+https://www.youtube.com/watch?v=Vn7U7S0-5CQ?
+xah talk show 2019-08-19 Deseret/Shavian Alphabets, IPA, font size, fugue, elisp coding youtube html
+
+Version 2019-08-19"
+  (interactive)
+  (let ( p1 p2 p3 p4 figCapText ytUrl )
+
+    (let (bds)
+      (setq bds (xah-get-bounds-of-thing-or-region 'block))
+      (setq p1 (car bds) p2 (cdr bds)))
+
+    (save-restriction
+      (narrow-to-region p1 p2)
+      (let ((case-fold-search t))
+        (goto-char (point-min))
+        (search-forward-regexp "src=\"\\([^\"]+\\)\"" )
+        (setq ytUrl (match-string 1 ))
+
+        (goto-char (point-min))
+        (search-forward "<figcaption>" )
+        (setq p3 (point))
+
+        (goto-char (point-min))
+        (search-forward "</figcaption>" )
+        (search-backward "</figcaption>")
+        (setq p4 (point))
+
+        (setq figCapText (buffer-substring-no-properties p3 p4))
+
+        (delete-region (point-min) (point-max))
+
+        (insert ytUrl)
+
+        (goto-char (point-min))
+        (search-forward "embed/" )
+        (replace-match "")
+
+        (insert "watch?v=")
+
+        (goto-char (point-min))
+        (search-forward "rel=0" )
+        (replace-match "")
+
+        (insert figCapText "\n\n")))))
+
 (defun xah-html-html-to-text ()
   "Convert HTML to plain text on current text block or text selection.
 Version 2019-04-12"
@@ -2077,7 +2137,7 @@ Version 2019-04-16"
 
 (defun xah-html-extract-url (@begin @end &optional @not-full-path-p)
   "Extract URLs in current block or region to `kill-ring'.
-When called interactively, copy result to `kill-ring'. Each URL in a line. 
+When called interactively, copy result to `kill-ring'. Each URL in a line.
 
 If the URL is a local file relative path, convert it to full path.
 
@@ -2494,8 +2554,9 @@ Version 2016-10-31"
   "Make the path under cursor into a embedded pdf.
 e.g. math.pdf
 becomes
-<embed src=\"math.pdf\" width=\"1100\" height=\"1000\" />
-Version 2018-01-30"
+<embed src=\"%s\" type=\"application/pdf\" style=\"width:100%;height:95vh\" />
+
+Version 2019-07-29"
   (interactive)
   (let* (
          ($bds (xah-get-bounds-of-thing-or-region 'filepath))
@@ -2507,7 +2568,8 @@ Version 2018-01-30"
               $inputStr
             (file-relative-name $inputStr))))
     (delete-region $p1 $p2)
-    (insert (format "<embed src=\"%s\" width=\"1100\" height=\"1000\" type=\"application/pdf\" />" $src))))
+    (insert
+     (format "<embed src=\"%s\" type=\"application/pdf\" style=\"width:100%%;height:1000px\" />" $src))))
 
 (defun xah-html-pdf-linkify ()
   "Make the pdf file path under cursor into a link.
@@ -2817,7 +2879,7 @@ Version 2018-10-31"
           (xah-html-source-url-linkify 3)
         (xah-html-wikipedia-url-linkify )))
      ((string-match-p "\\.css\\'" $input) (xah-html-css-linkify))
-     ((string-match-p "\\.pdf" $input) (xah-html-pdf-embed-linkify))
+     ((string-match-p "\\.pdf" $input) (xah-html-pdf-linkify))
      ((string-match-p "\\.js\\'\\|\\.ts\\'" $input) (xah-html-javascript-linkify))
      ((xah-html-audio-file-suffix-p $input) (xah-html-audio-file-linkify t))
      ((xah-html-video-file-suffix-p $input) (xah-html-video-file-linkify t))
@@ -3170,14 +3232,14 @@ Version 2017-03-17"
 • 「…」 → <code>…</code>
 • 〈…〉 → <cite>…</cite>
 • 《…》 → <cite class=\"book\">…</cite>
-• 〔…〕 → <code class=\"path-xl\">\\1</code>
+• 〔…〕 → <code class=\"path_xl\">\\1</code>
 •  ‹…› → <var class=\"d\">…</var>
 • [<a href=] → [see <a href=]
 
 Changes are reported to message buffer with char position.
 
 When called in lisp code, @begin @end are region begin/end positions.
-Version 2019-01-13"
+Version 2019-07-30"
   (interactive
    (let (($bds (xah-get-bounds-of-thing-or-region 'block)))
      (list (car $bds) (cdr $bds))))
@@ -3261,17 +3323,18 @@ Version 2019-01-13"
             (setq $p1 (point))
             (overlay-put (make-overlay $p1 $p2) 'face 'highlight)
             (search-forward "</code>")))
-        (progn
-          (goto-char (point-min))
-          (while (re-search-forward "\\.\\.\\." nil t)
-            (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) $changedItems)
-            (replace-match "…" t)
-            (let ($p1 $p2)
-              (search-backward "…" )
-              (setq $p1 (point))
-              (search-forward "…")
-              (setq $p2 (point))
-              (overlay-put (make-overlay $p1 $p2) 'face 'highlight))))))
+        ;; (progn
+        ;;   (goto-char (point-min))
+        ;;   (while (re-search-forward "\\.\\.\\." nil t)
+        ;;     (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) $changedItems)
+        ;;     (replace-match "…" t)
+        ;;     (let ($p1 $p2)
+        ;;       (search-backward "…" )
+        ;;       (setq $p1 (point))
+        ;;       (search-forward "…")
+        ;;       (setq $p2 (point))
+        ;;       (overlay-put (make-overlay $p1 $p2) 'face 'highlight))))
+        ))
     (mapcar
      (lambda ($x)
        (princ $x)
@@ -3463,8 +3526,8 @@ Version 2019-06-29"
       (setq $p1 (point) $p2 (point)))
     (save-restriction
       (narrow-to-region $p1 $p2)
-
-      (when ; trim whitespace
+      ;; trim whitespace
+      (when
           (and
            (not (use-region-p))
            (or
@@ -3489,11 +3552,14 @@ Version 2019-06-29"
 
       (xah-html-insert-open-close-tags @tag (point-min) (point-max) @class @id))
 
-    (when ; put cursor between when input text is empty
-        (not (xah-html--tag-self-closing-p @tag))
-      (when (and
-             (= $p1 $p2))
-        (search-backward "</" )))))
+    (message "pos are %s %s" $p1 $p2)
+
+    ;; move cursor
+    (if (= $p1 $p2)
+        (if (xah-html--tag-self-closing-p @tag)
+            (skip-chars-forward " \t\n" 100)
+          (search-backward "</" ))
+      (skip-chars-forward " \t\n"))))
 
 (defun xah-html-insert-wrap-source-code (&optional @lang-code)
   "Insert or wrap a <pre class=\"@lang-code\">…</pre> tags
@@ -3809,6 +3875,7 @@ Version 2016-10-24"
     ("divh" "<div id=\"x\" class=\"x\">\n▮</div>\n" xah-html--ahf)
     ("spanh" "<span id=\"x\" class=\"x\">▮</span>\n" xah-html--ahf)
     ("ph" "<p class=\"x\">▮</p>\n\n" xah-html--ahf)
+    ("buttonh" "<button id=\"button18646\" class=\"x\" type=\"button\">Click Me</button>\n\n" xah-html--ahf)
 
     ("cssh" "<link rel=\"stylesheet\" href=\"lbasic.css\" />")
     ("styleh" "<style type=\"text/css\">\np {line-height:130%}\n</style>")
