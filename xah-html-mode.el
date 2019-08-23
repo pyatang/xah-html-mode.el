@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2019, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.6.20190819184634
+;; Version: 7.6.20190823094221
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1971,7 +1971,7 @@ becomes:
 https://www.youtube.com/watch?v=Vn7U7S0-5CQ?
 xah talk show 2019-08-19 Deseret/Shavian Alphabets, IPA, font size, fugue, elisp coding youtube html
 
-Version 2019-08-19"
+Version 2019-08-22"
   (interactive)
   (let ( p1 p2 p3 p4 figCapText ytUrl )
 
@@ -2008,7 +2008,7 @@ Version 2019-08-19"
         (insert "watch?v=")
 
         (goto-char (point-min))
-        (search-forward "rel=0" )
+        (search-forward "?rel=0" )
         (replace-match "")
 
         (insert figCapText "\n\n")))))
@@ -2104,7 +2104,7 @@ Call this command, it'll prompt for a new name/path. The path can be full path o
 The file name will be renamed/moved to the new path. The link will be changed too.
 
 This command is for interactive use only.
-Version 2019-04-16"
+Version 2019-08-23"
   (interactive)
   (let* (
          ($p0 (point))
@@ -2112,15 +2112,24 @@ Version 2019-04-16"
          ($p1 (car $bounds))
          ($p2 (cdr $bounds))
          ($input (buffer-substring-no-properties $p1 $p2))
-         ($fullPath (expand-file-name $input (file-name-directory (or (buffer-file-name) default-directory ))))
-         ($newPath (replace-regexp-in-string " " "_" (read-string "New name: " $fullPath nil $fullPath )))
-         ($newFullPath (if (file-name-absolute-p $newPath)
-                           $newPath
-                         (expand-file-name $newPath )))
+         ($currentDir (file-name-directory (or (buffer-file-name) default-directory )))
+         ($oldfName (file-name-nondirectory $input))
+         ($oldDirPath (concat $currentDir (file-name-directory $input)) )
+         ($oldFullPath (concat $oldDirPath $oldfName ))
+         ($fullPath (expand-file-name $input $currentDir))
+         ($newPath
+          (replace-regexp-in-string
+           " " "_"
+           (read-string "New name or full path: " $oldfName nil $oldfName )))
+         ($newFullPath
+          (if (file-name-absolute-p $newPath)
+              $newPath
+            (expand-file-name $newPath $oldDirPath)))
          ($doit-p nil))
     (if (file-exists-p $newFullPath)
         (setq $doit-p (y-or-n-p "file exist. Replace?"))
       (setq $doit-p t))
+    (message "old path: %s\n new path: %s" $oldFullPath $newFullPath)
     (when $doit-p
       (progn
         (rename-file $fullPath $newFullPath t)
@@ -2132,8 +2141,8 @@ Version 2019-04-16"
                             (or (buffer-file-name) default-directory))
               (fboundp 'xahsite-filepath-to-href-value))
              (progn (xahsite-filepath-to-href-value $newFullPath (or (buffer-file-name) default-directory)))
-           (progn
-             (file-relative-name $newFullPath))))))))
+           (file-relative-name $newFullPath)))))
+    ))
 
 (defun xah-html-extract-url (@begin @end &optional @not-full-path-p)
   "Extract URLs in current block or region to `kill-ring'.
