@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2019, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.6.20190823094221
+;; Version: 7.6.20191106011440
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -639,7 +639,7 @@ Version 2019-04-08
 (defun xah-html-htmlized-p (@begin @end)
   "Return true if region @BEGIN @END is htmlized code.
 WARNING: it just check if it contains certain span tags.
-Version 2019-06-13"
+Version 2019-11-05"
   (save-excursion
     (goto-char @begin)
     (re-search-forward "<span class=\"comment\">\\|<span class=\"comment-delimiter\">\\|<span class=\"function-name\">\\|<span class=\"string\">\\|<span class=\"variable-name\">\\|<span class=\"keyword\">\\|<span class=\"bold\">\\|<span class=\"builtin\">\\|<span class=\"constant\">\\|<span class=\"doc\">\\|<span class=\"preprocessor\">\\|<span class=\"type\">\\|<span class=\"underline\">\\|<span class=\"warning\">" @end t)))
@@ -688,9 +688,6 @@ Version 2018-09-28"
         (setq $codeClose> (point))
         (search-backward "<")
         (setq $codeClose< (point)))
-
-      (message "pre> %s" pre> )
-      (message "code> %s" code> )
 
       (if (and (eq pre> nil) (eq code> nil))
           (error "no <pre> nor <code> found" )
@@ -1522,7 +1519,7 @@ Cursor must be inside table tags.
  <th> are also removed.
 Currently, assume there are only 2 columns.
 
-Version 2018-10-29"
+Version 2019-09-24"
   (interactive )
   (let ($p1 $p2)
     (if (use-region-p)
@@ -1559,16 +1556,21 @@ Version 2018-10-29"
           (delete-char 1)))
 
       (goto-char (point-min))
-      (while (search-forward "<tr><td>" nil t)
+      (while (re-search-forward "<tr>\n* *<td>" nil t)
         (replace-match "<dt>" t t ))
 
       (goto-char (point-min))
-      (while (search-forward "</td><td>" nil t)
-        (replace-match "</dt><dd>" t t ))
+      (while (re-search-forward "</td>\n* *<td>" nil t)
+        (replace-match "</dt>\n<dd>" t t ))
 
       (goto-char (point-min))
-      (while (search-forward "</td></tr>" nil t)
+      (while (re-search-forward "</td>\n* *</tr>" nil t)
         (replace-match "</dd>" t t ))
+
+      ;; (goto-char (point-min))
+      ;; (while (re-search-forward "</dt><dd>" nil t)
+      ;;   (replace-match "</dt>\n<dd>" t t ))
+
       (goto-char (point-max))
 
       ;;
@@ -2104,7 +2106,7 @@ Call this command, it'll prompt for a new name/path. The path can be full path o
 The file name will be renamed/moved to the new path. The link will be changed too.
 
 This command is for interactive use only.
-Version 2019-08-23"
+Version 2019-10-05"
   (interactive)
   (let* (
          ($p0 (point))
@@ -2114,18 +2116,23 @@ Version 2019-08-23"
          ($input (buffer-substring-no-properties $p1 $p2))
          ($currentDir (file-name-directory (or (buffer-file-name) default-directory )))
          ($oldfName (file-name-nondirectory $input))
-         ($oldDirPath (concat $currentDir (file-name-directory $input)) )
+         ($oldDirPath (concat $currentDir (file-name-directory $input)))
          ($oldFullPath (concat $oldDirPath $oldfName ))
          ($fullPath (expand-file-name $input $currentDir))
-         ($newPath
+         $newPath
+         $newFullPath
+         ($doit-p nil))
+
+    (setq $newPath
           (replace-regexp-in-string
            " " "_"
            (read-string "New name or full path: " $oldfName nil $oldfName )))
-         ($newFullPath
+
+    (setq $newFullPath
           (if (file-name-absolute-p $newPath)
               $newPath
             (expand-file-name $newPath $oldDirPath)))
-         ($doit-p nil))
+
     (if (file-exists-p $newFullPath)
         (setq $doit-p (y-or-n-p "file exist. Replace?"))
       (setq $doit-p t))
@@ -2141,8 +2148,7 @@ Version 2019-08-23"
                             (or (buffer-file-name) default-directory))
               (fboundp 'xahsite-filepath-to-href-value))
              (progn (xahsite-filepath-to-href-value $newFullPath (or (buffer-file-name) default-directory)))
-           (file-relative-name $newFullPath)))))
-    ))
+           (file-relative-name $newFullPath)))))))
 
 (defun xah-html-extract-url (@begin @end &optional @not-full-path-p)
   "Extract URLs in current block or region to `kill-ring'.
@@ -3240,7 +3246,7 @@ Version 2017-03-17"
 • 「emacs-lisp-function-name」 → <code class=\"elisp_f_3d841\">emacs-lisp-function-name</code> if current file path contains “emacs”.
 • 「…」 → <code>…</code>
 • 〈…〉 → <cite>…</cite>
-• 《…》 → <cite class=\"book\">…</cite>
+• 《…》 → <cite>…</cite>
 • 〔…〕 → <code class=\"path_xl\">\\1</code>
 •  ‹…› → <var class=\"d\">…</var>
 • [<a href=] → [see <a href=]
@@ -3248,7 +3254,7 @@ Version 2017-03-17"
 Changes are reported to message buffer with char position.
 
 When called in lisp code, @begin @end are region begin/end positions.
-Version 2019-07-30"
+Version 2019-09-11"
   (interactive
    (let (($bds (xah-get-bounds-of-thing-or-region 'block)))
      (list (car $bds) (cdr $bds))))
@@ -3289,12 +3295,12 @@ Version 2019-07-30"
         (goto-char (point-min))
         (while (re-search-forward "《\\([^》]+?\\)》" nil t)
           (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) $changedItems)
-          (replace-match "<cite class=\"book\">\\1</cite>" t)
+          (replace-match "<cite>\\1</cite>" t)
           (let ($p1 $p2)
             (search-backward "</cite>" )
             (setq $p2 (point))
-            (search-backward "<cite class=\"book\">" )
-            (search-forward "<cite class=\"book\">" )
+            (search-backward "<cite>" )
+            (search-forward "<cite>" )
             (setq $p1 (point))
             (overlay-put (make-overlay $p1 $p2) 'face 'highlight)
             (search-forward "</cite>" )))
@@ -3323,12 +3329,12 @@ Version 2019-07-30"
         (goto-char (point-min))
         (while (re-search-forward "〔\\([ -_/\\:~.A-Za-z0-9%]+?\\)〕" nil t)
           (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) $changedItems)
-          (replace-match "<code class=\"path-xl\">\\1</code>" t)
+          (replace-match "<code class=\"path_xl\">\\1</code>" t)
           (let ($p1 $p2)
             (search-backward "</code>" )
             (setq $p2 (point))
-            (search-backward "<code class=\"path-xl\">" )
-            (search-forward "<code class=\"path-xl\">")
+            (search-backward "<code class=\"path_xl\">" )
+            (search-forward "<code class=\"path_xl\">")
             (setq $p1 (point))
             (overlay-put (make-overlay $p1 $p2) 'face 'highlight)
             (search-forward "</code>")))
