@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2019, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.6.20191106011440
+;; Version: 7.6.20191107203133
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -3783,6 +3783,207 @@ Version 2018-10-26"
       (progn
         (delete-region $p1 $p2)
         (insert (decode-coding-string $newStr 'utf-8))))))
+
+(defun xah-html-browse-url-of-buffer ()
+  "Like `browse-url-of-buffer' but save file first.
+
+This command save the file first,
+Then, if `universal-argument' is called, visit the corresponding xahsite URL.
+For example, if current buffer is of this file:
+ ~/web/xahlee_info/index.html
+then after calling this function,
+default browser will be launched and opening this URL:
+ http://xahlee.info/index.html
+Version 2017-09-22"
+  (interactive)
+  (let (($url
+         (if current-prefix-arg
+             (when (fboundp 'xahsite-filepath-to-url) (xahsite-filepath-to-url (buffer-file-name)))
+           (buffer-file-name))))
+    (when (buffer-modified-p )
+      (when (fboundp 'xah-clean-whitespace) (xah-clean-whitespace))
+      (save-buffer))
+    (message "browsing %s" $url)
+    (browse-url $url )))
+
+(defun xah-html-open-in-chrome-browser ()
+  "Open the current file or `dired' marked files in Google Chrome browser.
+
+URL `http://ergoemacs.org/emacs/emacs_dired_open_file_in_ext_apps.html'
+Version 2017-12-07"
+  (interactive)
+  (let* (
+         ($file-list
+          (if (string-equal major-mode "dired-mode")
+              (dired-get-marked-files)
+            (list (buffer-file-name))))
+         ($do-it-p (if (<= (length $file-list) 5)
+                       t
+                     (y-or-n-p "Open more than 5 files? "))))
+    (when $do-it-p
+      (cond
+       ((string-equal system-type "darwin")
+        (mapc
+         (lambda ($fpath)
+           (shell-command
+            (format "open -a /Applications/Google\\ Chrome.app \"%s\"" $fpath))) $file-list))))))
+
+(defun xah-html-open-link-in-chrome ()
+  "Open url under cursor in Google Chrome.
+Work in Mac OS only
+Version 2019-10-07"
+  (interactive)
+  (let* (($inputStr
+          (if (use-region-p)
+              (buffer-substring-no-properties (region-beginning) (region-end))
+            (let ($p0 $p1 $p2
+                      ($pathStops "^  \t\n\"`'‘’“”|[]{}「」<>〔〕〈〉《》【】〖〗«»‹›❮❯❬❭〘〙·。\\"))
+              (setq $p0 (point))
+              (skip-chars-backward $pathStops)
+              (setq $p1 (point))
+              (goto-char $p0)
+              (skip-chars-forward $pathStops)
+              (setq $p2 (point))
+              (goto-char $p0)
+              (buffer-substring-no-properties $p1 $p2))))
+         ($path
+          (replace-regexp-in-string
+           "^file:///" "/"
+           (replace-regexp-in-string
+            ":\\'" "" $inputStr))))
+    (shell-command
+     (format "open -a Google\\ Chrome.app \"%s\"" $path))))
+
+(defun xah-html-open-in-safari ()
+  "Open the current file or `dired' marked files in Mac's Safari browser.
+If the file is not saved, save it first.
+
+URL `http://ergoemacs.org/emacs/emacs_dired_open_file_in_ext_apps.html'
+Version 2018-02-26"
+  (interactive)
+  (let* (
+         ($file-list
+          (if (string-equal major-mode "dired-mode")
+              (dired-get-marked-files)
+            (list (buffer-file-name))))
+         ($do-it-p (if (<= (length $file-list) 5)
+                       t
+                     (y-or-n-p "Open more than 5 files? "))))
+    (when $do-it-p
+      (cond
+       ((string-equal system-type "darwin")
+        (mapc
+         (lambda ($fpath)
+           (when (buffer-modified-p )
+             (save-buffer))
+           (shell-command
+            (format "open -a Safari.app \"%s\"" $fpath))) $file-list))))))
+
+(defun xah-html-open-link-in-safari ()
+  "open url under cursor in Safari.
+Work in Mac OS only
+Version 2019-02-09"
+  (interactive)
+  (let* (($inputStr (if (use-region-p)
+                        (buffer-substring-no-properties (region-beginning) (region-end))
+                      (let ($p0 $p1 $p2
+                                ($pathStops "^  \t\n\"`'‘’“”|[]{}「」<>〔〕〈〉《》【】〖〗«»‹›❮❯❬❭〘〙·。\\"))
+                        (setq $p0 (point))
+                        (skip-chars-backward $pathStops)
+                        (setq $p1 (point))
+                        (goto-char $p0)
+                        (skip-chars-forward $pathStops)
+                        (setq $p2 (point))
+                        (goto-char $p0)
+                        (buffer-substring-no-properties $p1 $p2))))
+         ($path
+          (replace-regexp-in-string
+           "^file:///" "/"
+           (replace-regexp-in-string
+            ":\\'" "" $inputStr))))
+    (shell-command
+     (format "open -a Safari.app \"%s\"" $path))))
+
+(defun xah-html-open-link-in-firefox (&optional @fullpath)
+  "open url under cursor in Firefox browser.
+Work in Mac OS only
+Version 2019-11-07"
+  (interactive)
+  (let ($path)
+    (if @fullpath
+        (progn (setq $path @fullpath))
+      (let (($inputStr
+              (if (use-region-p)
+                  (buffer-substring-no-properties (region-beginning) (region-end))
+                (let ($p0 $p1 $p2
+                          ($pathStops "^  \t\n\"`'‘’“”|[]{}「」<>〔〕〈〉《》【】〖〗«»‹›❮❯❬❭〘〙·。\\"))
+                  (setq $p0 (point))
+                  (skip-chars-backward $pathStops)
+                  (setq $p1 (point))
+                  (goto-char $p0)
+                  (skip-chars-forward $pathStops)
+                  (setq $p2 (point))
+                  (goto-char $p0)
+                  (buffer-substring-no-properties $p1 $p2)))))
+        (setq $path (replace-regexp-in-string
+                     "^file:///" "/"
+                     (replace-regexp-in-string
+                      ":\\'" "" $inputStr)))))
+    (shell-command
+     (format "open -a 'Firefox.app' \"%s\"" $path))))
+
+(defun xah-html-open-in-brave ()
+  "Open the current file or `dired' marked files in Mac's Brave browser.
+
+If the file is not saved, save it first.
+
+Version 2019-02-14"
+  (interactive)
+  (let* (
+         ($file-list
+          (if (string-equal major-mode "dired-mode")
+              (dired-get-marked-files)
+            (list (buffer-file-name))))
+         ($do-it-p (if (<= (length $file-list) 5)
+                       t
+                     (y-or-n-p "Open more than 5 files? "))))
+    (when $do-it-p
+      (cond
+       ((string-equal system-type "darwin")
+        (mapc
+         (lambda ($fpath)
+           (when (buffer-modified-p )
+             (save-buffer))
+           (shell-command
+            (format "open -a 'Brave Browser.app' \"%s\"" $fpath))) $file-list))))))
+
+(defun xah-html-open-link-in-brave (&optional @fullpath)
+  "open url under cursor in Brave browser.
+Work in Mac OS only
+Version 2019-02-17"
+  (interactive)
+  (let ($path)
+    (if @fullpath
+        (progn (setq $path @fullpath))
+      (let (($inputStr
+              (if (use-region-p)
+                  (buffer-substring-no-properties (region-beginning) (region-end))
+                (let ($p0 $p1 $p2
+                          ($pathStops "^  \t\n\"`'‘’“”|[]{}「」<>〔〕〈〉《》【】〖〗«»‹›❮❯❬❭〘〙·。\\"))
+                  (setq $p0 (point))
+                  (skip-chars-backward $pathStops)
+                  (setq $p1 (point))
+                  (goto-char $p0)
+                  (skip-chars-forward $pathStops)
+                  (setq $p2 (point))
+                  (goto-char $p0)
+                  (buffer-substring-no-properties $p1 $p2)))))
+        (setq $path (replace-regexp-in-string
+                     "^file:///" "/"
+                     (replace-regexp-in-string
+                      ":\\'" "" $inputStr)))))
+    (shell-command
+     (format "open -a 'Brave Browser.app' \"%s\"" $path))))
 
 (defun xah-html-encode-percent-encoded-url ()
   "Percent encode URL in current line or selection.
