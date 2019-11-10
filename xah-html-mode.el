@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2019, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.6.20191110015226
+;; Version: 7.6.20191110021323
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -3808,10 +3808,9 @@ Version 2017-09-22"
 
 (defun xah-html-open-in-chrome-browser ()
   "Open the current file or `dired' marked files in Google Chrome browser.
-Work in Windows, macOS. 2019-11-09 linux not yet.
-
+Work in Windows, macOS, linux.
 URL `http://ergoemacs.org/emacs/emacs_dired_open_file_in_ext_apps.html'
-Version 2019-11-09"
+Version 2019-11-10"
   (interactive)
   (let* (
          ($file-list
@@ -3839,14 +3838,13 @@ Version 2019-11-09"
        ((string-equal system-type "gnu/linux")
         (mapc
          (lambda ($fpath)
-           (shell-command
-            (format "chrome \"%s\"" $fpath)))
+           (shell-command (format "google-chrome-stable \"%s\"" $fpath)))
          $file-list))))))
 
 (defun xah-html-open-link-in-chrome ()
   "Open url under cursor in Google Chrome.
-Work in Windows, macOS. 2019-11-09 linux not yet.
-Version 2019-11-09"
+Work in Windows, macOS, linux.
+Version 2019-11-10"
   (interactive)
   (let* (($inputStr
           (if (use-region-p)
@@ -3874,7 +3872,7 @@ Version 2019-11-09"
       (let ((process-connection-type nil))
         (start-process "" nil "powershell" "start-process" "chrome" $path )))
      ((string-equal system-type "gnu/linux")
-      (shell-command (format "chrome \"%s\"" $path))))))
+      (shell-command (format "google-chrome-stable \"%s\"" $path))))))
 
 (defun xah-html-open-in-brave ()
   "Open the current file or `dired' marked files in Brave browser.
