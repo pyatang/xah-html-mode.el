@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2019, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.6.20191110021323
+;; Version: 7.6.20191115061846
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -2478,7 +2478,7 @@ If no @begin @end are given, use current line.
 
 If there's a text selection, use that as image path.
 
-Version 2017-08-16"
+Version 2019-11-15"
   (interactive)
   (let ($p1 $p2
             ($figcapStr (if @figcaption
@@ -2496,7 +2496,7 @@ Version 2017-08-16"
     (insert $figcapStr "\n</figcaption>\n</figure>\n\n")
 
     (goto-char $p1)
-    (insert "<figure>\n")
+    (insert "\n<figure>\n")
 
     (search-forward "</figcaption>" nil t)
     (search-backward "<")
@@ -2518,12 +2518,12 @@ Example, if cursor is on the word “i/cat.png”, then it will became
 If there's a text selection, use that as image path.
 
 This function calls `xah-html-image-linkify'.
-Version 2019-02-18"
+Version 2019-11-15"
   (interactive)
   (let ($p1 $p2 $altStr)
     (setq $altStr (xah-html-image-linkify))
     (search-backward "<img ")
-    (insert "<figure>\n")
+    (insert "\n<figure>\n")
     (search-forward ">")
     (insert "\n<figcaption>\n")
     (insert $altStr "\n</figcaption>\n</figure>\n\n")
@@ -2638,7 +2638,7 @@ if
 
 Returns a alt string based on the file name.
 
-Version 2018-09-19"
+Version 2019-11-15"
   (interactive)
   (let* (
          ($bds (bounds-of-thing-at-point 'filename ))
@@ -2655,7 +2655,7 @@ Version 2018-09-19"
     (if @figure
         (progn
           (goto-char $p1)
-          (insert "<figure>\n")
+          (insert "\n<figure>\n")
           (insert (format "<audio src=\"%s\" controls loop></audio>\n" $src))
           (insert "<figcaption>\n")
           (insert (replace-regexp-in-string "_" " " (file-name-nondirectory $src)))
@@ -2675,7 +2675,7 @@ if
 
 Returns a alt string based on the file name.
 
-Version 2017-12-09"
+Version 2019-11-15"
   (interactive)
   (let* (
          ($bds (bounds-of-thing-at-point 'filename ))
@@ -2692,7 +2692,7 @@ Version 2017-12-09"
     (if @figure
         (progn
           (goto-char $p1)
-          (insert "<figure>\n")
+          (insert "\n<figure>\n")
           (insert (format "<video src=\"%s\" controls loop></video>\n" $src))
           (insert "<figcaption>\n")
           (insert (replace-regexp-in-string "_" " " (file-name-nondirectory $src)))
