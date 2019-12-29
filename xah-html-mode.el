@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2019, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.6.20191115061846
+;; Version: 7.6.20191228191810
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -587,7 +587,9 @@ Version 2019-04-08
         ("css" . ["xah-css-mode" "css"])
         ("emacs-lisp" . ["xah-elisp-mode" "el"])
         ("dart" . ["dart-mode" "dart"])
+
         ("haskell" . ["haskell-mode" "hs"])
+        ("erlang" . ["erlang-mode" "erl"])
         ("golang" . ["go-mode" "go"])
         ("html" . ["xah-html-mode" "html"])
         ("mysql" . ["sql-mode" "sql"])
@@ -1586,13 +1588,13 @@ Currently, assume there are only 2 columns.
 
 If `universal-argument' is called first, prompt for separator string.
 
-Version 2018-10-28"
+Version 2019-12-10"
   (interactive )
   (let (
         $p1 $p2
         ($sep (if current-prefix-arg
                   (read-string "Seperator:" "→")
-                "→"
+                " → "
                 )))
     (if (use-region-p)
          (setq $p1 (region-beginning) $p2 (region-end))
