@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2019, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.6.20191228191810
+;; Version: 7.6.20200115214347
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -113,7 +113,7 @@ This function assumes your cursor is inside a tag, eg <…▮…>"
 
 (defun xah-html--cursor-in-link-p ()
   "Return true if curser is inside a string of src or href.
-Version 2018-02-21"
+Version 2020-01-15"
   (interactive)
   (let ((in-string-q (nth 3 (syntax-ppss))))
     (if in-string-q
@@ -126,6 +126,7 @@ Version 2018-02-21"
                 (if (or
                      (string-match "href" (current-word))
                      (string-match "src" (current-word))
+                     (string-match "poster" (current-word))
                      (string-match "content" (current-word)))
                     (progn t)
                   (progn nil)))
@@ -521,6 +522,7 @@ Version 2018-11-02")
 "enctype"
 "method"
 "action"
+"poster"
  ))
 
 (defcustom xah-html-boolean-attribute-names nil
@@ -2716,12 +2718,12 @@ http://amzn.to/1F5M1hA
 https://alexa.design/2okfMcj
 
 Example output:
-<a class=\"amz\" href=\"http://www.amazon.com/dp/B003CP0BHM/?tag=xahh-20\" title=\"Cyborg R T Gaming Mouse\">amazon</a>
+<a class=\"amz\" target=\"_blank\" href=\"http://www.amazon.com/dp/B003CP0BHM/?tag=xahh-20\" title=\"Cyborg R T Gaming Mouse\">amazon</a>
 
 ASIN is a 10 character string that's a product id.
 
 URL `http://ergoemacs.org/emacs/elisp_amazon-linkify.html'
-Version 2019-01-12"
+Version 2020-01-15"
   (interactive)
   (let (($bds (bounds-of-thing-at-point 'url))
         $p1 $p2 $url $asin $thingName
@@ -2733,7 +2735,7 @@ Version 2019-01-12"
     (if (or (string-match "//amzn.to/" $url)
             (string-match "//alexa.design/" $url))
         (progn (delete-region $p1 $p2)
-               (insert (format "<a class=\"amz_search\" href=\"%s\">amazon</a>" $url)))
+               (insert (format "<a class=\"amz_search\" target=\"_blank\" href=\"%s\">amazon</a>" $url)))
       (progn
         (setq $asin
               (cond
@@ -2760,7 +2762,8 @@ Version 2019-01-12"
             )))
         (delete-region $p1 $p2)
         (insert
-         (format "<a class=\"amz\" href=\"http://www.amazon.com/dp/%s/?tag=%s\" title=\"%s\">Buy at amazon</a>" $asin $trackId $thingName))
+
+         (format "<a class=\"amz\" target=\"_blank\" href=\"http://www.amazon.com/dp/%s/?tag=%s\" title=\"%s\">Buy at amazon</a>" $asin $trackId $thingName))
         (search-backward "\">")))))
 
 (defun xah-html-youtube-linkify ()
