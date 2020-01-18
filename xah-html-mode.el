@@ -1,9 +1,9 @@
-;;; xah-html-mode.el --- Major mode for editing pure html5. -*- coding: utf-8; lexical-binding: t; -*-
+;;; xah-html-mode.el --- Major mode for editing html. -*- coding: utf-8; lexical-binding: t; -*-
 
-;; Copyright © 2013-2019, by Xah Lee
+;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 7.6.20200115214347
+;; Version: 8.0.20200118112442
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1128,8 +1128,6 @@ The string replaced are:
  < ⇒ &lt;
  > ⇒ &gt;
 
-See also: `xah-html-replace-html-named-entities', `xah-html-replace-ampersand-to-unicode'
-
 URL `http://ergoemacs.org/emacs/elisp_replace_html_entities_command.html'
 Version 2018-10-08"
   (interactive "r")
@@ -1142,14 +1140,12 @@ The string replaced are:
  < ⇒ &lt;
  > ⇒ &gt;
 
-See also: `xah-html-replace-html-named-entities', `xah-html-replace-ampersand-to-unicode'
-
 URL `http://ergoemacs.org/emacs/elisp_replace_html_entities_command.html'
 Version 2018-10-08"
   (interactive "r")
   (xah-replace-pairs-region begin end '( ["&lt;" "<"] ["&gt;" ">"] ["&amp;" "&"])))
 
-(defun xah-html-replace-ampersand (@begin @end &optional @entity-to-char-p)
+(defun xah-html-escape-char-to-entity (@begin @end &optional @entity-to-char-p)
   "Replace HTML chars & < > to HTML entities on current line or selection.
 The string replaced are:
  & ⇒ &amp;
@@ -1158,14 +1154,12 @@ The string replaced are:
 
 Print to message buffer occurrences of replacement (if any), with position.
 
-If `universal-argument' is called, the replacement direction is reversed.
+If `universal-argument' is called first, the replacement direction is reversed.
 
 When called in lisp code, @begin @end are region begin/end positions. If entity-to-char-p is true, change entities to chars instead.
 
-See also: `xah-html-replace-html-named-entities', `xah-html-replace-ampersand-to-unicode'
-
 URL `http://ergoemacs.org/emacs/elisp_replace_html_entities_command.html'
-Version 2017-07-23"
+Version 2020-01-17"
   (interactive
    (list
     ;; These are done separately here
@@ -1201,18 +1195,16 @@ Version 2017-07-23"
                (replace-match (elt $x 1) "FIXEDCASE" "LITERAL")))
            $findReplaceMap))))))
 
-(defun xah-html-replace-ampersand-to-unicode (@begin @end &optional @fullwidth-to-ascii-p)
-  "Replace chars <>& to fullwidth version ＜＞＆ in current line or text selection.
+(defun xah-html-escape-char-to-unicode (@begin @end &optional @fullwidth-to-ascii-p)
+  "Replace chars < > & to fullwidth version ＜ ＞ ＆ in current line or text selection.
 
 If `universal-argument' is called, the replacement direction is reversed.
 
 When called in lisp code, @begin @end are region begin/end positions.
 If @fullwidth-to-ascii-p is true, change entities to chars instead.
 
-See also: `xah-html-replace-html-named-entities', `xah-html-replace-ampersand-to-unicode'
-
 URL `http://ergoemacs.org/emacs/elisp_replace_html_entities_command.html'
-Version 2015-04-23"
+Version 2020-01-17"
 (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end) current-prefix-arg)
@@ -1236,7 +1228,7 @@ Version 2015-04-23"
         (goto-char (point-min))
         (while (search-forward ">" nil t) (replace-match "＞" nil ))))))
 
-(defun xah-html-replace-html-named-entities (@begin @end)
+(defun xah-html-named-entity-to-char (@begin @end)
   "Replace HTML named entity to Unicode character in current line or selection.
 For example, “&copy;” becomes “©”.
 
@@ -1247,12 +1239,8 @@ The following HTML Entities are not replaced:
 
 When called in lisp code, @begin @end are region begin/end positions.
 
-See also:
-`xah-html-replace-ampersand'
-`xah-html-replace-ampersand-to-unicode'
-
 URL `http://ergoemacs.org/emacs/elisp_replace_html_entities_command.html'
-Version 2018-05-16"
+Version 2020-01-17"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -1695,7 +1683,7 @@ Version 2018-10-28"
       ;;
       )))
 
-(defun xah-html-make-html-table ()
+(defun xah-html-lines-to-table ()
   "Transform the current text block or selection into a HTML table.
 
 If there's a text selection, use the selection as input.
@@ -1765,8 +1753,8 @@ Version 2019-06-07"
           ;;
           )))))
 
-(defun xah-html-make-html-table-undo ()
-  "inverse of `xah-html-make-html-table'.
+(defun xah-html-lines-to-table-undo ()
+  "inverse of `xah-html-lines-to-table'.
 version 2016-12-18"
   (interactive)
   (let ( $p1 $p2)
@@ -2288,7 +2276,8 @@ If there's a text selection, use it for input, otherwise the input is a text blo
 
 The order of lines for {title, author, date/time, url} needs not be in that order. Author should start with “by”.
 
-Version 2018-03-24"
+URL `http://ergoemacs.org/emacs/elisp_make-citation.html'
+Version 2020-01-17"
   (interactive)
   (let* (
          ($bds (xah-get-bounds-of-thing 'block))
@@ -4183,7 +4172,7 @@ Version 2016-10-24"
   (define-key xah-html-mode-no-chord-map (kbd "<left>") 'xah-html-skip-tag-backward)
 
   (define-key xah-html-mode-no-chord-map (kbd "'") 'xah-html-encode-percent-encoded-url)
-  (define-key xah-html-mode-no-chord-map (kbd ",") 'xah-html-replace-ampersand)
+  (define-key xah-html-mode-no-chord-map (kbd ",") 'xah-html-escape-char-to-entity)
   (define-key xah-html-mode-no-chord-map (kbd ".") 'xah-html-decode-percent-encoded-url)
   (define-key xah-html-mode-no-chord-map (kbd ";") 'xah-html-emacs-to-windows-kbd-notation)
 
@@ -4229,11 +4218,11 @@ Version 2016-10-24"
   (define-key xah-html-mode-no-chord-map (kbd "u t") 'xah-html-word-to-wikipedia-linkify)
   (define-key xah-html-mode-no-chord-map (kbd "u h") 'xah-html-wikipedia-url-linkify)
 
-  (define-key xah-html-mode-no-chord-map (kbd "v") 'xah-html-make-html-table)
-  (define-key xah-html-mode-no-chord-map (kbd "w") 'xah-html-replace-html-named-entities)
-  (define-key xah-html-mode-no-chord-map (kbd "x") 'xah-html-replace-ampersand-to-unicode)
+  (define-key xah-html-mode-no-chord-map (kbd "v") 'xah-html-lines-to-table)
+  (define-key xah-html-mode-no-chord-map (kbd "w") 'xah-html-named-entity-to-char)
+  (define-key xah-html-mode-no-chord-map (kbd "x") 'xah-html-escape-char-to-unicode)
   (define-key xah-html-mode-no-chord-map (kbd "y") 'xah-html-make-citation)
-  (define-key xah-html-mode-no-chord-map (kbd "z") 'xah-html-make-html-table-undo)
+  (define-key xah-html-mode-no-chord-map (kbd "z") 'xah-html-lines-to-table-undo)
 
   ;; define separate, so that user can override the lead key
   (define-key xah-html-mode-map (kbd "C-c C-c") xah-html-mode-no-chord-map))
