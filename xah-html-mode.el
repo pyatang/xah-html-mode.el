@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 8.0.20200118112442
+;; Version: 8.0.20200119210101
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -2631,7 +2631,7 @@ if
 
 Returns a alt string based on the file name.
 
-Version 2019-11-15"
+Version 2020-01-19"
   (interactive)
   (let* (
          ($bds (bounds-of-thing-at-point 'filename ))
@@ -2651,7 +2651,7 @@ Version 2019-11-15"
           (insert "\n<figure>\n")
           (insert (format "<audio src=\"%s\" controls loop></audio>\n" $src))
           (insert "<figcaption>\n")
-          (insert (replace-regexp-in-string "_" " " (file-name-nondirectory $src)))
+          (insert (replace-regexp-in-string "_" " " (file-name-sans-extension (file-name-nondirectory $src))))
           (insert "\n</figcaption>\n</figure>\n\n")
           (search-backward "</figcaption>" ))
       (progn
@@ -2668,7 +2668,7 @@ if
 
 Returns a alt string based on the file name.
 
-Version 2019-11-15"
+Version 2020-01-19"
   (interactive)
   (let* (
          ($bds (bounds-of-thing-at-point 'filename ))
@@ -2688,7 +2688,7 @@ Version 2019-11-15"
           (insert "\n<figure>\n")
           (insert (format "<video src=\"%s\" controls loop></video>\n" $src))
           (insert "<figcaption>\n")
-          (insert (replace-regexp-in-string "_" " " (file-name-nondirectory $src)))
+          (insert (replace-regexp-in-string "_" " " (file-name-sans-extension (file-name-nondirectory $src))))
           (insert "\n</figcaption>\n</figure>\n\n")
           (search-backward "</figcaption>" ))
       (progn
@@ -4118,6 +4118,7 @@ Version 2016-10-24"
 
     ("cl" "class=\"▮\"" xah-html--ahf)
     ("idh" "id=\"▮\"" xah-html--ahf)
+    ("posterh" "poster=\"▮\"" xah-html--ahf)
 
     ("wi" "width" xah-html--ahf)
     ("hei" "height" xah-html--ahf)
