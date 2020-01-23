@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 8.1.20200120160337
+;; Version: 8.1.20200122171250
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -2153,13 +2153,13 @@ If `universal-argument' is called first, don't convert relative URL to full path
 This command extracts all text of the forms
  <‹letter› … href=‹path› …>
  <‹letter› … src=‹path› …>
-that is on a a single line, by regex. The quote for ‹path› may be double or single quote.
+The quote for ‹path› may be double or single quote.
 
 When called in lisp code, @begin @end are region begin/end positions.
 Returns a list of strings.
 
 URL `http://ergoemacs.org/emacs/elisp_extract_url_command.html'
-Version 2019-07-02"
+Version 2020-01-22"
   (interactive
    (let ($p1 $p2)
      ;; set region boundary $p1 $p2
@@ -2175,32 +2175,32 @@ Version 2019-07-02"
                     (setq $p2 (point)))
            (setq $p2 (point)))))
      (list $p1 $p2 (not current-prefix-arg))))
-
   (let (($regionText (buffer-substring-no-properties @begin @end))
         ($urlList (list)))
     (with-temp-buffer
       (insert $regionText)
-
       (goto-char 1)
       (while (re-search-forward "<" nil t)
         (replace-match "\n<" "FIXEDCASE" "LITERAL"))
-
       (goto-char 1)
       (while (re-search-forward
               "<[A-Za-z]+.+?\\(href\\|src\\)[[:blank:]]*?=[[:blank:]]*?\\([\"']\\)\\([^\"']+?\\)\\2" nil t)
         (push (match-string 3) $urlList)))
     (setq $urlList (reverse $urlList))
-
     (when @not-full-path-p
       (setq $urlList
             (mapcar
              (lambda ($x)
                (if (string-match "^http:\\|^https:" $x )
-                   (progn $x)
-                 (progn
-                   (expand-file-name $x (file-name-directory (buffer-file-name))))))
+                   $x
+                 (expand-file-name
+                  $x
+                  (file-name-directory
+                   (if (buffer-file-name)
+                       (buffer-file-name)
+                     default-directory
+                     )))))
              $urlList)))
-
     (when (called-interactively-p 'any)
       (let (($printedResult (mapconcat 'identity $urlList "\n")))
         (kill-new $printedResult)
