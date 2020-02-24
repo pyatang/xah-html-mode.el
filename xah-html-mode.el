@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 8.1.20200122171250
+;; Version: 8.1.20200224004555
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1965,7 +1965,7 @@ becomes:
 https://www.youtube.com/watch?v=Vn7U7S0-5CQ?
 xah talk show 2019-08-19 Deseret/Shavian Alphabets, IPA, font size, fugue, elisp coding youtube html
 
-Version 2019-08-22"
+Version 2020-02-24"
   (interactive)
   (let ( p1 p2 p3 p4 figCapText ytUrl )
 
@@ -2005,7 +2005,7 @@ Version 2019-08-22"
         (search-forward "?rel=0" )
         (replace-match "")
 
-        (insert figCapText "\n\n")))))
+        (insert "\n" figCapText "\n\n")))))
 
 (defun xah-html-html-to-text ()
   "Convert HTML to plain text on current text block or text selection.
@@ -3036,9 +3036,13 @@ Version 2016-06-29."
   "Make the URL at cursor point into a HTML link.
 Work on current non-whitespace char sequence or text selection.
 
-URL `http://ergoemacs.org/emacs/wrap-url.html'
+For example
+http://example.org/cat.html
+becomes
+<a href=\"http://example.org/cat.html\">http://example.org/cat.html</a>
 
-Version 2018-07-28"
+URL `http://ergoemacs.org/emacs/wrap-url.html'
+Version 2020-02-19"
   (interactive)
   (let ( $p1 $p2 $input $newStr )
     (if (use-region-p)
