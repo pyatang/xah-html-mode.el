@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 8.1.20200224004555
+;; Version: 8.2.20200309101237
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1683,6 +1683,54 @@ Version 2018-10-28"
       ;;
       )))
 
+(defun xah-html-dl-to-ul ()
+  "Change html dl to ul.
+Cursor must be inside dl tags.
+
+If `universal-argument' is called first, prompt for separator string.
+
+Version 2020-03-09"
+  (interactive )
+  (let (
+        $p1 $p2
+        ($sep (if current-prefix-arg
+                  (read-string "Seperator:" " → ")
+                " → "
+                )))
+    (if (use-region-p)
+         (setq $p1 (region-beginning) $p2 (region-end))
+      (save-excursion
+        (search-backward "<dl>" )
+        (setq $p1 (point))
+        (search-forward "</dl>")
+        (setq $p2 (point))))
+
+    (save-restriction
+      (narrow-to-region $p1 $p2)
+
+      (goto-char (point-min))
+      (search-forward "<dl>")
+      (replace-match "<ul>" t t )
+
+      (goto-char (point-min))
+      (search-forward "</dl>")
+      (replace-match "</ul>" t t )
+
+      (goto-char (point-min))
+      (while (search-forward "<dt>" nil t)
+        (replace-match "<li>" t t ))
+
+      (goto-char (point-min))
+      (while (search-forward "</dd>" nil t)
+        (replace-match "</li>" t t ))
+
+      (goto-char (point-min))
+      (while (re-search-forward "</dt> *\n*<dd>" nil t)
+        (replace-match $sep t t ))
+      (goto-char (point-max))
+      ;;
+      )))
+
 (defun xah-html-lines-to-table ()
   "Transform the current text block or selection into a HTML table.
 
@@ -2407,10 +2455,10 @@ Version 2018-06-14"
       (let ($p0)
         (setq $p0 (point))
         ;; chars that are likely to be delimiters of full path, e.g. space, tabs, brakets.
-        (skip-chars-backward "^  \"\t\n'|()[]{}<>〔〕“”〈〉《》【】〖〗«»‹›·。\\`")
+        (skip-chars-backward "^  \"\t\n'|()[]{}<>〔〕“”〈〉《》【】〖〗〘〙«»‹›·。\\`")
         (setq $p1 (point))
         (goto-char $p0)
-        (skip-chars-forward "^  \"\t\n'|()[]{}<>〔〕“”〈〉《》【】〖〗«»‹›·。\\'")
+        (skip-chars-forward "^  \"\t\n'|()[]{}<>〔〕“”〈〉《》【】〖〗〘〙«»‹›·。\\'")
         (setq $p2 (point))
         (goto-char $p0)))
     (setq $imgPath
@@ -2818,10 +2866,10 @@ Version 2017-12-20"
        (let ($p0 $p1 $p2)
          (setq $p0 (point))
          ;; chars that are likely to be delimiters of full path, e.g. space, tabs, brakets.
-         (skip-chars-backward "^  \"\t\n'|()[]{}<>〔〕“”〈〉《》【】〖〗«»‹›·。\\`")
+         (skip-chars-backward "^  \"\t\n'|()[]{}<>〔〕“”〈〉《》【】〖〗〘〙«»‹›·。\\`")
          (setq $p1 (point))
          (goto-char $p0)
-         (skip-chars-forward "^  \"\t\n'|()[]{}<>〔〕“”〈〉《》【】〖〗«»‹›·。\\'")
+         (skip-chars-forward "^  \"\t\n'|()[]{}<>〔〕“”〈〉《》【】〖〗〘〙«»‹›·。\\'")
          (setq $p2 (point))
          (list $p1 $p2)))))
   (when (or (null @begin) (null @end))
@@ -2874,10 +2922,10 @@ Version 2018-10-31"
         (let ($p0)
           (setq $p0 (point))
           ;; chars that are likely to be delimiters of full path, e.g. space, tabs, brakets.
-          (skip-chars-backward "^  \"\t\n'|[]{}<>〔〕“”〈〉《》【】〖〗«»‹›·。\\`")
+          (skip-chars-backward "^  \"\t\n'|[]{}<>〔〕“”〈〉《》【】〖〗〘〙〘〙«»‹›·。\\`")
           (setq $p1 (point))
           (goto-char $p0)
-          (skip-chars-forward "^  \"\t\n'|[]{}<>〔〕“”〈〉《》【】〖〗«»‹›·。\\'")
+          (skip-chars-forward "^  \"\t\n'|[]{}<>〔〕“”〈〉《》【】〖〗〘〙«»‹›·。\\'")
           (setq $p2 (point)))))
     (setq $input (replace-regexp-in-string "^file:///" "/" (buffer-substring-no-properties $p1 $p2) t t))
     (cond
@@ -3051,10 +3099,10 @@ Version 2020-02-19"
         (let ($p0)
           (setq $p0 (point))
           ;; chars that are likely to be delimiters of full path, e.g. space, tabs, brakets.
-          (skip-chars-backward "^  \"\t\n'|[]{}<>〔〕“”〈〉《》【】〖〗«»‹›·。\\`")
+          (skip-chars-backward "^  \"\t\n'|[]{}<>〔〕“”〈〉《》【】〖〗〘〙«»‹›·。\\`")
           (setq $p1 (point))
           (goto-char $p0)
-          (skip-chars-forward "^  \"\t\n'|[]{}<>〔〕“”〈〉《》【】〖〗«»‹›·。\\'")
+          (skip-chars-forward "^  \"\t\n'|[]{}<>〔〕“”〈〉《》【】〖〗〘〙«»‹›·。\\'")
           (setq $p2 (point)))))
     (setq $input (buffer-substring-no-properties $p1 $p2))
     (setq $newStr
@@ -3914,7 +3962,7 @@ Version 2019-11-10"
           (if (use-region-p)
               (buffer-substring-no-properties (region-beginning) (region-end))
             (let ($p0 $p1 $p2
-                      ($pathStops "^  \t\n\"`'‘’“”|[]{}「」<>〔〕〈〉《》【】〖〗«»‹›❮❯❬❭〘〙·。\\"))
+                      ($pathStops "^  \t\n\"`'‘’“”|[]{}「」<>〔〕〈〉《》【】〖〗〘〙«»‹›❮❯❬❭〘〙·。\\"))
               (setq $p0 (point))
               (skip-chars-backward $pathStops)
               (setq $p1 (point))
@@ -3983,7 +4031,7 @@ Version 2019-02-17"
              (if (use-region-p)
                  (buffer-substring-no-properties (region-beginning) (region-end))
                (let ($p0 $p1 $p2
-                         ($pathStops "^  \t\n\"`'‘’“”|[]{}「」<>〔〕〈〉《》【】〖〗«»‹›❮❯❬❭〘〙·。\\"))
+                         ($pathStops "^  \t\n\"`'‘’“”|[]{}「」<>〔〕〈〉《》【】〖〗〘〙«»‹›❮❯❬❭〘〙·。\\"))
                  (setq $p0 (point))
                  (skip-chars-backward $pathStops)
                  (setq $p1 (point))
@@ -4018,7 +4066,7 @@ Version 2019-11-09"
              (if (use-region-p)
                  (buffer-substring-no-properties (region-beginning) (region-end))
                (let ($p0 $p1 $p2
-                         ($pathStops "^  \t\n\"`'‘’“”|[]{}「」<>〔〕〈〉《》【】〖〗«»‹›❮❯❬❭〘〙·。\\"))
+                         ($pathStops "^  \t\n\"`'‘’“”|[]{}「」<>〔〕〈〉《》【】〖〗〘〙«»‹›❮❯❬❭〘〙·。\\"))
                  (setq $p0 (point))
                  (skip-chars-backward $pathStops)
                  (setq $p1 (point))
@@ -4074,7 +4122,7 @@ Version 2019-02-09"
   (let* (($inputStr (if (use-region-p)
                         (buffer-substring-no-properties (region-beginning) (region-end))
                       (let ($p0 $p1 $p2
-                                ($pathStops "^  \t\n\"`'‘’“”|[]{}「」<>〔〕〈〉《》【】〖〗«»‹›❮❯❬❭〘〙·。\\"))
+                                ($pathStops "^  \t\n\"`'‘’“”|[]{}「」<>〔〕〈〉《》【】〖〗〘〙«»‹›❮❯❬❭〘〙·。\\"))
                         (setq $p0 (point))
                         (skip-chars-backward $pathStops)
                         (setq $p1 (point))
