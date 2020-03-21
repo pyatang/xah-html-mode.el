@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 8.2.20200309101237
+;; Version: 8.2.20200321134057
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1640,7 +1640,7 @@ Cursor must be inside ul tags.
 
 If `universal-argument' is called first, prompt for separator string.
 
-Version 2018-10-28"
+Version 2020-03-09"
   (interactive )
   (let (
         $p1 $p2
@@ -1651,7 +1651,7 @@ Version 2018-10-28"
     (if (use-region-p)
          (setq $p1 (region-beginning) $p2 (region-end))
       (save-excursion
-        (search-backward "<ul " )
+        (search-backward "<ul>" )
         (setq $p1 (point))
         (search-forward "</ul>")
         (setq $p2 (point))))
@@ -4259,6 +4259,8 @@ Version 2016-10-24"
     ("html4t" "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">" xah-html--ahf)
     ("xhtmlh" "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">" xah-html--ahf)
     ("htmlh" "<!doctype html><html><head><meta charset=\"utf-8\" />
+<meta name=viewport content=\"width=device-width, initial-scale=1\">
+
 <title>ttt</title>
 </head>
 <body>
