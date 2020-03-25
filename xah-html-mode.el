@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 8.2.20200321134057
+;; Version: 8.3.20200324193838
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -3038,13 +3038,13 @@ If there is a text selection, use that as input.
 
 Example:
 http://en.wikipedia.org/wiki/Emacs
-⇒
-<a class=\"wikipedia-69128\" href=\"http://en.wikipedia.org/wiki/Emacs\" data-accessed=\"2015-09-14\">Emacs</a>.
+becomes
+<a class=\"wikipedia-69128\" target=\"_blank\" href=\"http://en.wikipedia.org/wiki/Emacs\" data-accessed=\"2015-09-14\">Emacs</a>.
 
 Works the same way for links to wiktionary, e.g. https://en.wiktionary.org/wiki/%E4%BA%86
 
 URL `http://ergoemacs.org/emacs/elisp_html_wikipedia_url_linkify.html'
-Version 2016-06-29."
+Version 2020-03-24"
   (interactive)
   (let (
         $p1 $p2
@@ -3071,7 +3071,7 @@ Version 2016-06-29."
            (decode-coding-string (url-unhex-string (file-name-nondirectory $input-str)) 'utf-8)))
     (setq $output-str
           (format
-           "<a class=\"wikipedia-69128\" href=\"%s\" data-accessed=\"%s\">%s</a>"
+           "<a class=\"wikipedia-69128\" target=\"_blank\" href=\"%s\" data-accessed=\"%s\">%s</a>"
            (url-encode-url $input-str)
            (format-time-string "%Y-%m-%d")
            $link-text
