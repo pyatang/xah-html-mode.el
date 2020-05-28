@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 8.3.20200324193838
+;; Version: 8.4.20200528112728
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -2162,17 +2162,14 @@ Version 2019-10-05"
          $newPath
          $newFullPath
          ($doit-p nil))
-
     (setq $newPath
           (replace-regexp-in-string
            " " "_"
            (read-string "New name or full path: " $oldfName nil $oldfName )))
-
     (setq $newFullPath
           (if (file-name-absolute-p $newPath)
               $newPath
             (expand-file-name $newPath $oldDirPath)))
-
     (if (file-exists-p $newFullPath)
         (setq $doit-p (y-or-n-p "file exist. Replace?"))
       (setq $doit-p t))
@@ -2940,25 +2937,18 @@ Version 2018-10-31"
      ((string-match-p "\\.js\\'\\|\\.ts\\'" $input) (xah-html-javascript-linkify))
      ((xah-html-audio-file-suffix-p $input) (xah-html-audio-file-linkify t))
      ((xah-html-video-file-suffix-p $input) (xah-html-video-file-linkify t))
-
      ((string-match-p "youtube\.com/watch" $input) (xah-html-youtube-linkify))
-
      ((string-match-p "youtu\.be/[A-Za-z0-9]" $input) (xah-html-youtube-linkify))
-
      ((string-match-p "www\.amazon\.com/\\|//amzn\.to/" $input) (xah-html-amazon-linkify))
-
      ((string-match-p "\\`https?://" $input)
       (progn
         (if (fboundp 'xahsite-url-is-xah-website-p)
             (if (xahsite-url-is-xah-website-p $input)
                 (progn
-                  (message "xah-file-linkify called")
                   (xah-file-linkify $p1 $p2))
               (progn
-                (message "xah-html-source-url-linkify called")
                 (xah-html-source-url-linkify 0)))
           (progn
-            (message "xah-html-source-url-linkify called")
             (xah-html-source-url-linkify 0)))))
      ((xah-html-image-file-suffix-p $input) (xah-html-image-figure-linkify))
      ((string-match
@@ -2966,15 +2956,12 @@ Version 2018-10-31"
        (or (buffer-file-name) default-directory))
       (if (fboundp 'xah-all-linkify)
           (progn
-            (message "xah-all-linkify called")
             (xah-all-linkify))
         (xah-html-url-linkify)))
      ((file-exists-p $input)
       (progn
-        (message "xah-html-file-linkify called")
         (xah-html-file-linkify $p1 $p2)))
      (t (progn
-          (message "xah-html-url-linkify called")
           (xah-html-url-linkify))))
     ;;
     ))
@@ -3421,32 +3408,32 @@ Version 2019-05-20"
            ;; case must match
            ["Ctrl" "<kbd>Ctrl</kbd>"]
            ["Control" "<kbd>Ctrl</kbd>"]
-           ["AltGr" "<kbd>Alt Graph</kbd>"]
-           ["AltGraph" "<kbd>Alt Graph</kbd>"]
-           ["Compose" "<kbd>⎄ Compose</kbd>"]
+           ["AltGr" "<kbd>AltGraph</kbd>"]
+           ["AltGraph" "<kbd>AltGraph</kbd>"]
+           ["Compose" "<kbd>Compose</kbd>"]
            ["Alt" "<kbd>Alt</kbd>"]
            ["Shift" "<kbd>Shift</kbd>"]
-           ["Cmd" "<kbd>⌘ command</kbd>"]
-           ["Option" "<kbd>⌥ option</kbd>"]
-           ["Opt" "<kbd>⌥ option</kbd>"]
-           ["Win" "<kbd>❖ Window</kbd>"]
-           ["Menu" "<kbd>▤ Menu</kbd>"]
+           ["Cmd" "<kbd>command</kbd>"]
+           ["Option" "<kbd>option</kbd>"]
+           ["Opt" "<kbd>option</kbd>"]
+           ["Win" "<kbd>❖Window</kbd>"]
+           ["Menu" "<kbd>▤Menu</kbd>"]
            ["Meta" "<kbd>Meta</kbd>"]
            ["Super" "<kbd>Super</kbd>"]
            ["Hyper" "<kbd>Hyper</kbd>"]
 
            ["Return" "<kbd>Return</kbd>"]
            ["Enter" "<kbd>Enter</kbd>"]
-           ["Backspace" "<kbd>⌫ Backspace</kbd>"]
-           ["bs" "<kbd>⌫ Backspace</kbd>"]
-           ["Delete" "<kbd>⌦ Delete</kbd>"]
-           ["DEL" "<kbd>⌦ Delete</kbd>"]
+           ["Backspace" "<kbd>Backspace</kbd>"]
+           ["bs" "<kbd>Backspace</kbd>"]
+           ["Delete" "<kbd>Delete</kbd>"]
+           ["DEL" "<kbd>Delete</kbd>"]
            ["Space" "<kbd>Space</kbd>"]
            ["Caps Lock" "<kbd>CapsLock</kbd>"]
            ["capslock" "<kbd>CapsLock</kbd>"]
            ["f lock" "<kbd>F Lock</kbd>"]
-           ["numlock" "<kbd>Num Lock</kbd>"]
-           ["Number Lock" "<kbd>Num Lock</kbd>"]
+           ["numlock" "<kbd>NumLock</kbd>"]
+           ["Number Lock" "<kbd>NumLock</kbd>"]
 
            ["Help" "<kbd>Help</kbd>"]
            ["Power" "<kbd>Power</kbd>"]
@@ -3455,17 +3442,17 @@ Version 2019-05-20"
            ["escape" "<kbd>Escape</kbd>"]
            ["Home" "<kbd>Home</kbd>"]
            ["End" "<kbd>End</kbd>"]
-           ["PgUp" "<kbd>Page Up</kbd>"]
-           ["PgDn" "<kbd>Page Down</kbd>"]
+           ["PgUp" "<kbd>PageUp</kbd>"]
+           ["PgDn" "<kbd>PageDown</kbd>"]
            ["Insert" "<kbd>Insert</kbd>"]
            ["INS" "<kbd>Insert</kbd>"]
            ["Pause" "<kbd>Pause</kbd>"]
            ["Break" "<kbd>Break</kbd>"]
-           ["PrtScn" "<kbd>Print Screen</kbd>"]
-           ["ps" "<kbd>Print Screen</kbd>"]
+           ["PrtScn" "<kbd>PrintScreen</kbd>"]
+           ["ps" "<kbd>PrintScreen</kbd>"]
            ["sysrq" "<kbd>SysRq</kbd>"]
-           ["scrlk" "<kbd>Scroll Lock</kbd>"]
-           ["scrolllock" "<kbd>Scroll Lock</kbd>"]
+           ["scrlk" "<kbd>ScrollLock</kbd>"]
+           ["scrolllock" "<kbd>ScrollLock</kbd>"]
            ["Fn" "<kbd>Fn</kbd>"]
 
            ["Copy" "<kbd>Copy</kbd>"]
@@ -4327,7 +4314,7 @@ Version 2016-10-24"
   (define-key xah-html-mode-no-chord-map (kbd "m") 'xah-html-insert-wrap-source-code)
   (define-key xah-html-mode-no-chord-map (kbd "n") 'xah-html-update-title)
   (define-key xah-html-mode-no-chord-map (kbd "o") nil)
-  (define-key xah-html-mode-no-chord-map (kbd "p") 'browse-url-of-buffer)
+  (define-key xah-html-mode-no-chord-map (kbd "p") 'xah-html-browse-url-of-buffer)
   (define-key xah-html-mode-no-chord-map (kbd "q") 'xah-html-make-link-defunct)
 
   (define-key xah-html-mode-no-chord-map (kbd "r") nil)
