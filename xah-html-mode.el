@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 8.4.20200528112728
+;; Version: 8.5.20200617210933
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -3728,70 +3728,43 @@ This is heuristic based, does not remove ALL possible redundant whitespace."
             (replace-match "<p>")))))))
 
 (defun xah-html-remove-wikipedia-link ()
-  "Delet wikipedia link at cursor position
-Version 2019-04-07"
+  "Delet wikipedia link after cursor position.
+
+https://en.wikipedia.org/wiki/isometry
+https://en.m.wikipedia.org/w/index.php?title=Trigonometry
+<a class=\"wikipedia-69128\" target=\"_blank\" href=\"https://en.wikipedia.org/wiki/isometry\">isometry</a>
+
+Version 2020-06-17"
   (interactive)
   (require 'xah-html-mode)
-  (let ( $p2
-         $deletedText
-         )
-    (when (search-forward "</a>")
+  (let ( $p1 $p2 $textToDelete )
+    (when (search-forward "</a>" nil "move")
       (progn
         (setq $p2 (point))
-        (re-search-backward "http.?://..\\.wikipedia.org/wiki/")
         (re-search-backward "<a .*href=")
-        (setq $deletedText (buffer-substring (point) $p2))
-        (xah-html-remove-html-tags (point) $p2)
-        (message "%s" $deletedText)
-        $deletedText
-        ))))
+        (setq $p1 (point))
+        (setq $textToDelete (buffer-substring-no-properties $p1 $p2))
+        (if (search-forward ".wikipedia.org/wiki/"  $p2 t)
+            (progn
+              (xah-html-remove-html-tags $p1 $p2)
+              $textToDelete
+              )
+          nil
+          )))))
 
 (defun xah-html-remove-all-wikipedia-link ()
-  "Delete all wikipedia links in a html file, except image links etc.
-Version 2018-06-03"
+  "Delete all wikipedia links in a html file.
+Version 2020-06-17"
   (interactive)
-  (let ($p1
-        $p2 $deletedText
-        ($resultList '()))
-    (goto-char (point-min))
-    (while (re-search-forward "<a \\(class=\"wikipedia-69128\" \\)?href=\"https?://...wikipedia.org/wiki/" nil t)
-      (progn
-        (search-backward "<a " )
-        (setq $p1 (point))
-        (search-forward ">")
-        (setq $p2 (point))
-
-        (setq $deletedText (buffer-substring-no-properties $p1 $p2))
-        (push $deletedText $resultList)
-        (delete-region $p1 $p2)
-
-        (search-forward "</a>")
-        (setq $p2 (point))
-        (search-backward "</a>")
-        (setq $p1 (point))
-
-        (setq $deletedText (buffer-substring-no-properties $p1 $p2))
-        (push $deletedText $resultList)
-        (delete-region $p1 $p2)))
-
-    ;; (goto-char (point-min))
-    ;; (while (re-search-forward "<a class=\"wikipedia-69128\" href" nil t)
-    ;;   (progn
-    ;;     (search-backward "<a class=\"wikipedia-69128\" href" )
-    ;;     (setq $p1 (point))
-    ;;     (search-forward ">")
-    ;;     (setq $p2 (point))
-    ;;     (setq $deletedText (buffer-substring-no-properties $p1 $p2))
-    ;;     (push $deletedText $resultList)
-    ;;     (delete-region $p1 $p2)
-    ;;     (search-forward "</a>")
-    ;;     (setq $p2 (point))
-    ;;     (search-backward "</a>")
-    ;;     (setq $p1 (point))
-    ;;     (delete-region $p1 $p2)))
-
-    (terpri )
-    (mapc (lambda (x) (princ x) (terpri )) (reverse $resultList))))
+  (save-excursion
+    (let ($flag ($removedTextList '()))
+      (goto-char (point-min))
+      (while (search-forward ".wikipedia.org/wiki/" nil "move")
+        (setq $flag (xah-html-remove-wikipedia-link))
+        (push $flag $removedTextList))
+      (mapc (lambda (x) (princ x) (terpri)) $removedTextList)
+      $removedTextList
+      )))
 
 (defun xah-html-remove-uri-fragment (@href-value)
   "remove URL @href-value fragment, anything after first 「#」 char, including the #.
