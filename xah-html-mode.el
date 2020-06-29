@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 8.5.20200619114805
+;; Version: 8.1.20200629080007
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -3026,7 +3026,7 @@ If there is a text selection, use that as input.
 Example:
 http://en.wikipedia.org/wiki/Emacs
 becomes
-<a class=\"wikipedia-69128\" target=\"_blank\" href=\"http://en.wikipedia.org/wiki/Emacs\" data-accessed=\"2015-09-14\">Emacs</a>.
+<a class=\"wikipedia_92d5m\" target=\"_blank\" href=\"http://en.wikipedia.org/wiki/Emacs\" data-accessed=\"2015-09-14\">Emacs</a>.
 
 Works the same way for links to wiktionary, e.g. https://en.wiktionary.org/wiki/%E4%BA%86
 
@@ -3058,7 +3058,7 @@ Version 2020-03-24"
            (decode-coding-string (url-unhex-string (file-name-nondirectory $input-str)) 'utf-8)))
     (setq $output-str
           (format
-           "<a class=\"wikipedia-69128\" target=\"_blank\" href=\"%s\" data-accessed=\"%s\">%s</a>"
+           "<a class=\"wikipedia_92d5m\" target=\"_blank\" href=\"%s\" data-accessed=\"%s\">%s</a>"
            (url-encode-url $input-str)
            (format-time-string "%Y-%m-%d")
            $link-text
@@ -3732,7 +3732,7 @@ This is heuristic based, does not remove ALL possible redundant whitespace."
 
 https://en.wikipedia.org/wiki/isometry
 https://en.m.wikipedia.org/w/index.php?title=Trigonometry
-<a class=\"wikipedia-69128\" target=\"_blank\" href=\"https://en.wikipedia.org/wiki/isometry\">isometry</a>
+<a class=\"wikipedia_92d5m\" target=\"_blank\" href=\"https://en.wikipedia.org/wiki/isometry\">isometry</a>
 
 Version 2020-06-17"
   (interactive)
@@ -3858,7 +3858,6 @@ Version 2018-10-26"
 
 (defun xah-html-browse-url-of-buffer ()
   "Like `browse-url-of-buffer' but save file first.
-This command save the file first.
 
 Then, if `universal-argument' is called, visit the corresponding xahsite URL.
 For example, if current buffer is of this file:
@@ -3866,7 +3865,7 @@ For example, if current buffer is of this file:
 then after calling this function,
 default browser will be launched and opening this URL:
  http://xahlee.info/index.html
-Version 2017-09-22"
+Version 2020-06-26"
   (interactive)
   (let (($url
          (if current-prefix-arg
@@ -3875,7 +3874,6 @@ Version 2017-09-22"
     (when (buffer-modified-p )
       (when (fboundp 'xah-clean-whitespace) (xah-clean-whitespace))
       (save-buffer))
-    (message "browsing %s" $url)
     (browse-url $url )))
 
 (defun xah-html-open-in-chrome-browser ()
@@ -4202,7 +4200,8 @@ Version 2016-10-24"
     ("hei" "height" xah-html--ahf)
     ("bgc" "background-color" xah-html--ahf)
     ("bgc" "background-color" xah-html--ahf)
-    ("brh" "<br />\n\n" xah-html--ahf)
+    ("br" "<br />\n" xah-html--ahf)
+    ("hr" "<hr />\n\n" xah-html--ahf)
     ("divh" "<div id=\"x\" class=\"x\">\n▮</div>\n" xah-html--ahf)
     ("spanh" "<span id=\"x\" class=\"x\">▮</span>\n" xah-html--ahf)
     ("ph" "<p class=\"x\">▮</p>\n\n" xah-html--ahf)
