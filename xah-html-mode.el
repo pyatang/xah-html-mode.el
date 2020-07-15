@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 8.1.20200629080007
+;; Version: 8.2.20200715125143
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1850,6 +1850,39 @@ Version 2015-07-27"
                     (replace-regexp-in-string " " "_" $linkText)
                     "\">" $linkText "</a>"))))
 
+(defun xah-html-remove-list-tags ()
+  "Remove HTML ul ol li list tags.
+Version 2020-07-15"
+  (interactive)
+  (let ($p1 $p2)
+    (save-excursion
+      (if (region-active-p)
+          (progn
+            (setq $p1 (region-beginning))
+            (setq $p2 (region-end)))
+        (progn
+          (skip-chars-forward " \n\t")
+          (when (re-search-backward "\n[ \t]*\n" nil "move")
+            (re-search-forward "\n[ \t]*\n"))
+          (setq $p1 (point))
+          (re-search-forward "\n[ \t]*\n" nil "move")
+          (re-search-backward "\n[ \t]*\n" )
+          (setq $p2 (point)))))
+    (save-restriction
+      (narrow-to-region $p1 $p2)
+      (goto-char 1)
+      (while (search-forward "<ul>" nil t) (replace-match "" ))
+      (goto-char 1)
+      (while (search-forward "</ul>" nil t) (replace-match "" ))
+      (goto-char 1)
+      (while (search-forward "<ol>" nil t) (replace-match "" ))
+      (goto-char 1)
+      (while (search-forward "</ol>" nil t) (replace-match "" ))
+      (goto-char 1)
+      (while (search-forward "<li>" nil t) (replace-match "" ))
+      (goto-char 1)
+      (while (search-forward "</li>" nil t) (replace-match "" )))))
+
 (defun xah-html-remove-span-tag-region (@begin @end)
   "Delete HTML “span” tags in region.
 Only span tags of the form <span class=\"…\"> and </span> are deleted.
@@ -2322,7 +2355,7 @@ If there's a text selection, use it for input, otherwise the input is a text blo
 The order of lines for {title, author, date/time, url} needs not be in that order. Author should start with “by”.
 
 URL `http://ergoemacs.org/emacs/elisp_make-citation.html'
-Version 2020-01-17"
+Version 2020-06-30"
   (interactive)
   (let* (
          ($bds (xah-get-bounds-of-thing 'block))
@@ -2342,7 +2375,7 @@ Version 2020-01-17"
         (cond
          ((string-match "https?://" $x) (setq $url $x))
          ((xah-html--is-datetimestamp-p $x) (setq $date $x))
-         ((string-match "^ *[bB]y " $x) (setq $author $x))
+         ((string-match "^ *[bB]y:* " $x) (setq $author $x))
          (t (setq $title $x)))))
 
     (when (not $author) (error "I can't find “author” %s" $author))
@@ -2356,7 +2389,7 @@ Version 2020-01-17"
 
     (setq $author (string-trim $author))
     (setq $author (replace-regexp-in-string "\\. " " " $author)) ; remove period in Initals
-    (setq $author (replace-regexp-in-string "^ *[Bb]y +" "" $author))
+    (setq $author (replace-regexp-in-string "^ *[Bb]y:* +" "" $author))
     (setq $author (upcase-initials (downcase $author)))
 
     (setq $date (string-trim $date))
