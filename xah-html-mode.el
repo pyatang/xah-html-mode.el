@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 8.3.20200715173352
+;; Version: 8.3.20200716101654
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -3000,14 +3000,15 @@ Version 2018-10-31"
     ))
 
 (defun xah-html-source-url-linkify (@prefixArg)
-  "Make URL at cursor point into a HTML link.
+  "Change URL under cursor into a HTML link.
 If there's a text selection, use the text selection as input.
 
 Example: http://example.com/xyz.htm
 becomes
-<a class=\"sorc\" target=\"_blank\" href=\"http://example.com/xyz.htm\" data-accessed=\"2008-12-25\">example.com…</a>
+<a class=\"sorc\" target=\"_blank\" href=\"http://example.com/xyz.htm\" data-accessed=\"2008-12-25\">http://example.com/xyz.htm</a>
 
-The anchor text may be of 4 possibilities, depending on value of `universal-argument'.
+If `universal-argument' is called first,
+The anchor text may be of 4 possibilities:
 
 1 → 「‹full url›」
 2 or 4 → 「‹domain›…」
