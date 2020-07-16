@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 8.2.20200715125143
+;; Version: 8.3.20200715173352
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -2348,14 +2348,14 @@ by Ewan Morrison
 
 becomes
 
- [<cite>Why Utopian Communities Fail</cite> <time>2018-03-08</time> By Ewan Morrison. At <a class=\"sorc\" href=\"https://areomagazine.com/2018/03/08/why-utopian-communities-fail/\" data-accessed=\"2018-03-24\">https://areomagazine.com/2018/03/08/why-utopian-communities-fail/</a> ]
+ [<cite>Why Utopian Communities Fail</cite> <time>2018-03-08</time> By Ewan Morrison. At <a class=\"sorc\" target=\"_blank\" href=\"https://areomagazine.com/2018/03/08/why-utopian-communities-fail/\" data-accessed=\"2018-03-24\">https://areomagazine.com/2018/03/08/why-utopian-communities-fail/</a> ]
 
 If there's a text selection, use it for input, otherwise the input is a text block between blank lines.
 
 The order of lines for {title, author, date/time, url} needs not be in that order. Author should start with “by”.
 
 URL `http://ergoemacs.org/emacs/elisp_make-citation.html'
-Version 2020-06-30"
+Version 2020-07-15"
   (interactive)
   (let* (
          ($bds (xah-get-bounds-of-thing 'block))
@@ -3005,7 +3005,7 @@ If there's a text selection, use the text selection as input.
 
 Example: http://example.com/xyz.htm
 becomes
-<a class=\"sorc\" href=\"http://example.com/xyz.htm\" data-accessed=\"2008-12-25\">example.com…</a>
+<a class=\"sorc\" target=\"_blank\" href=\"http://example.com/xyz.htm\" data-accessed=\"2008-12-25\">example.com…</a>
 
 The anchor text may be of 4 possibilities, depending on value of `universal-argument'.
 
@@ -3015,7 +3015,7 @@ The anchor text may be of 4 possibilities, depending on value of `universal-argu
 0 or any → smartly decide.
 
 URL `http://ergoemacs.org/emacs/elisp_html-linkify.html'
-Version 2018-02-17"
+Version 2020-07-15"
   (interactive "P")
   (let (
         $p1
@@ -3048,7 +3048,7 @@ Version 2018-02-17"
     ;; delete URL and insert the link
     (delete-region $p1 $p2)
     (insert (format
-             "<a class=\"sorc\" href=\"%s\" data-accessed=\"%s\">%s</a>"
+             "<a class=\"sorc\" target=\"_blank\" href=\"%s\" data-accessed=\"%s\">%s</a>"
              $url (format-time-string "%Y-%m-%d") $linkText
              ))))
 
