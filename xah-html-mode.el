@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 8.3.20200716101654
+;; Version: 8.4.20200716232003
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -65,6 +65,33 @@ Version 2018-05-08"
    xah-html-webroot-list
    nil
    ))
+
+(defun xah-html-local-link-p (@href-value)
+  "Return true if it's a local file link, else false.
+
+None local link may start with these:
+
+ http://
+ https://
+ mailto:
+ irc:
+ ftp:
+ javascript:
+ //
+
+Version 2020-07-16"
+(cond
+   ((string-match-p "^\.\./" @href-value) t)
+   ((string-match-p "^\./" @href-value) t)
+   ((string-match-p "^//" @href-value) nil)
+   ((string-match-p "^http://" @href-value) nil)
+   ((string-match-p "^https://" @href-value) nil)
+   ((string-match-p "^mailto:" @href-value) nil)
+   ((string-match-p "^irc:" @href-value) nil)
+   ((string-match-p "^ftp:" @href-value) nil)
+   ((string-match-p "^javascript:" @href-value) nil)
+   (t t)
+))
 
 (defun xah-html-get-relative-path-to-webroot (@path)
   "Return the relative path of @path with respect to its webroot.
