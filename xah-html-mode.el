@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 8.4.20200801182836
+;; Version: 8.5.20200804140700
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -3183,7 +3183,7 @@ Version 2019-06-21"
 
 (defun xah-html-insert-br-tag ()
   "Add <br /> at cursor point, or end of each line in selection.
-Version 2019-03-05"
+Version 2020-08-02"
   (interactive)
   (if (use-region-p)
       (progn
@@ -4004,6 +4004,17 @@ Version 2019-11-10"
         (start-process "" nil "powershell" "start-process" "chrome" $path )))
      ((string-equal system-type "gnu/linux")
       (shell-command (format "google-chrome-stable \"%s\"" $path))))))
+
+
+(defun xah-html-open-in-chrome ()
+  "Open current buffer or link under cursor in Google Chrome browser.
+If cursor position is link/url, open that link. Else, open current buffer.
+Version 2020-08-04"
+  (interactive)
+  (let ((filePath (thing-at-point 'filename )) )
+    (if filePath
+        (xah-html-open-link-in-chrome)
+      (xah-html-open-in-chrome-browser))))
 
 (defun xah-html-open-in-brave ()
   "Open the current file or `dired' marked files in Brave browser.
