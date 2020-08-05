@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 8.5.20200804140700
+;; Version: 8.6.20200805123722
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -669,11 +669,15 @@ Version 2019-04-08
 
 (defun xah-html-htmlized-p (@begin @end)
   "Return true if region @BEGIN @END is htmlized code.
-WARNING: it just check if it contains certain span tags.
-Version 2019-11-05"
+“htmlized” means lots of <span class=\"...\">...</span> tags for syntax coloring.
+WARNING: it just check if it contains cortain span tags.
+Version 2020-08-05"
   (save-excursion
-    (goto-char @begin)
-    (re-search-forward "<span class=\"comment\">\\|<span class=\"comment-delimiter\">\\|<span class=\"function-name\">\\|<span class=\"string\">\\|<span class=\"variable-name\">\\|<span class=\"keyword\">\\|<span class=\"bold\">\\|<span class=\"builtin\">\\|<span class=\"constant\">\\|<span class=\"doc\">\\|<span class=\"preprocessor\">\\|<span class=\"type\">\\|<span class=\"underline\">\\|<span class=\"warning\">" @end t)))
+    (cond
+     ( (progn (goto-char @begin) (search-forward "&lt;<span" @end t)) t )
+     ( (progn (goto-char @begin) (re-search-forward "<span class=\"comment\">\\|<span class=\"comment-delimiter\">\\|<span class=\"function-name\">\\|<span class=\"string\">\\|<span class=\"variable-name\">\\|<span class=\"keyword\">\\|<span class=\"bold\">\\|<span class=\"builtin\">\\|<span class=\"constant\">\\|<span class=\"doc\">\\|<span class=\"preprocessor\">\\|<span class=\"type\">\\|<span class=\"underline\">\\|<span class=\"warning\">" @end t)) t
+       )
+     (t nil))))
 
 (defun xah-html-get-langcode ()
   "Get the langCode and position boundary of current HTML pre block.
