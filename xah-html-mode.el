@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 8.6.20200806210229
+;; Version: 8.6.20200807085916
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -2869,7 +2869,7 @@ Here's sample result:
 </figcaption>
 </figure>
 
-Version 2020-08-06"
+Version 2020-08-07"
   (interactive)
   (let ( $p1 $p2 $inputStr $id
              ($youtubeLinkChars "-_?.:/=&A-Za-z0-9"))
@@ -2889,7 +2889,9 @@ Version 2020-08-06"
 
     (delete-region $p1 $p2)
     (insert "\n<figure>\n")
-    (insert (concat "<iframe width=\"640\" height=\"480\" src=\"https://www.youtube.com/embed/" $id ))
+
+    (insert
+     (concat "<iframe width=\"640\" height=\"480\" src=\"https://www.youtube.com/embed/" $id "\" allowfullscreen></iframe>"))
     (insert "\n<figcaption>\n")
     (insert "</figcaption>\n")
     (insert "</figure>\n")
