@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 8.6.20200805123722
+;; Version: 8.6.20200806210229
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -2066,7 +2066,7 @@ Works on text block or region.
 Example, this:
 
 <figure>
-<iframe width=\"640\" height=\"480\" src=\"https://www.youtube.com/embed/Vn7U7S0-5CQ?rel=0\" allowfullscreen></iframe>
+<iframe width=\"640\" height=\"480\" src=\"https://www.youtube.com/embed/Vn7U7S0-5CQ\" allowfullscreen></iframe>
 <figcaption>
 xah talk show 2019-08-19 Deseret/Shavian Alphabets, IPA, font size, fugue, elisp coding youtube html
 </figcaption>
@@ -2074,50 +2074,38 @@ xah talk show 2019-08-19 Deseret/Shavian Alphabets, IPA, font size, fugue, elisp
 
 becomes:
 
-https://www.youtube.com/watch?v=Vn7U7S0-5CQ?
+https://www.youtube.com/watch?v=Vn7U7S0-5CQ
 xah talk show 2019-08-19 Deseret/Shavian Alphabets, IPA, font size, fugue, elisp coding youtube html
 
 Version 2020-02-24"
   (interactive)
   (let ( p1 p2 p3 p4 figCapText ytUrl )
-
     (let (bds)
       (setq bds (xah-get-bounds-of-thing-or-region 'block))
       (setq p1 (car bds) p2 (cdr bds)))
-
     (save-restriction
       (narrow-to-region p1 p2)
       (let ((case-fold-search t))
         (goto-char (point-min))
         (search-forward-regexp "src=\"\\([^\"]+\\)\"" )
         (setq ytUrl (match-string 1 ))
-
         (goto-char (point-min))
         (search-forward "<figcaption>" )
         (setq p3 (point))
-
         (goto-char (point-min))
         (search-forward "</figcaption>" )
         (search-backward "</figcaption>")
         (setq p4 (point))
-
         (setq figCapText (buffer-substring-no-properties p3 p4))
-
         (delete-region (point-min) (point-max))
-
         (insert ytUrl)
-
         (goto-char (point-min))
         (search-forward "embed/" )
         (replace-match "")
-
         (insert "watch?v=")
-
-        (goto-char (point-min))
-        (search-forward "?rel=0" )
-        (replace-match "")
-
-        (insert "\n" figCapText "\n\n")))))
+        (end-of-line )
+        (insert "\n" figCapText "\n\n")
+        ))))
 
 (defun xah-html-html-to-text ()
   "Convert HTML to plain text on current text block or text selection.
@@ -2876,12 +2864,12 @@ The line can be any of
 Here's sample result:
 
 <figure>
-<iframe width=\"640\" height=\"480\" src=\"https://www.youtube.com/embed/yQw3DvqEbxI?rel=0\" allowfullscreen></iframe>
+<iframe width=\"640\" height=\"480\" src=\"https://www.youtube.com/embed/yQw3DvqEbxI\" allowfullscreen></iframe>
 <figcaption>
 </figcaption>
 </figure>
 
-Version 2018-06-24"
+Version 2020-08-06"
   (interactive)
   (let ( $p1 $p2 $inputStr $id
              ($youtubeLinkChars "-_?.:/=&A-Za-z0-9"))
@@ -2901,7 +2889,7 @@ Version 2018-06-24"
 
     (delete-region $p1 $p2)
     (insert "\n<figure>\n")
-    (insert (concat "<iframe width=\"640\" height=\"480\" src=\"https://www.youtube.com/embed/" $id "?rel=0\" allowfullscreen></iframe>"))
+    (insert (concat "<iframe width=\"640\" height=\"480\" src=\"https://www.youtube.com/embed/" $id ))
     (insert "\n<figcaption>\n")
     (insert "</figcaption>\n")
     (insert "</figure>\n")
