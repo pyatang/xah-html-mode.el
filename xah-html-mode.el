@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 8.6.20200807085916
+;; Version: 8.7.20200807135423
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -2857,14 +2857,15 @@ Version 2020-01-15"
 
 The line can be any of
 
- AZNHuFjnmUo
- https://www.youtube.com/watch?v=AZNHuFjnmUo
- https://youtu.be/AZNHuFjnmUo
+ https://www.youtube.com/watch?v=RhYNu6i_uY4
+ RhYNu6i_uY4
+ https://youtu.be/RhYNu6i_uY4
+ https://www.youtube.com/embed/RhYNu6i_uY4
 
 Here's sample result:
 
 <figure>
-<iframe width=\"640\" height=\"480\" src=\"https://www.youtube.com/embed/yQw3DvqEbxI\" allowfullscreen></iframe>
+<iframe width=\"640\" height=\"480\" src=\"https://www.youtube.com/embed/RhYNu6i_uY4\" allowfullscreen></iframe>
 <figcaption>
 </figcaption>
 </figure>
@@ -2875,21 +2876,26 @@ Version 2020-08-07"
              ($youtubeLinkChars "-_?.:/=&A-Za-z0-9"))
     (skip-chars-backward $youtubeLinkChars (min 1 (- (point) 100)))
     (setq $p1 (point))
-
     (skip-chars-forward $youtubeLinkChars (+ $p1 100))
     (setq $p2 (point))
-
     (setq $inputStr (buffer-substring-no-properties $p1 $p2))
-
     (setq $id
           (cond
-           ((string-match "v=\\(.\\{11\\}\\)" $inputStr) (match-string 1 $inputStr))
-           ((string-match "youtu\\.be/\\([A-Za-z0-9]\\{11\\}\\)" $inputStr) (match-string 1 $inputStr))
+           ;; RhYNu6i_uY4
+           ((eq 11 (length $inputStr))
+            $inputStr)
+           ;; https://www.youtube.com/watch?v=RhYNu6i_uY4
+           ((string-match "v=\\(.\\{11\\}\\)" $inputStr)
+            (match-string 1 $inputStr))
+           ;; https://youtu.be/RhYNu6i_uY4
+           ((string-match "youtu\\.be/\\(.\\{11\\}\\)" $inputStr)
+            (match-string 1 $inputStr))
+           ;; https://www.youtube.com/embed/RhYNu6i_uY4
+           ((string-match "youtube.com/embed/\\(.\\{11\\}\\)" $inputStr)
+            (match-string 1 $inputStr))
            (t (error "cannot find the youtube vid id in url" ))))
-
     (delete-region $p1 $p2)
     (insert "\n<figure>\n")
-
     (insert
      (concat "<iframe width=\"640\" height=\"480\" src=\"https://www.youtube.com/embed/" $id "\" allowfullscreen></iframe>"))
     (insert "\n<figcaption>\n")
