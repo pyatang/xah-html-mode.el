@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 8.7.20200807135423
+;; Version: 8.8.20200807201354
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -2858,9 +2858,9 @@ Version 2020-01-15"
 The line can be any of
 
  https://www.youtube.com/watch?v=RhYNu6i_uY4
- RhYNu6i_uY4
  https://youtu.be/RhYNu6i_uY4
  https://www.youtube.com/embed/RhYNu6i_uY4
+ RhYNu6i_uY4
 
 Here's sample result:
 
@@ -2874,10 +2874,14 @@ Version 2020-08-07"
   (interactive)
   (let ( $p1 $p2 $inputStr $id
              ($youtubeLinkChars "-_?.:/=&A-Za-z0-9"))
-    (skip-chars-backward $youtubeLinkChars (min 1 (- (point) 100)))
-    (setq $p1 (point))
-    (skip-chars-forward $youtubeLinkChars (+ $p1 100))
-    (setq $p2 (point))
+
+    ;; (skip-chars-backward $youtubeLinkChars (min 1 (- (point) 100)))
+    ;; (setq $p1 (point))
+    ;; (skip-chars-forward $youtubeLinkChars (+ $p1 100))
+    ;; (setq $p2 (point))
+
+    (setq $p1 (line-beginning-position))
+    (setq $p2 (line-end-position))
     (setq $inputStr (buffer-substring-no-properties $p1 $p2))
     (setq $id
           (cond
@@ -2895,12 +2899,24 @@ Version 2020-08-07"
             (match-string 1 $inputStr))
            (t (error "cannot find the youtube vid id in url" ))))
     (delete-region $p1 $p2)
-    (insert "\n<figure>\n")
+
+    ;; (insert "\n<figure>\n")
+    ;; (insert
+    ;;  (concat "<iframe width=\"640\" height=\"480\" src=\"https://www.youtube.com/embed/" $id "\" allowfullscreen></iframe>"))
+    ;; (insert "\n<figcaption>\n")
+    ;; (insert "</figcaption>\n")
+    ;; (insert "</figure>\n")
+
     (insert
-     (concat "<iframe width=\"640\" height=\"480\" src=\"https://www.youtube.com/embed/" $id "\" allowfullscreen></iframe>"))
-    (insert "\n<figcaption>\n")
-    (insert "</figcaption>\n")
-    (insert "</figure>\n")
+     (format "<figure>
+<iframe width=\"640\" height=\"480\" src=\"https://www.youtube.com/embed/%s\" allowfullscreen></iframe>
+<figcaption>
+</figcaption>
+</figure>
+"
+             $id
+             ))
+
     (search-backward "</figcaption>" )
     (backward-char 1)))
 
@@ -2967,7 +2983,7 @@ Exactly what tag is used depends on the suffix. Here's example of result:
 and YouTube url.
 
 If region is active, use it as input.
-Version 2018-10-31"
+Version 2020-08-07"
   (interactive)
   (let ( $p1 $p2 $input)
     ;; (if (string-match "%" $input )
@@ -2997,8 +3013,8 @@ Version 2018-10-31"
      ((string-match-p "\\.js\\'\\|\\.ts\\'" $input) (xah-html-javascript-linkify))
      ((xah-html-audio-file-suffix-p $input) (xah-html-audio-file-linkify t))
      ((xah-html-video-file-suffix-p $input) (xah-html-video-file-linkify t))
-     ((string-match-p "youtube\.com/watch" $input) (xah-html-youtube-linkify))
-     ((string-match-p "youtu\.be/[A-Za-z0-9]" $input) (xah-html-youtube-linkify))
+     ((string-match-p "youtube\.com/" $input) (xah-html-youtube-linkify))
+     ((string-match-p "youtu\.be/" $input) (xah-html-youtube-linkify))
      ((string-match-p "www\.amazon\.com/\\|//amzn\.to/" $input) (xah-html-amazon-linkify))
      ((string-match-p "\\`https?://" $input)
       (progn
