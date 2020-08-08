@@ -2872,14 +2872,7 @@ Here's sample result:
 
 Version 2020-08-07"
   (interactive)
-  (let ( $p1 $p2 $inputStr $id
-             ($youtubeLinkChars "-_?.:/=&A-Za-z0-9"))
-
-    ;; (skip-chars-backward $youtubeLinkChars (min 1 (- (point) 100)))
-    ;; (setq $p1 (point))
-    ;; (skip-chars-forward $youtubeLinkChars (+ $p1 100))
-    ;; (setq $p2 (point))
-
+  (let ( $p1 $p2 $inputStr $id )
     (setq $p1 (line-beginning-position))
     (setq $p2 (line-end-position))
     (setq $inputStr (buffer-substring-no-properties $p1 $p2))
@@ -2899,14 +2892,6 @@ Version 2020-08-07"
             (match-string 1 $inputStr))
            (t (error "cannot find the youtube vid id in url" ))))
     (delete-region $p1 $p2)
-
-    ;; (insert "\n<figure>\n")
-    ;; (insert
-    ;;  (concat "<iframe width=\"640\" height=\"480\" src=\"https://www.youtube.com/embed/" $id "\" allowfullscreen></iframe>"))
-    ;; (insert "\n<figcaption>\n")
-    ;; (insert "</figcaption>\n")
-    ;; (insert "</figure>\n")
-
     (insert
      (format "<figure>
 <iframe width=\"640\" height=\"480\" src=\"https://www.youtube.com/embed/%s\" allowfullscreen></iframe>
@@ -2916,7 +2901,6 @@ Version 2020-08-07"
 "
              $id
              ))
-
     (search-backward "</figcaption>" )
     (backward-char 1)))
 
@@ -2979,8 +2963,7 @@ Exactly what tag is used depends on the suffix. Here's example of result:
  <img src=\"xyz.png\" alt=\"xyz\" width=\"960\" height=\"720\" />
  <video src=\"xyz.mp4\" controls loop></video>
  <audio src=\"xyz.mp3\" controls loop></audio>
-
-and YouTube url.
+ <iframe width=\"640\" height=\"480\" src=\"https://www.youtube.com/embed/aeKZmHm5ICw\" allowfullscreen></iframe>
 
 If region is active, use it as input.
 Version 2020-08-07"
