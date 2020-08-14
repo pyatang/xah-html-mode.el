@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 8.8.20200807201354
+;; Version: 8.8.20200813202554
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -4004,14 +4004,13 @@ Version 2019-11-10"
      ((string-equal system-type "gnu/linux")
       (shell-command (format "google-chrome-stable \"%s\"" $path))))))
 
-
 (defun xah-html-open-in-chrome ()
   "Open current buffer or link under cursor in Google Chrome browser.
 If cursor position is link/url, open that link. Else, open current buffer.
 Version 2020-08-04"
   (interactive)
-  (let ((filePath (thing-at-point 'filename )) )
-    (if filePath
+  (let ((filePath (thing-at-point 'filename )))
+    (if (and filePath (string-match "^http\\|html$" filePath ))
         (xah-html-open-link-in-chrome)
       (xah-html-open-in-chrome-browser))))
 
