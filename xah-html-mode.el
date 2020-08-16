@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 8.8.20200813202554
+;; Version: 8.9.20200815215409
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -2858,6 +2858,7 @@ Version 2020-01-15"
 The line can be any of
 
  https://www.youtube.com/watch?v=RhYNu6i_uY4
+ https://www.youtube.com/watch?v=RhYNu6i_uY4?t=198
  https://youtu.be/RhYNu6i_uY4
  https://www.youtube.com/embed/RhYNu6i_uY4
  RhYNu6i_uY4
@@ -2870,12 +2871,18 @@ Here's sample result:
 </figcaption>
 </figure>
 
-Version 2020-08-07"
+Version 2020-08-15"
   (interactive)
-  (let ( $p1 $p2 $inputStr $id )
+  (let ( $p1 $p2 $inputStr $id $timeStamp )
     (setq $p1 (line-beginning-position))
     (setq $p2 (line-end-position))
     (setq $inputStr (buffer-substring-no-properties $p1 $p2))
+
+    ;; check if the url contain time stamp https://youtu.be/mKkXW0sEwGQ?t=1989
+    (setq $timeStamp
+          (if (string-match "t=\\([0-9]+\\)" $inputStr )
+              (match-string 1 $inputStr)
+            ""))
     (setq $id
           (cond
            ;; RhYNu6i_uY4
@@ -2894,12 +2901,12 @@ Version 2020-08-07"
     (delete-region $p1 $p2)
     (insert
      (format "<figure>
-<iframe width=\"640\" height=\"480\" src=\"https://www.youtube.com/embed/%s\" allowfullscreen></iframe>
+<iframe width=\"640\" height=\"480\" src=\"https://www.youtube.com/embed/%s?start=%s\" allowfullscreen></iframe>
 <figcaption>
 </figcaption>
 </figure>
 "
-             $id
+             $id $timeStamp
              ))
     (search-backward "</figcaption>" )
     (backward-char 1)))
