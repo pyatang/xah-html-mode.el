@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 8.11.20200818013219
+;; Version: 8.11.20200818013817
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1881,7 +1881,7 @@ Version 2015-07-27"
                     (replace-regexp-in-string " " "_" $linkText)
                     "\">" $linkText "</a>"))))
 
-(defun xah-html-remove-p-tags ()
+(defun xah-html-remove-paragraph-tags ()
   "Remove paragraph <p></p> tags.
 In text selection or current text block.
 Version 2020-08-17"
