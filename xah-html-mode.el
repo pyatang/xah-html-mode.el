@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 8.10.20200816042319
+;; Version: 8.11.20200818013219
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -1881,8 +1881,35 @@ Version 2015-07-27"
                     (replace-regexp-in-string " " "_" $linkText)
                     "\">" $linkText "</a>"))))
 
+(defun xah-html-remove-p-tags ()
+  "Remove paragraph <p></p> tags.
+In text selection or current text block.
+Version 2020-08-17"
+  (interactive)
+  (let ($p1 $p2 )
+    (save-excursion
+      (if (region-active-p)
+          (progn
+            (setq $p1 (region-beginning))
+            (setq $p2 (region-end)))
+        (progn
+          (skip-chars-forward " \n\t")
+          (when (re-search-backward "\n[ \t]*\n" nil "move")
+            (re-search-forward "\n[ \t]*\n"))
+          (setq $p1 (point))
+          (re-search-forward "\n[ \t]*\n" nil "move")
+          (re-search-backward "\n[ \t]*\n" )
+          (setq $p2 (point)))))
+    (save-restriction
+      (narrow-to-region $p1 $p2)
+      (goto-char 1)
+      (while (search-forward "<p>" nil t) (replace-match "" ))
+      (goto-char 1)
+      (while (search-forward "</p>" nil t) (replace-match "" )))))
+
 (defun xah-html-remove-list-tags ()
   "Remove HTML ul ol li list tags.
+In text selection or current text block.
 Version 2020-07-15"
   (interactive)
   (let ($p1 $p2)
