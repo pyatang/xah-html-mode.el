@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 9.0.20200822035838
+;; Version: 9.0.20200822080148
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -3829,9 +3829,8 @@ Entire link is printed to messages buffer.
 
 Returns the entire link text.
 
-Version 2020-08-21"
+Version 2020-08-22"
   (interactive)
-  (require 'xah-html-mode)
   (let ( $p1 $p2 $wholeLink $p3 $p4 $p5 $p6 $linkTextBegin $linkTextEnd)
     (when (search-forward "</a>" nil "move")
       (progn
@@ -3863,7 +3862,7 @@ Version 2020-08-21"
 (defun xah-html-remove-all-wikipedia-link ()
   "Remove all wikipedia links in buffer of HTML.
 Highlight the link text that remains.
-Return and print the list of url removed. 
+Return and print the list of url removed.
 Version 2020-08-22"
   (interactive)
   (save-excursion
@@ -3873,7 +3872,8 @@ Version 2020-08-22"
       ;; but not https://en.wikipedia.org/wiki/File:QWERTY-home-keys-position.svg
       (while (search-forward "wikipedia.org/wiki" nil "move")
         (setq $url (thing-at-point 'url))
-        (when (not (string-match "File:" $url ))
+        (when (and (not (string-match "File:" $url ))
+                   (not (string-match "Image:" $url )))
           (xah-html-remove-wikipedia-link)
           (push $url $removedTextList)))
       (mapc (lambda (x) (princ x) (terpri)) $removedTextList)
