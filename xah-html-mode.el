@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 8.12.20200821172850
+;; Version: 9.0.20200821175702
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -3822,11 +3822,11 @@ This is heuristic based, does not remove ALL possible redundant whitespace."
             (replace-match "<p>")))))))
 
 (defun xah-html-remove-wikipedia-link ()
-  "Delet wikipedia link after cursor position.
+  "Delet wikipedia link under cursor or after cursor position.
+The link text remains, and is colored red.
+Entire link is printed to messages buffer.
 
-https://en.wikipedia.org/wiki/isometry
-https://en.m.wikipedia.org/w/index.php?title=Trigonometry
-<a class=\"wikipedia_92d5m\" target=\"_blank\" href=\"https://en.wikipedia.org/wiki/isometry\">isometry</a>
+Returns the entire link text.
 
 Version 2020-08-21"
   (interactive)
@@ -3855,6 +3855,7 @@ Version 2020-08-21"
             (delete-region $p3 $p4)
             (setq $linkTextEnd (point))
             (overlay-put (make-overlay $linkTextBegin $linkTextEnd) 'font-lock-face '(:foreground "red"))
+            (overlay-put (make-overlay $linkTextBegin $linkTextEnd) 'face 'bold)
             $textToDelete
             ))))))
 
@@ -3863,11 +3864,11 @@ Version 2020-08-21"
 Version 2020-08-21"
   (interactive)
   (save-excursion
-    (let ($flag ($removedTextList '()))
+    (let ($link ($removedTextList '()))
       (goto-char (point-min))
       (while (search-forward "wikipedia_92d5m" nil "move")
-        (setq $flag (xah-html-remove-wikipedia-link))
-        (push $flag $removedTextList))
+        (setq $link (xah-html-remove-wikipedia-link))
+        (push $link $removedTextList))
       (mapc (lambda (x) (princ x) (terpri)) $removedTextList)
       $removedTextList
       )))
