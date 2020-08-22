@@ -3,9 +3,9 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 9.0.20200822035744
+;; Version: 9.0.20200822035838
 ;; Created: 12 May 2012
-;; Package-Requires: ((emacs "24.1"))
+;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
 ;; License: GPL v3
 ;; Homepage: http://ergoemacs.org/emacs/xah-html-mode.html
@@ -13,7 +13,7 @@
 ;; This file is not part of GNU Emacs.
 
 ;;; Commentary:
-;; Major mode for editing pure HTML5 files.
+;; Major mode for editing HTML files.
 ;; home page: http://ergoemacs.org/emacs/xah-html-mode.html
 
 ;; part of emacs
