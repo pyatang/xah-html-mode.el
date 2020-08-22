@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 8.11.20200818013817
+;; Version: 8.12.20200821172850
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -3828,32 +3828,44 @@ https://en.wikipedia.org/wiki/isometry
 https://en.m.wikipedia.org/w/index.php?title=Trigonometry
 <a class=\"wikipedia_92d5m\" target=\"_blank\" href=\"https://en.wikipedia.org/wiki/isometry\">isometry</a>
 
-Version 2020-06-17"
+Version 2020-08-21"
   (interactive)
   (require 'xah-html-mode)
-  (let ( $p1 $p2 $textToDelete )
+  (let ( $p1 $p2 $textToDelete $p3 $p4 $linkTextBegin $linkTextEnd )
     (when (search-forward "</a>" nil "move")
       (progn
         (setq $p2 (point))
         (re-search-backward "<a .*href=")
         (setq $p1 (point))
         (setq $textToDelete (buffer-substring-no-properties $p1 $p2))
-        (if (search-forward ".wikipedia.org/wiki/"  $p2 t)
-            (progn
-              (xah-html-remove-html-tags $p1 $p2)
-              $textToDelete
-              )
-          nil
-          )))))
+        (when (search-forward ".wikipedia.org/wiki/"  $p2 t)
+          (progn
+            ;; delete the beginning link tag
+            (search-backward "<" )
+            (setq $p3 (point))
+            (search-forward ">")
+            (setq $p4 (point))
+            (delete-region $p3 $p4)
+            (setq $linkTextBegin (point))
+            ;; delete the end link tag
+            (search-forward ">")
+            (setq $p3 (point))
+            (search-backward "<" )
+            (setq $p4 (point))
+            (delete-region $p3 $p4)
+            (setq $linkTextEnd (point))
+            (overlay-put (make-overlay $linkTextBegin $linkTextEnd) 'font-lock-face '(:foreground "red"))
+            $textToDelete
+            ))))))
 
 (defun xah-html-remove-all-wikipedia-link ()
   "Delete all wikipedia links in a html file.
-Version 2020-06-17"
+Version 2020-08-21"
   (interactive)
   (save-excursion
     (let ($flag ($removedTextList '()))
       (goto-char (point-min))
-      (while (search-forward ".wikipedia.org/wiki/" nil "move")
+      (while (search-forward "wikipedia_92d5m" nil "move")
         (setq $flag (xah-html-remove-wikipedia-link))
         (push $flag $removedTextList))
       (mapc (lambda (x) (princ x) (terpri)) $removedTextList)
@@ -4313,7 +4325,7 @@ Version 2016-10-24"
 
     ("cssh" "<link rel=\"stylesheet\" href=\"lbasic.css\" />")
     ("styleh" "<style type=\"text/css\">\np {line-height:130%}\n</style>")
-
+    ("target" "target=\"_blank\"")
     ("iframe" "<iframe src=\"some.html\" width=\"200\" height=\"300\"></iframe>")
 
     ("og" "<meta property=\"og:image\" content=\"http://ergoemacs.org/emacs/i/geek_vs_non_geek_repetitive_tasks.png\" />" xah-html--ahf)
@@ -4608,7 +4620,7 @@ Version 2016-10-24"
 ;;;###autoload
 (define-derived-mode
   xah-html-mode
-  fundamental-mode
+  mhtml-mode
   "∑html"
   "A simple major mode for HTML5.
 HTML5 keywords are colored.
