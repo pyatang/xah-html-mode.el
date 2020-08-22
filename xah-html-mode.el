@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 9.0.20200822033806
+;; Version: 9.0.20200822035744
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -3861,11 +3861,13 @@ Version 2020-08-21"
             ))))))
 
 (defun xah-html-remove-all-wikipedia-link ()
-  "Delete all wikipedia links in a html file.
+  "Remove all wikipedia links in buffer of HTML.
+Highlight the link text that remains.
+Return and print the list of url removed. 
 Version 2020-08-22"
   (interactive)
   (save-excursion
-    (let ($link $url ($removedTextList '()))
+    (let ($url ($removedTextList '()))
       (goto-char (point-min))
       ;; remove url like this https://en.wikipedia.org/wiki/United_States
       ;; but not https://en.wikipedia.org/wiki/File:QWERTY-home-keys-position.svg
