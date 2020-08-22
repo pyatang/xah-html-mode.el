@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 9.0.20200821175702
+;; Version: 9.0.20200822033806
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: languages, html, web
@@ -25,6 +25,7 @@
 (require 'thingatpt)
 (require 'seq)
 (require 'subr-x)
+(require 'mhtml-mode)
 
 (require 'xah-replace-pairs)
 (require 'xah-get-thing)
@@ -3831,14 +3832,14 @@ Returns the entire link text.
 Version 2020-08-21"
   (interactive)
   (require 'xah-html-mode)
-  (let ( $p1 $p2 $textToDelete $p3 $p4 $linkTextBegin $linkTextEnd )
+  (let ( $p1 $p2 $wholeLink $p3 $p4 $p5 $p6 $linkTextBegin $linkTextEnd)
     (when (search-forward "</a>" nil "move")
       (progn
         (setq $p2 (point))
         (re-search-backward "<a .*href=")
         (setq $p1 (point))
-        (setq $textToDelete (buffer-substring-no-properties $p1 $p2))
-        (when (search-forward ".wikipedia.org/wiki/"  $p2 t)
+        (setq $wholeLink (buffer-substring-no-properties $p1 $p2))
+        (when (search-forward ".wikipedia.org/wiki/"  $p2 "move")
           (progn
             ;; delete the beginning link tag
             (search-backward "<" )
@@ -3849,26 +3850,30 @@ Version 2020-08-21"
             (setq $linkTextBegin (point))
             ;; delete the end link tag
             (search-forward ">")
-            (setq $p3 (point))
+            (setq $p5 (point))
             (search-backward "<" )
-            (setq $p4 (point))
-            (delete-region $p3 $p4)
+            (setq $p6 (point))
+            (delete-region $p5 $p6)
             (setq $linkTextEnd (point))
-            (overlay-put (make-overlay $linkTextBegin $linkTextEnd) 'font-lock-face '(:foreground "red"))
-            (overlay-put (make-overlay $linkTextBegin $linkTextEnd) 'face 'bold)
-            $textToDelete
+            (overlay-put (make-overlay $linkTextBegin $linkTextEnd)'font-lock-face '(:foreground "red"))
+            (overlay-put (make-overlay $linkTextBegin $linkTextEnd)'face 'bold)
+            $wholeLink
             ))))))
 
 (defun xah-html-remove-all-wikipedia-link ()
   "Delete all wikipedia links in a html file.
-Version 2020-08-21"
+Version 2020-08-22"
   (interactive)
   (save-excursion
-    (let ($link ($removedTextList '()))
+    (let ($link $url ($removedTextList '()))
       (goto-char (point-min))
-      (while (search-forward "wikipedia_92d5m" nil "move")
-        (setq $link (xah-html-remove-wikipedia-link))
-        (push $link $removedTextList))
+      ;; remove url like this https://en.wikipedia.org/wiki/United_States
+      ;; but not https://en.wikipedia.org/wiki/File:QWERTY-home-keys-position.svg
+      (while (search-forward "wikipedia.org/wiki" nil "move")
+        (setq $url (thing-at-point 'url))
+        (when (not (string-match "File:" $url ))
+          (xah-html-remove-wikipedia-link)
+          (push $url $removedTextList)))
       (mapc (lambda (x) (princ x) (terpri)) $removedTextList)
       $removedTextList
       )))
