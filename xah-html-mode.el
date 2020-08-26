@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 9.0.20200822080148
+;; Version: 9.0.20200826144746
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -2899,14 +2899,16 @@ Here's sample result:
 </figcaption>
 </figure>
 
-Version 2020-08-16"
+Version 2020-08-26"
   (interactive)
   (let ( $p1 $p2 $inputStr $id $timeStamp )
     (setq $p1 (line-beginning-position))
     (setq $p2 (line-end-position))
     (setq $inputStr (buffer-substring-no-properties $p1 $p2))
     (setq $timeStamp
-          (if (string-match "t=\\([0-9]+\\)" $inputStr )
+          (if (or
+               (string-match "t=\\([0-9]+\\)" $inputStr )
+               (string-match "time_continue=\\([0-9]+\\)" $inputStr ))
               (match-string 1 $inputStr)
             ""))
     (setq $id
@@ -4435,69 +4437,65 @@ Version 2016-10-24"
 
 
 
-(defvar xah-html-mode-syntax-table nil "Syntax table for `xah-html-mode'.")
+;; (defvar xah-html-mode-syntax-table nil "Syntax table for `xah-html-mode'.")
 
-(setq xah-html-mode-syntax-table
-      (let ((synTable (make-syntax-table)))
-        (modify-syntax-entry ?! "." synTable)
-        (modify-syntax-entry ?# "." synTable)
+;; (setq xah-html-mode-syntax-table
+;;       (let ((synTable (make-syntax-table)))
+;;         (modify-syntax-entry ?! "." synTable)
+;;         (modify-syntax-entry ?# "." synTable)
 
-        (modify-syntax-entry ?$ "." synTable)
+;;         (modify-syntax-entry ?$ "." synTable)
 
-        (modify-syntax-entry ?% "." synTable)
-        (modify-syntax-entry ?& "." synTable)
-        (modify-syntax-entry ?' "." synTable)
-        (modify-syntax-entry ?* "." synTable)
-        (modify-syntax-entry ?+ "." synTable)
-        (modify-syntax-entry ?, "." synTable)
-        (modify-syntax-entry ?- "_" synTable)
-        (modify-syntax-entry ?. "." synTable)
-        (modify-syntax-entry ?/ "." synTable)
-        (modify-syntax-entry ?: "." synTable)
-        (modify-syntax-entry ?\; "." synTable)
-        (modify-syntax-entry ?< "." synTable)
-        (modify-syntax-entry ?= "." synTable)
-        (modify-syntax-entry ?> "." synTable)
-        (modify-syntax-entry ?? "." synTable)
-        (modify-syntax-entry ?@ "." synTable)
+;;         (modify-syntax-entry ?% "." synTable)
+;;         (modify-syntax-entry ?& "." synTable)
+;;         (modify-syntax-entry ?' "." synTable)
+;;         (modify-syntax-entry ?* "." synTable)
+;;         (modify-syntax-entry ?+ "." synTable)
+;;         (modify-syntax-entry ?, "." synTable)
+;;         (modify-syntax-entry ?- "_" synTable)
+;;         (modify-syntax-entry ?. "." synTable)
+;;         (modify-syntax-entry ?/ "." synTable)
+;;         (modify-syntax-entry ?: "." synTable)
+;;         (modify-syntax-entry ?\; "." synTable)
+;;         (modify-syntax-entry ?< "." synTable)
+;;         (modify-syntax-entry ?= "." synTable)
+;;         (modify-syntax-entry ?> "." synTable)
+;;         (modify-syntax-entry ?? "." synTable)
+;;         (modify-syntax-entry ?@ "." synTable)
 
-        (modify-syntax-entry ?\" "\"" synTable)
-        ;; (modify-syntax-entry ?\" "." synTable)
+;;         (modify-syntax-entry ?\" "\"" synTable)
 
-        (modify-syntax-entry ?\\ "\\" synTable)
+;;         (modify-syntax-entry ?\\ "\\" synTable)
 
-        (modify-syntax-entry ?^ "." synTable)
-        (modify-syntax-entry ?_ "_" synTable)
-        (modify-syntax-entry ?` "." synTable)
-        (modify-syntax-entry ?| "." synTable)
-        (modify-syntax-entry ?~ "." synTable)
+;;         (modify-syntax-entry ?^ "." synTable)
+;;         (modify-syntax-entry ?_ "_" synTable)
+;;         (modify-syntax-entry ?` "." synTable)
+;;         (modify-syntax-entry ?| "." synTable)
+;;         (modify-syntax-entry ?~ "." synTable)
 
-        (modify-syntax-entry ?{ "(}" synTable)
-        (modify-syntax-entry ?} "){" synTable)
+;;         (modify-syntax-entry ?{ "(}" synTable)
+;;         (modify-syntax-entry ?} "){" synTable)
 
-        (modify-syntax-entry ?\( "()" synTable)
-        (modify-syntax-entry ?\) ")(" synTable)
+;;         (modify-syntax-entry ?\( "()" synTable)
+;;         (modify-syntax-entry ?\) ")(" synTable)
 
-        (modify-syntax-entry ?\[ "(]" synTable)
-        (modify-syntax-entry ?\] ")[" synTable)
+;;         (modify-syntax-entry ?\[ "(]" synTable)
+;;         (modify-syntax-entry ?\] ")[" synTable)
 
-        (modify-syntax-entry ?‹ "(›" synTable)
-        (modify-syntax-entry ?› ")‹" synTable)
+;;         (modify-syntax-entry ?‹ "(›" synTable)
+;;         (modify-syntax-entry ?› ")‹" synTable)
 
-        (modify-syntax-entry ?« "(»" synTable)
-        (modify-syntax-entry ?» ")«" synTable)
+;;         (modify-syntax-entry ?« "(»" synTable)
+;;         (modify-syntax-entry ?» ")«" synTable)
 
-        ;; (modify-syntax-entry ?« "\"" synTable)
-        ;; (modify-syntax-entry ?» "\"" synTable)
+;;         (modify-syntax-entry ?“ "(”" synTable)
+;;         (modify-syntax-entry ?” ")“" synTable)
 
-        (modify-syntax-entry ?“ "(”" synTable)
-        (modify-syntax-entry ?” ")“" synTable)
+;;         (modify-syntax-entry ?‘ "(’" synTable)
+;;         (modify-syntax-entry ?’ ")‘" synTable)
 
-        (modify-syntax-entry ?‘ "(’" synTable)
-        (modify-syntax-entry ?’ ")‘" synTable)
-
-        synTable)
-)
+;;         synTable)
+;; )
 
 (defface xah-html-double-curly-quote-f
   '((t :foreground "black"
