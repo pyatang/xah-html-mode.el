@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 9.0.20200826144746
+;; Version: 9.1.20200827054611
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -2087,54 +2087,6 @@ Version 2019-04-12"
               (progn (insert (format " [ %s ] " $url)))
             (progn (insert (format " 〈%s〉 [ %s ] " $linkText $url )))))))))
 
-(defun xah-html-youtube-to-text ()
-  "Remove embedded YouTube html block to url and caption.
-Works on text block or region.
-
-Example, this:
-
-<figure>
-<iframe width=\"640\" height=\"480\" src=\"https://www.youtube.com/embed/Vn7U7S0-5CQ\" allowfullscreen></iframe>
-<figcaption>
-xah talk show 2019-08-19 Deseret/Shavian Alphabets, IPA, font size, fugue, elisp coding youtube html
-</figcaption>
-</figure>
-
-becomes:
-
-https://www.youtube.com/watch?v=Vn7U7S0-5CQ
-xah talk show 2019-08-19 Deseret/Shavian Alphabets, IPA, font size, fugue, elisp coding youtube html
-
-Version 2020-02-24"
-  (interactive)
-  (let ( p1 p2 p3 p4 figCapText ytUrl )
-    (let (bds)
-      (setq bds (xah-get-bounds-of-thing-or-region 'block))
-      (setq p1 (car bds) p2 (cdr bds)))
-    (save-restriction
-      (narrow-to-region p1 p2)
-      (let ((case-fold-search t))
-        (goto-char (point-min))
-        (search-forward-regexp "src=\"\\([^\"]+\\)\"" )
-        (setq ytUrl (match-string 1 ))
-        (goto-char (point-min))
-        (search-forward "<figcaption>" )
-        (setq p3 (point))
-        (goto-char (point-min))
-        (search-forward "</figcaption>" )
-        (search-backward "</figcaption>")
-        (setq p4 (point))
-        (setq figCapText (buffer-substring-no-properties p3 p4))
-        (delete-region (point-min) (point-max))
-        (insert ytUrl)
-        (goto-char (point-min))
-        (search-forward "embed/" )
-        (replace-match "")
-        (insert "watch?v=")
-        (end-of-line )
-        (insert "\n" figCapText "\n\n")
-        ))))
-
 (defun xah-html-html-to-text ()
   "Convert HTML to plain text on current text block or text selection.
 Version 2019-04-12"
@@ -2211,6 +2163,67 @@ Version 2019-04-12"
        (buffer-substring 1 (point-max))))
     (delete-region $p1 $p2 )
     (insert $output-str)))
+
+(defun xah-html-youtube-to-text ()
+  "Remove embedded YouTube html block to url and caption.
+Works on text block or region.
+
+Example, this:
+
+<figure>
+<iframe width=\"640\" height=\"480\" src=\"https://www.youtube.com/embed/Vn7U7S0-5CQ\" allowfullscreen></iframe>
+<figcaption>
+xah talk show 2019-08-19 Deseret/Shavian Alphabets, IPA, font size, fugue, elisp coding youtube html
+</figcaption>
+</figure>
+
+becomes:
+
+https://www.youtube.com/watch?v=Vn7U7S0-5CQ
+xah talk show 2019-08-19 Deseret/Shavian Alphabets, IPA, font size, fugue, elisp coding youtube html
+
+Version 2020-08-27"
+  (interactive)
+  (let ( bds p1 p2 p3 p4 figCapText $url $id $timeStamp)
+    (setq bds (xah-get-bounds-of-thing-or-region 'block))
+    (setq p1 (car bds) p2 (cdr bds))
+    (save-restriction
+      (narrow-to-region p1 p2)
+      (goto-char (point-min))
+      (re-search-forward "src=\"\\([^\"]+\\)\"" )
+      (setq $url (match-string 1 ))
+      (setq $id (xah-html-get-youtube-id $url))
+      (when (not $id)
+        (error "Cannot find the youtube video id in url $url" ))
+      (goto-char (point-min))
+      ;; https://www.youtube.com/embed/gjiAjtGzC64?start=2358
+      (setq $timeStamp
+            (if (string-match "\\?start=\\([0-9]+\\)" $url )
+                (match-string 1 $url)
+              nil))
+      (let ((case-fold-search t))
+        (goto-char (point-min))
+        (search-forward "<figcaption>" )
+        (setq p3 (point))
+        (goto-char (point-min))
+        (search-forward "</figcaption>" )
+        (search-backward "</figcaption>")
+        (setq p4 (point))
+        (save-mark-and-excursion
+          (save-restriction
+            (narrow-to-region p3 p4)
+            (set-mark (point-min))
+            (goto-char (point-max))
+            (xah-html-html-to-text)
+            (setq figCapText (buffer-substring-no-properties (point-min) (point-max)))))
+        (delete-region (point-min) (point-max))
+        (progn
+          ;; https://youtu.be/gjiAjtGzC64?t=2358
+          (insert "https://youtu.be/" $id)
+          (when $timeStamp
+            (insert (format "?t=%s" $timeStamp)))
+          (end-of-line )
+          (insert "\n" figCapText "\n\n"))))))
 
 (defun xah-html-rename-source-file-path ()
   "Rename HTML source file path.
@@ -2880,6 +2893,27 @@ Version 2020-01-15"
          (format "<a class=\"amz\" target=\"_blank\" href=\"http://www.amazon.com/dp/%s/?tag=%s\" title=\"%s\">Buy at amazon</a>" $asin $trackId $thingName))
         (search-backward "\">")))))
 
+(defun xah-html-get-youtube-id (@url)
+  "Return the ID string inside a YouTube @url string.
+If cannot find, return nil.
+Version 2020-08-27"
+  (interactive)
+  (let ($id)
+    (cond
+     ;; RhYNu6i_uY4
+     ((eq 11 (length @url))
+      @url)
+     ;; https://www.youtube.com/watch?v=RhYNu6i_uY4
+     ((string-match "v=\\(.\\{11\\}\\)" @url)
+      (match-string 1 @url))
+     ;; https://youtu.be/RhYNu6i_uY4
+     ((string-match "youtu\\.be/\\(.\\{11\\}\\)" @url)
+      (match-string 1 @url))
+     ;; https://www.youtube.com/embed/RhYNu6i_uY4
+     ((string-match "youtube.com/embed/\\(.\\{11\\}\\)" @url)
+      (match-string 1 @url))
+     (t nil))))
+
 (defun xah-html-youtube-linkify ()
   "Make the current line of youtube url into a embeded video.
 
@@ -2899,7 +2933,7 @@ Here's sample result:
 </figcaption>
 </figure>
 
-Version 2020-08-26"
+Version 2020-08-27"
   (interactive)
   (let ( $p1 $p2 $inputStr $id $timeStamp )
     (setq $p1 (line-beginning-position))
@@ -2911,21 +2945,7 @@ Version 2020-08-26"
                (string-match "time_continue=\\([0-9]+\\)" $inputStr ))
               (match-string 1 $inputStr)
             ""))
-    (setq $id
-          (cond
-           ;; RhYNu6i_uY4
-           ((eq 11 (length $inputStr))
-            $inputStr)
-           ;; https://www.youtube.com/watch?v=RhYNu6i_uY4
-           ((string-match "v=\\(.\\{11\\}\\)" $inputStr)
-            (match-string 1 $inputStr))
-           ;; https://youtu.be/RhYNu6i_uY4
-           ((string-match "youtu\\.be/\\(.\\{11\\}\\)" $inputStr)
-            (match-string 1 $inputStr))
-           ;; https://www.youtube.com/embed/RhYNu6i_uY4
-           ((string-match "youtube.com/embed/\\(.\\{11\\}\\)" $inputStr)
-            (match-string 1 $inputStr))
-           (t (error "cannot find the youtube vid id in url" ))))
+    (setq $id (xah-html-get-youtube-id $inputStr))
     (delete-region $p1 $p2)
     (insert
      (format "<figure>
