@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 9.2.20200829135103
+;; Version: 9.2.20200829141329
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -1184,7 +1184,7 @@ The string replaced are:
  < ⇒ &lt;
  > ⇒ &gt;
 
-Highlight changed places, also print to message buffer occurrences of replacement (if any), with position.
+Highlight changed places.
 If `universal-argument' is called first, the replacement direction is reversed.
 
 When called in lisp code, @begin @end are region begin/end positions. If @entity-to-char-p is true, change entities to chars instead.
