@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 9.1.20200827054611
+;; Version: 9.1.20200829121657
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -1177,55 +1177,40 @@ Version 2018-10-08"
   (interactive "r")
   (xah-replace-pairs-region begin end '( ["&lt;" "<"] ["&gt;" ">"] ["&amp;" "&"])))
 
-(defun xah-html-escape-char-to-entity (@begin @end &optional @entity-to-char-p)
-  "Replace HTML chars & < > to HTML entities on current line or selection.
+(defun xah-html-escape-char-to-entity ()
+  "Replace HTML chars & < > to HTML entities on current text block or selection.
 The string replaced are:
  & ⇒ &amp;
  < ⇒ &lt;
  > ⇒ &gt;
 
-Print to message buffer occurrences of replacement (if any), with position.
-
+Highlight changed parts in red.
 If `universal-argument' is called first, the replacement direction is reversed.
-
-When called in lisp code, @begin @end are region begin/end positions. If entity-to-char-p is true, change entities to chars instead.
-
 URL `http://ergoemacs.org/emacs/elisp_replace_html_entities_command.html'
-Version 2020-01-17"
-  (interactive
-   (list
-    ;; These are done separately here
-    ;; so that command-history will record these expressions
-    ;; rather than the values they had this time.
-    ;; 2016-07-06 note, if you add a else, it won't work
-    (if (use-region-p) (region-beginning))
-    (if (use-region-p) (region-end))
-    (if current-prefix-arg t nil)))
-
-  (when (null @begin) (setq @begin (line-beginning-position)))
-  (when (null @end) (setq @end (line-end-position)))
-
-  (let (($changedItems '())
-        ($findReplaceMap
-         (if @entity-to-char-p
-             ;; this to prevent creating a replacement sequence out of blue
-             [
-              ["&amp;" "螽⛫1"] ["&lt;" "螽⛫2"] ["&gt;" "螽⛫3"]
-              ["螽⛫1" "&"] ["螽⛫2" "<"] ["螽⛫3" ">"]
-              ]
-           [ ["&" "&amp;"] ["<" "&lt;"] [">" "&gt;"] ]
-           )))
-    (save-excursion
-      (save-restriction
-        (narrow-to-region @begin @end)
-        (let ( (case-fold-search nil))
-          (mapc
-           (lambda ($x)
-             (goto-char (point-min))
-             (while (search-forward (elt $x 0) nil t)
-               (push (format "%s %s" (point) $x) $changedItems)
-               (replace-match (elt $x 1) "FIXEDCASE" "LITERAL")))
-           $findReplaceMap))))))
+Version 2020-08-29"
+  (interactive)
+  (let (p1 p2 (findReplaceMap [ ["&" "&amp;"] ["<" "&lt;"] [">" "&gt;"] ] ))
+    (if (use-region-p)
+        (setq p1 (region-beginning) p2 (region-end))
+      (progn
+        (search-backward "\n\n" nil "move" )
+        (forward-char 2)
+        (setq p1 (point))
+        (search-forward "\n\n" nil "move")
+        (backward-char 2)
+        (setq p2 (point))))
+    (save-restriction
+      (narrow-to-region p1 p2)
+      (mapc
+       (lambda (xPair)
+         (let ( (findStr (aref xPair 0)) (repStr (aref xPair 1)))
+           (goto-char (point-min))
+           (while (search-forward findStr nil "NOERROR")
+             (replace-match repStr)
+             (overlay-put
+              (make-overlay (- (point) (length repStr)) (point))
+              'font-lock-face '(:foreground "red")))))
+       (if current-prefix-arg (mapcar 'reverse findReplaceMap) findReplaceMap )))))
 
 (defun xah-html-escape-char-to-unicode (@begin @end &optional @fullwidth-to-ascii-p)
   "Replace chars < > & to fullwidth version ＜ ＞ ＆ in current line or text selection.
@@ -4457,65 +4442,65 @@ Version 2016-10-24"
 
 
 
-;; (defvar xah-html-mode-syntax-table nil "Syntax table for `xah-html-mode'.")
+(defvar xah-html-mode-syntax-table nil "Syntax table for `xah-html-mode'.")
 
-;; (setq xah-html-mode-syntax-table
-;;       (let ((synTable (make-syntax-table)))
-;;         (modify-syntax-entry ?! "." synTable)
-;;         (modify-syntax-entry ?# "." synTable)
+(setq xah-html-mode-syntax-table
+      (let ((synTable (make-syntax-table)))
+        (modify-syntax-entry ?! "." synTable)
+        (modify-syntax-entry ?# "." synTable)
 
-;;         (modify-syntax-entry ?$ "." synTable)
+        (modify-syntax-entry ?$ "." synTable)
 
-;;         (modify-syntax-entry ?% "." synTable)
-;;         (modify-syntax-entry ?& "." synTable)
-;;         (modify-syntax-entry ?' "." synTable)
-;;         (modify-syntax-entry ?* "." synTable)
-;;         (modify-syntax-entry ?+ "." synTable)
-;;         (modify-syntax-entry ?, "." synTable)
-;;         (modify-syntax-entry ?- "_" synTable)
-;;         (modify-syntax-entry ?. "." synTable)
-;;         (modify-syntax-entry ?/ "." synTable)
-;;         (modify-syntax-entry ?: "." synTable)
-;;         (modify-syntax-entry ?\; "." synTable)
-;;         (modify-syntax-entry ?< "." synTable)
-;;         (modify-syntax-entry ?= "." synTable)
-;;         (modify-syntax-entry ?> "." synTable)
-;;         (modify-syntax-entry ?? "." synTable)
-;;         (modify-syntax-entry ?@ "." synTable)
+        (modify-syntax-entry ?% "." synTable)
+        (modify-syntax-entry ?& "." synTable)
+        (modify-syntax-entry ?' "." synTable)
+        (modify-syntax-entry ?* "." synTable)
+        (modify-syntax-entry ?+ "." synTable)
+        (modify-syntax-entry ?, "." synTable)
+        (modify-syntax-entry ?- "_" synTable)
+        (modify-syntax-entry ?. "." synTable)
+        (modify-syntax-entry ?/ "." synTable)
+        (modify-syntax-entry ?: "." synTable)
+        (modify-syntax-entry ?\; "." synTable)
+        (modify-syntax-entry ?< "." synTable)
+        (modify-syntax-entry ?= "." synTable)
+        (modify-syntax-entry ?> "." synTable)
+        (modify-syntax-entry ?? "." synTable)
+        (modify-syntax-entry ?@ "." synTable)
 
-;;         (modify-syntax-entry ?\" "\"" synTable)
+        (modify-syntax-entry ?\" "\"" synTable)
 
-;;         (modify-syntax-entry ?\\ "\\" synTable)
+        (modify-syntax-entry ?\\ "\\" synTable)
 
-;;         (modify-syntax-entry ?^ "." synTable)
-;;         (modify-syntax-entry ?_ "_" synTable)
-;;         (modify-syntax-entry ?` "." synTable)
-;;         (modify-syntax-entry ?| "." synTable)
-;;         (modify-syntax-entry ?~ "." synTable)
+        (modify-syntax-entry ?^ "." synTable)
+        (modify-syntax-entry ?_ "_" synTable)
+        (modify-syntax-entry ?` "." synTable)
+        (modify-syntax-entry ?| "." synTable)
+        (modify-syntax-entry ?~ "." synTable)
 
-;;         (modify-syntax-entry ?{ "(}" synTable)
-;;         (modify-syntax-entry ?} "){" synTable)
+        (modify-syntax-entry ?{ "(}" synTable)
+        (modify-syntax-entry ?} "){" synTable)
 
-;;         (modify-syntax-entry ?\( "()" synTable)
-;;         (modify-syntax-entry ?\) ")(" synTable)
+        (modify-syntax-entry ?\( "()" synTable)
+        (modify-syntax-entry ?\) ")(" synTable)
 
-;;         (modify-syntax-entry ?\[ "(]" synTable)
-;;         (modify-syntax-entry ?\] ")[" synTable)
+        (modify-syntax-entry ?\[ "(]" synTable)
+        (modify-syntax-entry ?\] ")[" synTable)
 
-;;         (modify-syntax-entry ?‹ "(›" synTable)
-;;         (modify-syntax-entry ?› ")‹" synTable)
+        (modify-syntax-entry ?‹ "(›" synTable)
+        (modify-syntax-entry ?› ")‹" synTable)
 
-;;         (modify-syntax-entry ?« "(»" synTable)
-;;         (modify-syntax-entry ?» ")«" synTable)
+        (modify-syntax-entry ?« "(»" synTable)
+        (modify-syntax-entry ?» ")«" synTable)
 
-;;         (modify-syntax-entry ?“ "(”" synTable)
-;;         (modify-syntax-entry ?” ")“" synTable)
+        (modify-syntax-entry ?“ "(”" synTable)
+        (modify-syntax-entry ?” ")“" synTable)
 
-;;         (modify-syntax-entry ?‘ "(’" synTable)
-;;         (modify-syntax-entry ?’ ")‘" synTable)
+        (modify-syntax-entry ?‘ "(’" synTable)
+        (modify-syntax-entry ?’ ")‘" synTable)
 
-;;         synTable)
-;; )
+        synTable)
+)
 
 (defface xah-html-double-curly-quote-f
   '((t :foreground "black"
