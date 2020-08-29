@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 9.1.20200829121657
+;; Version: 9.2.20200829135103
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -1177,40 +1177,62 @@ Version 2018-10-08"
   (interactive "r")
   (xah-replace-pairs-region begin end '( ["&lt;" "<"] ["&gt;" ">"] ["&amp;" "&"])))
 
-(defun xah-html-escape-char-to-entity ()
+(defun xah-html-escape-char-to-entity (@begin @end &optional @entity-to-char-p)
   "Replace HTML chars & < > to HTML entities on current text block or selection.
 The string replaced are:
  & ⇒ &amp;
  < ⇒ &lt;
  > ⇒ &gt;
 
-Highlight changed parts in red.
+Highlight changed places, also print to message buffer occurrences of replacement (if any), with position.
 If `universal-argument' is called first, the replacement direction is reversed.
+
+When called in lisp code, @begin @end are region begin/end positions. If @entity-to-char-p is true, change entities to chars instead.
+
 URL `http://ergoemacs.org/emacs/elisp_replace_html_entities_command.html'
 Version 2020-08-29"
-  (interactive)
-  (let (p1 p2 (findReplaceMap [ ["&" "&amp;"] ["<" "&lt;"] [">" "&gt;"] ] ))
-    (if (use-region-p)
-        (setq p1 (region-beginning) p2 (region-end))
-      (progn
-        (search-backward "\n\n" nil "move" )
-        (forward-char 2)
-        (setq p1 (point))
-        (search-forward "\n\n" nil "move")
-        (backward-char 2)
-        (setq p2 (point))))
-    (save-restriction
-      (narrow-to-region p1 p2)
-      (mapc
-       (lambda (xPair)
-         (let ( (findStr (aref xPair 0)) (repStr (aref xPair 1)))
-           (goto-char (point-min))
-           (while (search-forward findStr nil "NOERROR")
-             (replace-match repStr)
-             (overlay-put
-              (make-overlay (- (point) (length repStr)) (point))
-              'font-lock-face '(:foreground "red")))))
-       (if current-prefix-arg (mapcar 'reverse findReplaceMap) findReplaceMap )))))
+  (interactive
+   (save-excursion
+     (list
+      ;; These are done separately here
+      ;; so that command-history will record these expressions
+      ;; rather than the values they had this time.
+      ;; 2016-07-06 note, if you add a else, it won't work
+      (if (use-region-p)
+          (region-beginning)
+        (progn
+          (re-search-backward "\n[ \t]*\n" nil "move")
+          (re-search-forward "\n[ \t]*\n" nil "move")
+          (point)))
+      (if (use-region-p)
+          (region-end)
+        (progn
+          (re-search-forward "\n[ \t]*\n" nil "move")
+          (re-search-backward "\n[ \t]*\n" nil "move")
+          (point)))
+      (if current-prefix-arg t nil))))
+  (let (($changedItems '())
+        ($findReplaceMap
+         (if @entity-to-char-p
+             ;; this to prevent creating a replacement sequence out of blue
+             [
+              ["&amp;" "螽⛫1"] ["&lt;" "螽⛫2"] ["&gt;" "螽⛫3"]
+              ["螽⛫1" "&"] ["螽⛫2" "<"] ["螽⛫3" ">"]
+              ]
+           [ ["&" "&amp;"] ["<" "&lt;"] [">" "&gt;"] ]
+           )))
+    (save-excursion
+      (save-restriction
+        (narrow-to-region @begin @end)
+        (let ( (case-fold-search nil))
+          (mapc
+           (lambda ($x)
+             (goto-char (point-min))
+             (while (search-forward (elt $x 0) nil t)
+               (push (format "%s %s" (point) $x) $changedItems)
+               (replace-match (elt $x 1) "FIXEDCASE" "LITERAL")
+               (overlay-put (make-overlay (- (point) (length (elt $x 1))) (point)) 'font-lock-face '(:foreground "red"))))
+           $findReplaceMap))))))
 
 (defun xah-html-escape-char-to-unicode (@begin @end &optional @fullwidth-to-ascii-p)
   "Replace chars < > & to fullwidth version ＜ ＞ ＆ in current line or text selection.
