@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 9.3.20200830095118
+;; Version: 9.3.20200830101540
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -1273,18 +1273,14 @@ Version 2020-08-30"
 
 (defun xah-html-named-entity-to-char (@begin @end)
   "Replace HTML named entity to Unicode character in current text block or selection.
+Changed places are highlighted.
 For example, “&copy;” becomes “©”.
-
-The following HTML Entities are not replaced:
-
- &amp; →  &
- &lt; → <
- &gt; → >
+The following HTML Entities are not replaced: &amp; &lt; &gt;
 
 When called in lisp code, @begin @end are region begin/end positions.
 
 URL `http://ergoemacs.org/emacs/elisp_replace_html_entities_command.html'
-Version 2020-01-17"
+Version 2020-08-30"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
