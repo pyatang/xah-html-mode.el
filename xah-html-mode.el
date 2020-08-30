@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 9.2.20200830040847
+;; Version: 9.3.20200830095118
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -1272,13 +1272,14 @@ Version 2020-08-30"
          $findReplaceMap)))))
 
 (defun xah-html-named-entity-to-char (@begin @end)
-  "Replace HTML named entity to Unicode character in current line or selection.
+  "Replace HTML named entity to Unicode character in current text block or selection.
 For example, “&copy;” becomes “©”.
 
 The following HTML Entities are not replaced:
- &amp; &
- &lt; <
- &gt; >
+
+ &amp; →  &
+ &lt; → <
+ &gt; → >
 
 When called in lisp code, @begin @end are region begin/end positions.
 
@@ -1287,7 +1288,16 @@ Version 2020-01-17"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
-     (list (line-beginning-position) (line-end-position))))
+     (save-excursion
+       (list
+        (progn
+          (search-backward "\n\n" nil "NOERROR" )
+          (search-forward "\n\n" nil "NOERROR")
+          (point))
+        (progn
+          (search-forward "\n\n" nil "NOERROR")
+          (search-backward "\n\n" nil "NOERROR" )
+          (point))))))
   (let (
         ($replaceMap
          [
@@ -1356,7 +1366,8 @@ Version 2020-01-17"
          (lambda ($x)
            (goto-char (point-min))
            (while (search-forward (elt $x 0) nil t)
-             (replace-match (elt $x 1) "FIXEDCASE" "LITERAL")))
+             (replace-match (elt $x 1))
+             (overlay-put (make-overlay (- (point) (length (elt $x 1))) (point)) 'font-lock-face '(:foreground "red"))))
          $replaceMap)))))
 
 (defun xah-html-get-html-file-title (fname &optional no-error-p)
