@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 9.2.20200829141329
+;; Version: 9.2.20200830040847
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -1187,17 +1187,13 @@ The string replaced are:
 Highlight changed places.
 If `universal-argument' is called first, the replacement direction is reversed.
 
-When called in lisp code, @begin @end are region begin/end positions. If @entity-to-char-p is true, change entities to chars instead.
+When called in lisp code, @begin @end are region begin/end positions. If @entity-to-char-p is true, reverse change direction.
 
 URL `http://ergoemacs.org/emacs/elisp_replace_html_entities_command.html'
-Version 2020-08-29"
+Version 2020-08-30"
   (interactive
    (save-excursion
      (list
-      ;; These are done separately here
-      ;; so that command-history will record these expressions
-      ;; rather than the values they had this time.
-      ;; 2016-07-06 note, if you add a else, it won't work
       (if (use-region-p)
           (region-beginning)
         (progn
@@ -1235,37 +1231,45 @@ Version 2020-08-29"
            $findReplaceMap))))))
 
 (defun xah-html-escape-char-to-unicode (@begin @end &optional @fullwidth-to-ascii-p)
-  "Replace chars < > & to fullwidth version ＜ ＞ ＆ in current line or text selection.
+  "Replace chars < > & to fullwidth version ＜ ＞ ＆ in current text block or selection.
 
-If `universal-argument' is called, the replacement direction is reversed.
+Highlight changed places.
+If `universal-argument' is called first, the replacement direction is reversed.
 
-When called in lisp code, @begin @end are region begin/end positions.
-If @fullwidth-to-ascii-p is true, change entities to chars instead.
+When called in lisp code, @begin @end are region begin/end positions. If @fullwidth-to-ascii-p is true, reverse change direction.
 
 URL `http://ergoemacs.org/emacs/elisp_replace_html_entities_command.html'
-Version 2020-01-17"
-(interactive
-   (if (use-region-p)
-       (list (region-beginning) (region-end) current-prefix-arg)
-     (list (line-beginning-position) (line-end-position) current-prefix-arg)))
-
-  (save-restriction
-    (narrow-to-region @begin @end)
-    (if @fullwidth-to-ascii-p
-        (progn
-          (goto-char (point-min))
-          (while (search-forward "＆" nil t) (replace-match "&" nil t))
-          (goto-char (point-min))
-          (while (search-forward "＜" nil t) (replace-match "<" nil t))
-          (goto-char (point-min))
-          (while (search-forward "＞" nil t) (replace-match ">" nil t)))
+Version 2020-08-30"
+  (interactive
+   (list
+    (if (use-region-p)
+        (region-beginning)
       (progn
-        (goto-char (point-min))
-        (while (search-forward "&" nil t) (replace-match "＆" nil t))
-        (goto-char (point-min))
-        (while (search-forward "<" nil t) (replace-match "＜" nil t))
-        (goto-char (point-min))
-        (while (search-forward ">" nil t) (replace-match "＞" nil ))))))
+        (re-search-backward "\n[ \t]*\n" nil "move")
+        (re-search-forward "\n[ \t]*\n" nil "move")
+        (point)))
+    (if (use-region-p)
+        (region-end)
+      (progn
+        (re-search-forward "\n[ \t]*\n" nil "move")
+        (re-search-backward "\n[ \t]*\n" nil "move")
+        (point)))
+    (if current-prefix-arg t nil)))
+  (let (($findReplaceMap
+         (if @fullwidth-to-ascii-p
+             [ ["＆" "&"] [ "＜" "<"] [ "＞" ">"] ]
+           [ ["&" "＆"] ["<" "＜"] [">" "＞"] ]
+           )))
+    (save-excursion
+      (save-restriction
+        (narrow-to-region @begin @end)
+        (mapc
+         (lambda ($x)
+           (goto-char (point-min))
+           (while (search-forward (elt $x 0) nil t)
+             (replace-match (elt $x 1))
+             (overlay-put (make-overlay (- (point) (length (elt $x 1))) (point)) 'font-lock-face '(:foreground "red"))))
+         $findReplaceMap)))))
 
 (defun xah-html-named-entity-to-char (@begin @end)
   "Replace HTML named entity to Unicode character in current line or selection.
