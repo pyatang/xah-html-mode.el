@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 9.3.20200830101540
+;; Version: 9.4.20200905165230
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -109,6 +109,25 @@ Version 2018-05-08"
                   (file-relative-name @path $webroot)))
       (file-relative-name @path $current_dir))))
 
+(defun xah-html--display-hr-as-line ()
+  "Display hr tag as a line.
+Version 2020-09-05"
+  (interactive)
+  (let (p1 p2)
+    (save-excursion
+      (goto-char (point-min))
+      (while (search-forward "<hr>" nil "NOERROR")
+        (setq p1 (match-beginning 0))
+        (setq p2 (match-end 0))
+        (put-text-property
+         p1 p2 'display "__________________________________________________"))
+      (goto-char (point-min))
+      (while (search-forward "<hr />" nil "NOERROR")
+        (setq p1 (match-beginning 0))
+        (setq p2 (match-end 0))
+        (put-text-property
+         p1 p2 'display "__________________________________________________")))))
+
 (defun xah-html-display-page-break-as-line ()
   "Display the formfeed ^L char as line.
 Version 2018-08-17"
@@ -121,7 +140,7 @@ Version 2018-08-17"
           (vconcat (make-list 70 (make-glyph-code ?─ 'font-lock-comment-face))))
     (redraw-frame)))
 
-
+;; HHH___________________________________________________________________
 
 (defun xah-html--get-tag-name (&optional left<)
   "Return the tag name.
@@ -210,18 +229,18 @@ Version 2016-10-18"
         )
     (save-excursion
       (goto-char $pos)
-      (setq -posPrev< (search-backward "<" nil "NOERROR"))
+      (setq -posPrev< (search-backward "<" nil "move"))
       (goto-char $pos)
-      (setq -posPrev> (search-backward ">" nil "NOERROR"))
+      (setq -posPrev> (search-backward ">" nil "move"))
       (goto-char $pos)
       (setq -posNext<
-            (if (search-forward "<" nil "NOERROR")
+            (if (search-forward "<" nil "move")
                 (- (point) 1)
               nil
               ))
       (goto-char $pos)
       (setq -posNext>
-            (if (search-forward ">" nil "NOERROR")
+            (if (search-forward ">" nil "move")
                 (- (point) 1)
               nil
               ))
@@ -286,7 +305,7 @@ Version 2016-12-18"
       (forward-char 1)
       (looking-at "/" )))
 
-
+;; HHH___________________________________________________________________
 
 ;; (defvar xah-html--month-full-names '("January" "February" "March" "April" "May" "June" "July" "August" "September" "October" "November" "December") "list of English month full names.")
 
@@ -322,7 +341,7 @@ Version 2017-11-22"
      ((string-match "\\b[0-9][0-9][0-9][0-9]\\b" @input-string) t)
      (t nil))))
 
-
+;; HHH___________________________________________________________________
 
 ;; (defun xah-html--trim-string (string)
 ;;   "Remove white spaces in beginning and ending of string.
@@ -350,10 +369,10 @@ Version 2017-01-11"
           ;; hackish. grab the first occurence of width height in file
           (insert-file-contents @file-path)
           (goto-char (point-min))
-          (when (re-search-forward "width=\"\\([0-9]+\\).\\{0,2\\}\"" nil "NOERROR")
+          (when (re-search-forward "width=\"\\([0-9]+\\).\\{0,2\\}\"" nil "move")
             (setq $x (match-string 1 )))
           (goto-char (point-min))
-          (if (re-search-forward "height=\"\\([0-9]+\\).\\{0,2\\}\"" nil "NOERROR")
+          (if (re-search-forward "height=\"\\([0-9]+\\).\\{0,2\\}\"" nil "move")
               (setq $y (match-string 1 ))))
         (if (and $x $y)
             (progn (vector (string-to-number $x) (string-to-number $y)))
@@ -370,7 +389,7 @@ Version 2017-01-11"
                      t)))
         (vector (car $xy) (cdr $xy)))))))
 
-
+;; HHH___________________________________________________________________
 (defcustom xah-html-html5-tag-names nil
   "A alist of HTML5 tag names.
 For each element, the key is tag name, value is a vector of one element of string: “w” means word, “l” means line, “b” means block, “s” means self-closing tag such as br, others are placeholder for unknown. The purpose of the value is to indicate the default way to wrap the tag around cursor. "
@@ -574,7 +593,7 @@ Version 2018-11-02")
   :group 'xah-html-mode )
 (setq xah-html-html5-self-close-tags '( "area" "base" "br" "col" "command" "embed" "hr" "img" "input" "keygen" "link" "meta" "param" "source" "track" "wbr"))
 
-
+;; HHH___________________________________________________________________
 
 (defun xah-html--get-tag-type (tag-name)
   "Return the wrap-type info of tag-name in `xah-html-html5-tag-names'
@@ -810,7 +829,7 @@ Version 2019-04-29"
     (write-file $fname "CONFIRM")
     (goto-char (point-min))))
 
-
+;; HHH___________________________________________________________________
 
 (defun xah-html-htmlize-string (@input-str @major-mode-name)
   "Take @input-str and return a htmlized version using @major-mode-name.
@@ -935,7 +954,7 @@ Version 2018-10-03"
     (save-excursion
       (goto-char (point-min))
       (while
-          (re-search-forward "<pre class=\"\\([-A-Za-z0-9]+\\)\">" nil "NOERROR")
+          (re-search-forward "<pre class=\"\\([-A-Za-z0-9]+\\)\">" nil "move")
         (setq $langCode (match-string 1))
         (setq $majorModeNameStr (xah-html-langcode-to-mode-name $langCode xah-html-lang-name-map))
         (when $majorModeNameStr
@@ -963,7 +982,7 @@ Version 2018-10-03"
     (save-excursion
       (goto-char (point-min))
       (while
-          (re-search-forward "<code class=\"\\([-A-Za-z0-9]+\\)\">" nil "NOERROR")
+          (re-search-forward "<code class=\"\\([-A-Za-z0-9]+\\)\">" nil "move")
         (setq $langCode (match-string 1))
         (setq $majorModeNameStr (xah-html-langcode-to-mode-name $langCode xah-html-lang-name-map))
         (when $majorModeNameStr
@@ -1022,7 +1041,7 @@ Version 2019-06-13"
     (save-excursion
       (goto-char (point-min))
       (while
-          (re-search-forward "<pre class=\"\\([-A-Za-z0-9]+\\)\">" nil "NOERROR")
+          (re-search-forward "<pre class=\"\\([-A-Za-z0-9]+\\)\">" nil "move")
         (setq $langCode (match-string 1))
         (setq $majorModeNameStr (xah-html-langcode-to-mode-name $langCode xah-html-lang-name-map))
         (when $majorModeNameStr
@@ -1065,7 +1084,7 @@ Version 2019-05-30"
               (find-file $srcStr)))))
     (newline)))
 
-
+;; HHH___________________________________________________________________
 
 (defun xah-html-delete-tag ()
   "work in progress. do nothing.
@@ -1124,7 +1143,7 @@ version 2016-12-18"
       (setq $p2  (point))
       (goto-char $p1)
       (when
-          (re-search-forward "class[ \n]*=[ \n]*\"" $p2 "NOERROR")
+          (re-search-forward "class[ \n]*=[ \n]*\"" $p2 "move")
   ;(string-match "class[ \n]*=[ \n]*\"" (buffer-substring-no-properties $p1 $p2))
         (let ($p3 $p4)
           (setq $p3 (point))
@@ -1287,12 +1306,12 @@ Version 2020-08-30"
      (save-excursion
        (list
         (progn
-          (search-backward "\n\n" nil "NOERROR" )
-          (search-forward "\n\n" nil "NOERROR")
+          (search-backward "\n\n" nil "move" )
+          (search-forward "\n\n" nil "move")
           (point))
         (progn
-          (search-forward "\n\n" nil "NOERROR")
-          (search-backward "\n\n" nil "NOERROR" )
+          (search-forward "\n\n" nil "move")
+          (search-backward "\n\n" nil "move" )
           (point))))))
   (let (
         ($replaceMap
@@ -1684,54 +1703,75 @@ Version 2019-12-10"
       ;;
       )))
 
-(defun xah-html-ul-to-dl ()
-  "Change html ul to dl
-Cursor must be inside ul tags.
+(defun xah-html-ul-to-dl (@begin @end @sep @keep-sep-p)
+  "Change html unordered list to definition list.
+Cursor must be inside <ul></ul> tags.
 
-If `universal-argument' is called first, prompt for separator string.
+Prompt for separator string and whether to keep.
+else, add empty <dt></dt> in the beginning. @keep-sep-p if true, keep it in result.
 
-Version 2020-03-09"
-  (interactive )
-  (let (
-        $p1 $p2
-        ($sep (if current-prefix-arg
-                  (read-string "Seperator:" "→")
-                "→"
-                )))
-    (if (use-region-p)
+Version 2020-09-05"
+  (interactive
+   (let ( $p1 $p2)
+     (if (use-region-p)
          (setq $p1 (region-beginning) $p2 (region-end))
-      (save-excursion
-        (search-backward "<ul>" )
-        (setq $p1 (point))
-        (search-forward "</ul>")
-        (setq $p2 (point))))
+       (save-excursion
+         (search-backward "<ul>" )
+         (setq $p1 (point))
+         (search-forward "</ul>")
+         (setq $p2 (point))))
+     (list $p1 $p2 (read-string "Seperator:" ) (yes-or-no-p "Keep Seperator:"))))
+  (save-restriction
+    (narrow-to-region @begin @end)
+    (goto-char (point-min)) (search-forward "<ul>") (replace-match "<dl>" t t )
+    (goto-char (point-min)) (search-forward "</ul>") (replace-match "</dl>" t t )
+    (goto-char (point-min)) (while (search-forward "<li>" nil "move") (replace-match "<dt>" t t ))
+    (goto-char (point-min)) (while (search-forward "</li>" nil "move") (replace-match "</dd>" t t ))
+    (if (or (string-equal @sep "") (eq @sep nil))
+        (progn
+          (goto-char (point-min))
+          (while (search-forward "<dt>" nil "move")
+            (replace-match "<dt>◆</dt><dd>" t t )
+            (search-forward "</dd>" nil "move" )))
+      (progn
+        (goto-char (point-min))
+        (while (search-forward @sep nil t)
+          (replace-match (if @keep-sep-p (concat @sep "</dt><dd>") "</dt><dd>" )  t t )
+          (search-forward "</dd>" nil "move" ))))
+    (goto-char (point-max))))
 
-    (save-restriction
-      (narrow-to-region $p1 $p2)
+(defun xah-html-ul-to-dl (@begin @end @sep @keep-sep-p)
+  "Change html unordered list to definition list.
+Cursor must be inside <ul></ul> tags.
 
-      (goto-char (point-min))
-      (search-forward "<ul>")
-      (replace-match "<dl>" t t )
+Prompt for separator string and whether to keep.
+else, add empty <dt></dt> in the beginning. @keep-sep-p if true, keep it in result.
 
-      (goto-char (point-min))
-      (search-forward "</ul>")
-      (replace-match "</dl>" t t )
-
-      (goto-char (point-min))
-      (while (search-forward "<li>" nil t)
-        (replace-match "<dt>" t t ))
-
-      (goto-char (point-min))
-      (while (search-forward "</li>" nil t)
-        (replace-match "</dd>" t t ))
-
-      (goto-char (point-min))
-      (while (search-forward $sep nil t)
-        (replace-match "</dt><dd>" t t ))
-      (goto-char (point-max))
-
-      ;;
-      )))
+Version 2020-09-05"
+  (interactive
+   (let ( $p1 $p2)
+     (if (use-region-p)
+         (setq $p1 (region-beginning) $p2 (region-end))
+       (save-excursion
+         (search-backward "<ul>" )
+         (setq $p1 (point))
+         (search-forward "</ul>")
+         (setq $p2 (point))))
+     (list $p1 $p2 (read-string "Seperator:" ) (yes-or-no-p "Keep Seperator:"))))
+  (save-restriction
+    (narrow-to-region @begin @end)
+    (goto-char (point-min)) (search-forward "<ul>") (replace-match "<dl>" t t )
+    (goto-char (point-min)) (search-forward "</ul>") (replace-match "</dl>" t t )
+    (goto-char (point-min)) (while (search-forward "</li>" nil "move") (replace-match "</dd>" t t ))
+    (if (or (string-equal @sep "") (eq @sep nil))
+        (progn
+          (goto-char (point-min)) (while (search-forward "<li>" nil "move") (replace-match "<dt></dt><dd>" t t )))
+      (progn
+        (goto-char (point-min)) (while (search-forward "<li>" nil "move") (replace-match "<dt>" t t ))
+        (goto-char (point-min))
+        (while (search-forward @sep nil t)
+          (replace-match (if @keep-sep-p (concat @sep "</dt><dd>") "</dt><dd>" )  t t )
+          (search-forward "</dd>" nil "move" ))))))
 
 (defun xah-html-dl-to-ul ()
   "Change html dl to ul.
@@ -1825,14 +1865,14 @@ Version 2019-06-07"
 
           (goto-char (point-min))
           (while (and
-                  (search-forward $sep nil "NOERROR")
+                  (search-forward $sep nil "move")
                   (< $i 2000))
             (replace-match "</td><td>")
             (1+ $i))
 
           (goto-char (point-min))
           (while (and
-                  (search-forward "\n" nil "NOERROR")
+                  (search-forward "\n" nil "move")
                   (< $j 2000))
             (replace-match "</td></tr>
 <tr><td>")
@@ -2322,11 +2362,11 @@ Version 2020-01-22"
      (if (use-region-p)
          (setq $p1 (region-beginning) $p2 (region-end))
        (save-excursion
-         (if (re-search-backward "\n[ \t]*\n" nil "NOERROR")
+         (if (re-search-backward "\n[ \t]*\n" nil "move")
              (progn (re-search-forward "\n[ \t]*\n")
                     (setq $p1 (point)))
            (setq $p1 (point)))
-         (if (re-search-forward "\n[ \t]*\n" nil "NOERROR")
+         (if (re-search-forward "\n[ \t]*\n" nil "move")
              (progn (re-search-backward "\n[ \t]*\n")
                     (setq $p2 (point)))
            (setq $p2 (point)))))
@@ -3830,11 +3870,11 @@ Version 2017-01-11"
       (narrow-to-region @begin @end)
       (progn
         (goto-char (point-min))
-        (while (search-forward "(" nil "NOERROR")
+        (while (search-forward "(" nil "move")
           (replace-match "<rt>")))
       (progn
         (goto-char (point-min))
-        (while (search-forward ")" nil "NOERROR")
+        (while (search-forward ")" nil "move")
           (replace-match "</rt>")))
       (goto-char (point-min))
       (insert "<ruby class=\"ruby88\">")
@@ -3855,11 +3895,11 @@ This is heuristic based, does not remove ALL possible redundant whitespace."
         (narrow-to-region $p1 $p2)
         (progn
           (goto-char (point-min))
-          (while (re-search-forward "[ \t]+\n" nil "NOERROR")
+          (while (re-search-forward "[ \t]+\n" nil "move")
             (replace-match "\n")))
         (progn
           (goto-char (point-min))
-          (while (re-search-forward " *<p>\n+" nil "NOERROR")
+          (while (re-search-forward " *<p>\n+" nil "move")
             (replace-match "<p>")))))))
 
 (defun xah-html-remove-wikipedia-link ()
@@ -4290,7 +4330,7 @@ Version 2018-10-26"
         (delete-region $p1 $p2)
         (insert $newStr)))))
 
-
+;; HHH___________________________________________________________________
 
 (defun xah-html-abbrev-enable-function ()
   "Return t if not in string or comment. Else nil.
@@ -4400,7 +4440,7 @@ Version 2016-10-24"
 (abbrev-table-put xah-html-mode-abbrev-table :system t)
 (abbrev-table-put xah-html-mode-abbrev-table :enable-function 'xah-html-abbrev-enable-function)
 
-
+;; HHH___________________________________________________________________
 ;; keybinding
 
 (defvar xah-html-mode-map nil "Keybinding for `xah-html-mode'")
@@ -4473,7 +4513,7 @@ Version 2016-10-24"
   ;; define separate, so that user can override the lead key
   (define-key xah-html-mode-map (kbd "C-c C-c") xah-html-mode-no-chord-map))
 
-
+;; HHH___________________________________________________________________
 
 (defvar xah-html-mode-syntax-table nil "Syntax table for `xah-html-mode'.")
 
@@ -4659,7 +4699,7 @@ Version 2016-10-24"
           (,cssColorNames . font-lock-preprocessor-face)
           (,cssUnitNames . font-lock-reference-face))))
 
-
+;; HHH___________________________________________________________________
 
 ;;;###autoload
 (define-derived-mode
@@ -4685,6 +4725,8 @@ URL `http://ergoemacs.org/emacs/xah-html-mode.html'
 
   (xah-html-display-page-break-as-line)
   (abbrev-mode 1)
+
+  ;; (xah-html--display-hr-as-line)
 
   :group 'xah-html-mode
   )
