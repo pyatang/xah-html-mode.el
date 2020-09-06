@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 9.4.20200905165450
+;; Version: 9.4.20200905192402
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -1712,29 +1712,28 @@ else, add empty <dt></dt> in the beginning. @keep-sep-p if true, keep it in resu
 
 Version 2020-09-05"
   (interactive
-   (let ( $p1 $p2)
-     (if (use-region-p)
-         (setq $p1 (region-beginning) $p2 (region-end))
-       (save-excursion
-         (search-backward "<ul>" )
-         (setq $p1 (point))
-         (search-forward "</ul>")
-         (setq $p2 (point))))
-     (list $p1 $p2 (read-string "Seperator:" ) (yes-or-no-p "Keep Seperator:"))))
-  (save-restriction
-    (narrow-to-region @begin @end)
-    (goto-char (point-min)) (search-forward "<ul>") (replace-match "<dl>" t t )
-    (goto-char (point-min)) (search-forward "</ul>") (replace-match "</dl>" t t )
-    (goto-char (point-min)) (while (search-forward "</li>" nil "move") (replace-match "</dd>" t t ))
-    (if (or (string-equal @sep "") (eq @sep nil))
+   (list
+    (if (use-region-p) (region-beginning))
+    (if (use-region-p) (region-end))
+    (read-string "Seperator:" )
+    (yes-or-no-p "Keep Seperator:")))
+
+  (let (($p1 (if @begin @begin (save-excursion (search-forward ">" ) (search-backward "<ul>" ) (point))))
+        ($p2 (if @end @end (progn (search-backward "<") (search-forward "</ul>") (point)))))
+    (save-restriction
+      (narrow-to-region $p1 $p2)
+      (goto-char (point-min)) (search-forward "<ul>") (replace-match "<dl>" t t )
+      (goto-char (point-min)) (search-forward "</ul>") (replace-match "</dl>" t t )
+      (goto-char (point-min)) (while (search-forward "</li>" nil "move") (replace-match "</dd>" t t ))
+      (if (or (string-equal @sep "") (eq @sep nil))
+          (progn
+            (goto-char (point-min)) (while (search-forward "<li>" nil "move") (replace-match "<dt></dt><dd>" t t )))
         (progn
-          (goto-char (point-min)) (while (search-forward "<li>" nil "move") (replace-match "<dt></dt><dd>" t t )))
-      (progn
-        (goto-char (point-min)) (while (search-forward "<li>" nil "move") (replace-match "<dt>" t t ))
-        (goto-char (point-min))
-        (while (search-forward @sep nil t)
-          (replace-match (if @keep-sep-p (concat @sep "</dt><dd>") "</dt><dd>" )  t t )
-          (search-forward "</dd>" nil "move" ))))))
+          (goto-char (point-min)) (while (search-forward "<li>" nil "move") (replace-match "<dt>" t t ))
+          (goto-char (point-min))
+          (while (search-forward @sep nil t)
+            (replace-match (if @keep-sep-p (concat @sep "</dt><dd>") "</dt><dd>" )  t t )
+            (search-forward "</dd>" nil "move" )))))))
 
 (defun xah-html-dl-to-ul ()
   "Change html dl to ul.
