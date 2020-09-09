@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 9.4.20200905192402
+;; Version: 9.5.20200908192933
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -1905,7 +1905,7 @@ Version 2015-07-27"
 (defun xah-html-remove-paragraph-tags ()
   "Remove paragraph <p></p> tags.
 In text selection or current text block.
-Version 2020-08-17"
+Version 2020-08-17 2020-09-08"
   (interactive)
   (let ($p1 $p2 )
     (save-excursion
@@ -1914,7 +1914,6 @@ Version 2020-08-17"
             (setq $p1 (region-beginning))
             (setq $p2 (region-end)))
         (progn
-          (skip-chars-forward " \n\t")
           (when (re-search-backward "\n[ \t]*\n" nil "move")
             (re-search-forward "\n[ \t]*\n"))
           (setq $p1 (point))
@@ -2159,6 +2158,7 @@ Version 2019-04-12"
 
             ["<code>" "「" ]
             ["<code class=\"elisp_f_3d841\">" "「" ]
+            ["<code class=\"path_xl\">" "「" ]
             ["</code>" "」" ]
 
             ["<cite>" "〈" ]
