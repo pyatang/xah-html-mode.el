@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 9.5.20200908192933
+;; Version: 9.5.20200914095923
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -4375,7 +4375,7 @@ Version 2016-10-24"
 
     ("cssh" "<link rel=\"stylesheet\" href=\"lbasic.css\" />")
     ("styleh" "<style type=\"text/css\">\np {line-height:130%}\n</style>")
-    ("target" "target=\"_blank\"")
+    ("targeth" "target=\"_blank\"")
     ("iframe" "<iframe src=\"some.html\" width=\"200\" height=\"300\"></iframe>")
 
     ("og" "<meta property=\"og:image\" content=\"http://ergoemacs.org/emacs/i/geek_vs_non_geek_repetitive_tasks.png\" />" xah-html--ahf)
