@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 9.5.20200914095923
+;; Version: 9.6.20200915115659
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -3258,17 +3258,24 @@ Version 2019-06-21"
     (skip-chars-forward "\n" )))
 
 (defun xah-html-insert-br-tag ()
-  "Add <br /> at cursor point, or end of each line in selection.
-Version 2020-08-02"
+  "Insert a html <br /> tag at end of line and move cursor to the end of next line.
+If there's a text selection, add to end of all lines.
+Version 2020-09-15"
   (interactive)
-  (if (use-region-p)
+  (let (p1 p2)
+    (if (use-region-p)
+        (progn
+          (setq p1 (region-beginning))
+          (setq p2 (region-end))
+          (save-restriction
+            (narrow-to-region p1 p2)
+            (goto-char (point-min))
+            (while (search-forward "\n" nil "NOERROR" )
+              (replace-match "<br />\n"))))
       (progn
-        (save-restriction
-          (narrow-to-region (region-beginning) (region-end))
-          (goto-char (point-min))
-          (while (search-forward "\n" nil t)
-            (replace-match "<br />\n"))))
-    (insert "<br />")))
+        (end-of-line )
+        (insert "<br />")
+        (forward-line )))))
 
 (defun xah-html-emacs-to-windows-kbd-notation (@begin @end)
   "Change emacs key notation to Windows's notation on text selection or current line.
