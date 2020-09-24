@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 9.6.20200915115659
+;; Version: 9.7.20200924022435
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -632,7 +632,7 @@ Version 2019-04-08
 
         ;; ("clojure" . ["clojure-mode" "clj"])
         ("clojure" . ["xah-clojure-mode" "clj"])
-        ("typescript" . ["typescript-mode" "ts"])
+        ("typescript" . ["xah-js-mode" "ts"])
         ("css" . ["xah-css-mode" "css"])
         ("emacs-lisp" . ["xah-elisp-mode" "el"])
         ("dart" . ["dart-mode" "dart"])
@@ -4511,6 +4511,7 @@ Version 2016-10-24"
         (modify-syntax-entry ?@ "." synTable)
 
         (modify-syntax-entry ?\" "\"" synTable)
+        ;; (modify-syntax-entry ?\" "." synTable)
 
         (modify-syntax-entry ?\\ "\\" synTable)
 
@@ -4673,7 +4674,7 @@ Version 2016-10-24"
 ;;;###autoload
 (define-derived-mode
   xah-html-mode
-  mhtml-mode
+  fundamental-mode
   "∑html"
   "A simple major mode for HTML5.
 HTML5 keywords are colored.
