@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 9.7.20200924022435
+;; Version: 9.8.20201011113846
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -537,39 +537,39 @@ Version 2018-11-02")
 :group 'xah-html-mode)
 (setq xah-html-attribute-names '(
 
-"id"
-"class"
-"style"
-"title"
-"href"
-"type"
-"rel"
-"http-equiv"
-"content"
-"charset"
-"alt"
-"src"
-"width"
-"height"
-
-"preload"
-"name"
-"value"
-"size"
-"maxlength"
-"rows"
-"cols"
-"min"
-"max"
-"step"
-"for"
-"list"
-
-"target"
-"enctype"
-"method"
 "action"
+"alt"
+"charset"
+"class"
+"cols"
+"content"
+"enctype"
+"for"
+"height"
+"href"
+"http-equiv"
+"id"
+"lang"
+"list"
+"max"
+"maxlength"
+"method"
+"min"
+"name"
 "poster"
+"preload"
+"rel"
+"rows"
+"size"
+"src"
+"step"
+"style"
+"target"
+"title"
+"type"
+"value"
+"width"
+
  ))
 
 (defcustom xah-html-boolean-attribute-names nil
@@ -839,8 +839,7 @@ If @major-mode-name is string. It'll be converted to symbol and if is not in `ob
 
 This function requires the `htmlize-buffer' from htmlize.el by Hrvoje Niksic.
 
-Version 2018-09-28"
-  (interactive)
+Version 2018-09-28, 2020-09-27"
   (let ($output-buff
         $resultStr
         ($majorModeSym (intern-soft @major-mode-name)))
@@ -892,19 +891,19 @@ Version 2018-09-28"
 (defun xah-html-htmlize-region (@p1 @p2 @mode-name )
   "Htmlized region @p1 @p2 using `major-mode' @mode-name.
 This function requires the `htmlize-buffer' from htmlize.el by Hrvoje Niksic.
-Version 2016-12-18"
+Version 2016-12-18 2020-09-27"
   (interactive
    (list (region-beginning)
          (region-end)
          (ido-completing-read "Chose mode for coloring:" xah-html-lang-mode-list)))
   (let* (
-         ($input-str (buffer-substring-no-properties @p1 @p2))
-         ($out-str (xah-html-htmlize-string $input-str @mode-name)))
-    (if (string-equal $input-str $out-str)
+         ($inputStr (buffer-substring-no-properties @p1 @p2))
+         ($outStr (xah-html-htmlize-string $inputStr @mode-name)))
+    (if (string-equal $inputStr $outStr)
         nil
       (progn
         (delete-region @p1 @p2)
-        (insert $out-str)))))
+        (insert $outStr)))))
 
 (defun xah-html-dehtml-711 (@begin @end)
   "Delete span tags between pre tags.
@@ -3541,7 +3540,7 @@ Example:
 
 When called in lisp code, @begin @end are region begin/end positions.
 
-Version 2020-06-19"
+Version 2020-10-06"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -3570,8 +3569,8 @@ Version 2020-06-19"
            ["Enter" "<kbd>Enter</kbd>"]
            ["Backspace" "<kbd>Backspace</kbd>"]
            ["bs" "<kbd>Backspace</kbd>"]
-           ["Delete" "<kbd>Delete</kbd>"]
-           ["DEL" "<kbd>Delete</kbd>"]
+           ["Delete" "<kbd>Delete ⌦</kbd>"]
+           ["DEL" "<kbd>Delete ⌦</kbd>"]
            ["Space" "<kbd>Space</kbd>"]
            ["Caps Lock" "<kbd>CapsLock</kbd>"]
            ["capslock" "<kbd>CapsLock</kbd>"]
