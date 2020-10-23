@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 9.8.20201011113846
+;; Version: 9.9.20201023131334
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -677,6 +677,7 @@ Version 2019-04-08
         ("scss" . ["xah-css-mode" "css"])
 
         ("poem_xl" . ["text-mode" "txt"])
+        ("text" . ["text-mode" "txt"])
         ("lyrics_xl" . ["text-mode" "txt"])
 
         ("vimrc" . ["vimrc-mode" "vim"])))
@@ -3762,20 +3763,22 @@ Like this:
 …
 </pre>
 
-Version 2018-10-11"
+Version 2020-10-22"
   (interactive
    (list
-    (ido-completing-read "lang code:" (mapcar (lambda (x) (car x)) xah-html-lang-name-map) "PREDICATE" "REQUIRE-MATCH" nil xah-html-html-tag-input-history "code")))
+    (ido-completing-read
+     "lang code:" (mapcar (lambda (x) (car x)) xah-html-lang-name-map)
+     "PREDICATE" "REQUIRE-MATCH" nil xah-html-html-tag-input-history "code")))
   (let* (($bds (xah-get-bounds-of-thing-or-region 'block))
          ($p1 (car $bds))
          ($p2 (cdr $bds)))
     (save-restriction
       (narrow-to-region $p1 $p2)
       (goto-char (point-min))
-      (insert (format "<pre class=\"%s\">" @lang-code ))
+      (insert (format "<pre class=\"%s\">\n" @lang-code ))
       (goto-char (point-max))
-      (insert "</pre>")
-      (backward-char 6))))
+      (insert "\n</pre>")
+      (backward-char 7))))
 
 (defun xah-html-mark-unicode (@pos)
   "Wrap a special <mark> tag around the character before cursor.
