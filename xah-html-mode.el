@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 9.9.20201023131334
+;; Version: 9.10.20201108162847
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -2098,7 +2098,8 @@ Version 2019-04-12"
                ($url (if (string-match "^http" $hrefVal)
                          $hrefVal
                        (if (fboundp 'xahsite-web-path-to-filepath)
-                           (xahsite-filepath-to-url (xahsite-web-path-to-filepath $hrefVal))
+                           $hrefVal
+                         ;; (xahsite-filepath-to-url (xahsite-web-path-to-filepath $hrefVal))
                          $hrefVal
                          ))))
           (delete-region $tagBegin $tagEnd)
@@ -4371,7 +4372,7 @@ Version 2016-10-24"
     ("idh" "id=\"▮\"" xah-html--ahf)
     ("posterh" "poster=\"▮\"" xah-html--ahf)
 
-    ("wi" "width" xah-html--ahf)
+    ("wid" "width" xah-html--ahf)
     ("hei" "height" xah-html--ahf)
     ("bgc" "background-color" xah-html--ahf)
     ("bgc" "background-color" xah-html--ahf)
