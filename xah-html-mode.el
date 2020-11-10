@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 9.10.20201108162847
+;; Version: 9.11.20201110042845
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -4647,9 +4647,11 @@ Version 2016-10-24"
           (,(format "<h\\([1-6]\\)>%s</h\\1>" textNodeRegex) . (2 'bold))
 
           (,(format "<title>%s</title>" textNodeRegex) . (1 'bold))
+          (,(format "<span>%s</span>" textNodeRegex) . (1 'xah-html-span-f))
           (,(format "<span%s>%s</span>" attriRegex textNodeRegex) . (1 'xah-html-span-f))
           (,(format "<mark>%s</mark>" textNodeRegex) . (1 'xah-html-mark-f))
           (,(format "<mark%s>%s</mark>" attriRegex textNodeRegex) . (1 'xah-html-mark-f))
+          (,(format "<b>%s</b>" textNodeRegex) . (1 'bold))
           (,(format "<b%s>%s</b>" attriRegex textNodeRegex) . (1 'bold))
 
           ;; (,"=\"\\([-_/.A-Za-z0-9]+?\\)\"" . (1 'font-lock-string-face))
