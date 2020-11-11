@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 9.11.20201110042845
+;; Version: 9.11.20201111130641
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -3693,14 +3693,14 @@ version 2019-06-29"
 Wrap around text selection.
 If there's no text selection, the tag will be wrapped around current {word, line, text-block}, depending on the tag used.
 If current line or word is empty, then insert open/end tags and place cursor between them.
-If `universal-argument' is called first, then also prompt for a “class” attribute. Empty value means don't add the attribute.
-Version 2019-06-29"
+If `universal-argument' is called first, then also prompt for a “class” attribute and “class”. Empty value means don't add the attribute.
+Version 2020-11-11"
   (interactive
    (list
     (ido-completing-read "HTML tag:" xah-html-html5-tag-list "PREDICATE" "REQUIRE-MATCH" nil xah-html-html-tag-input-history "div")
-    ;; (when current-prefix-arg (read-string "class:" nil xah-html-class-input-history ""))
-    (when current-prefix-arg "x" )
-    (when current-prefix-arg (format "x%05x" (random (1- (expt 16 5)))))))
+    (when current-prefix-arg (read-string "class:" nil xah-html-class-input-history ))
+    (when current-prefix-arg (read-string "id:" "auto" nil "auto"))))
+  (when (string-equal @id "auto") (setq @id (format "id_%05x" (random (1- (expt 16 5))))))
   (let* (
          ($wrap-type (xah-html--get-tag-type @tag))
          ($bds
@@ -3734,7 +3734,6 @@ Version 2019-06-29"
           (delete-horizontal-space)
           (goto-char (point-max))
           (delete-horizontal-space)))
-
       ;; add blank at start/end
       (when (equal $wrap-type "b")
         (progn
@@ -3742,11 +3741,10 @@ Version 2019-06-29"
           (insert "\n")
           (goto-char (point-max))
           (insert "\n")))
-
-      (xah-html-insert-open-close-tags @tag (point-min) (point-max) @class @id))
-
-    (message "pos are %s %s" $p1 $p2)
-
+      (xah-html-insert-open-close-tags
+       @tag (point-min) (point-max)
+       (if (eq (length @class) 0) nil @class )
+       (if (eq (length @id) 0) nil @id )))
     ;; move cursor
     (if (= $p1 $p2)
         (if (xah-html--tag-self-closing-p @tag)
