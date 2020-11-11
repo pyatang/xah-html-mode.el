@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 9.11.20201111130641
+;; Version: 9.11.20201111131148
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -3699,7 +3699,7 @@ Version 2020-11-11"
    (list
     (ido-completing-read "HTML tag:" xah-html-html5-tag-list "PREDICATE" "REQUIRE-MATCH" nil xah-html-html-tag-input-history "div")
     (when current-prefix-arg (read-string "class:" nil xah-html-class-input-history ))
-    (when current-prefix-arg (read-string "id:" "auto" nil "auto"))))
+    (when current-prefix-arg (read-string "id:" "auto" ))))
   (when (string-equal @id "auto") (setq @id (format "id_%05x" (random (1- (expt 16 5))))))
   (let* (
          ($wrap-type (xah-html--get-tag-type @tag))
