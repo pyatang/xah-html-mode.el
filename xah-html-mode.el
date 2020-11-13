@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 9.11.20201111131148
+;; Version: 9.11.20201112162222
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -499,6 +499,7 @@ For each element, the key is tag name, value is a vector of one element of strin
 ("option" . ["z"])
 ("output" . ["z"])
 ("param" . ["z"])
+("picture" . ["z"])
 ("progress" . ["z"])
 ("q" . ["w"])
 ("samp" . ["z"])
@@ -537,6 +538,7 @@ Version 2018-11-02")
 :group 'xah-html-mode)
 (setq xah-html-attribute-names '(
 
+
 "action"
 "alt"
 "charset"
@@ -553,6 +555,7 @@ Version 2018-11-02")
 "list"
 "max"
 "maxlength"
+"media"
 "method"
 "min"
 "name"
@@ -562,6 +565,7 @@ Version 2018-11-02")
 "rows"
 "size"
 "src"
+"srcset"
 "step"
 "style"
 "target"
@@ -569,7 +573,6 @@ Version 2018-11-02")
 "type"
 "value"
 "width"
-
  ))
 
 (defcustom xah-html-boolean-attribute-names nil
