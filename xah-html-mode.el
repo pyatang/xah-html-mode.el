@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 9.11.20201112162222
+;; Version: 9.12.20201113212043
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -31,6 +31,7 @@
 (require 'xah-get-thing)
 (require 'xah-css-mode)
 (require 'htmlize)
+(require 'xeu_elisp_util)
 
 ;; (load "html-util.el" )
 
