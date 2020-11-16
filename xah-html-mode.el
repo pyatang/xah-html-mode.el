@@ -1221,7 +1221,7 @@ Version 2020-08-30"
           (region-beginning)
         (progn
           (re-search-backward "\n[ \t]*\n" nil "move")
-          (re-search-forward "\n[ \t]*\n" nil "move")
+          (re-search-forward "\n[ \t]*\n" nil )
           (point)))
       (if (use-region-p)
           (region-end)
@@ -2394,6 +2394,41 @@ Version 2019-01-11"
              (goto-char $p1)
              (insert @title ))
       (xah-html-update-first-h1 @title))))
+
+(defun xah-html-insert-date-section ()
+  "Insert a section tag with date tag inside.
+Version 2020-11-16"
+  (interactive)
+  (let ($p1 $p2)
+    (if (region-active-p)
+        (progn (setq $p1 (region-beginning))
+               (setq $p2 (region-end)))
+      (progn (setq $p1 (point))
+             (setq $p2 (point))))
+    (save-restriction
+      (narrow-to-region $p1 $p2)
+      (goto-char (point-min))
+      (insert "\n\n<section>\n\n")
+      (insert (format "<div class=\"date_xl\"><time>%s</time></div>\n\n" (format-time-string "%Y-%m-%d")))
+      (goto-char (point-max))
+      (insert "\n\n</section>\n\n")
+      (search-backward "\n\n</section>" ))))
+
+(defun xah-html-insert-date-tag ()
+  "Insert a date tag.
+Version 2020-11-16"
+  (interactive)
+  (let ($p1 $p2)
+    (if (region-active-p)
+        (progn (setq $p1 (region-beginning))
+               (setq $p2 (region-end)))
+      (progn (setq $p1 (point))
+             (setq $p2 (point))))
+    (save-restriction
+      (narrow-to-region $p1 $p2)
+      (goto-char (point-min))
+      (insert (concat "<div class=\"date_xl\"><time>" (format-time-string "%Y-%m-%d") "</time></div>\n\n\n" )))
+    (backward-char 1)))
 
 (defun xah-html-update-first-h1 ( @h1Text)
   "Update the first <h1>…</h1> of current buffer.
