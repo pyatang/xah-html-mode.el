@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 9.12.20201113212043
+;; Version: 10.1.20201116154124
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -1452,7 +1452,9 @@ Version 2019-03-15"
                 (when (looking-at "- ")
                   (delete-char 2))
                 (when (looking-at "⓪①②③④⑤⑥⑦⑧⑨⑩")
-                  (delete-char 2))
+                  (delete-char 1))
+                (while (looking-at " ")
+                  (delete-char 1))
                 (insert "<li>")
                 (end-of-line) (insert "</li>")
                 (forward-line 1 ))
@@ -4670,9 +4672,10 @@ Version 2016-10-24"
 
   ;              (attriRegex " *= *\"\\([ -_a-z]*?\\)\"")
   ;              (attriRegex " +\\(?:[ =\"-_a-z]*?\\)") ; one or more attributes
-            (attriRegex " +\\(?:[^\n<>]*?\\)") ; one or more attributes
+            (attriRegex " +\\(?:[^<>]*?\\)") ; one or more attributes
+
   ;              (textNodeRegex "\\([ [:graph:]]+?\\)")
-            (textNodeRegex "\\([^\n<]+?\\)") ; ← hack, to avoid multi-line
+            (textNodeRegex "\\([^<]+?\\)") ; ← hack, to avoid multi-line
 
             )
         `(
@@ -4690,6 +4693,8 @@ Version 2016-10-24"
           (,(format "<mark%s>%s</mark>" attriRegex textNodeRegex) . (1 'xah-html-mark-f))
           (,(format "<b>%s</b>" textNodeRegex) . (1 'bold))
           (,(format "<b%s>%s</b>" attriRegex textNodeRegex) . (1 'bold))
+
+          (,(format "“%s”" textNodeRegex) . 'xah-html-double-curly-quote-f)
 
           ;; (,"=\"\\([-_/.A-Za-z0-9]+?\\)\"" . (1 'font-lock-string-face))
 
