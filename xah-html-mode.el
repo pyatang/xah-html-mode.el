@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 10.1.20201116154124
+;; Version: 10.1.20201118021725
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -2515,7 +2515,7 @@ Version 2020-07-15"
     (setq $author (upcase-initials (downcase $author)))
 
     (setq $date (string-trim $date))
-    (setq $date (xah-fix-datetime-stamp $date))
+    (setq $date (xah-fix-datetime-string $date))
 
     (setq $url (string-trim $url))
     (setq $url (with-temp-buffer (insert $url) (xah-html-source-url-linkify 1) (buffer-string)))
