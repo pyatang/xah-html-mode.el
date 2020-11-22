@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 10.1.20201118021725
+;; Version: 10.1.20201122083852
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -3300,9 +3300,9 @@ Version 2019-06-21"
     (skip-chars-forward "\n" )))
 
 (defun xah-html-insert-br-tag ()
-  "Insert a html <br /> tag at end of line and move cursor to the end of next line.
+  "Insert a html <br /> tag.
 If there's a text selection, add to end of all lines.
-Version 2020-09-15"
+Version 2020-11-22"
   (interactive)
   (let (p1 p2)
     (if (use-region-p)
@@ -3314,10 +3314,7 @@ Version 2020-09-15"
             (goto-char (point-min))
             (while (search-forward "\n" nil "NOERROR" )
               (replace-match "<br />\n"))))
-      (progn
-        (end-of-line )
-        (insert "<br />")
-        (forward-line )))))
+      (insert "<br />\n"))))
 
 (defun xah-html-emacs-to-windows-kbd-notation (@begin @end)
   "Change emacs key notation to Windows's notation on text selection or current line.
