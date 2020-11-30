@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 10.1.20201122083852
+;; Version: 10.2.20201130093649
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -4258,6 +4258,38 @@ Version 2019-11-09"
         (start-process "" nil "powershell" "start-process" "firefox" $path )))
      ((string-equal system-type "gnu/linux")
       (shell-command (format "firefox \"%s\"" $path))))))
+
+(defun xah-html-open-in-firefox ()
+  "Open current link or buffer or marked files in Firefox browser.
+If cursor position is link/url, open that link. Else, open current buffer. But if in dired, open marked files or current file.
+Version 2020-11-30"
+  (interactive)
+  (if (string-equal major-mode "dired-mode")
+      (let (($file-list (dired-get-marked-files)))
+        (cond
+         ((string-equal system-type "darwin")
+          (mapc
+           (lambda ($fpath)
+             (when (buffer-modified-p )
+               (save-buffer))
+             (shell-command
+              (format "open -a firefox.app \"%s\"" $fpath))) $file-list)))
+        ;;
+        )
+    (let (($linkPath (thing-at-point 'filename )))
+      (if (and $linkPath (string-match "^http\\|html$" $linkPath ))
+          (xah-html-open-link-in-firefox)
+        (let (($path (buffer-file-name)))
+          (when (buffer-modified-p ) (save-buffer))
+          (cond
+           ((string-equal system-type "darwin")
+            (shell-command (format "open -a 'Firefox.app' \"%s\"" $path)))
+           ((string-equal system-type "windows-nt")
+            ;; "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" 2019-11-09
+            (let ((process-connection-type nil))
+              (start-process "" nil "powershell" "start-process" "firefox" $path )))
+           ((string-equal system-type "gnu/linux")
+            (shell-command (format "firefox \"%s\"" $path)))))))))
 
 (defun xah-html-open-in-safari ()
   "Open the current file or `dired' marked files in Mac's Safari browser.
