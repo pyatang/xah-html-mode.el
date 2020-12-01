@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 10.2.20201130093649
+;; Version: 10.2.20201130223940
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -4287,7 +4287,7 @@ Version 2020-11-30"
            ((string-equal system-type "windows-nt")
             ;; "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" 2019-11-09
             (let ((process-connection-type nil))
-              (start-process "" nil "powershell" "start-process" "firefox" $path )))
+              (start-process "" nil "powershell" "start-process" "firefox" (concat "file:///" $path))))
            ((string-equal system-type "gnu/linux")
             (shell-command (format "firefox \"%s\"" $path)))))))))
 
