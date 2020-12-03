@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 10.2.20201130093649
+;; Version: 10.2.20201202185626
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -2075,22 +2075,26 @@ Version 2018-11-27"
     (insert $output-str))
   (skip-chars-forward "\n" ))
 
-(defun xah-html-link-to-text (&optional @begin @end)
-  "convert html link <a … href …>…</a> to plain text form.
+(defun xah-html-link-to-text (@begin @end)
+  "Convert html link <a …>…</a> to plain text form.
 If the href value and link text is the same, then result is:
  [ ‹URL› ]
 else
  〈link text〉 [ ‹URL› ]
-Version 2019-04-12"
-  (interactive)
-  (let ($p1 $p2)
-    (if @begin
-        (progn
-          (setq $p1 @begin)
-          (setq $p2 @end))
-      (progn
-        (setq $p1 (point-min))
-        (setq $p2 (point-max))))
+Version 2020-12-02"
+  (interactive
+   (let ($p1 $p2)
+     (if (use-region-p)
+         (setq $p1 (region-beginning) $p2 (region-end))
+       (save-excursion
+         (if (re-search-backward "\n[ \t]*\n+" nil "move")
+             (progn (re-search-forward "\n[ \t]*\n+")
+                    (setq $p1 (point)))
+           (setq $p1 (point)))
+         (re-search-forward "\n[ \t]*\n" nil "move")
+         (setq $p2 (point))))
+     (list $p1 $p2)))
+  (let ( ($p1 @begin ) ($p2 @end))
     (save-restriction
       (narrow-to-region $p1 $p2)
       (goto-char 1)
@@ -2101,17 +2105,21 @@ Version 2019-04-12"
                ($matchData (match-data 0))
                ($tagBegin (nth 0 $matchData))
                ($tagEnd (nth 1 $matchData))
-               ($url (if (string-match "^http" $hrefVal)
-                         $hrefVal
-                       (if (fboundp 'xahsite-web-path-to-filepath)
+               ($url (if (xah-html-local-link-p $hrefVal)
+                         (if (fboundp 'xahsite-web-path-to-filepath)
+                             (let ((xahFPath (xahsite-web-path-to-filepath $hrefVal)))
+                               (if (xahsite-file-path-is-xahsite-p xahFPath)
+                                   (xahsite-filepath-to-url xahFPath )
+                                 xahFPath
+                                 ))
                            $hrefVal
-                         ;; (xahsite-filepath-to-url (xahsite-web-path-to-filepath $hrefVal))
-                         $hrefVal
-                         ))))
+                           )
+                       $hrefVal
+                       )))
           (delete-region $tagBegin $tagEnd)
           (if (string-equal $url $linkText)
-              (progn (insert (format " [ %s ] " $url)))
-            (progn (insert (format " 〈%s〉 [ %s ] " $linkText $url )))))))))
+              (insert (format " [ %s ] " $url))
+            (insert (format " 〈%s〉 [ %s ] " $linkText $url ))))))))
 
 (defun xah-html-html-to-text ()
   "Convert HTML to plain text on current text block or text selection.
