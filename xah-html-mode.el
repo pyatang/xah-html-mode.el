@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 10.2.20201218214830
+;; Version: 10.2.20201218215119
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -3588,7 +3588,7 @@ Example:
 
 When called in lisp code, @begin @end are region begin/end positions.
 
-Version 2020-10-06"
+Version 2020-12-18"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
