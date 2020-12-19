@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 10.2.20201202185626
+;; Version: 10.2.20201218214830
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -1030,7 +1030,7 @@ Version 2017-01-11"
         (let (($backup-path
                (concat @file-path "~htmlize" (format-time-string "%Y%m%dT%H%M%S") "~")))
           (copy-file @file-path $backup-path t))
-        (write-region 1 (point-max) @file-path)))
+        (write-region (point-min) (point-max) @file-path)))
     $result
     ))
 
@@ -2195,7 +2195,7 @@ Version 2019-04-12"
 
             )))
        (xah-html-remove-html-tags (point-min) (point-max))
-       (buffer-substring 1 (point-max))))
+       (buffer-substring (point-min) (point-max))))
     (delete-region $p1 $p2 )
     (insert $output-str)))
 
@@ -3605,6 +3605,7 @@ Version 2020-10-06"
            ["Alt" "<kbd>Alt</kbd>"]
            ["Shift" "<kbd>Shift</kbd>"]
            ["Cmd" "<kbd>⌘command</kbd>"]
+           ["command" "<kbd>⌘command</kbd>"]
            ["Option" "<kbd>option</kbd>"]
            ["Opt" "<kbd>⌥option</kbd>"]
            ["Win" "<kbd>❖Window</kbd>"]
