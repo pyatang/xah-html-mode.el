@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 10.2.20201221000412
+;; Version: 10.2.20201221000606
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -25,7 +25,7 @@
 (require 'thingatpt)
 (require 'seq)
 (require 'subr-x)
-(require 'mhtml-mode)
+;; (require 'mhtml-mode)
 
 (require 'xah-replace-pairs)
 (require 'xah-get-thing)
