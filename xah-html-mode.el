@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2020, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 10.2.20201218215119
+;; Version: 10.2.20201221000412
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -3832,10 +3832,11 @@ like this:
  <mark class=\"unicode\" title=\"U+3B1: GREEK SMALL LETTER ALPHA\">α</mark>
 
 If the char is any of 「&」 「<」 「>」, then replace them with 「&amp;」「&lt;」「&gt;」.
+If the unicode name contains < or >, such as <CJK IDEOGRAPH-7684>, they are removed.
 
 When called in elisp program, wrap the tag around char before position @pos.
 
-Version 2018-01-12"
+Version 2018-01-12 2020-12-20"
   (interactive (list (point)))
   (let* (
          ($codepoint (string-to-char (buffer-substring-no-properties (- @pos 1) @pos )))
@@ -3848,7 +3849,7 @@ Version 2018-01-12"
                   (get-char-code-property $codepoint 'name)))
          ($char (buffer-substring-no-properties (- @pos 1) @pos)))
     (goto-char (- @pos 1))
-    (insert (format "<mark class=\"unicode\" title=\"U+%X: %s\">" $codepoint $name))
+    (insert (format "<mark class=\"unicode\" title=\"U+%X: %s\">" $codepoint (replace-regexp-in-string "<\\|>" "" $name  t t )))
     (right-char 1)
     (insert (format "</mark>"))
 
