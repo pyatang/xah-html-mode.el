@@ -1,9 +1,9 @@
 ;;; xah-html-mode.el --- Major mode for editing html. -*- coding: utf-8; lexical-binding: t; -*-
 
-;; Copyright © 2013-2020, by Xah Lee
+;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 10.2.20201221000606
+;; Version: 10.2.20210103042302
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -1496,7 +1496,7 @@ For example, if the input is
 cat → 4 legs
 bird → has wings
 
-Version 2018-10-11"
+Version 2018-10-11 2020-12-24"
   (interactive)
   (let ($bds $p1 $p2 $input-str $resultStr $endpos)
     (setq $bds (xah-get-bounds-of-thing 'block))
@@ -1520,7 +1520,7 @@ Version 2018-10-11"
                 (if (re-search-forward $sep $endpos )
                     (progn
                      (delete-region (match-beginning 0) (match-end 0))
-                     (insert "</dt><dd>")
+                     (insert "</dt><dd>\n")
                      (end-of-line)
                      (insert "</dd>")
                      (forward-line 1 ))
@@ -1716,7 +1716,7 @@ Cursor must be inside <ul></ul> tags.
 Prompt for separator string and whether to keep.
 else, add empty <dt></dt> in the beginning. @keep-sep-p if true, keep it in result.
 
-Version 2020-09-05"
+Version 2020-09-05 2020-12-24"
   (interactive
    (list
     (if (use-region-p) (region-beginning))
@@ -1738,7 +1738,7 @@ Version 2020-09-05"
           (goto-char (point-min)) (while (search-forward "<li>" nil "move") (replace-match "<dt>" t t ))
           (goto-char (point-min))
           (while (search-forward @sep nil t)
-            (replace-match (if @keep-sep-p (concat @sep "</dt><dd>") "</dt><dd>" )  t t )
+            (replace-match (if @keep-sep-p (concat @sep "</dt><dd>\n") "</dt><dd>\n" )  t t )
             (search-forward "</dd>" nil "move" )))))))
 
 (defun xah-html-dl-to-ul ()
@@ -3604,12 +3604,12 @@ Version 2020-12-18"
            ["Compose" "<kbd>Compose</kbd>"]
            ["Alt" "<kbd>Alt</kbd>"]
            ["Shift" "<kbd>Shift</kbd>"]
-           ["Cmd" "<kbd>⌘command</kbd>"]
-           ["command" "<kbd>⌘command</kbd>"]
-           ["Option" "<kbd>option</kbd>"]
-           ["Opt" "<kbd>⌥option</kbd>"]
-           ["Win" "<kbd>❖Window</kbd>"]
-           ["Menu" "<kbd>▤Menu</kbd>"]
+           ["Cmd" "<kbd>⌘ command</kbd>"]
+           ["command" "<kbd>⌘ command</kbd>"]
+           ["Option" "<kbd>⌥ option</kbd>"]
+           ["Opt" "<kbd>⌥ option</kbd>"]
+           ["Win" "<kbd>❖ Window</kbd>"]
+           ["Menu" "<kbd>▤ Menu</kbd>"]
            ["Meta" "<kbd>Meta</kbd>"]
            ["Super" "<kbd>Super</kbd>"]
            ["Hyper" "<kbd>Hyper</kbd>"]
@@ -3618,8 +3618,8 @@ Version 2020-12-18"
            ["Enter" "<kbd>Enter</kbd>"]
            ["Backspace" "<kbd>Backspace</kbd>"]
            ["bs" "<kbd>Backspace</kbd>"]
-           ["Delete" "<kbd>Delete ⌦</kbd>"]
-           ["DEL" "<kbd>Delete ⌦</kbd>"]
+           ["Delete" "<kbd>Delete ⌦</kbd>"]
+           ["DEL" "<kbd>Delete ⌦</kbd>"]
            ["Space" "<kbd>Space</kbd>"]
            ["Caps Lock" "<kbd>CapsLock</kbd>"]
            ["capslock" "<kbd>CapsLock</kbd>"]
