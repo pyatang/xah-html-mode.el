@@ -4546,7 +4546,7 @@ Version 2016-10-24"
   (define-key xah-html-mode-no-chord-map (kbd "f") 'xah-html-image-linkify)
   (define-key xah-html-mode-no-chord-map (kbd "g") 'xah-html-brackets-to-html)
   (define-key xah-html-mode-no-chord-map (kbd "h") 'xah-html-any-linkify)
-  (define-key xah-html-mode-no-chord-map (kbd "i") 'xah-html-delete-tag-pair)
+  (define-key xah-html-mode-no-chord-map (kbd "i") nil)
   (define-key xah-html-mode-no-chord-map (kbd "j") 'xah-html-url-linkify)
   (define-key xah-html-mode-no-chord-map (kbd "k") 'xah-html-htmlize-keyboard-shortcut-notation)
   (define-key xah-html-mode-no-chord-map (kbd "l") 'xah-html-htmlize-elisp-keywords)
@@ -4561,7 +4561,7 @@ Version 2016-10-24"
   (define-key xah-html-mode-no-chord-map (kbd "s") 'xah-html-lines-to-dl)
   (define-key xah-html-mode-no-chord-map (kbd "t") 'xah-html-wrap-p-tag)
 
-  (define-key xah-html-mode-no-chord-map (kbd "u") nil)
+  (define-key xah-html-mode-no-chord-map (kbd "u") 'xah-html-delete-tag-pair)
 
   (define-key xah-html-mode-no-chord-map (kbd "v") 'xah-html-lines-to-table)
   (define-key xah-html-mode-no-chord-map (kbd "w") 'xah-html-named-entity-to-char)
