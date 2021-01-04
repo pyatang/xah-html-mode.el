@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 10.2.20210103042302
+;; Version: 10.3.20210103221532
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -211,100 +211,134 @@ Version 2020-01-15"
   (interactive)
   (member @tag-name xah-html-html5-self-close-tags))
 
+(defun xah-html-delete-tag ()
+  "Delete the tag under cursor.
+This function assume cursor is inside the tag <…▮…>.
+Version 2021-01-03"
+  (interactive)
+  (let (p1 p2)
+    (save-excursion
+      (search-backward "<" )
+      (setq p1 (point))
+      (search-forward ">")
+      (setq p2 (point))
+      (delete-region p1 p2))))
+
+(defun xah-html-delete-tag-pair ()
+  "Remove the current tag(s) under cursor.
+For example, if you have <p>some</p> and cursor is inside either the beginning or ending tag, it'll remove both. But if cursor is inside a self-closing tag such as <br />, just remove that.
+This function assumes cursor is inside a tag <…▮…>.
+This function  self-closing tags ends in />.
+Version 2021-01-03"
+  (interactive)
+  (let (p0 inEndTag-p p1 p2 openTag-p1 openTag-p2 selfCloseTag-p closingTag-p1 closingTag-p2 openTagStr closeTagStr)
+    (setq p0 (point))
+    (search-backward "<")
+    (setq p1 (point))
+    (forward-char 1)
+    (setq inEndTag-p (char-equal (char-after ) ?/))
+    (search-forward ">")
+    (setq p2 (point))
+    (if inEndTag-p
+        (progn
+          (setq closingTag-p1 p1)
+          (setq closingTag-p2 p2)
+          (goto-char p0)
+          (sgml-skip-tag-backward 1)
+          (setq openTag-p1 (point))
+          (search-forward ">" )
+          (setq openTag-p2 (point))
+          (setq closeTagStr (buffer-substring closingTag-p1 closingTag-p2))
+          (setq openTagStr (buffer-substring openTag-p1 openTag-p2))
+          (message "Deleted:\n%s\n%s" openTagStr closeTagStr)
+          (delete-region closingTag-p1 closingTag-p2)
+          (delete-region openTag-p1 openTag-p2))
+      (progn
+        (setq selfCloseTag-p (char-equal (char-after (- p2 2)) ?/))
+        (if selfCloseTag-p
+            (progn
+              (setq openTagStr (buffer-substring p1 p2))
+              (message "Deleted:\n%s" openTagStr )
+              (delete-region p1 p2))
+          (progn
+            (setq openTag-p1 p1)
+            (setq openTag-p2 p2)
+            (goto-char p0)
+            (sgml-skip-tag-forward 1)
+            (setq closingTag-p2 (point))
+            (search-backward "<" )
+            (setq closingTag-p1 (point))
+            (setq closeTagStr (buffer-substring closingTag-p1 closingTag-p2))
+            (setq openTagStr (buffer-substring openTag-p1 openTag-p2))
+            (message "Deleted:\n%s\n%s" openTagStr closeTagStr)
+            (delete-region closingTag-p1 closingTag-p2)
+            (delete-region openTag-p1 openTag-p2)))))))
+
 (defun xah-html--get-bracket-positions ()
   "Returns HTML angle bracket positions.
-Returns a vector [ -posPrev< -posPrev> -posNext< -posNext> ]
- -posPrev< is the position of < nearest to cursor on the left side
- -posPrev> is the position of > nearest to cursor on the left side
- similar for -posNext< and -posNext> for the right side.
+Returns a vector [ $pPrevL $pPrevR $pNextL $pNextR ]
+ $pPrevL is the position of < nearest to cursor on the left side
+ $pPrevR is the position of > nearest to cursor on the left side
+ similar for $pNextL and $pNextR for the right side.
 If any of these are not found, nil is the value.
 Here, a char's position is the point immediately to the left of the char.
 
 Version 2016-10-18"
   (let (
         ($pos (point))
-        -posPrev< ; position of first < char to the left of cursor
-        -posPrev>
-        -posNext<
-        -posNext>
+        $pPrevL ; position of first < char to the left of cursor
+        $pPrevR
+        $pNextL
+        $pNextR
         )
     (save-excursion
       (goto-char $pos)
-      (setq -posPrev< (search-backward "<" nil "move"))
+      (setq $pPrevL (search-backward "<" nil "move"))
       (goto-char $pos)
-      (setq -posPrev> (search-backward ">" nil "move"))
+      (setq $pPrevR (search-backward ">" nil "move"))
       (goto-char $pos)
-      (setq -posNext<
+      (setq $pNextL
             (if (search-forward "<" nil "move")
                 (- (point) 1)
               nil
               ))
       (goto-char $pos)
-      (setq -posNext>
+      (setq $pNextR
             (if (search-forward ">" nil "move")
                 (- (point) 1)
               nil
               ))
-      (vector -posPrev< -posPrev> -posNext< -posNext>))))
+      (vector $pPrevL $pPrevR $pNextL $pNextR))))
 
-(defun xah-html--cursor-in-tag-markup-p (&optional @bracketPositions)
+(defun xah-html--cursor-in-tag (&optional @bracketPositions)
   "Return t if cursor is between angle brackets like this: 「<…▮…>」, where the … is any char except angle brackets.
 More precisely: on the left side of cursor, there exist a <, and there's no > between < and cursor.
 And, on the right side of cursor, there exist a >, and there's no < between > and cursor.
  @bracketPositions is optional. If nil, then `xah-html--get-bracket-positions' is called to get it.
-Version 2016-10-18"
+Version 2016-10-18 2021-01-03"
   (interactive)
   (let (($bracketPos
          (if @bracketPositions
              @bracketPositions
            (xah-html--get-bracket-positions)))
-        -posPrev< -posPrev> -posNext> -posNext< )
+        $pPrevL $pPrevR $pNextR $pNextL )
     (progn
-      (setq -posPrev< (elt $bracketPos 0))
-      (setq -posPrev> (elt $bracketPos 1))
-      (setq -posNext< (elt $bracketPos 2))
-      (setq -posNext> (elt $bracketPos 3)))
+      (setq $pPrevL (elt $bracketPos 0))
+      (setq $pPrevR (elt $bracketPos 1))
+      (setq $pNextL (elt $bracketPos 2))
+      (setq $pNextR (elt $bracketPos 3)))
     (if (and
-         -posPrev<
-         -posNext>
-         (if -posPrev>
-             (< -posPrev> -posPrev<)
+         $pPrevL
+         $pNextR
+         (if $pPrevR
+             (< $pPrevR $pPrevL)
            t
            )
-         (if -posNext<
-             (< -posNext> -posNext<)
+         (if $pNextL
+             (< $pNextR $pNextL)
            t
            ))
         nil)))
-
-(defun xah-html--in-opening-tag-p ()
-  "Return t if it's a opening tag. Else, false.
-We assume that the cursor is inside a tag, like this 「<…▮…>」.
-"
-  (interactive)
-  (save-excursion
-    (if
-        (search-backward "<" (- (point) 150))
-        (progn
-          (forward-char)
-          (message "%s" (not (char-equal (char-after) ?/))))
-      (user-error "Not in a tag. Cursor must be inside a tag."))))
-
-(defun xah-html--in-closing-tag-p ()
-  "Return t if cursor is in a closing tag. Else, false."
-  (interactive)
-  (not (xah-html--in-opening-tag-p)))
-
-(defun xah-html--ending-tag-p ()
-  "Return t if cursor is inside a begin tag, else nil.
-This function assumes your cursor is inside a tag, eg <…▮…>
- It simply check if the left brack is followed by a slash or not.\n
-Version 2016-12-18"
-  (interactive)
-  (save-excursion
-      (search-backward "<")
-      (forward-char 1)
-      (looking-at "/" )))
 
 ;; HHH___________________________________________________________________
 
@@ -358,7 +392,6 @@ Version 2017-11-22"
 The elements are integer datatype.
 Support png jpg svg gif and any image type emacs supports.
 If it's svg, and dimension cannot be determined, it returns [0 0]
-
 URL `http://ergoemacs.org/emacs/elisp_image_tag.html'
 Version 2017-01-11"
   (let (($x nil)
@@ -1089,28 +1122,6 @@ Version 2019-05-30"
     (newline)))
 
 ;; HHH___________________________________________________________________
-
-(defun xah-html-delete-tag ()
-  "work in progress. do nothing.
-Delete the tag under cursor.
-Also delete the matching beginning/ending tag."
-  (interactive)
-  (save-excursion
-    ;; determine if it's inside the tag. eg <…>
-    ;; if so, good. else abort.
-    ;; now, determine if it's opening tag or closing. eg closing tag start with </
-    ;; if it's opening tag, need to delete the matching one to the right
-    ;; else, need to delete the matching one to the left
-    ;; let's assume it's the opening.
-    ;; now, determine if there's nested element. eg <p>…<b>…</b>…</p>
-    ;;    to do this, first determine the name of the tag. eg the “p” in  <p …>, then search the matching tag.
-    ;; if so, O shit, it's complex. Need to determine if one of the nested has the same tag name. and and …
-    ;; if not, then we can proceed. Just find the closing tag and delete it. Also the beginning.
-    (if (xah-html--cursor-in-tag-markup-p)
-        (if (xah-html--ending-tag-p)
-            (progn (message "end %s" (xah-html--get-tag-name)))
-          (progn (message "begin %s" (xah-html--get-tag-name))))
-      (message "%s" "cursor needs to be inside a tag."))))
 
 (defun xah-html-skip-tag-forward ()
   "Move cursor to the closing tag."
@@ -4535,7 +4546,7 @@ Version 2016-10-24"
   (define-key xah-html-mode-no-chord-map (kbd "f") 'xah-html-image-linkify)
   (define-key xah-html-mode-no-chord-map (kbd "g") 'xah-html-brackets-to-html)
   (define-key xah-html-mode-no-chord-map (kbd "h") 'xah-html-any-linkify)
-  (define-key xah-html-mode-no-chord-map (kbd "i") nil)
+  (define-key xah-html-mode-no-chord-map (kbd "i") 'xah-html-delete-tag-pair)
   (define-key xah-html-mode-no-chord-map (kbd "j") 'xah-html-url-linkify)
   (define-key xah-html-mode-no-chord-map (kbd "k") 'xah-html-htmlize-keyboard-shortcut-notation)
   (define-key xah-html-mode-no-chord-map (kbd "l") 'xah-html-htmlize-elisp-keywords)
@@ -4551,8 +4562,6 @@ Version 2016-10-24"
   (define-key xah-html-mode-no-chord-map (kbd "t") 'xah-html-wrap-p-tag)
 
   (define-key xah-html-mode-no-chord-map (kbd "u") nil)
-  (define-key xah-html-mode-no-chord-map (kbd "u t") 'xah-html-word-to-wikipedia-linkify)
-  (define-key xah-html-mode-no-chord-map (kbd "u h") 'xah-html-wikipedia-url-linkify)
 
   (define-key xah-html-mode-no-chord-map (kbd "v") 'xah-html-lines-to-table)
   (define-key xah-html-mode-no-chord-map (kbd "w") 'xah-html-named-entity-to-char)
