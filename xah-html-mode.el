@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 10.3.20210103221532
+;; Version: 10.3.20210104165937
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -27,10 +27,10 @@
 (require 'subr-x)
 ;; (require 'mhtml-mode)
 
-(require 'xah-replace-pairs)
-(require 'xah-get-thing)
-(require 'xah-css-mode)
-(require 'htmlize)
+(require 'xah-replace-pairs) ; http://ergoemacs.org/emacs/elisp_replace_string_region.html
+(require 'xah-get-thing) ; http://ergoemacs.org/emacs/elisp_get-selection-or-unit.html
+(require 'xah-css-mode) ; http://ergoemacs.org/emacs/xah-css-mode.html
+(require 'htmlize) ; https://github.com/hniksic/emacs-htmlize
 (require 'xeu_elisp_util)
 
 ;; (load "html-util.el" )
@@ -571,7 +571,6 @@ Version 2018-11-02")
   "HTML attribute names."
 :group 'xah-html-mode)
 (setq xah-html-attribute-names '(
-
 
 "action"
 "alt"
@@ -2134,7 +2133,7 @@ Version 2020-12-02"
 
 (defun xah-html-html-to-text ()
   "Convert HTML to plain text on current text block or text selection.
-Version 2019-04-12"
+Version 2019-04-12 2021-01-04"
   (interactive)
   (let ( $p1 $p2 $input-str $output-str)
     (let ($bds)
@@ -2190,6 +2189,9 @@ Version 2019-04-12"
             ["<cite>" "〈" ]
             ["<cite class=\"book\">" "〈" ]
             ["</cite>" "〉" ]
+
+            ["<kbd>" "【" ]
+            ["</kbd>" "】" ]
 
             ["<h2>" "────────── ────────── ────────── ────────── ──────────\n" ]
             ["</h2>" "" ]
