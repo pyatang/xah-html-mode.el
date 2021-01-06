@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 10.3.20210104165937
+;; Version: 10.4.20210106022248
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -1869,9 +1869,9 @@ Version 2019-06-07"
           ;;
           )))))
 
-(defun xah-html-lines-to-table-undo ()
+(defun xah-html-table-to-lines ()
   "inverse of `xah-html-lines-to-table'.
-version 2016-12-18"
+Version 2016-12-18 2021-01-06"
   (interactive)
   (let ( $p1 $p2)
     (search-backward "<table")
@@ -1882,11 +1882,22 @@ version 2016-12-18"
      $p1 $p2
      [
       ["<table \\([^>]+?\\)>" ""]
-      ["</th><th>" "•"]
-      ["</td><td>" "•"]
+      ["</table>" ""]
+      ["<th>" "🖸"]
+      ["</th>" "🖸"]
+      ["<td>" "🖸"]
+      ["</td>" "🖸"]
       ["<tr>" ""]
       ["</tr>" ""]
-      ["</table>" ""]
+      ]
+     "FIXEDCASE" "LITERAL"
+     )
+    (xah-replace-regexp-pairs-region
+     $p1 $p2
+     [
+      ["^🖸" ""]
+      ["🖸$" ""]
+      ["🖸🖸" "│"]
       ]
      "FIXEDCASE" "LITERAL"
      )))
@@ -4569,7 +4580,7 @@ Version 2016-10-24"
   (define-key xah-html-mode-no-chord-map (kbd "w") 'xah-html-named-entity-to-char)
   (define-key xah-html-mode-no-chord-map (kbd "x") 'xah-html-escape-char-to-unicode)
   (define-key xah-html-mode-no-chord-map (kbd "y") 'xah-html-make-citation)
-  (define-key xah-html-mode-no-chord-map (kbd "z") 'xah-html-lines-to-table-undo)
+  (define-key xah-html-mode-no-chord-map (kbd "z") 'xah-html-table-to-lines)
 
   ;; define separate, so that user can override the lead key
   (define-key xah-html-mode-map (kbd "C-c C-c") xah-html-mode-no-chord-map))
