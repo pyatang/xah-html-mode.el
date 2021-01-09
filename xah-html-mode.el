@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 10.4.20210106022248
+;; Version: 10.5.20210109094939
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -1871,7 +1871,7 @@ Version 2019-06-07"
 
 (defun xah-html-table-to-lines ()
   "inverse of `xah-html-lines-to-table'.
-Version 2016-12-18 2021-01-06"
+Version 2016-12-18 2021-01-07"
   (interactive)
   (let ( $p1 $p2)
     (search-backward "<table")
@@ -1897,7 +1897,7 @@ Version 2016-12-18 2021-01-06"
      [
       ["^🖸" ""]
       ["🖸$" ""]
-      ["🖸🖸" "│"]
+      ["🖸🖸" "|"]
       ]
      "FIXEDCASE" "LITERAL"
      )))
