@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.0.20210111220200
+;; Version: 11.0.20210111234554
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -4599,6 +4599,7 @@ Version 2016-10-24"
   (define-key xah-html-mode-map (kbd "TAB") 'xah-html-wrap-html-tag)
   (define-key xah-html-mode-map (kbd "<C-return>") 'xah-html-insert-br-tag)
   (define-prefix-command 'xah-html-leader-map)
+  (define-key xah-html-leader-map (kbd "<backspace>") 'xah-html-remove-html-tags)
   (define-key xah-html-leader-map (kbd "<right>") 'xah-html-skip-tag-forward)
   (define-key xah-html-leader-map (kbd "<left>") 'xah-html-skip-tag-backward)
   (define-key xah-html-leader-map (kbd "'") 'xah-html-encode-percent-encoded-url)
@@ -4609,6 +4610,7 @@ Version 2016-10-24"
   (define-key xah-html-leader-map (kbd "2") 'xah-html-toggle-syntax-coloring-markup)
   (define-key xah-html-leader-map (kbd "4") 'xah-html-markup-ruby)
   (define-key xah-html-leader-map (kbd "5") 'xah-html-mark-unicode)
+  (define-key xah-html-leader-map (kbd "6") 'xah-html-html-to-text)
   (define-key xah-html-leader-map (kbd "9") 'xah-html-redo-syntax-coloring-buffer)
   (define-key xah-html-leader-map (kbd "0") 'xah-html-dehtmlize-pre-code-buffer)
   ;; a
@@ -4634,10 +4636,7 @@ Version 2016-10-24"
   (define-key xah-html-leader-map (kbd "r") 'xah-html-rename-source-file-path)
   (define-key xah-html-leader-map (kbd "s") 'xah-html-lines-to-dl)
   (define-key xah-html-leader-map (kbd "t") 'xah-html-wrap-p-tag)
-  (define-key xah-html-leader-map (kbd "u") 'nil)
-  (define-key xah-html-leader-map (kbd "u g") 'xah-html-delete-tag-pair)
-  (define-key xah-html-leader-map (kbd "u h") 'xah-html-remove-html-tags)
-  (define-key xah-html-leader-map (kbd "u t") 'xah-html-html-to-text)
+  (define-key xah-html-leader-map (kbd "u") 'xah-html-delete-tag-pair)
   (define-key xah-html-leader-map (kbd "v") 'xah-html-lines-to-table)
   (define-key xah-html-leader-map (kbd "w") 'nil)
   (define-key xah-html-leader-map (kbd "w w") 'xah-html-named-entity-to-char)
@@ -4648,6 +4647,7 @@ Version 2016-10-24"
   (define-key xah-html-leader-map (kbd "x") 'xah-html-escape-char-to-unicode)
   (define-key xah-html-leader-map (kbd "y") 'xah-html-make-citation)
   (define-key xah-html-leader-map (kbd "z") 'xah-html-table-to-lines)
+  (define-key xah-html-leader-map (kbd "SPC") 'nil)
   (define-key xah-html-leader-map (kbd "SPC SPC") 'xah-html-insert-date-section)
   ;; define separate, so that user can override the lead key
   (define-key xah-html-mode-map (kbd "C-c C-c") xah-html-leader-map))
