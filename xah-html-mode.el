@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 10.5.20210109094939
+;; Version: 10.6.20210111200747
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -2283,6 +2283,88 @@ Version 2020-08-27"
             (insert (format "?t=%s" $timeStamp)))
           (end-of-line )
           (insert "\n" figCapText "\n\n"))))))
+
+(defun xah-call-ImageMagick ( @argsStr @pathOld @pathNew  )
+  "Wrapper to ImageMagick' “convert” shell command.
+@argsStr is argument string passed to ImageMagick's “convert” command.
+@pathOld is image file full path.
+@pathNew is new image file full path.
+Version 2021-01-11"
+  (let ( $cmdStr )
+    ;; relative paths used to get around Windows/Cygwin path remapping problem
+    (setq $cmdStr
+          (format
+           "%s %s \"%s\" \"%s\""
+           (if (string-equal system-type "windows-nt") "magick.exe convert" "convert" )
+           @argsStr
+           (if (file-name-absolute-p @pathOld ) (file-relative-name @pathOld) @pathOld )
+           (if (file-name-absolute-p @pathNew ) (file-relative-name @pathNew) @pathNew )))
+    (shell-command $cmdStr)
+    (message "Called:「%s」" $cmdStr)))
+
+(defun xah-html-resize-img ()
+  "Create a new resized image of image path under cursor.
+In a html file, put cursor on a image file path, call the command,
+a thumbnail will be created, with file name prefix tn_‹width›x‹height› in the same dir, and relative path of the newly created file will be inserted before the img tag.
+If `universal-argument' is called first, ask for jpeg quality. (default is 90)
+Version 2020-11-13 2021-01-11"
+  (interactive)
+  (let* (
+         ($bounds (bounds-of-thing-at-point 'filename))
+         ($p1 (car $bounds))
+         ($p2 (cdr $bounds))
+         ($inputPath (buffer-substring-no-properties $p1 $p2))
+         ($fPath1 (expand-file-name $inputPath ))
+         ($dir (file-name-directory $fPath1))
+         ($fname (file-name-nondirectory $fPath1))
+         ($coreName (file-name-sans-extension $fname))
+         ($ext (file-name-extension $fname))
+         ($sideLength (string-to-number (read-from-minibuffer "~width:" "250" )))
+         ($thumbnailSizeArea (* $sideLength $sideLength))
+         ($size (xah-html--get-image-dimensions $fPath1))
+         ($w (aref $size 0))
+         ($h (aref $size 1))
+         ($fnameNew (format "%s-s%d.%s" $coreName $sideLength $ext ))
+         ($fPathNew (concat $dir $fnameNew))
+         ($isLossy-p (or (string-equal (downcase $ext)  "jpg")
+                         (string-equal (downcase $ext)  "jpeg")))
+         $args $doIt
+         )
+    (when (not (file-exists-p $inputPath))
+      (user-error "File not exist: %s" $inputPath))
+    (setq $args (format " -scale %s%% %s %s "
+                        (round (* (sqrt (/ (float $thumbnailSizeArea) (float (* $w $h)))) 100))
+                        (if $isLossy-p
+                            (if current-prefix-arg
+                                (format "-quality %s%%" (read-string "quality:" "85"))
+                              "-quality 90%%")
+                          " "
+                          )
+                        " -sharpen 1 "
+                        ))
+    (if (file-exists-p $fPathNew)
+        (setq $doIt (y-or-n-p (format "File exist 「%s」. Replace it?" $fPathNew)))
+      (setq $doIt t ))
+    (when $doIt (xah-call-ImageMagick $args $fPath1 $fPathNew ))
+    (search-backward "<" )
+    (insert $fPathNew "\n")
+    (backward-word )))
+
+(defun xah-html-convert-to-jpg ()
+  "Convert the image file under cursor in a html file, from jpg, then, linkify it in html. Do not delete the original
+If `universal-argument' is called first, ask to delete png.
+Version 2019-12-17 2021-01-11"
+  (interactive)
+  (let* ( ( $inputPath (thing-at-point 'filename))
+          ($newName (format "%s.jpg" (file-name-sans-extension $inputPath))))
+    (xah-call-ImageMagick " " $inputPath $newName)
+    (search-backward "<" )
+    (insert $newName )
+    (insert "\n")
+    (backward-char 2)
+    (xah-html-image-linkify)
+    ;;
+    ))
 
 (defun xah-html-rename-source-file-path ()
   "Rename HTML source file path.
@@ -4568,14 +4650,10 @@ Version 2016-10-24"
   (define-key xah-html-mode-no-chord-map (kbd "o") nil)
   (define-key xah-html-mode-no-chord-map (kbd "p") 'xah-html-browse-url-of-buffer)
   (define-key xah-html-mode-no-chord-map (kbd "q") 'xah-html-make-link-defunct)
-
-  (define-key xah-html-mode-no-chord-map (kbd "r") nil)
-
+  (define-key xah-html-mode-no-chord-map (kbd "r") 'xah-html-resize-img)
   (define-key xah-html-mode-no-chord-map (kbd "s") 'xah-html-lines-to-dl)
   (define-key xah-html-mode-no-chord-map (kbd "t") 'xah-html-wrap-p-tag)
-
   (define-key xah-html-mode-no-chord-map (kbd "u") 'xah-html-delete-tag-pair)
-
   (define-key xah-html-mode-no-chord-map (kbd "v") 'xah-html-lines-to-table)
   (define-key xah-html-mode-no-chord-map (kbd "w") 'xah-html-named-entity-to-char)
   (define-key xah-html-mode-no-chord-map (kbd "x") 'xah-html-escape-char-to-unicode)
