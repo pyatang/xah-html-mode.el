@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.0.20210112001457
+;; Version: 11.0.20210112012038
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -70,9 +70,7 @@ Version 2018-05-08"
 
 (defun xah-html-local-link-p (@href-value)
   "Return true if it's a local file link, else false.
-
 None local link may start with these:
-
  http://
  https://
  mailto:
@@ -80,7 +78,6 @@ None local link may start with these:
  ftp:
  javascript:
  //
-
 Version 2020-07-16"
 (cond
    ((string-match-p "^\.\./" @href-value) t)
@@ -94,6 +91,47 @@ Version 2020-07-16"
    ((string-match-p "^javascript:" @href-value) nil)
    (t t)
 ))
+
+(defun xah-html-local-url-to-file-path (@local-file-url)
+  "Turn a localhost file URL such as file:///C:/Users/xah/cat.html to file path.
+@local-file-url must be a full path.
+
+basically, remove the prefix of
+file:///
+file://localhost
+file://
+
+For example, the following string shown in browser URL field:
+; On Windows Vista 2009-06
+ [C:\\Users\\joe\\index.html]  IE
+ [file:///C:/Users/joe/index.html]  Firefox, Google Chrome, Safari
+ [file://localhost/C:/Users/joe/index.html]  Opera
+ becomes
+ [C:/Users/joe/index.html]
+
+ On Mac 2009-06
+ [file:///Users/joe/index.html]  Safari, Firefox
+ [file://localhost/Users/joe/index.html]  Opera
+ becomes
+ [/Users/joe/index.html]
+
+ On Ubuntu Linux, 2011-05
+ [file:///media/HP/Users/joe/index.html] firefox
+ becomes
+ [/media/HP/Users/joe/index.html]
+Version 2009-06-01 2021-01-12"
+  (let ((case-fold-search nil))
+    (xah-replace-regexp-pairs-in-string
+     @local-file-url
+     [
+      ["\\`file://localhost" ""]
+      ["\\`file://" ""]
+      ["\\`/\\([A-Za-z]\\):" "\\1:"] ; Windows C:\\
+      ["\\`C:" "c:"] ; need because a bug in `file-relative-name', it doesn't work when path C: is cap
+      ["\\\\" "/"]   ; Windows \ → /
+      ]
+     "FIXEDCASE"
+     )))
 
 (defun xah-html-get-relative-path-to-webroot (@path)
   "Return the relative path of @path with respect to its webroot.
@@ -2680,7 +2718,7 @@ If `univers-argument' is called before, don't width and height attribute.
 Returns the string used in the alt attribute.
 
 URL `http://ergoemacs.org/emacs/elisp_image_tag.html'
-Version 2018-06-14"
+Version 2018-06-14 2021-01-12"
   (interactive)
   (let ( $p1 $p2 $imgPath
              $hrefValue $altText $imgWH $width $height)
@@ -2696,10 +2734,9 @@ Version 2018-06-14"
         (setq $p2 (point))
         (goto-char $p0)))
     (setq $imgPath
-          (if (and (fboundp 'xahsite-web-path-to-filepath)
-                   (fboundp 'xah-local-url-to-file-path))
+          (if (fboundp 'xahsite-web-path-to-filepath)
               (xahsite-web-path-to-filepath
-               (xah-local-url-to-file-path
+               (xah-html-local-url-to-file-path
                 (buffer-substring-no-properties $p1 $p2 )))
             (buffer-substring-no-properties $p1 $p2 )))
     (when (not (file-exists-p $imgPath))
@@ -2769,7 +2806,7 @@ Version 2020-06-24"
             (skip-chars-forward "^  \"\t\n'|()[]{}<>〔〕“”〈〉《》【】〖〗〘〙«»‹›·。\\'")
             (setq $p2 (point))))))
     (setq $input (buffer-substring-no-properties $p1 $p2))
-    (setq $imgPath (xah-local-url-to-file-path $input))
+    (setq $imgPath (xah-html-local-url-to-file-path $input))
     (setq $dimension (xah-get-image-dimensions $imgPath))
     (setq $width (number-to-string (elt $dimension 0)))
     (setq $height (number-to-string (elt $dimension 1)))
