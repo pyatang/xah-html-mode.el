@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 10.6.20210111200747
+;; Version: 10.7.20210111202734
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -4624,16 +4624,9 @@ Version 2016-10-24"
   (define-key xah-html-mode-no-chord-map (kbd "3") nil)
   (define-key xah-html-mode-no-chord-map (kbd "4") 'xah-html-markup-ruby)
   (define-key xah-html-mode-no-chord-map (kbd "5") 'xah-html-mark-unicode)
-  (define-key xah-html-mode-no-chord-map (kbd "6") 'xah-html-html-to-text)
-
-  (define-key xah-html-mode-no-chord-map (kbd "7") nil)
-  (define-key xah-html-mode-no-chord-map (kbd "8") nil)
   (define-key xah-html-mode-no-chord-map (kbd "9") 'xah-html-redo-syntax-coloring-buffer)
   (define-key xah-html-mode-no-chord-map (kbd "0") 'xah-html-dehtmlize-pre-code-buffer)
-
-  (define-key xah-html-mode-no-chord-map (kbd "DEL") 'xah-html-remove-html-tags)
-
-  (define-key xah-html-mode-no-chord-map (kbd "a") nil)
+  ;; a
   (define-key xah-html-mode-no-chord-map (kbd "b") 'xah-html-rename-source-file-path)
   (define-key xah-html-mode-no-chord-map (kbd "c") 'xah-html-lines-to-list)
   (define-key xah-html-mode-no-chord-map (kbd "d") 'xah-html-extract-url)
@@ -4641,19 +4634,22 @@ Version 2016-10-24"
   (define-key xah-html-mode-no-chord-map (kbd "f") 'xah-html-image-linkify)
   (define-key xah-html-mode-no-chord-map (kbd "g") 'xah-html-brackets-to-html)
   (define-key xah-html-mode-no-chord-map (kbd "h") 'xah-html-any-linkify)
-  (define-key xah-html-mode-no-chord-map (kbd "i") nil)
+  (define-key xah-html-mode-no-chord-map (kbd "ir") 'xah-html-resize-img)
+  (define-key xah-html-mode-no-chord-map (kbd "ii") 'xah-html-convert-to-jpg)
   (define-key xah-html-mode-no-chord-map (kbd "j") 'xah-html-url-linkify)
   (define-key xah-html-mode-no-chord-map (kbd "k") 'xah-html-htmlize-keyboard-shortcut-notation)
   (define-key xah-html-mode-no-chord-map (kbd "l") 'xah-html-htmlize-elisp-keywords)
   (define-key xah-html-mode-no-chord-map (kbd "m") 'xah-html-insert-wrap-source-code)
   (define-key xah-html-mode-no-chord-map (kbd "n") 'xah-html-update-title)
-  (define-key xah-html-mode-no-chord-map (kbd "o") nil)
+  ;; o
   (define-key xah-html-mode-no-chord-map (kbd "p") 'xah-html-browse-url-of-buffer)
   (define-key xah-html-mode-no-chord-map (kbd "q") 'xah-html-make-link-defunct)
-  (define-key xah-html-mode-no-chord-map (kbd "r") 'xah-html-resize-img)
+  ;; r
   (define-key xah-html-mode-no-chord-map (kbd "s") 'xah-html-lines-to-dl)
   (define-key xah-html-mode-no-chord-map (kbd "t") 'xah-html-wrap-p-tag)
-  (define-key xah-html-mode-no-chord-map (kbd "u") 'xah-html-delete-tag-pair)
+  (define-key xah-html-mode-no-chord-map (kbd "ug") 'xah-html-delete-tag-pair)
+  (define-key xah-html-mode-no-chord-map (kbd "uh") 'xah-html-remove-html-tags)
+  (define-key xah-html-mode-no-chord-map (kbd "ut") 'xah-html-html-to-text)
   (define-key xah-html-mode-no-chord-map (kbd "v") 'xah-html-lines-to-table)
   (define-key xah-html-mode-no-chord-map (kbd "w") 'xah-html-named-entity-to-char)
   (define-key xah-html-mode-no-chord-map (kbd "x") 'xah-html-escape-char-to-unicode)
