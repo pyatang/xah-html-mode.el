@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.0.20210111234554
+;; Version: 11.0.20210112001457
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -4614,7 +4614,7 @@ Version 2016-10-24"
   (define-key xah-html-leader-map (kbd "9") 'xah-html-redo-syntax-coloring-buffer)
   (define-key xah-html-leader-map (kbd "0") 'xah-html-dehtmlize-pre-code-buffer)
   ;; a
-  (define-key xah-html-leader-map (kbd "b") 'xah-html-browse-url-of-buffer)
+  (define-key xah-html-leader-map (kbd "b") 'xah-html-rename-source-file-path)
   (define-key xah-html-leader-map (kbd "c") 'xah-html-lines-to-list)
   (define-key xah-html-leader-map (kbd "d") 'xah-html-extract-url)
   (define-key xah-html-leader-map (kbd "e") 'xah-html-source-url-linkify)
@@ -4623,17 +4623,17 @@ Version 2016-10-24"
   (define-key xah-html-leader-map (kbd "h") 'xah-html-any-linkify)
   (define-key xah-html-leader-map (kbd "i") 'nil)
   (define-key xah-html-leader-map (kbd "i i") 'xah-html-image-to-link)
+  (define-key xah-html-leader-map (kbd "i j") 'xah-html-convert-to-jpg)
   (define-key xah-html-leader-map (kbd "i r") 'xah-html-resize-img)
-  (define-key xah-html-leader-map (kbd "i i") 'xah-html-convert-to-jpg)
   (define-key xah-html-leader-map (kbd "j") 'xah-html-url-linkify)
   (define-key xah-html-leader-map (kbd "k") 'xah-html-htmlize-keyboard-shortcut-notation)
   (define-key xah-html-leader-map (kbd "l") 'xah-html-image-figure-linkify)
   (define-key xah-html-leader-map (kbd "m") 'xah-html-insert-wrap-source-code)
   (define-key xah-html-leader-map (kbd "n") 'xah-html-update-title)
   (define-key xah-html-leader-map (kbd "o") 'nil)
-  (define-key xah-html-leader-map (kbd "p") 'nil)
+  (define-key xah-html-leader-map (kbd "p") 'xah-html-browse-url-of-buffer)
   (define-key xah-html-leader-map (kbd "q") 'xah-html-make-link-defunct)
-  (define-key xah-html-leader-map (kbd "r") 'xah-html-rename-source-file-path)
+  (define-key xah-html-leader-map (kbd "r") 'nil)
   (define-key xah-html-leader-map (kbd "s") 'xah-html-lines-to-dl)
   (define-key xah-html-leader-map (kbd "t") 'xah-html-wrap-p-tag)
   (define-key xah-html-leader-map (kbd "u") 'xah-html-delete-tag-pair)
