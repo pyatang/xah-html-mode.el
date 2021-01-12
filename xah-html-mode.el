@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 10.7.20210111202734
+;; Version: 11.0.20210111220200
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -386,42 +386,6 @@ Version 2017-11-22"
 ;;  (string-trim ‹str›)
 ;; "
 ;;   (replace-regexp-in-string "\\`[ \t\n]*" "" (replace-regexp-in-string "[ \t\n]*\\'" "" string)))
-
-(defun xah-html--get-image-dimensions (@file-path)
-  "Returns a vector [width height] of a image's dimension.
-The elements are integer datatype.
-Support png jpg svg gif and any image type emacs supports.
-If it's svg, and dimension cannot be determined, it returns [0 0]
-URL `http://ergoemacs.org/emacs/elisp_image_tag.html'
-Version 2017-01-11"
-  (let (($x nil)
-        ($y nil))
-    (cond
-     ((string-match "\.svg$" @file-path)
-      (progn
-        (with-temp-buffer
-          ;; hackish. grab the first occurence of width height in file
-          (insert-file-contents @file-path)
-          (goto-char (point-min))
-          (when (re-search-forward "width=\"\\([0-9]+\\).\\{0,2\\}\"" nil "move")
-            (setq $x (match-string 1 )))
-          (goto-char (point-min))
-          (if (re-search-forward "height=\"\\([0-9]+\\).\\{0,2\\}\"" nil "move")
-              (setq $y (match-string 1 ))))
-        (if (and $x $y)
-            (progn (vector (string-to-number $x) (string-to-number $y)))
-          (progn [0 0]))))
-     (t
-      (let ($xy )
-        (progn
-          (clear-image-cache t)
-          (setq $xy (image-size
-                     (create-image
-                      (if (file-name-absolute-p @file-path)
-                          @file-path
-                        (concat default-directory @file-path)))
-                     t)))
-        (vector (car $xy) (cdr $xy)))))))
 
 ;; HHH___________________________________________________________________
 (defcustom xah-html-html5-tag-names nil
@@ -2321,7 +2285,7 @@ Version 2020-11-13 2021-01-11"
          ($ext (file-name-extension $fname))
          ($sideLength (string-to-number (read-from-minibuffer "~width:" "250" )))
          ($thumbnailSizeArea (* $sideLength $sideLength))
-         ($size (xah-html--get-image-dimensions $fPath1))
+         ($size (xah-get-image-dimensions $fPath1))
          ($w (aref $size 0))
          ($h (aref $size 1))
          ($fnameNew (format "%s-s%d.%s" $coreName $sideLength $ext ))
@@ -2513,6 +2477,10 @@ Version 2019-01-11"
 
 (defun xah-html-insert-date-section ()
   "Insert a section tag with date tag inside.
+Like this:
+<section>
+<div class=\"date_xl\"><time>2021-01-11</time></div>
+</section>
 Version 2020-11-16"
   (interactive)
   (let ($p1 $p2)
@@ -2754,7 +2722,7 @@ Version 2018-06-14"
             $hrefValue
             "\"" " " "alt=\"" $altText "\"" " />")))
       (progn
-        (setq $imgWH (xah-html--get-image-dimensions $imgPath))
+        (setq $imgWH (xah-get-image-dimensions $imgPath))
         (setq $width (number-to-string (elt $imgWH 0)))
         (setq $height (number-to-string (elt $imgWH 1)))
 
@@ -2773,6 +2741,42 @@ Version 2018-06-14"
             " height=\"" $height "\" />")))))
     $altText
     ))
+
+(defun xah-html-image-to-link (&optional @begin @end)
+  "Make image file path at cursor point into a img link.
+Example:
+i/cat.jpg
+becomes
+<a class=\"bigImg\" href=\"i/cat.jpg\">4176×2366</a>
+If there's a text selection, use that region as file name.
+Version 2020-06-24"
+  (interactive)
+  (let
+      ($p0 $p1 $p2 $input $imgPath $dimension $width $height $resultStr)
+    (progn ; sets $p1 $p2
+      (if @begin
+          (progn
+            (setq $p1 @begin)
+            (setq $p2 @end))
+        (if (use-region-p)
+            (setq $p1 (region-beginning) $p2 (region-end))
+          (save-excursion
+            (setq $p0 (point))
+            ;; chars that are likely to be delimiters of full path, e.g. space, tabs, brakets.
+            (skip-chars-backward "^  \"\t\n'|()[]{}<>〔〕“”〈〉《》【】〖〗〘〙«»‹›·。\\`")
+            (setq $p1 (point))
+            (goto-char $p0)
+            (skip-chars-forward "^  \"\t\n'|()[]{}<>〔〕“”〈〉《》【】〖〗〘〙«»‹›·。\\'")
+            (setq $p2 (point))))))
+    (setq $input (buffer-substring-no-properties $p1 $p2))
+    (setq $imgPath (xah-local-url-to-file-path $input))
+    (setq $dimension (xah-get-image-dimensions $imgPath))
+    (setq $width (number-to-string (elt $dimension 0)))
+    (setq $height (number-to-string (elt $dimension 1)))
+    (setq $resultStr
+          (concat "<a class=\"bigImg\" href=\"" (file-relative-name $imgPath) "\">" $width "×" $height "</a>"))
+    (delete-region $p1 $p2)
+    (insert $resultStr)))
 
 (defun xah-html-wrap-figure-tag (&optional @begin @end @figcaption)
   "Wrap <figure> tag around @begin @end, also add <figcaption>.
@@ -2814,16 +2818,12 @@ Version 2019-11-15"
 (defun xah-html-image-figure-linkify ()
   "Replace a image file's path under cursor with a HTML img tag,
 and wrap it with “figure” and “figcaption” tags.
-
 Example, if cursor is on the word “i/cat.png”, then it will became
-
 <figure>
 <img src=\"cat.png\" alt=\"cat\" width=\"707\" height=\"517\" />
 <figcaption>▮</figcaption>
 </figure>
-
 If there's a text selection, use that as image path.
-
 This function calls `xah-html-image-linkify'.
 Version 2019-11-15"
   (interactive)
@@ -3277,15 +3277,13 @@ The anchor text may be of 4 possibilities:
 URL `http://ergoemacs.org/emacs/elisp_html-linkify.html'
 Version 2020-07-15"
   (interactive "P")
-  (let (
-        $p1
-        $p2
-        $input
-        $url $domainName $linkText )
+  (let ( $p1 $p2 $input $url $domainName $linkText )
     (if (use-region-p)
-         (setq $p1 (region-beginning) $p2 (region-end))
+        (setq $p1 (region-beginning) $p2 (region-end))
       (let (($bds (bounds-of-thing-at-point 'url)))
         (setq $p1 (car $bds) $p2 (cdr $bds))))
+    (when (eq $p1 nil)
+      (user-error "Text under cursor probably not a url." ))
     (setq $input (buffer-substring-no-properties $p1 $p2))
     (setq $url (replace-regexp-in-string "&amp;" "&" $input nil "LITERAL"))
     ;; in case it's already encoded. TODO this is only 99% correct.
@@ -3293,6 +3291,8 @@ Version 2020-07-15"
           (progn
             (string-match "://\\([^\/]+?\\)/?" $url)
             (match-string 1 $url)))
+    (when (eq 0 (length $domainName))
+      (user-error "cannot find domain name. Got %s" $domainName))
     (setq $linkText
           (cond
            ((equal @prefixArg 1) $url)
@@ -3908,13 +3908,6 @@ Version 2020-11-11"
 (defun xah-html-insert-wrap-source-code (&optional @lang-code)
   "Insert or wrap a <pre class=\"@lang-code\">…</pre> tags
  to text selection or current text block.
-
-Like this:
-
-<pre class=\"@lang-code\">
-…
-</pre>
-
 Version 2020-10-22"
   (interactive
    (list
@@ -4603,61 +4596,61 @@ Version 2016-10-24"
 (progn
   (setq xah-html-mode-map (make-sparse-keymap))
   (define-key xah-html-mode-map (kbd "RET") 'xah-html-open-local-link)
-
   (define-key xah-html-mode-map (kbd "TAB") 'xah-html-wrap-html-tag)
-
   (define-key xah-html-mode-map (kbd "<C-return>") 'xah-html-insert-br-tag)
-
-  (define-prefix-command 'xah-html-mode-no-chord-map)
-
-  (define-key xah-html-mode-no-chord-map (kbd "<right>") 'xah-html-skip-tag-forward)
-  (define-key xah-html-mode-no-chord-map (kbd "<left>") 'xah-html-skip-tag-backward)
-
-  (define-key xah-html-mode-no-chord-map (kbd "'") 'xah-html-encode-percent-encoded-url)
-  (define-key xah-html-mode-no-chord-map (kbd ",") 'xah-html-escape-char-to-entity)
-  (define-key xah-html-mode-no-chord-map (kbd ".") 'xah-html-decode-percent-encoded-url)
-  (define-key xah-html-mode-no-chord-map (kbd ";") 'xah-html-emacs-to-windows-kbd-notation)
-
-  (define-key xah-html-mode-no-chord-map (kbd "1") 'xah-html-get-precode-make-new-file)
-  (define-key xah-html-mode-no-chord-map (kbd "2") 'xah-html-toggle-syntax-coloring-markup)
-
-  (define-key xah-html-mode-no-chord-map (kbd "3") nil)
-  (define-key xah-html-mode-no-chord-map (kbd "4") 'xah-html-markup-ruby)
-  (define-key xah-html-mode-no-chord-map (kbd "5") 'xah-html-mark-unicode)
-  (define-key xah-html-mode-no-chord-map (kbd "9") 'xah-html-redo-syntax-coloring-buffer)
-  (define-key xah-html-mode-no-chord-map (kbd "0") 'xah-html-dehtmlize-pre-code-buffer)
+  (define-prefix-command 'xah-html-leader-map)
+  (define-key xah-html-leader-map (kbd "<right>") 'xah-html-skip-tag-forward)
+  (define-key xah-html-leader-map (kbd "<left>") 'xah-html-skip-tag-backward)
+  (define-key xah-html-leader-map (kbd "'") 'xah-html-encode-percent-encoded-url)
+  (define-key xah-html-leader-map (kbd ",") 'xah-html-decode-percent-encoded-url)
+  (define-key xah-html-leader-map (kbd ".") 'xah-html-escape-char-to-entity)
+  (define-key xah-html-leader-map (kbd ";") 'xah-html-emacs-to-windows-kbd-notation)
+  (define-key xah-html-leader-map (kbd "1") 'xah-html-get-precode-make-new-file)
+  (define-key xah-html-leader-map (kbd "2") 'xah-html-toggle-syntax-coloring-markup)
+  (define-key xah-html-leader-map (kbd "4") 'xah-html-markup-ruby)
+  (define-key xah-html-leader-map (kbd "5") 'xah-html-mark-unicode)
+  (define-key xah-html-leader-map (kbd "9") 'xah-html-redo-syntax-coloring-buffer)
+  (define-key xah-html-leader-map (kbd "0") 'xah-html-dehtmlize-pre-code-buffer)
   ;; a
-  (define-key xah-html-mode-no-chord-map (kbd "b") 'xah-html-rename-source-file-path)
-  (define-key xah-html-mode-no-chord-map (kbd "c") 'xah-html-lines-to-list)
-  (define-key xah-html-mode-no-chord-map (kbd "d") 'xah-html-extract-url)
-  (define-key xah-html-mode-no-chord-map (kbd "e") 'xah-html-source-url-linkify)
-  (define-key xah-html-mode-no-chord-map (kbd "f") 'xah-html-image-linkify)
-  (define-key xah-html-mode-no-chord-map (kbd "g") 'xah-html-brackets-to-html)
-  (define-key xah-html-mode-no-chord-map (kbd "h") 'xah-html-any-linkify)
-  (define-key xah-html-mode-no-chord-map (kbd "ir") 'xah-html-resize-img)
-  (define-key xah-html-mode-no-chord-map (kbd "ii") 'xah-html-convert-to-jpg)
-  (define-key xah-html-mode-no-chord-map (kbd "j") 'xah-html-url-linkify)
-  (define-key xah-html-mode-no-chord-map (kbd "k") 'xah-html-htmlize-keyboard-shortcut-notation)
-  (define-key xah-html-mode-no-chord-map (kbd "l") 'xah-html-htmlize-elisp-keywords)
-  (define-key xah-html-mode-no-chord-map (kbd "m") 'xah-html-insert-wrap-source-code)
-  (define-key xah-html-mode-no-chord-map (kbd "n") 'xah-html-update-title)
-  ;; o
-  (define-key xah-html-mode-no-chord-map (kbd "p") 'xah-html-browse-url-of-buffer)
-  (define-key xah-html-mode-no-chord-map (kbd "q") 'xah-html-make-link-defunct)
-  ;; r
-  (define-key xah-html-mode-no-chord-map (kbd "s") 'xah-html-lines-to-dl)
-  (define-key xah-html-mode-no-chord-map (kbd "t") 'xah-html-wrap-p-tag)
-  (define-key xah-html-mode-no-chord-map (kbd "ug") 'xah-html-delete-tag-pair)
-  (define-key xah-html-mode-no-chord-map (kbd "uh") 'xah-html-remove-html-tags)
-  (define-key xah-html-mode-no-chord-map (kbd "ut") 'xah-html-html-to-text)
-  (define-key xah-html-mode-no-chord-map (kbd "v") 'xah-html-lines-to-table)
-  (define-key xah-html-mode-no-chord-map (kbd "w") 'xah-html-named-entity-to-char)
-  (define-key xah-html-mode-no-chord-map (kbd "x") 'xah-html-escape-char-to-unicode)
-  (define-key xah-html-mode-no-chord-map (kbd "y") 'xah-html-make-citation)
-  (define-key xah-html-mode-no-chord-map (kbd "z") 'xah-html-table-to-lines)
-
+  (define-key xah-html-leader-map (kbd "b") 'xah-html-browse-url-of-buffer)
+  (define-key xah-html-leader-map (kbd "c") 'xah-html-lines-to-list)
+  (define-key xah-html-leader-map (kbd "d") 'xah-html-extract-url)
+  (define-key xah-html-leader-map (kbd "e") 'xah-html-source-url-linkify)
+  (define-key xah-html-leader-map (kbd "f") 'xah-html-image-linkify)
+  (define-key xah-html-leader-map (kbd "g") 'xah-html-brackets-to-html)
+  (define-key xah-html-leader-map (kbd "h") 'xah-html-any-linkify)
+  (define-key xah-html-leader-map (kbd "i") 'nil)
+  (define-key xah-html-leader-map (kbd "i i") 'xah-html-image-to-link)
+  (define-key xah-html-leader-map (kbd "i r") 'xah-html-resize-img)
+  (define-key xah-html-leader-map (kbd "i i") 'xah-html-convert-to-jpg)
+  (define-key xah-html-leader-map (kbd "j") 'xah-html-url-linkify)
+  (define-key xah-html-leader-map (kbd "k") 'xah-html-htmlize-keyboard-shortcut-notation)
+  (define-key xah-html-leader-map (kbd "l") 'xah-html-image-figure-linkify)
+  (define-key xah-html-leader-map (kbd "m") 'xah-html-insert-wrap-source-code)
+  (define-key xah-html-leader-map (kbd "n") 'xah-html-update-title)
+  (define-key xah-html-leader-map (kbd "o") 'nil)
+  (define-key xah-html-leader-map (kbd "p") 'nil)
+  (define-key xah-html-leader-map (kbd "q") 'xah-html-make-link-defunct)
+  (define-key xah-html-leader-map (kbd "r") 'xah-html-rename-source-file-path)
+  (define-key xah-html-leader-map (kbd "s") 'xah-html-lines-to-dl)
+  (define-key xah-html-leader-map (kbd "t") 'xah-html-wrap-p-tag)
+  (define-key xah-html-leader-map (kbd "u") 'nil)
+  (define-key xah-html-leader-map (kbd "u g") 'xah-html-delete-tag-pair)
+  (define-key xah-html-leader-map (kbd "u h") 'xah-html-remove-html-tags)
+  (define-key xah-html-leader-map (kbd "u t") 'xah-html-html-to-text)
+  (define-key xah-html-leader-map (kbd "v") 'xah-html-lines-to-table)
+  (define-key xah-html-leader-map (kbd "w") 'nil)
+  (define-key xah-html-leader-map (kbd "w w") 'xah-html-named-entity-to-char)
+  (define-key xah-html-leader-map (kbd "w c") 'xah-html-open-in-chrome)
+  (define-key xah-html-leader-map (kbd "w f") 'xah-html-open-in-firefox)
+  (define-key xah-html-leader-map (kbd "w s") 'xah-html-open-in-safari)
+  (define-key xah-html-leader-map (kbd "w b") 'xah-html-open-in-brave)
+  (define-key xah-html-leader-map (kbd "x") 'xah-html-escape-char-to-unicode)
+  (define-key xah-html-leader-map (kbd "y") 'xah-html-make-citation)
+  (define-key xah-html-leader-map (kbd "z") 'xah-html-table-to-lines)
+  (define-key xah-html-leader-map (kbd "SPC SPC") 'xah-html-insert-date-section)
   ;; define separate, so that user can override the lead key
-  (define-key xah-html-mode-map (kbd "C-c C-c") xah-html-mode-no-chord-map))
+  (define-key xah-html-mode-map (kbd "C-c C-c") xah-html-leader-map))
 
 ;; HHH___________________________________________________________________
 
