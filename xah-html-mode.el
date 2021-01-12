@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.0.20210112012038
+;; Version: 11.0.20210112102340
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -433,135 +433,132 @@ For each element, the key is tag name, value is a vector of one element of strin
 :group 'xah-html-mode
 )
 (setq xah-html-html5-tag-names
-'(
-  ;; most frequently used should be on top. todo: reorder based on use. do a cache or such, look at ido-switch-buffer
+      '(
+        ;; most frequently used should be on top. todo: reorder based on use. do a cache or such, look at ido-switch-buffer
 
-("div" . ["b"])
-("span" . ["w"])
-("br" . ["s"])
+        ("div" . ["b"])
+        ("span" . ["w"])
+        ("br" . ["s"])
 
-("b" . ["w"])
-("strong" . ["w"])
-("em" . ["w"])
-("i" . ["w"])
-("mark" . ["w"])
-("s" . ["w"])
+        ("b" . ["w"])
+        ("strong" . ["w"])
+        ("em" . ["w"])
+        ("i" . ["w"])
+        ("mark" . ["w"])
+        ("s" . ["w"])
 
-("var" . ["w"])
-("sub" . ["z"])
-("sup" . ["z"])
-("small" . ["w"])
-("time" . ["w"])
-("kbd" . ["w"])
-("li" . ["l"])
+        ("var" . ["w"])
+        ("sub" . ["z"])
+        ("sup" . ["z"])
+        ("small" . ["w"])
+        ("time" . ["w"])
+        ("kbd" . ["w"])
+        ("li" . ["l"])
 
-("ol" . ["b"])
-("p" . ["b"])
-("pre" . ["b"])
+        ("ol" . ["b"])
+        ("p" . ["b"])
+        ("pre" . ["b"])
 
-("h1" . ["l"])
-("h2" . ["l"])
-("h3" . ["l"])
-("h4" . ["l"])
-("h5" . ["l"])
-("h6" . ["l"])
-("dl" . ["l"])
-("dt" . ["l"])
-("marquee" . ["l"])
+        ("h1" . ["l"])
+        ("h2" . ["l"])
+        ("h3" . ["l"])
+        ("h4" . ["l"])
+        ("h5" . ["l"])
+        ("h6" . ["l"])
+        ("dl" . ["b"])
+        ("dt" . ["l"])
+        ("marquee" . ["l"])
 
-("img" . ["l"])
-("input" . ["l"])
-("ins" . ["z"])
-("hr" . ["s"])
+        ("img" . ["l"])
+        ("input" . ["l"])
+        ("ins" . ["z"])
+        ("hr" . ["s"])
 
-("a" . ["l"])
-("blockquote" . ["b"])
-("cite" . ["l"])
-("code" . ["l"])
+        ("a" . ["l"])
+        ("blockquote" . ["b"])
+        ("cite" . ["l"])
+        ("code" . ["l"])
 
-("nav" . ["b"])
+        ("nav" . ["b"])
 
-("rp" . ["l"])
-("rt" . ["w"])
-("ruby" . ["l"])
-("abbr" . ["w"])
+        ("rp" . ["l"])
+        ("rt" . ["w"])
+        ("ruby" . ["l"])
+        ("abbr" . ["w"])
 
-("article" . ["b"])
+        ("article" . ["b"])
 
-("applet" . ["l"])
-("main" . ["b"])
-("address" . ["w"])
-("aside" . ["b"])
-("audio" . ["l"])
-("area" . ["l"])
-("base" . ["l"])
-("basefont" . ["l"])
-("bdi" . ["w"])
-("bdo" . ["w"])
-("body" . ["b"])
-("button" . ["w"])
-("canvas" . ["b"])
-("caption" . ["l"])
-("col" . ["n"])
-("colgroup" . ["l"])
-("command" . ["z"])
-("datalist" . ["z"])
-("dd" . ["z"])
-("del" . ["z"])
-("details" . ["z"])
-("dfn" . ["z"])
-("embed" . ["l"])
-("fieldset" . ["z"])
-("figure" . ["b"])
-("figcaption" . ["l"])
-("footer" . ["b"])
-("form" . ["l"])
-("head" . ["b"])
-("header" . ["b"])
-("html" . ["b"])
-("iframe" . ["z"])
-("keygen" . ["z"])
-("label" . ["z"])
-("legend" . ["z"])
-("link" . ["z"])
-("map" . ["z"])
-("menu" . ["z"])
-("menuitem" . ["z"])
-("meta" . ["z"])
-("meter" . ["z"])
-("noscript" . ["l"])
-("object" . ["z"])
-("optgroup" . ["z"])
-("option" . ["z"])
-("output" . ["z"])
-("param" . ["z"])
-("picture" . ["z"])
-("progress" . ["z"])
-("q" . ["w"])
-("samp" . ["z"])
-("script" . ["b"])
-("section" . ["b"])
-("select" . ["z"])
-("source" . ["z"])
-("style" . ["b"])
-("summary" . ["z"])
-("table" . ["b"])
-("tbody" . ["z"])
-("td" . ["l"])
-("textarea" . ["z"])
-("tfoot" . ["z"])
-("th" . ["z"])
-("thead" . ["z"])
-("title" . ["l"])
-("tr" . ["b"])
-("track" . ["b"])
-("u" . ["w"])
-("ul" . ["b"])
-("video" . ["l"])
-("wbr" . ["z"])
-
-)
- )
+        ("applet" . ["l"])
+        ("main" . ["b"])
+        ("address" . ["w"])
+        ("aside" . ["b"])
+        ("audio" . ["l"])
+        ("area" . ["l"])
+        ("base" . ["l"])
+        ("basefont" . ["l"])
+        ("bdi" . ["w"])
+        ("bdo" . ["w"])
+        ("body" . ["b"])
+        ("button" . ["w"])
+        ("canvas" . ["b"])
+        ("caption" . ["l"])
+        ("col" . ["n"])
+        ("colgroup" . ["l"])
+        ("command" . ["z"])
+        ("datalist" . ["z"])
+        ("dd" . ["z"])
+        ("del" . ["z"])
+        ("details" . ["z"])
+        ("dfn" . ["z"])
+        ("embed" . ["l"])
+        ("fieldset" . ["z"])
+        ("figure" . ["b"])
+        ("figcaption" . ["l"])
+        ("footer" . ["b"])
+        ("form" . ["l"])
+        ("head" . ["b"])
+        ("header" . ["b"])
+        ("html" . ["b"])
+        ("iframe" . ["z"])
+        ("keygen" . ["z"])
+        ("label" . ["z"])
+        ("legend" . ["z"])
+        ("link" . ["z"])
+        ("map" . ["z"])
+        ("menu" . ["z"])
+        ("menuitem" . ["z"])
+        ("meta" . ["z"])
+        ("meter" . ["z"])
+        ("noscript" . ["l"])
+        ("object" . ["z"])
+        ("optgroup" . ["z"])
+        ("option" . ["z"])
+        ("output" . ["z"])
+        ("param" . ["z"])
+        ("picture" . ["z"])
+        ("progress" . ["z"])
+        ("q" . ["w"])
+        ("samp" . ["z"])
+        ("script" . ["b"])
+        ("section" . ["b"])
+        ("select" . ["z"])
+        ("source" . ["z"])
+        ("style" . ["b"])
+        ("summary" . ["z"])
+        ("table" . ["b"])
+        ("tbody" . ["z"])
+        ("td" . ["l"])
+        ("textarea" . ["z"])
+        ("tfoot" . ["z"])
+        ("th" . ["z"])
+        ("thead" . ["z"])
+        ("title" . ["l"])
+        ("tr" . ["b"])
+        ("track" . ["b"])
+        ("u" . ["w"])
+        ("ul" . ["b"])
+        ("video" . ["l"])
+        ("wbr" . ["z"])))
 
 (defvar xah-html-html5-tag-list nil
   "list of html tag names.
@@ -1487,12 +1484,10 @@ Version 2019-03-15"
 
 (defun xah-html-lines-to-dl ()
   "Make the current block of lines into a HTML dl list.
-
 e.g.
 
 cat . 4 legs
 bird . has wings
-
 becomes
 
 <dl>
@@ -1508,7 +1503,7 @@ For example, if the input is
 cat → 4 legs
 bird → has wings
 
-Version 2018-10-11 2020-12-24"
+Version 2018-10-11 2020-12-24 2021-01-12"
   (interactive)
   (let ($bds $p1 $p2 $input-str $resultStr $endpos)
     (setq $bds (xah-get-bounds-of-thing 'block))
@@ -1532,7 +1527,7 @@ Version 2018-10-11 2020-12-24"
                 (if (re-search-forward $sep $endpos )
                     (progn
                      (delete-region (match-beginning 0) (match-end 0))
-                     (insert "</dt><dd>\n")
+                     (insert "</dt><dd>")
                      (end-of-line)
                      (insert "</dd>")
                      (forward-line 1 ))
@@ -2068,7 +2063,7 @@ A “text block” is text between blank lines
 Use `xah-html-html-to-text' if you want the html link URL to remain.
 
  WARNING: this command does not cover all HTML tags or convert all HTML entities. For robust solution you might use the terminal command “lynx” or other.
-Version 2018-11-27"
+Version 2018-11-27 2021-01-12"
   (interactive)
   (let ($p1 $p2 $input-str $output-str)
     (if @begin
@@ -2085,7 +2080,10 @@ Version 2018-11-27"
             (setq $tempStr
                   (xah-replace-regexp-pairs-in-string
                    $tempStr
-                   '(["<script>\\([^\\<]+?\\)</script>" ""]
+                   '(
+                     ["<kbd>" " "]
+                     ["</kbd>" " "]
+                     ["<script>\\([^\\<]+?\\)</script>" ""]
                      ["<[^>]+?>" ""]
                      ["</[a-z0-9]+>" ""]
                      ["&amp;" "&"]
@@ -2720,8 +2718,7 @@ Returns the string used in the alt attribute.
 URL `http://ergoemacs.org/emacs/elisp_image_tag.html'
 Version 2018-06-14 2021-01-12"
   (interactive)
-  (let ( $p1 $p2 $imgPath
-             $hrefValue $altText $imgWH $width $height)
+  (let ( $p1 $p2 $imgPath $hrefValue $altText $imgWH $width $height)
     (save-excursion
       ;; get image file path begin end pos
       (let ($p0)
