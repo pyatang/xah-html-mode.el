@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.0.20210112102340
+;; Version: 11.1.20210114044025
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -2307,7 +2307,7 @@ Version 2021-01-11"
 In a html file, put cursor on a image file path, call the command,
 a thumbnail will be created, with file name prefix tn_‹width›x‹height› in the same dir, and relative path of the newly created file will be inserted before the img tag.
 If `universal-argument' is called first, ask for jpeg quality. (default is 90)
-Version 2020-11-13 2021-01-11"
+Version 2020-11-13 2021-01-14"
   (interactive)
   (let* (
          ($bounds (bounds-of-thing-at-point 'filename))
@@ -2332,20 +2332,23 @@ Version 2020-11-13 2021-01-11"
          )
     (when (not (file-exists-p $inputPath))
       (user-error "File not exist: %s" $inputPath))
-    (setq $args (format " -scale %s%% %s %s "
-                        (round (* (sqrt (/ (float $thumbnailSizeArea) (float (* $w $h)))) 100))
-                        (if $isLossy-p
-                            (if current-prefix-arg
-                                (format "-quality %s%%" (read-string "quality:" "85"))
-                              "-quality 90%%")
-                          " "
-                          )
-                        " -sharpen 1 "
-                        ))
+    (setq $args
+          (format " -scale %s%% %s %s "
+                  (round (* (sqrt (/ (float $thumbnailSizeArea) (float (* $w $h)))) 100))
+                  (if $isLossy-p
+                      (if current-prefix-arg
+                          (format "-quality %s%%" (read-string "quality:" "90"))
+                        "-quality 90%")
+                    " "
+                    )
+                  " -sharpen 1 "
+                  ""
+                  ))
     (if (file-exists-p $fPathNew)
         (setq $doIt (y-or-n-p (format "File exist 「%s」. Replace it?" $fPathNew)))
       (setq $doIt t ))
     (when $doIt (xah-call-ImageMagick $args $fPath1 $fPathNew ))
+    ;; (message "%s" $args)
     (search-backward "<" )
     (insert $fPathNew "\n")
     (backward-word )))
@@ -4155,20 +4158,19 @@ Version 2017-08-15"
       (vector @href-value "" ))))
 
 (defun xah-html-url-percent-decode-string (string)
-  "Returns string URL percent-encoded
-
+  "Returns string URL percent decoded.
 Example:
-    http://example.org/%28D%C3%BCrer%29
-becomes
-    http://example.org/(Dürer)
 
-Example:
-    http://example.org/%E6%96%87%E6%9C%AC%E7%BC%96%E8%BE%91%E5%99%A8
-becomes
-    http://example.org/文本编辑器
+http://example.org/%28D%C3%BCrer%29
+↓
+http://example.org/(Dürer)
+
+http://example.org/%E6%96%87%E6%9C%AC%E7%BC%96%E8%BE%91%E5%99%A8
+↓
+http://example.org/文本编辑器
 
 URL `http://ergoemacs.org/emacs/elisp_decode_uri_percent_encoding.html'
-Version 2018-10-26"
+Version 2018-10-26 2021-01-14"
   (require 'url-util)
   (decode-coding-string (url-unhex-string string) 'utf-8))
 
@@ -4186,7 +4188,7 @@ becomes
  文本编辑器
 
 URL `http://ergoemacs.org/emacs/emacs_url_percent_decode.html'
-Version 2018-10-26"
+Version 2018-10-26 2021-01-14"
   (interactive)
   (let ( $p1 $p2 $input-str $newStr)
     (if (use-region-p)
@@ -4196,7 +4198,7 @@ Version 2018-10-26"
     (require 'url-util)
     (setq $newStr (url-unhex-string $input-str))
     (if (string-equal $newStr $input-str)
-        (progn (message "no change" ))
+        (progn (message "percent-decode no change" ))
       (progn
         (delete-region $p1 $p2)
         (insert (decode-coding-string $newStr 'utf-8))))))
@@ -4656,9 +4658,9 @@ Version 2016-10-24"
   (define-key xah-html-leader-map (kbd "g") 'xah-html-brackets-to-html)
   (define-key xah-html-leader-map (kbd "h") 'xah-html-any-linkify)
   (define-key xah-html-leader-map (kbd "i") 'nil)
-  (define-key xah-html-leader-map (kbd "i i") 'xah-html-image-to-link)
-  (define-key xah-html-leader-map (kbd "i j") 'xah-html-convert-to-jpg)
-  (define-key xah-html-leader-map (kbd "i r") 'xah-html-resize-img)
+  (define-key xah-html-leader-map (kbd "i i") 'xah-html-resize-img)
+  (define-key xah-html-leader-map (kbd "i t") 'xah-html-convert-to-jpg)
+  (define-key xah-html-leader-map (kbd "i h") 'xah-html-image-to-link)
   (define-key xah-html-leader-map (kbd "j") 'xah-html-url-linkify)
   (define-key xah-html-leader-map (kbd "k") 'xah-html-htmlize-keyboard-shortcut-notation)
   (define-key xah-html-leader-map (kbd "l") 'xah-html-image-figure-linkify)
