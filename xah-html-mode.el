@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.1.20210114044025
+;; Version: 11.1.20210115030528
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -3560,7 +3560,7 @@ Some issues:
 • Some words are common in other lang, e.g. “while”, “print”, “string”, unix “find”, “grep”, HTML's “kbd” tag, etc. But they are also built-in elisp symbols. This command will tag them, but you may not want that.
 
 • Some function/variable are from 3rd party libs, and some are not bundled with GNU emacs , e.g. 「'htmlize」. They may or may not be tagged depending whether they've been loaded.
-Version 2017-03-17"
+Version 2017-03-17 2021-01-14"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -3578,7 +3578,7 @@ Version 2017-03-17"
             (cond
              ((and (intern-soft $mStr) (fboundp (intern-soft $mStr)))
               (progn
-                (push (format "ƒ %s" $mStr) $changedItems)
+                (push (format "f %s" $mStr) $changedItems)
                 (replace-match (concat "<code class=\"elisp_f_3d841\">" $mStr "</code>") t t)
                 (let ($p1 $p2)
                   (search-backward "</code>" )
