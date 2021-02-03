@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.1.20210115030528
+;; Version: 11.2.20210203052055
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -4658,7 +4658,7 @@ Version 2016-10-24"
   (define-key xah-html-leader-map (kbd "g") 'xah-html-brackets-to-html)
   (define-key xah-html-leader-map (kbd "h") 'xah-html-any-linkify)
   (define-key xah-html-leader-map (kbd "i") 'nil)
-  (define-key xah-html-leader-map (kbd "i i") 'xah-html-resize-img)
+  (define-key xah-html-leader-map (kbd "i c") 'xah-html-resize-img)
   (define-key xah-html-leader-map (kbd "i t") 'xah-html-convert-to-jpg)
   (define-key xah-html-leader-map (kbd "i h") 'xah-html-image-to-link)
   (define-key xah-html-leader-map (kbd "j") 'xah-html-url-linkify)
