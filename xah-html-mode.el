@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.2.20210203052055
+;; Version: 11.3.20210204123555
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -267,50 +267,51 @@ Version 2021-01-03"
 For example, if you have <p>some</p> and cursor is inside either the beginning or ending tag, it'll remove both. But if cursor is inside a self-closing tag such as <br />, just remove that.
 This function assumes cursor is inside a tag <…▮…>.
 This function  self-closing tags ends in />.
-Version 2021-01-03"
+Version 2021-01-03 2021-02-04"
   (interactive)
-  (let (p0 inEndTag-p p1 p2 openTag-p1 openTag-p2 selfCloseTag-p closingTag-p1 closingTag-p2 openTagStr closeTagStr)
-    (setq p0 (point))
-    (search-backward "<")
-    (setq p1 (point))
-    (forward-char 1)
-    (setq inEndTag-p (char-equal (char-after ) ?/))
-    (search-forward ">")
-    (setq p2 (point))
-    (if inEndTag-p
-        (progn
-          (setq closingTag-p1 p1)
-          (setq closingTag-p2 p2)
-          (goto-char p0)
-          (sgml-skip-tag-backward 1)
-          (setq openTag-p1 (point))
-          (search-forward ">" )
-          (setq openTag-p2 (point))
-          (setq closeTagStr (buffer-substring closingTag-p1 closingTag-p2))
-          (setq openTagStr (buffer-substring openTag-p1 openTag-p2))
-          (message "Deleted:\n%s\n%s" openTagStr closeTagStr)
-          (delete-region closingTag-p1 closingTag-p2)
-          (delete-region openTag-p1 openTag-p2))
-      (progn
-        (setq selfCloseTag-p (char-equal (char-after (- p2 2)) ?/))
-        (if selfCloseTag-p
-            (progn
-              (setq openTagStr (buffer-substring p1 p2))
-              (message "Deleted:\n%s" openTagStr )
-              (delete-region p1 p2))
+  (save-excursion
+    (let (p0 inEndTag-p p1 p2 openTag-p1 openTag-p2 selfCloseTag-p closingTag-p1 closingTag-p2 openTagStr closeTagStr)
+      (setq p0 (point))
+      (search-backward "<")
+      (setq p1 (point))
+      (forward-char 1)
+      (setq inEndTag-p (char-equal (char-after ) ?/))
+      (search-forward ">")
+      (setq p2 (point))
+      (if inEndTag-p
           (progn
-            (setq openTag-p1 p1)
-            (setq openTag-p2 p2)
+            (setq closingTag-p1 p1)
+            (setq closingTag-p2 p2)
             (goto-char p0)
-            (sgml-skip-tag-forward 1)
-            (setq closingTag-p2 (point))
-            (search-backward "<" )
-            (setq closingTag-p1 (point))
+            (sgml-skip-tag-backward 1)
+            (setq openTag-p1 (point))
+            (search-forward ">" )
+            (setq openTag-p2 (point))
             (setq closeTagStr (buffer-substring closingTag-p1 closingTag-p2))
             (setq openTagStr (buffer-substring openTag-p1 openTag-p2))
-            (message "Deleted:\n%s\n%s" openTagStr closeTagStr)
+            (message "Deleted: %s%s" openTagStr closeTagStr)
             (delete-region closingTag-p1 closingTag-p2)
-            (delete-region openTag-p1 openTag-p2)))))))
+            (delete-region openTag-p1 openTag-p2))
+        (progn
+          (setq selfCloseTag-p (char-equal (char-after (- p2 2)) ?/))
+          (if selfCloseTag-p
+              (progn
+                (setq openTagStr (buffer-substring p1 p2))
+                (message "Deleted:\n%s" openTagStr )
+                (delete-region p1 p2))
+            (progn
+              (setq openTag-p1 p1)
+              (setq openTag-p2 p2)
+              (goto-char p0)
+              (sgml-skip-tag-forward 1)
+              (setq closingTag-p2 (point))
+              (search-backward "<" )
+              (setq closingTag-p1 (point))
+              (setq closeTagStr (buffer-substring closingTag-p1 closingTag-p2))
+              (setq openTagStr (buffer-substring openTag-p1 openTag-p2))
+              (message "Deleted:%s%s" openTagStr closeTagStr)
+              (delete-region closingTag-p1 closingTag-p2)
+              (delete-region openTag-p1 openTag-p2))))))))
 
 (defun xah-html--get-bracket-positions ()
   "Returns HTML angle bracket positions.
@@ -3471,14 +3472,16 @@ Version 2020-11-22"
   "Change emacs key notation to Windows's notation on text selection or current line.
 
 For example:
- 「C-h f」⇒ 「Ctrl+h f」
- 「M-a」⇒ 「Alt+a」
- 「<f9> <f8>」 ⇒ 「F9 F8」
+ C-h f → Ctrl+h f
+ M-a → Alt+a
+ <f9> <f8> → F9 F8
+And a special W for Window.
+ W-a → Win+a
 
 This command will do most emacs syntax correctly, but not 100% correct, especially on notations like <C-M-down>. But works if it's written as C-M-<down>
 
 When called in lisp code, @begin @end are region begin/end positions.
-Version 2017-09-30"
+Version 2017-09-30 2021-02-03"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -3511,7 +3514,6 @@ Version 2017-09-30"
         ["<backspace>" "Backspace"]
         ["<menu>" "Menu"]
         ]))
-
     (let ((case-fold-search nil))
       (mapc
        (lambda ($x)
@@ -3530,6 +3532,7 @@ Version 2017-09-30"
         ["\\bS-\\(.\\)" "Shift+\\1"]
         ["\\bs-\\(.\\)" "Super+\\1"]
         ["\\bH-\\(.\\)" "Hyper+\\1"]
+        ["\\bW-\\(.\\)" "Win+\\1"]
         ["\\bRET\\b" "Enter"]
         ["\\bSPC\\b" "Space"]
         ["\\bTAB\\b" "Tab"]
