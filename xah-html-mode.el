@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.3.20210204123555
+;; Version: 11.3.20210209105052
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -1055,7 +1055,7 @@ Version 2017-01-11"
   (let ( ($result 0))
     (with-temp-buffer
       (insert-file-contents @file-path)
-      (goto-char (point-min))
+      (goto-char 1)
       (xah-html-mode)
       (setq $result (xah-html-redo-syntax-coloring-buffer))
       (when (> $result 0)
@@ -1947,9 +1947,9 @@ Version 2020-08-17 2020-09-08"
           (setq $p2 (point)))))
     (save-restriction
       (narrow-to-region $p1 $p2)
-      (goto-char 1)
+      (goto-char (point-min))
       (while (search-forward "<p>" nil t) (replace-match "" ))
-      (goto-char 1)
+      (goto-char (point-min))
       (while (search-forward "</p>" nil t) (replace-match "" )))))
 
 (defun xah-html-remove-list-tags ()
@@ -1973,17 +1973,17 @@ Version 2020-07-15"
           (setq $p2 (point)))))
     (save-restriction
       (narrow-to-region $p1 $p2)
-      (goto-char 1)
+      (goto-char (point-min))
       (while (search-forward "<ul>" nil t) (replace-match "" ))
-      (goto-char 1)
+      (goto-char (point-min))
       (while (search-forward "</ul>" nil t) (replace-match "" ))
-      (goto-char 1)
+      (goto-char (point-min))
       (while (search-forward "<ol>" nil t) (replace-match "" ))
-      (goto-char 1)
+      (goto-char (point-min))
       (while (search-forward "</ol>" nil t) (replace-match "" ))
-      (goto-char 1)
+      (goto-char (point-min))
       (while (search-forward "<li>" nil t) (replace-match "" ))
-      (goto-char 1)
+      (goto-char (point-min))
       (while (search-forward "</li>" nil t) (replace-match "" )))))
 
 (defun xah-html-remove-span-tag-region (@begin @end)
@@ -2119,7 +2119,7 @@ Version 2020-12-02"
   (let ( ($p1 @begin ) ($p2 @end))
     (save-restriction
       (narrow-to-region $p1 $p2)
-      (goto-char 1)
+      (goto-char (point-min))
       (while (re-search-forward "<a .*href=\"\\([^\"]+?\\)\".*>\\([^<]+?\\)</a>" nil t)
         (let* (
                ($hrefVal (match-string 1))
@@ -2159,14 +2159,14 @@ Version 2019-04-12 2021-01-04"
 
        (xah-html-link-to-text (point-min) (point-max))
 
-       (goto-char 1)
+       (goto-char (point-min))
        (while (re-search-forward "src=\"\\([^\"]+?\\)\""  nil t)
          (let (($matchString (match-string 1)))
            (search-forward ">" )
            (search-forward ">" )
            (insert (format " [ %s ] " $matchString))))
 
-       (goto-char 1)
+       (goto-char (point-min))
        (let ((case-fold-search nil))
          (xah-replace-regexp-pairs-region
           (point-min)
@@ -2462,10 +2462,10 @@ Version 2020-01-22"
         ($urlList (list)))
     (with-temp-buffer
       (insert $regionText)
-      (goto-char 1)
+      (goto-char (point-min))
       (while (re-search-forward "<" nil t)
         (replace-match "\n<" "FIXEDCASE" "LITERAL"))
-      (goto-char 1)
+      (goto-char (point-min))
       (while (re-search-forward
               "<[A-Za-z]+.+?\\(href\\|src\\)[[:blank:]]*?=[[:blank:]]*?\\([\"']\\)\\([^\"']+?\\)\\2" nil t)
         (push (match-string 3) $urlList)))
@@ -2490,26 +2490,25 @@ Version 2020-01-22"
         (message "%s" $printedResult)))
     $urlList ))
 
-(defun xah-html-update-title ( @title)
-  "Update the <title>…</title> and <h1>…</h1> of current buffer.
-
+(defun xah-html-update-title (@title)
+  "Update the <title>…</title> and first <h1>…</h1> of current buffer.
+When called in elisp code, @title is new title, a string.
 URL `http://ergoemacs.org/emacs/elisp_update-html-title.html'
-Version 2019-01-11"
+Version 2019-01-11 2021-02-09"
   (interactive
    (let ($oldTitle)
      (save-excursion
-       (goto-char 1)
+       (goto-char (point-min))
        (re-search-forward "<title>\\([^<]+?\\)</title>")
        (setq $oldTitle (match-string 1 )))
      (list (read-string "New title:" $oldTitle nil $oldTitle "INHERIT-INPUT-METHOD"))))
   (let ($p1 $p2)
     (save-excursion
-      (goto-char 1)
+      (goto-char (point-min))
       (progn (search-forward "<title>")
              (setq $p1 (point))
              (search-forward "</title>")
-             (search-backward "<")
-             (setq $p2 (point))
+             (setq $p2 (- (point) 8))
              (delete-region $p1 $p2 )
              (goto-char $p1)
              (insert @title ))
@@ -2554,21 +2553,21 @@ Version 2020-11-16"
       (insert (concat "<div class=\"date_xl\"><time>" (format-time-string "%Y-%m-%d") "</time></div>\n\n\n" )))
     (backward-char 1)))
 
-(defun xah-html-update-first-h1 ( @h1Text)
+(defun xah-html-update-first-h1 (@h1Text)
   "Update the first <h1>…</h1> of current buffer.
-
+When called in elisp code, @h1Text is new title, a string.
 URL `http://ergoemacs.org/emacs/elisp_update-html-title.html'
-Version 2019-01-11"
+Version 2019-01-11 2021-02-09"
   (interactive
    (let ($oldTitle)
      (save-excursion
-       (goto-char 1)
+       (goto-char (point-min))
        (re-search-forward "<h1>\\([^<]+?\\)</h1>")
        (setq $oldTitle (match-string 1 )))
      (list (read-string "New title:" $oldTitle nil $oldTitle "INHERIT-INPUT-METHOD"))))
   (let ($p1 $p2)
     (save-excursion
-      (goto-char 1)
+      (goto-char (point-min))
       (if (search-forward "<h1>")
           (progn
             (setq $p1 (point))
@@ -2674,7 +2673,7 @@ Version 2019-04-02"
       (with-temp-buffer
         ;; generate replacement text
         (insert $wholeLinkStr)
-        (goto-char 1)
+        (goto-char (point-min))
         (re-search-forward  "href=\"\\([^\"]+?\\)\"")
         (setq $url (match-string 1))
         (setq $accessedDate
