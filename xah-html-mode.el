@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.3.20210209105052
+;; Version: 11.4.20210209205859
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -2372,19 +2372,15 @@ Version 2019-12-17 2021-01-11"
 
 (defun xah-html-rename-source-file-path ()
   "Rename HTML source file path.
-
 Place cursor anywhere inside a HTML source local file path, e.g.
-
 <img src=\"img/▮cats.jpg\" >
 or
 <a href=\"js_▮canvas_tutorial.html\">
-
-Call this command, it'll prompt for a new name/path. The path can be full path or relative path.
-
-The file name will be renamed/moved to the new path. The link will be changed too.
-
+Call this command, it'll prompt for a new name.
+The file name be renamed/moved to the new name/path. The link will be updated.
+Newline characters in path are removed, and comma or space replaced by _.
 This command is for interactive use only.
-Version 2019-10-05"
+Version 2019-10-05 2021-02-09"
   (interactive)
   (let* (
          ($p0 (point))
@@ -2393,37 +2389,26 @@ Version 2019-10-05"
          ($p2 (cdr $bounds))
          ($input (buffer-substring-no-properties $p1 $p2))
          ($currentDir (file-name-directory (or (buffer-file-name) default-directory )))
-         ($oldfName (file-name-nondirectory $input))
-         ($oldDirPath (concat $currentDir (file-name-directory $input)))
-         ($oldFullPath (concat $oldDirPath $oldfName ))
-         ($fullPath (expand-file-name $input $currentDir))
-         $newPath
-         $newFullPath
+         ($oldPath (expand-file-name $input $currentDir))
+         ($promptPath (concat (file-name-directory $oldPath) "\n" (file-name-nondirectory $oldPath)))
+         ($userInputPath (read-string "New name: " $promptPath nil $promptPath ))
          ($doit-p nil))
     (setq $newPath
           (replace-regexp-in-string
-           " " "_"
-           (read-string "New name or full path: " $oldfName nil $oldfName )))
-    (setq $newFullPath
-          (if (file-name-absolute-p $newPath)
-              $newPath
-            (expand-file-name $newPath $oldDirPath)))
-    (if (file-exists-p $newFullPath)
-        (setq $doit-p (y-or-n-p "file exist. Replace?"))
-      (setq $doit-p t))
-    (message "old path: %s\n new path: %s" $oldFullPath $newFullPath)
+           " \\|\n\\|," "_"
+           (replace-regexp-in-string "\n" "" $userInputPath)))
+    (setq $doit-p
+          (if (file-exists-p $newPath)
+              (y-or-n-p "File exist. Replace?")
+            t))
+    (message "old path: %s\n new path: %s" $oldPath $newPath)
     (when $doit-p
       (progn
-        (rename-file $fullPath $newFullPath t)
+        (rename-file $oldPath $newPath t)
         (goto-char $p0)
         (delete-region $p1 $p2)
         (insert
-         (if (and
-              (string-match (concat "^" (expand-file-name "~/" ) "web/")
-                            (or (buffer-file-name) default-directory))
-              (fboundp 'xahsite-filepath-to-href-value))
-             (progn (xahsite-filepath-to-href-value $newFullPath (or (buffer-file-name) default-directory)))
-           (file-relative-name $newFullPath)))))))
+         (file-relative-name $newPath))))))
 
 (defun xah-html-extract-url (@begin @end &optional @not-full-path-p)
   "Extract URLs in current block or region to `kill-ring'.
