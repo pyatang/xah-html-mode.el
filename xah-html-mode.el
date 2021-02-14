@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.4.20210209205859
+;; Version: 11.5.20210214133740
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -2376,11 +2376,10 @@ Place cursor anywhere inside a HTML source local file path, e.g.
 <img src=\"img/▮cats.jpg\" >
 or
 <a href=\"js_▮canvas_tutorial.html\">
-Call this command, it'll prompt for a new name.
-The file name be renamed/moved to the new name/path. The link will be updated.
-Newline characters in path are removed, and comma or space replaced by _.
+Call this command, it prompt for a new path/name with one line for dir path and line for file name. The separate lines are for ease of editing.
+When done editing, newline characters in path are removed, and comma or space replaced by _. The file name is renamed, and link also updated.
 This command is for interactive use only.
-Version 2019-10-05 2021-02-09"
+Version 2019-10-05 2021-02-10"
   (interactive)
   (let* (
          ($p0 (point))
@@ -2576,14 +2575,14 @@ by Ewan Morrison
 
 becomes
 
- [<cite>Why Utopian Communities Fail</cite> <time>2018-03-08</time> By Ewan Morrison. At <a class=\"sorc\" target=\"_blank\" href=\"https://areomagazine.com/2018/03/08/why-utopian-communities-fail/\" data-accessed=\"2018-03-24\">https://areomagazine.com/2018/03/08/why-utopian-communities-fail/</a> ]
+ [<cite>Why Utopian Communities Fail</cite> <time>2018-03-08</time> By Ewan Morrison. At <a class=\"sorc\" rel=\"noopener\" target=\"_blank\" href=\"https://areomagazine.com/2018/03/08/why-utopian-communities-fail/\" data-accessed=\"2018-03-24\">https://areomagazine.com/2018/03/08/why-utopian-communities-fail/</a> ]
 
 If there's a text selection, use it for input, otherwise the input is a text block between blank lines.
 
 The order of lines for {title, author, date/time, url} needs not be in that order. Author should start with “by”.
 
 URL `http://ergoemacs.org/emacs/elisp_make-citation.html'
-Version 2020-07-15"
+Version 2020-07-15 2021-02-11"
   (interactive)
   (let* (
          ($bds (xah-get-bounds-of-thing 'block))
@@ -2594,7 +2593,6 @@ Version 2020-07-15"
          ;; ($lines (split-string $inputText "[ \t]*\n[ \t]*" t "[[:space:]]*"))
          ($lines (split-string $inputText "\n" t " *"))
          $title $author $date $url )
-
     ;; set title, date, url, author,
     (let ($x (case-fold-search t))
       ;; the whole thing here is not optimal implementation. data structure should be hash or so. easier... basically, we have n items, and we need to identify them into n things. that is, pairing them up. Now, some items are easily recognized with 100% certainty. We pair those first. Then, in the end, we'll have 2 or so items that we need to identify, but by then, the items are few, and we can easily distinguish them. So, for this, we need a data structure such that we can easily remove item for those we already identified.
@@ -2605,27 +2603,21 @@ Version 2020-07-15"
          ((xah-html--is-datetimestamp-p $x) (setq $date $x))
          ((string-match "^ *[bB]y:* " $x) (setq $author $x))
          (t (setq $title $x)))))
-
-    (when (not $author) (error "I can't find “author” %s" $author))
-    (when (not $date) (error "error 74188 I can't find “date” %s" $date))
     (when (not $url) (error "I can't find “url” %s" $url))
+    (when (not $date) (error "error 74188 I can't find “date” %s" $date))
     (when (not $title) (error "I can't find “title” %s" $title))
-
+    (when (not $author) (error "I can't find “author” %s" $author))
     (setq $title (string-trim $title))
     (setq $title (replace-regexp-in-string "^\"\\(.+\\)\"$" "\\1" $title))
     (setq $title (xah-replace-pairs-in-string $title '(["’" "'"] ["&" "＆"] )))
-
     (setq $author (string-trim $author))
     (setq $author (replace-regexp-in-string "\\. " " " $author)) ; remove period in Initals
     (setq $author (replace-regexp-in-string "^ *[Bb]y:* +" "" $author))
     (setq $author (upcase-initials (downcase $author)))
-
     (setq $date (string-trim $date))
     (setq $date (xah-fix-datetime-string $date))
-
     (setq $url (string-trim $url))
     (setq $url (with-temp-buffer (insert $url) (xah-html-source-url-linkify 1) (buffer-string)))
-
     (delete-region $p1 $p2 )
     (insert (concat "[<cite>" $title "</cite> ")
             "<time>" $date "</time>"
@@ -3221,7 +3213,7 @@ Exactly what tag is used depends on the suffix. Here's example of result:
  <iframe width=\"640\" height=\"480\" src=\"https://www.youtube.com/embed/aeKZmHm5ICw\" allowfullscreen></iframe>
 
 If region is active, use it as input.
-Version 2020-08-07"
+Version 2020-08-07 2021-02-14"
   (interactive)
   (let ( $p1 $p2 $input)
     ;; (if (string-match "%" $input )
@@ -3254,24 +3246,23 @@ Version 2020-08-07"
      ((string-match-p "youtube\.com/" $input) (xah-html-youtube-linkify))
      ((string-match-p "youtu\.be/" $input) (xah-html-youtube-linkify))
      ((string-match-p "www\.amazon\.com/\\|//amzn\.to/" $input) (xah-html-amazon-linkify))
-     ((string-match-p "\\`https?://" $input)
-      (progn
-        (if (fboundp 'xahsite-url-is-xah-website-p)
-            (if (xahsite-url-is-xah-website-p $input)
-                (progn
-                  (xah-file-linkify $p1 $p2))
-              (progn
-                (xah-html-source-url-linkify 0)))
-          (progn
-            (xah-html-source-url-linkify 0)))))
+     ((string-match-p "\\`https?://" $input) (xah-html-source-url-linkify 0)
+      ;; (progn
+      ;;   (if (fboundp 'xahsite-url-is-xah-website-p)
+      ;;       (if (xahsite-url-is-xah-website-p $input)
+      ;;           (progn
+      ;;             (xah-file-linkify $p1 $p2))
+      ;;         (progn
+      ;;           (xah-html-source-url-linkify 0)))
+      ;;       nil
+      ;;     (xah-html-source-url-linkify 0)))
+      )
      ((xah-html-image-file-suffix-p $input) (xah-html-image-figure-linkify))
      ((string-match
        (concat "^" (expand-file-name "~/" ) "web/")
        (or (buffer-file-name) default-directory))
-      (if (fboundp 'xah-all-linkify)
-          (progn
-            (xah-all-linkify))
-        (xah-html-url-linkify)))
+      ;; (if (fboundp 'xah-all-linkify) (progn (xah-all-linkify)) (xah-html-url-linkify))
+      (xah-html-url-linkify))
      ((file-exists-p $input)
       (progn
         (xah-html-file-linkify $p1 $p2)))
@@ -3286,7 +3277,7 @@ If there's a text selection, use the text selection as input.
 
 Example: http://example.com/xyz.htm
 becomes
-<a class=\"sorc\" target=\"_blank\" href=\"http://example.com/xyz.htm\" data-accessed=\"2008-12-25\">http://example.com/xyz.htm</a>
+<a class=\"sorc\" rel=\"noopener\" target=\"_blank\" href=\"http://example.com/xyz.htm\" data-accessed=\"2008-12-25\">http://example.com/xyz.htm</a>
 
 If `universal-argument' is called first,
 The anchor text may be of 4 possibilities:
@@ -3297,7 +3288,7 @@ The anchor text may be of 4 possibilities:
 0 or any → smartly decide.
 
 URL `http://ergoemacs.org/emacs/elisp_html-linkify.html'
-Version 2020-07-15"
+Version 2020-07-15 2021-02-11"
   (interactive "P")
   (let ( $p1 $p2 $input $url $domainName $linkText )
     (if (use-region-p)
@@ -3330,7 +3321,7 @@ Version 2020-07-15"
     ;; delete URL and insert the link
     (delete-region $p1 $p2)
     (insert (format
-             "<a class=\"sorc\" target=\"_blank\" href=\"%s\" data-accessed=\"%s\">%s</a>"
+             "<a class=\"sorc\" rel=\"noopener\" target=\"_blank\" href=\"%s\" data-accessed=\"%s\">%s</a>"
              $url (format-time-string "%Y-%m-%d") $linkText
              ))))
 
@@ -3341,7 +3332,7 @@ If there is a text selection, use that as input.
 Example:
 http://en.wikipedia.org/wiki/Emacs
 becomes
-<a class=\"wikipedia_92d5m\" target=\"_blank\" href=\"http://en.wikipedia.org/wiki/Emacs\" data-accessed=\"2015-09-14\">Emacs</a>.
+<a class=\"wikipedia_92d5m\" rel=\"noopener\" target=\"_blank\" href=\"http://en.wikipedia.org/wiki/Emacs\" data-accessed=\"2015-09-14\">Emacs</a>.
 
 Works the same way for links to wiktionary, e.g. https://en.wiktionary.org/wiki/%E4%BA%86
 
@@ -3373,7 +3364,7 @@ Version 2020-03-24"
            (decode-coding-string (url-unhex-string (file-name-nondirectory $input-str)) 'utf-8)))
     (setq $output-str
           (format
-           "<a class=\"wikipedia_92d5m\" target=\"_blank\" href=\"%s\" data-accessed=\"%s\">%s</a>"
+           "<a class=\"wikipedia_92d5m\" rel=\"noopener\" target=\"_blank\" href=\"%s\" data-accessed=\"%s\">%s</a>"
            (url-encode-url $input-str)
            (format-time-string "%Y-%m-%d")
            $link-text
