@@ -3162,7 +3162,7 @@ The link text is pulled from the file's <title> tag if exists.
 If there is text selection, use it as file path.
 
 The file path can also be a full path or URL.
-Version 2017-12-20"
+Version 2017-12-20 2021-02-14"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -3179,7 +3179,8 @@ Version 2017-12-20"
   (when (or (null @begin) (null @end))
     (setq @begin (line-beginning-position) @end (line-end-position)))
   (let* (
-         ($inputStr (replace-regexp-in-string "^file://" "" (buffer-substring-no-properties @begin @end)))
+         ($inputStr
+          (xah-html-local-url-to-file-path (buffer-substring-no-properties @begin @end)))
          ($inputStParts (xah-html-split-uri-hashmark $inputStr))
          ($pt1 (aref $inputStParts 0))
          ($fragPart (aref $inputStParts 1))
@@ -3202,15 +3203,19 @@ Version 2017-12-20"
 (defun xah-html-any-linkify ()
   "Make the text under cursor into a HTML link.
 
-Exactly what tag is used depends on the suffix. Here's example of result:
-
- <a href=\"xyz.html\">xyz.html</a>
- <link rel=\"stylesheet\" href=\"xyz.css\" />
- <script defer src=\"xyz.js\"></script>
- <img src=\"xyz.png\" alt=\"xyz\" width=\"960\" height=\"720\" />
- <video src=\"xyz.mp4\" controls loop></video>
- <audio src=\"xyz.mp3\" controls loop></audio>
- <iframe width=\"640\" height=\"480\" src=\"https://www.youtube.com/embed/aeKZmHm5ICw\" allowfullscreen></iframe>
+Exactly what tag is used depends on the file name suffix. this command calls one of the following:
+`xah-html-source-url-linkify'
+`xah-html-wikipedia-url-linkify'
+`xah-html-css-linkify'
+`xah-html-pdf-linkify'
+`xah-html-javascript-linkify'
+`xah-html-audio-file-linkify'
+`xah-html-video-file-linkify'
+`xah-html-youtube-linkify'
+`xah-html-amazon-linkify'
+`xah-html-source-url-linkify'
+`xah-html-image-figure-linkify'
+`xah-html-url-linkify'
 
 If region is active, use it as input.
 Version 2020-08-07 2021-02-14"
@@ -3230,23 +3235,46 @@ Version 2020-08-07 2021-02-14"
           (goto-char $p0)
           (skip-chars-forward "^  \"\t\n'|[]{}<>〔〕“”〈〉《》【】〖〗〘〙«»‹›·。\\'")
           (setq $p2 (point)))))
-    (setq $input (replace-regexp-in-string "^file:///" "/" (buffer-substring-no-properties $p1 $p2) t t))
+    (setq $input (xah-html-local-url-to-file-path (buffer-substring-no-properties $p1 $p2)))
+    (message "%s" $input)
     (cond
      ((or (string-match-p "wikipedia.org/" $input)
           (string-match-p "wiktionary.org/" $input)
           (string-match-p "wikimedia.org/" $input))
       (if (xah-html-image-file-suffix-p $input)
-          (xah-html-source-url-linkify 3)
-        (xah-html-wikipedia-url-linkify )))
+          (progn
+            (message "Call %s" "xah-html-source-url-linkify")
+            (xah-html-source-url-linkify 3))
+        (progn
+          (message "Call %s" "xah-html-wikipedia-url-linkify")
+          (xah-html-wikipedia-url-linkify ))))
      ((string-match-p "\\.css\\'" $input) (xah-html-css-linkify))
      ((string-match-p "\\.pdf" $input) (xah-html-pdf-linkify))
      ((string-match-p "\\.js\\'\\|\\.ts\\'" $input) (xah-html-javascript-linkify))
-     ((xah-html-audio-file-suffix-p $input) (xah-html-audio-file-linkify t))
-     ((xah-html-video-file-suffix-p $input) (xah-html-video-file-linkify t))
-     ((string-match-p "youtube\.com/" $input) (xah-html-youtube-linkify))
-     ((string-match-p "youtu\.be/" $input) (xah-html-youtube-linkify))
-     ((string-match-p "www\.amazon\.com/\\|//amzn\.to/" $input) (xah-html-amazon-linkify))
-     ((string-match-p "\\`https?://" $input) (xah-html-source-url-linkify 0)
+     ((xah-html-audio-file-suffix-p $input)
+      (progn
+        (message "Call %s" "xah-html-audio-file-linkify")
+        (xah-html-audio-file-linkify t)))
+     ((xah-html-video-file-suffix-p $input)
+      (progn
+        (message "Call %s" "xah-html-video-file-linkify")
+        (xah-html-video-file-linkify t)))
+     ((string-match-p "youtube\.com/" $input)
+      (progn
+        (message "Call %s" "xah-html-youtube-linkify")
+        (xah-html-youtube-linkify)))
+     ((string-match-p "youtu\.be/" $input)
+      (progn
+        (message "Call %s" "xah-html-youtube-linkify")
+        (xah-html-youtube-linkify)))
+     ((string-match-p "www\.amazon\.com/\\|//amzn\.to/" $input)
+      (progn
+        (message "Call %s" "xah-html-amazon-linkify")
+        (xah-html-amazon-linkify)))
+     ((string-match-p "\\`https?://" $input)
+      (progn
+        (message "Call %s" "xah-html-source-url-linkify")
+        (xah-html-source-url-linkify 0))
       ;; (progn
       ;;   (if (fboundp 'xahsite-url-is-xah-website-p)
       ;;       (if (xahsite-url-is-xah-website-p $input)
@@ -3262,11 +3290,15 @@ Version 2020-08-07 2021-02-14"
        (concat "^" (expand-file-name "~/" ) "web/")
        (or (buffer-file-name) default-directory))
       ;; (if (fboundp 'xah-all-linkify) (progn (xah-all-linkify)) (xah-html-url-linkify))
-      (xah-html-url-linkify))
+      (progn
+        (message "Call %s" "xah-html-url-linkify")
+        (xah-html-file-linkify $p1 $p2)))
      ((file-exists-p $input)
       (progn
+        (message "Call %s" "xah-html-file-linkify")
         (xah-html-file-linkify $p1 $p2)))
      (t (progn
+          (message "Call %s" "xah-html-url-linkify")
           (xah-html-url-linkify))))
     ;;
     ))
@@ -3401,7 +3433,7 @@ Version 2020-02-19"
     (setq $newStr
           (if (string-match "^http" $input )
               $input
-            (progn (file-relative-name (replace-regexp-in-string "^file:///" "/" $input t t)))))
+            (progn (file-relative-name (xah-html-local-url-to-file-path $input)))))
     (delete-region $p1 $p2)
     (insert (concat "<a href=\"" (url-encode-url $newStr) "\">" $newStr "</a>" ))))
 
