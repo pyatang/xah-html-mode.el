@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.5.20210214133740
+;; Version: 11.6.20210219183714
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -103,22 +103,22 @@ file://
 
 For example, the following string shown in browser URL field:
 ; On Windows Vista 2009-06
- [C:\\Users\\joe\\index.html]  IE
- [file:///C:/Users/joe/index.html]  Firefox, Google Chrome, Safari
- [file://localhost/C:/Users/joe/index.html]  Opera
+ [C:\\Users\\jj\\index.html]  IE
+ [file:///C:/Users/jj/index.html]  Firefox, Google Chrome, Safari
+ [file://localhost/C:/Users/jj/index.html]  Opera
  becomes
- [C:/Users/joe/index.html]
+ [C:/Users/jj/index.html]
 
  On Mac 2009-06
- [file:///Users/joe/index.html]  Safari, Firefox
- [file://localhost/Users/joe/index.html]  Opera
+ [file:///Users/jj/index.html]  Safari, Firefox
+ [file://localhost/Users/jj/index.html]  Opera
  becomes
- [/Users/joe/index.html]
+ [/Users/jj/index.html]
 
  On Ubuntu Linux, 2011-05
- [file:///media/HP/Users/joe/index.html] firefox
+ [file:///media/HP/Users/jj/index.html] firefox
  becomes
- [/media/HP/Users/joe/index.html]
+ [/media/HP/Users/jj/index.html]
 Version 2009-06-01 2021-01-12"
   (let ((case-fold-search nil))
     (xah-replace-regexp-pairs-in-string
@@ -897,6 +897,22 @@ Version 2018-09-28, 2020-09-27"
     (kill-buffer $output-buff)
     $resultStr ))
 
+(defun xah-html-htmlize-region (@p1 @p2 @mode-name )
+  "Htmlized region @p1 @p2 using `major-mode' @mode-name.
+Version 2016-12-18 2021-02-19"
+  (interactive
+   (list (region-beginning)
+         (region-end)
+         (ido-completing-read "Chose mode for coloring:" xah-html-lang-mode-list)))
+  (let* (
+         ($inputStr (buffer-substring-no-properties @p1 @p2))
+         ($outStr (string-trim-right (xah-html-htmlize-string $inputStr @mode-name))))
+    (if (string-equal $inputStr $outStr)
+        nil
+      (progn
+        (delete-region @p1 @p2)
+        (insert $outStr)))))
+
 (defun xah-html-langcode-to-mode-name (@lang-code @lang-code-map)
   "get the `major-mode' name associated with @lang-code.
 return major-mode name as string. If none found, return nil.
@@ -924,23 +940,6 @@ Version 2018-09-28"
          ($p2 (elt $precodeData 2))
          ($modeName (xah-html-langcode-to-mode-name $langCode @lang-code-map)))
     (xah-html-htmlize-region $p1 $p2 $modeName)))
-
-(defun xah-html-htmlize-region (@p1 @p2 @mode-name )
-  "Htmlized region @p1 @p2 using `major-mode' @mode-name.
-This function requires the `htmlize-buffer' from htmlize.el by Hrvoje Niksic.
-Version 2016-12-18 2020-09-27"
-  (interactive
-   (list (region-beginning)
-         (region-end)
-         (ido-completing-read "Chose mode for coloring:" xah-html-lang-mode-list)))
-  (let* (
-         ($inputStr (buffer-substring-no-properties @p1 @p2))
-         ($outStr (xah-html-htmlize-string $inputStr @mode-name)))
-    (if (string-equal $inputStr $outStr)
-        nil
-      (progn
-        (delete-region @p1 @p2)
-        (insert $outStr)))))
 
 (defun xah-html-dehtml-711 (@begin @end)
   "Delete span tags between pre tags.
