@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.6.20210219183714
+;; Version: 11.6.20210312115120
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -726,12 +726,13 @@ Version 2019-04-08
 
 (defun xah-html-htmlized-p (@begin @end)
   "Return true if region @BEGIN @END is htmlized code.
-“htmlized” means lots of <span class=\"...\">...</span> tags for syntax coloring.
+“htmlized” means the text contains &gt; or &lt; or <span class=\"...\">.
 WARNING: it just check if it contains cortain span tags.
-Version 2020-08-05"
+Version 2020-08-05 2021-03-12"
   (save-excursion
     (cond
-     ( (progn (goto-char @begin) (search-forward "&lt;<span" @end t)) t )
+     ( (progn (goto-char @begin) (search-forward "&gt;" @end t)) t )
+     ( (progn (goto-char @begin) (search-forward "&lt;" @end t)) t )
      ( (progn (goto-char @begin) (re-search-forward "<span class=\"comment\">\\|<span class=\"comment-delimiter\">\\|<span class=\"function-name\">\\|<span class=\"string\">\\|<span class=\"variable-name\">\\|<span class=\"keyword\">\\|<span class=\"bold\">\\|<span class=\"builtin\">\\|<span class=\"constant\">\\|<span class=\"doc\">\\|<span class=\"preprocessor\">\\|<span class=\"type\">\\|<span class=\"underline\">\\|<span class=\"warning\">" @end t)) t
        )
      (t nil))))
@@ -1066,7 +1067,7 @@ Version 2017-01-11"
     ))
 
 (defun xah-html-redo-syntax-coloring-buffer ()
-  "redo all pre lang code syntax coloring in current HTML page.
+  "Redo all <pre class=\"...\"> syntax coloring in current HTML page.
 Returns 0 if nothing is done. Else a positive integer of the count of <pre class=lang>.
 Version 2019-06-13"
   (interactive)
@@ -2425,7 +2426,7 @@ When called in lisp code, @begin @end are region begin/end positions.
 Returns a list of strings.
 
 URL `http://ergoemacs.org/emacs/elisp_extract_url_command.html'
-Version 2020-01-22"
+Version 2021-02-20"
   (interactive
    (let ($p1 $p2)
      ;; set region boundary $p1 $p2
@@ -2468,7 +2469,7 @@ Version 2020-01-22"
                      )))))
              $urlList)))
     (when (called-interactively-p 'any)
-      (let (($printedResult (mapconcat 'identity $urlList "\n")))
+      (let (($printedResult (concat (mapconcat 'identity $urlList "\n") "\n\n" )))
         (kill-new $printedResult)
         (message "%s" $printedResult)))
     $urlList ))
@@ -3217,7 +3218,7 @@ Exactly what tag is used depends on the file name suffix. this command calls one
 `xah-html-url-linkify'
 
 If region is active, use it as input.
-Version 2020-08-07 2021-02-14"
+Version 2020-08-07 2021-02-26"
   (interactive)
   (let ( $p1 $p2 $input)
     ;; (if (string-match "%" $input )
@@ -3272,18 +3273,16 @@ Version 2020-08-07 2021-02-14"
         (xah-html-amazon-linkify)))
      ((string-match-p "\\`https?://" $input)
       (progn
-        (message "Call %s" "xah-html-source-url-linkify")
-        (xah-html-source-url-linkify 0))
-      ;; (progn
-      ;;   (if (fboundp 'xahsite-url-is-xah-website-p)
-      ;;       (if (xahsite-url-is-xah-website-p $input)
-      ;;           (progn
-      ;;             (xah-file-linkify $p1 $p2))
-      ;;         (progn
-      ;;           (xah-html-source-url-linkify 0)))
-      ;;       nil
-      ;;     (xah-html-source-url-linkify 0)))
-      )
+        (if (fboundp 'xahsite-url-is-xah-website-p)
+            (if (xahsite-url-is-xah-website-p $input)
+                (progn
+                  (xah-file-linkify $p1 $p2))
+              (progn
+                (message "Call %s" "xah-html-source-url-linkify")
+                (xah-html-source-url-linkify 0)))
+          (progn
+            (message "Call %s" "xah-html-source-url-linkify")
+            (xah-html-source-url-linkify 0)))))
      ((xah-html-image-file-suffix-p $input) (xah-html-image-figure-linkify))
      ((string-match
        (concat "^" (expand-file-name "~/" ) "web/")
