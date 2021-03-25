@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.6.20210312115120
+;; Version: 11.7.20210325091046
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -1223,21 +1223,21 @@ If `universal-argument' is called first, the replacement direction is reversed.
 When called in lisp code, @begin @end are region begin/end positions. If @entity-to-char-p is true, reverse change direction.
 
 URL `http://ergoemacs.org/emacs/elisp_replace_html_entities_command.html'
-Version 2020-08-30"
+Version 2020-08-30 2021-03-25"
   (interactive
    (save-excursion
      (list
-      (if (use-region-p)
+      (if (region-active-p)
           (region-beginning)
         (progn
-          (re-search-backward "\n[ \t]*\n" nil "move")
-          (re-search-forward "\n[ \t]*\n" nil )
+          (when (re-search-backward "\n[ \t]*\n" nil "move")
+            (re-search-forward "\n[ \t]*\n" nil ))
           (point)))
       (if (use-region-p)
           (region-end)
         (progn
-          (re-search-forward "\n[ \t]*\n" nil "move")
-          (re-search-backward "\n[ \t]*\n" nil "move")
+          (when (re-search-forward "\n[ \t]*\n" nil "move")
+            (re-search-backward "\n[ \t]*\n" nil "move"))
           (point)))
       (if current-prefix-arg t nil))))
   (let (($changedItems '())
@@ -1272,20 +1272,20 @@ If `universal-argument' is called first, the replacement direction is reversed.
 When called in lisp code, @begin @end are region begin/end positions. If @fullwidth-to-ascii-p is true, reverse change direction.
 
 URL `http://ergoemacs.org/emacs/elisp_replace_html_entities_command.html'
-Version 2020-08-30"
+Version 2020-08-30 2021-03-25"
   (interactive
    (list
-    (if (use-region-p)
+    (if (region-active-p)
         (region-beginning)
       (progn
-        (re-search-backward "\n[ \t]*\n" nil "move")
-        (re-search-forward "\n[ \t]*\n" nil "move")
+        (when (re-search-backward "\n[ \t]*\n" nil "move")
+          (re-search-forward "\n[ \t]*\n" nil ))
         (point)))
     (if (use-region-p)
         (region-end)
       (progn
-        (re-search-forward "\n[ \t]*\n" nil "move")
-        (re-search-backward "\n[ \t]*\n" nil "move")
+        (when (re-search-forward "\n[ \t]*\n" nil "move")
+          (re-search-backward "\n[ \t]*\n" nil "move"))
         (point)))
     (if current-prefix-arg t nil)))
   (let (($findReplaceMap
@@ -2426,7 +2426,7 @@ When called in lisp code, @begin @end are region begin/end positions.
 Returns a list of strings.
 
 URL `http://ergoemacs.org/emacs/elisp_extract_url_command.html'
-Version 2021-02-20"
+Version 2021-02-20 2021-03-22"
   (interactive
    (let ($p1 $p2)
      ;; set region boundary $p1 $p2
@@ -2469,7 +2469,7 @@ Version 2021-02-20"
                      )))))
              $urlList)))
     (when (called-interactively-p 'any)
-      (let (($printedResult (concat (mapconcat 'identity $urlList "\n") "\n\n" )))
+      (let (($printedResult (concat (mapconcat 'identity $urlList "\n") "\n" )))
         (kill-new $printedResult)
         (message "%s" $printedResult)))
     $urlList ))
