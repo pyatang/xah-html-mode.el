@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.7.20210325091046
+;; Version: 11.8.20210327103456
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -2306,9 +2306,9 @@ Version 2021-01-11"
 (defun xah-html-resize-img ()
   "Create a new resized image of image path under cursor.
 In a html file, put cursor on a image file path, call the command,
-a thumbnail will be created, with file name prefix tn_‹width›x‹height› in the same dir, and relative path of the newly created file will be inserted before the img tag.
-If `universal-argument' is called first, ask for jpeg quality. (default is 90)
-Version 2020-11-13 2021-01-14"
+a thumbnail will be created in the same dir, and path of the newly created file will be inserted before the img tag.
+If `universal-argument' is called first, ask for jpeg quality (default is 90) and whether to sharpen. (default is sharpen 1.)
+Version 2020-11-13 2021-03-27"
   (interactive)
   (let* (
          ($bounds (bounds-of-thing-at-point 'filename))
@@ -2342,9 +2342,12 @@ Version 2020-11-13 2021-01-14"
                         "-quality 90%")
                     " "
                     )
-                  " -sharpen 1 "
-                  ""
-                  ))
+                  (if current-prefix-arg
+                      (if (y-or-n-p "sharpen?")
+                          " -sharpen 1 "
+                        ""
+                        )
+                    " -sharpen 1 ")))
     (if (file-exists-p $fPathNew)
         (setq $doIt (y-or-n-p (format "File exist 「%s」. Replace it?" $fPathNew)))
       (setq $doIt t ))
