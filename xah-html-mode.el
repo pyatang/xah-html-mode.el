@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.8.20210327103456
+;; Version: 11.9.20210409211459
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -705,7 +705,6 @@ Version 2019-04-08
         ("visualbasic" . ["visual-basic-mode" "vbs"])
         ("mathematica" . ["fundamental-mode" "m"])
         ("math" . ["fundamental-mode" "txt"])
-
         ("slim" . ["slim-mode" "slim"])
         ("yaml" . ["yaml-mode" "yaml"])
         ("haml" . ["haml-mode" "haml"])
@@ -2477,6 +2476,39 @@ Version 2021-02-20 2021-03-22"
         (message "%s" $printedResult)))
     $urlList ))
 
+(defun xah-html-local-links-to-fullpath ()
+  "Change all local links to fullpaths, in region or current text block.
+Version 2021-04-09"
+  (interactive)
+  (require 'xah-get-thing)
+  (let ( (bounds (xah-get-bounds-of-thing-or-region 'block)))
+    (save-restriction
+      (narrow-to-region (car bounds) (cdr bounds))
+      (goto-char (point-min))
+      (while (search-forward "<a href=\"" nil t)
+        (let* ((lBounds (bounds-of-thing-at-point 'filename))
+               (hrefVal (buffer-substring-no-properties (car lBounds) (cdr lBounds))))
+          (when (not (string-match "^http" hrefVal ))
+            (delete-region (car lBounds) (cdr lBounds))
+            (insert (concat "file:///" (expand-file-name hrefVal)))))))))
+
+(defun xah-html-local-links-to-relative-path ()
+  "Change all local links to relative paths, in region or current text block.
+Version 2021-04-09"
+  (interactive)
+  (require 'xah-get-thing)
+  (require 'subr-x)
+  (let ( (bounds (xah-get-bounds-of-thing-or-region 'block)))
+    (save-restriction
+      (narrow-to-region (car bounds) (cdr bounds))
+      (goto-char (point-min))
+      (while (search-forward "<a href=\"" nil t)
+        (let* ((lBounds (bounds-of-thing-at-point 'filename))
+               (hrefVal (buffer-substring-no-properties (car lBounds) (cdr lBounds))))
+          (when (string-match "file:///" hrefVal )
+            (delete-region (car lBounds) (cdr lBounds))
+            (insert (file-relative-name (string-remove-prefix "file:///" hrefVal)))))))))
+
 (defun xah-html-update-title (@title)
   "Update the <title>…</title> and first <h1>…</h1> of current buffer.
 When called in elisp code, @title is new title, a string.
@@ -3126,11 +3158,14 @@ Here's sample result:
 </figcaption>
 </figure>
 
-Version 2020-08-27"
+Version 2020-08-27 2021-04-08"
   (interactive)
   (let ( $p1 $p2 $inputStr $id $timeStamp )
-    (setq $p1 (line-beginning-position))
-    (setq $p2 (line-end-position))
+    (re-search-backward "[ \n]")
+    (forward-char )
+    (setq $p1 (point))
+    (re-search-forward "[ \n]" )
+    (setq $p2 (point))
     (setq $inputStr (buffer-substring-no-properties $p1 $p2))
     (setq $timeStamp
           (if (or
@@ -3141,11 +3176,14 @@ Version 2020-08-27"
     (setq $id (xah-html-get-youtube-id $inputStr))
     (delete-region $p1 $p2)
     (insert
-     (format "<figure>
+     (format "
+
+<figure>
 <iframe width=\"640\" height=\"480\" src=\"https://www.youtube.com/embed/%s%s\" allowfullscreen></iframe>
 <figcaption>
 </figcaption>
 </figure>
+
 "
              $id
              (if (string-equal $timeStamp "")
