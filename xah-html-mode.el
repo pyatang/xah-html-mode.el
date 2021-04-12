@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.9.20210409211459
+;; Version: 11.10.20210412115720
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -2144,7 +2144,7 @@ Version 2020-12-02"
 
 (defun xah-html-html-to-text ()
   "Convert HTML to plain text on current text block or text selection.
-Version 2019-04-12 2021-01-04"
+Version 2019-04-12 2021-04-10"
   (interactive)
   (let ( $p1 $p2 $input-str $output-str)
     (let ($bds)
@@ -2201,8 +2201,8 @@ Version 2019-04-12 2021-01-04"
             ["<cite class=\"book\">" "〈" ]
             ["</cite>" "〉" ]
 
-            ["<kbd>" "【" ]
-            ["</kbd>" "】" ]
+            ["<kbd>" "" ]
+            ["</kbd>" "" ]
 
             ["<h2>" "────────── ────────── ────────── ────────── ──────────\n" ]
             ["</h2>" "" ]
