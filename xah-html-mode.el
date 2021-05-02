@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.10.20210412115720
+;; Version: 11.11.20210502003750
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -1415,11 +1415,8 @@ Version 2018-06-06"
 
 (defun xah-html-lines-to-list ()
   "Make the current block of lines into a HTML list.
-
 If `universal-argument' is called first, use ordered list <ol> instead of <ul>.
-
-Example:
-If your cursor is in the following block of text:
+Example: If your cursor is in the following block of text:
 
 cat
 dog
@@ -2278,6 +2275,7 @@ Version 2020-08-27"
         (delete-region (point-min) (point-max))
         (progn
           ;; https://youtu.be/gjiAjtGzC64?t=2358
+          ;; https://www.youtube.com/watch?v=q2c6fKOu-vo 
           (insert "https://youtu.be/" $id)
           (when $timeStamp
             (insert (format "?t=%s" $timeStamp)))
@@ -2428,7 +2426,7 @@ When called in lisp code, @begin @end are region begin/end positions.
 Returns a list of strings.
 
 URL `http://ergoemacs.org/emacs/elisp_extract_url_command.html'
-Version 2021-02-20 2021-03-22"
+Version 2021-02-20 2021-03-22 2021-04-30"
   (interactive
    (let ($p1 $p2)
      ;; set region boundary $p1 $p2
@@ -2471,7 +2469,7 @@ Version 2021-02-20 2021-03-22"
                      )))))
              $urlList)))
     (when (called-interactively-p 'any)
-      (let (($printedResult (concat (mapconcat 'identity $urlList "\n") "\n" )))
+      (let (($printedResult (mapconcat 'identity $urlList "\n")))
         (kill-new $printedResult)
         (message "%s" $printedResult)))
     $urlList ))
@@ -2610,14 +2608,14 @@ by Ewan Morrison
 
 becomes
 
- [<cite>Why Utopian Communities Fail</cite> <time>2018-03-08</time> By Ewan Morrison. At <a class=\"sorc\" rel=\"noopener\" target=\"_blank\" href=\"https://areomagazine.com/2018/03/08/why-utopian-communities-fail/\" data-accessed=\"2018-03-24\">https://areomagazine.com/2018/03/08/why-utopian-communities-fail/</a> ]
+ [<cite>Why Utopian Communities Fail</cite> <time>2018-03-08</time> By Ewan Morrison. At <a href=\"https://areomagazine.com/2018/03/08/why-utopian-communities-fail/\" data-accessed=\"2018-03-24\">https://areomagazine.com/2018/03/08/why-utopian-communities-fail/</a> ]
 
 If there's a text selection, use it for input, otherwise the input is a text block between blank lines.
 
 The order of lines for {title, author, date/time, url} needs not be in that order. Author should start with “by”.
 
 URL `http://ergoemacs.org/emacs/elisp_make-citation.html'
-Version 2020-07-15 2021-02-11"
+Version 2020-07-15 2021-05-02"
   (interactive)
   (let* (
          ($bds (xah-get-bounds-of-thing 'block))
@@ -3070,12 +3068,12 @@ http://amzn.to/1F5M1hA
 https://alexa.design/2okfMcj
 
 Example output:
-<a class=\"amz\" target=\"_blank\" href=\"http://www.amazon.com/dp/B003CP0BHM/?tag=xahh-20\" title=\"Cyborg R T Gaming Mouse\">amazon</a>
+<a href=\"http://www.amazon.com/dp/B003CP0BHM/?tag=xahh-20\" title=\"Cyborg R T Gaming Mouse\">amazon</a>
 
 ASIN is a 10 character string that's a product id.
 
 URL `http://ergoemacs.org/emacs/elisp_amazon-linkify.html'
-Version 2020-01-15"
+Version 2020-01-15 2021-05-02"
   (interactive)
   (let (($bds (bounds-of-thing-at-point 'url))
         $p1 $p2 $url $asin $thingName
@@ -3087,7 +3085,7 @@ Version 2020-01-15"
     (if (or (string-match "//amzn.to/" $url)
             (string-match "//alexa.design/" $url))
         (progn (delete-region $p1 $p2)
-               (insert (format "<a class=\"amz_search\" target=\"_blank\" href=\"%s\">amazon</a>" $url)))
+               (insert (format "<a class=\"amz_search\" href=\"%s\">amazon</a>" $url)))
       (progn
         (setq $asin
               (cond
@@ -3115,7 +3113,7 @@ Version 2020-01-15"
         (delete-region $p1 $p2)
         (insert
 
-         (format "<a class=\"amz\" target=\"_blank\" href=\"http://www.amazon.com/dp/%s/?tag=%s\" title=\"%s\">Buy at amazon</a>" $asin $trackId $thingName))
+         (format "<a class=\"amz\" href=\"http://www.amazon.com/dp/%s/?tag=%s\" title=\"%s\">Buy at amazon</a>" $asin $trackId $thingName))
         (search-backward "\">")))))
 
 (defun xah-html-get-youtube-id (@url)
@@ -3348,7 +3346,7 @@ If there's a text selection, use the text selection as input.
 
 Example: http://example.com/xyz.htm
 becomes
-<a class=\"sorc\" rel=\"noopener\" target=\"_blank\" href=\"http://example.com/xyz.htm\" data-accessed=\"2008-12-25\">http://example.com/xyz.htm</a>
+<a href=\"http://example.com/xyz.htm\" data-accessed=\"2008-12-25\">http://example.com/xyz.htm</a>
 
 If `universal-argument' is called first,
 The anchor text may be of 4 possibilities:
@@ -3359,7 +3357,7 @@ The anchor text may be of 4 possibilities:
 0 or any → smartly decide.
 
 URL `http://ergoemacs.org/emacs/elisp_html-linkify.html'
-Version 2020-07-15 2021-02-11"
+Version 2020-07-15 2021-05-02"
   (interactive "P")
   (let ( $p1 $p2 $input $url $domainName $linkText )
     (if (use-region-p)
@@ -3392,7 +3390,7 @@ Version 2020-07-15 2021-02-11"
     ;; delete URL and insert the link
     (delete-region $p1 $p2)
     (insert (format
-             "<a class=\"sorc\" rel=\"noopener\" target=\"_blank\" href=\"%s\" data-accessed=\"%s\">%s</a>"
+             "<a href=\"%s\" data-accessed=\"%s\">%s</a>"
              $url (format-time-string "%Y-%m-%d") $linkText
              ))))
 
@@ -3403,12 +3401,12 @@ If there is a text selection, use that as input.
 Example:
 http://en.wikipedia.org/wiki/Emacs
 becomes
-<a class=\"wikipedia_92d5m\" rel=\"noopener\" target=\"_blank\" href=\"http://en.wikipedia.org/wiki/Emacs\" data-accessed=\"2015-09-14\">Emacs</a>.
+<a href=\"http://en.wikipedia.org/wiki/Emacs\" data-accessed=\"2015-09-14\">Emacs</a>.
 
 Works the same way for links to wiktionary, e.g. https://en.wiktionary.org/wiki/%E4%BA%86
 
 URL `http://ergoemacs.org/emacs/elisp_html_wikipedia_url_linkify.html'
-Version 2020-03-24"
+Version 2020-03-24 2021-05-02"
   (interactive)
   (let (
         $p1 $p2
@@ -3435,7 +3433,7 @@ Version 2020-03-24"
            (decode-coding-string (url-unhex-string (file-name-nondirectory $input-str)) 'utf-8)))
     (setq $output-str
           (format
-           "<a class=\"wikipedia_92d5m\" rel=\"noopener\" target=\"_blank\" href=\"%s\" data-accessed=\"%s\">%s</a>"
+           "<a href=\"%s\" data-accessed=\"%s\">%s</a>"
            (url-encode-url $input-str)
            (format-time-string "%Y-%m-%d")
            $link-text
