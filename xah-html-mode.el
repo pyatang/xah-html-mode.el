@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.11.20210503121120
+;; Version: 11.11.20210509184557
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -263,11 +263,9 @@ Version 2021-01-03"
       (delete-region p1 p2))))
 
 (defun xah-html-delete-tag-pair ()
-  "Remove the current tag(s) under cursor.
-For example, if you have <p>some</p> and cursor is inside either the beginning or ending tag, it'll remove both. But if cursor is inside a self-closing tag such as <br />, just remove that.
-This function assumes cursor is inside a tag <…▮…>.
-This function  self-closing tags ends in />.
-Version 2021-01-03 2021-02-04"
+  "Remove the previous or current tag(s) under cursor.
+The tags removed is the first angle bracketed tag to the left of cursor. Both begin and end tags are removed, unless it's a self-closing tag such as <br />. 
+Version 2021-01-03 2021-05-09"
   (interactive)
   (save-excursion
     (let (p0 inEndTag-p p1 p2 openTag-p1 openTag-p2 selfCloseTag-p closingTag-p1 closingTag-p2 openTagStr closeTagStr)
