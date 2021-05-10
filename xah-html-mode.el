@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.11.20210509184557
+;; Version: 11.12.20210509191632
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -264,7 +264,7 @@ Version 2021-01-03"
 
 (defun xah-html-delete-tag-pair ()
   "Remove the previous or current tag(s) under cursor.
-The tags removed is the first angle bracketed tag to the left of cursor. Both begin and end tags are removed, unless it's a self-closing tag such as <br />. 
+The tags removed is the first angle bracketed tag to the left of cursor. Both begin and end tags are removed, unless it's a self-closing tag such as <br />.
 Version 2021-01-03 2021-05-09"
   (interactive)
   (save-excursion
@@ -280,7 +280,7 @@ Version 2021-01-03 2021-05-09"
           (progn
             (setq closingTag-p1 p1)
             (setq closingTag-p2 p2)
-            (goto-char p0)
+            (goto-char (1+ p1))
             (sgml-skip-tag-backward 1)
             (setq openTag-p1 (point))
             (search-forward ">" )
@@ -300,7 +300,7 @@ Version 2021-01-03 2021-05-09"
             (progn
               (setq openTag-p1 p1)
               (setq openTag-p2 p2)
-              (goto-char p0)
+              (goto-char (1+ p1))
               (sgml-skip-tag-forward 1)
               (setq closingTag-p2 (point))
               (search-backward "<" )
