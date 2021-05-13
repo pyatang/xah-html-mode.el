@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.13.20210511231709
+;; Version: 11.14.20210512233358
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -721,16 +721,16 @@ Version 2019-04-08
 (defvar xah-html-lang-mode-list nil "List of supported language mode names.")
 (setq xah-html-lang-mode-list (mapcar (lambda (x) (aref (cdr x) 0)) xah-html-lang-name-map))
 
-(defun xah-html-htmlized-p (@begin @end)
+(defun xah-html-is-html-p (@begin @end)
   "Return true if region @BEGIN @END is htmlized code.
 “htmlized” means the text contains &gt; or &lt; or <span class=\"...\">.
 WARNING: it just check if it contains cortain span tags.
-Version 2020-08-05 2021-03-12"
+Version 2020-08-05 2021-05-12"
   (save-excursion
     (cond
      ( (progn (goto-char @begin) (search-forward "&gt;" @end t)) t )
      ( (progn (goto-char @begin) (search-forward "&lt;" @end t)) t )
-     ( (progn (goto-char @begin) (re-search-forward "<span class=\"comment\">\\|<span class=\"comment-delimiter\">\\|<span class=\"function-name\">\\|<span class=\"string\">\\|<span class=\"variable-name\">\\|<span class=\"keyword\">\\|<span class=\"bold\">\\|<span class=\"builtin\">\\|<span class=\"constant\">\\|<span class=\"doc\">\\|<span class=\"preprocessor\">\\|<span class=\"type\">\\|<span class=\"underline\">\\|<span class=\"warning\">" @end t)) t
+     ( (progn (goto-char @begin) (re-search-forward "<span class=\"" @end t)) t
        )
      (t nil))))
 
@@ -846,7 +846,7 @@ Version 2019-04-29"
         (fundamental-mode))
       (setq buffer-offer-save t)
       (insert $textContent)
-      (when (xah-html-htmlized-p (point-min) (point-max))
+      (when (xah-html-is-html-p (point-min) (point-max))
         (xah-html-remove-span-tag-region (point-min) (point-max)))
       (xah-html-decode-ampersand-region (point-min) (point-max)))
     (setq $fname
@@ -918,7 +918,7 @@ Version 2017-01-10"
   (interactive)
   (elt (cdr (assoc @lang-code @lang-code-map)) 0))
 
-(defun xah-html-htmlize-pre47 (@lang-code-map)
+(defun xah-html-htmlize2 (@lang-code-map)
   "Replace text enclosed by “pre” tag to htmlized code.
 
 For example, if the cursor is inside the pre tags <pre class=\"‹langCode›\">…▮…</pre>, then after calling, the text inside the pre tag will be htmlized. That is, wrapped with many span tags for syntax coloring.
@@ -927,7 +927,7 @@ The opening tag must be of the form <pre class=\"‹langCode›\">.  The ‹lang
 
 Cursor will end up right before </pre>.
 
-See also: `xah-html-dehtml-711', `xah-html-toggle-syntax-coloring-markup'.
+See also: `xah-html-dehtml2', `xah-html-toggle-syntax-coloring-markup'.
 This function requires the `htmlize-buffer' from htmlize.el by Hrvoje Niksic.
 Version 2018-09-28"
   (interactive (list xah-html-lang-name-map))
@@ -939,10 +939,10 @@ Version 2018-09-28"
          ($modeName (xah-html-langcode-to-mode-name $langCode @lang-code-map)))
     (xah-html-htmlize-region $p1 $p2 $modeName)))
 
-(defun xah-html-dehtml-711 (@begin @end)
+(defun xah-html-dehtml2 (@begin @end)
   "Delete span tags between pre tags.
 Note: only span tags of the form 「<span class=\"…\">…</span>」 are deleted.
-This command does the inverse of `xah-html-htmlize-pre47'.
+This command does the inverse of `xah-html-htmlize2'.
 Version 2018-10-08"
   (interactive
    (let* ( ($xx (xah-html-get-langcode)))
@@ -999,7 +999,7 @@ Version 2018-10-03"
             (setq $p2 (point))
             (save-restriction
               (narrow-to-region $p1 $p2)
-              (xah-html-dehtml-711 (point-min) (point-max))
+              (xah-html-dehtml2 (point-min) (point-max))
               (setq $count (1+ $count)))))))
     $count
     ))
@@ -1027,22 +1027,22 @@ Version 2018-10-03"
             (setq $p2 (point))
             (save-restriction
               (narrow-to-region $p1 $p2)
-              (xah-html-dehtml-711 (point-min) (point-max))
+              (xah-html-dehtml2 (point-min) (point-max))
               (setq $count (1+ $count)))))))
     $count
     ))
 
 (defun xah-html-toggle-syntax-coloring-markup (lang-name-map)
-  "Call `xah-html-htmlize-pre47' or `xah-html-dehtml-711'.
+  "Call `xah-html-htmlize2' or `xah-html-dehtml2'.
 Version 2019-06-13"
   (interactive (list xah-html-lang-name-map))
   (let* (
          ($tmp (xah-html-get-langcode))
          ($p1 (elt $tmp 1))
          ($p2 (elt $tmp 2)))
-    (if (xah-html-htmlized-p $p1 $p2)
-        (xah-html-dehtml-711 $p1 $p2)
-      (xah-html-htmlize-pre47 lang-name-map))))
+    (if (xah-html-is-html-p $p1 $p2)
+        (xah-html-dehtml2 $p1 $p2)
+      (xah-html-htmlize2 lang-name-map))))
 
 (defun xah-html-redo-syntax-coloring-file ( @file-path )
   "redo all pre lang code syntax coloring in current HTML page.
@@ -1086,8 +1086,8 @@ Version 2019-06-13"
             (setq $p2 (point))
             (save-restriction
               (narrow-to-region $p1 $p2)
-              (when (xah-html-htmlized-p (point-min) (point-max))
-                (xah-html-dehtml-711 (point-min) (point-max)))
+              (when (xah-html-is-html-p (point-min) (point-max))
+                (xah-html-dehtml2 (point-min) (point-max)))
               (xah-html-htmlize-region (point-min) (point-max) $majorModeNameStr )
               (setq $count (1+ $count)))))))
     (message "xah-html-redo-syntax-coloring-buffer %s redone" $count)
@@ -2276,7 +2276,7 @@ Version 2020-08-27"
         (delete-region (point-min) (point-max))
         (progn
           ;; https://youtu.be/gjiAjtGzC64?t=2358
-          ;; https://www.youtube.com/watch?v=q2c6fKOu-vo 
+          ;; https://www.youtube.com/watch?v=q2c6fKOu-vo
           (insert "https://youtu.be/" $id)
           (when $timeStamp
             (insert (format "?t=%s" $timeStamp)))
