@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.15.20210513221152
+;; Version: 11.16.20210514124411
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -2095,12 +2095,9 @@ Version 2018-11-27 2021-01-12"
   (skip-chars-forward "\n" ))
 
 (defun xah-html-link-to-text (@begin @end)
-  "Convert html link <a …>…</a> to plain text form.
-If the href value and link text is the same, then result is:
- [[‹URL›]]
-else
- [link text](URL)
-Version 2020-12-02 2021-05-13"
+  "Change html link <a …>…</a> to plain text form.
+If the href value and link text is the same, then result is just the URL, else it's [link text]( URL )
+Version 2020-12-02 2021-05-13 2021-05-14"
   (interactive
    (let ($p1 $p2)
      (if (use-region-p)
@@ -2138,7 +2135,7 @@ Version 2020-12-02 2021-05-13"
           (delete-region $tagBegin $tagEnd)
           (if (string-equal $url $linkText)
               (insert (format "%s" $url))
-            (insert (format "[%s] (%s)" $linkText $url))))))))
+            (insert (format "[%s] ( %s )" $linkText $url))))))))
 
 (defun xah-html-html-to-text ()
   "Convert HTML to plain text on current text block or text selection.
@@ -2153,9 +2150,7 @@ Version 2019-04-12 2021-04-10"
      $outputStr
      (with-temp-buffer
        (insert $inputStr)
-
        (xah-html-link-to-text (point-min) (point-max))
-
        (goto-char (point-min))
        (while (re-search-forward "src=\"\\([^\"]+?\\)\""  nil t)
          (let (($matchString (match-string 1)))
