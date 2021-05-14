@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.14.20210512233358
+;; Version: 11.15.20210513221152
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -1498,7 +1498,7 @@ For example, if the input is
 cat → 4 legs
 bird → has wings
 
-Version 2018-10-11 2020-12-24 2021-01-12"
+Version 2018-10-11 2021-05-13"
   (interactive)
   (let ($bds $p1 $p2 $input-str $resultStr $endpos)
     (setq $bds (xah-get-bounds-of-thing 'block))
@@ -1522,7 +1522,7 @@ Version 2018-10-11 2020-12-24 2021-01-12"
                 (if (re-search-forward $sep $endpos )
                     (progn
                      (delete-region (match-beginning 0) (match-end 0))
-                     (insert "</dt><dd>")
+                     (insert "</dt>\n<dd>")
                      (end-of-line)
                      (insert "</dd>")
                      (forward-line 1 ))
@@ -2097,10 +2097,10 @@ Version 2018-11-27 2021-01-12"
 (defun xah-html-link-to-text (@begin @end)
   "Convert html link <a …>…</a> to plain text form.
 If the href value and link text is the same, then result is:
- [ ‹URL› ]
+ [[‹URL›]]
 else
- 〈link text〉 [ ‹URL› ]
-Version 2020-12-02"
+ [link text](URL)
+Version 2020-12-02 2021-05-13"
   (interactive
    (let ($p1 $p2)
      (if (use-region-p)
@@ -2137,22 +2137,22 @@ Version 2020-12-02"
                        )))
           (delete-region $tagBegin $tagEnd)
           (if (string-equal $url $linkText)
-              (insert (format " [ %s ] " $url))
-            (insert (format " 〈%s〉 [ %s ] " $linkText $url ))))))))
+              (insert (format "%s" $url))
+            (insert (format "[%s] (%s)" $linkText $url))))))))
 
 (defun xah-html-html-to-text ()
   "Convert HTML to plain text on current text block or text selection.
 Version 2019-04-12 2021-04-10"
   (interactive)
-  (let ( $p1 $p2 $input-str $output-str)
+  (let ( $p1 $p2 $inputStr $outputStr)
     (let ($bds)
       (setq $bds (xah-get-bounds-of-thing-or-region 'block))
       (setq $p1 (car $bds) $p2 (cdr $bds)))
-    (setq $input-str (buffer-substring-no-properties $p1 $p2))
+    (setq $inputStr (buffer-substring-no-properties $p1 $p2))
     (setq
-     $output-str
+     $outputStr
      (with-temp-buffer
-       (insert $input-str)
+       (insert $inputStr)
 
        (xah-html-link-to-text (point-min) (point-max))
 
@@ -2219,7 +2219,7 @@ Version 2019-04-12 2021-04-10"
        (xah-html-remove-html-tags (point-min) (point-max))
        (buffer-substring (point-min) (point-max))))
     (delete-region $p1 $p2 )
-    (insert $output-str)))
+    (insert $outputStr)))
 
 (defun xah-html-youtube-to-text ()
   "Remove embedded YouTube html block to url and caption.
@@ -3258,7 +3258,7 @@ Exactly what tag is used depends on the file name suffix. this command calls one
 `xah-html-url-linkify'
 
 If region is active, use it as input.
-Version 2020-08-07 2021-02-26"
+Version 2020-08-07 2021-02-26 2021-05-13"
   (interactive)
   (let ( $p1 $p2 $input)
     ;; (if (string-match "%" $input )
@@ -3270,10 +3270,10 @@ Version 2020-08-07 2021-02-26"
         (let ($p0)
           (setq $p0 (point))
           ;; chars that are likely to be delimiters of full path, e.g. space, tabs, brakets.
-          (skip-chars-backward "^  \"\t\n'|[]{}<>〔〕“”〈〉《》【】〖〗〘〙〘〙«»‹›·。\\`")
+          (skip-chars-backward "^  \"\t\n'|()[]{}<>〔〕“”〈〉《》【】〖〗〘〙〘〙«»‹›·。\\`")
           (setq $p1 (point))
           (goto-char $p0)
-          (skip-chars-forward "^  \"\t\n'|[]{}<>〔〕“”〈〉《》【】〖〗〘〙«»‹›·。\\'")
+          (skip-chars-forward "^  \"\t\n'|()[]{}<>〔〕“”〈〉《》【】〖〗〘〙«»‹›·。\\'")
           (setq $p2 (point)))))
     (setq $input (xah-html-local-url-to-file-path (buffer-substring-no-properties $p1 $p2)))
     (message "%s" $input)
@@ -3363,7 +3363,13 @@ Version 2020-07-15 2021-05-02"
   (let ( $p1 $p2 $input $url $domainName $linkText )
     (if (use-region-p)
         (setq $p1 (region-beginning) $p2 (region-end))
-      (let (($bds (bounds-of-thing-at-point 'url)))
+      (let (($bds
+             ;; (xah-get-bounds-of-thing 'filepath )
+             ;; (xah-get-bounds-of-thing 'url )
+             (bounds-of-thing-at-point 'url)
+             ;; (bounds-of-thing-at-point 'filename)
+             ;;
+             ))
         (setq $p1 (car $bds) $p2 (cdr $bds))))
     (when (eq $p1 nil)
       (user-error "Text under cursor probably not a url." ))
