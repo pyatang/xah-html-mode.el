@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.17.20210515085555
+;; Version: 11.18.20210515100133
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -1749,9 +1749,7 @@ Version 2020-09-05 2020-12-24 2021-05-11"
 (defun xah-html-dl-to-ul ()
   "Change html dl to ul.
 Cursor must be inside dl tags.
-
 If `universal-argument' is called first, prompt for separator string.
-
 Version 2020-03-09"
   (interactive )
   (let (
@@ -1767,10 +1765,8 @@ Version 2020-03-09"
         (setq $p1 (point))
         (search-forward "</dl>")
         (setq $p2 (point))))
-
-    (save-restriction
+(save-restriction
       (narrow-to-region $p1 $p2)
-
       (goto-char (point-min))
       (search-forward "<dl>")
       (replace-match "<ul>" t t )
@@ -4269,6 +4265,34 @@ Version 2018-10-26 2021-01-14"
       (progn
         (delete-region $p1 $p2)
         (insert (decode-coding-string $newStr 'utf-8))))))
+
+(defun xah-html-compact-def-list (p1 p2)
+  "Reformat definition list to 1 line per item, on current text block or selection.
+Version 2021-05-15"
+  (interactive
+   (save-excursion
+     (list
+      (if (region-active-p)
+          (region-beginning)
+        (progn
+          (when (re-search-backward "\n[ \t]*\n" nil "move")
+            (re-search-forward "\n[ \t]*\n" nil ))
+          (point)))
+      (if (use-region-p)
+          (region-end)
+        (progn
+          (when (re-search-forward "\n[ \t]*\n" nil "move")
+            (re-search-backward "\n[ \t]*\n" nil "move"))
+          (point))))))
+  (progn
+    (save-restriction
+      (narrow-to-region p1 p2)
+      (goto-char (point-min))
+      (while  (search-forward "</dt>\n<dd>" nil t)
+        (replace-match "</dt><dd>" t t ))
+      (goto-char (point-min))
+      (while  (search-forward "<dd>\n" nil t)
+        (replace-match "<dd>" t t )))))
 
 (defun xah-html-browse-url-of-buffer ()
   "Like `browse-url-of-buffer' but save file first.
