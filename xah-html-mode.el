@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.16.20210514124411
+;; Version: 11.17.20210515085555
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -3340,9 +3340,9 @@ Version 2020-08-07 2021-02-26 2021-05-13"
   "Change URL under cursor into a HTML link.
 If there's a text selection, use the text selection as input.
 
-Example: http://example.com/xyz.htm
+Example: http://example.com/x.htm
 becomes
-<a href=\"http://example.com/xyz.htm\" data-accessed=\"2008-12-25\">http://example.com/xyz.htm</a>
+<a href=\"http://example.com/x.htm\" data-accessed=\"2008-12-25\">http://example.com/x.htm</a>
 
 If `universal-argument' is called first,
 The anchor text may be of 4 possibilities:
@@ -3353,7 +3353,7 @@ The anchor text may be of 4 possibilities:
 0 or any → smartly decide.
 
 URL `http://ergoemacs.org/emacs/elisp_html-linkify.html'
-Version 2020-07-15 2021-05-02"
+Version 2020-07-15 2021-05-14"
   (interactive "P")
   (let ( $p1 $p2 $input $url $domainName $linkText )
     (if (use-region-p)
@@ -3500,7 +3500,7 @@ Version 2019-06-21"
 (defun xah-html-insert-br-tag ()
   "Insert a html <br /> tag.
 If there's a text selection, add to end of all lines.
-Version 2020-11-22"
+Version 2020-11-22 2021-05-15"
   (interactive)
   (let (p1 p2)
     (if (use-region-p)
@@ -3512,7 +3512,7 @@ Version 2020-11-22"
             (goto-char (point-min))
             (while (search-forward "\n" nil "NOERROR" )
               (replace-match "<br />\n"))))
-      (insert "<br />\n"))))
+      (insert "<br />"))))
 
 (defun xah-html-emacs-to-windows-kbd-notation (@begin @end)
   "Change emacs key notation to Windows's notation on text selection or current line.
