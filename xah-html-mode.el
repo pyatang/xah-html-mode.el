@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.18.20210515100133
+;; Version: 11.18.20210516141254
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -1715,7 +1715,7 @@ Version 2019-12-10"
   "Change html unordered list to definition list.
 Cursor must be inside <ul></ul> tags.
 else, add empty <dt></dt> in the beginning. @keep-sep-p if true, keep it in result.
-Version 2020-09-05 2020-12-24 2021-05-11"
+Version 2020-09-05 2020-12-24 2021-05-15"
   (interactive
    (list
     (if (use-region-p) (region-beginning))
@@ -1744,7 +1744,8 @@ Version 2020-09-05 2020-12-24 2021-05-11"
           (goto-char (point-min))
           (while (search-forward @sep nil t)
             (replace-match (if @keep-sep-p (concat @sep "</dt>\n<dd>\n") "</dt>\n<dd>\n" )  t t )
-            (search-forward "</dd>" nil "move" )))))))
+            (search-forward "</dd>" nil "move" ))))))
+  (when (fboundp 'xah-upcase-sentence) (xah-upcase-sentence)))
 
 (defun xah-html-dl-to-ul ()
   "Change html dl to ul.
@@ -2093,7 +2094,7 @@ Version 2018-11-27 2021-01-12"
 (defun xah-html-link-to-text (@begin @end)
   "Change html link <a …>…</a> to plain text form.
 If the href value and link text is the same, then result is just the URL, else it's [link text]( URL )
-Version 2020-12-02 2021-05-13 2021-05-14"
+Version 2020-12-02 2021-05-16"
   (interactive
    (let ($p1 $p2)
      (if (use-region-p)
@@ -2110,7 +2111,7 @@ Version 2020-12-02 2021-05-13 2021-05-14"
     (save-restriction
       (narrow-to-region $p1 $p2)
       (goto-char (point-min))
-      (while (re-search-forward "<a .*href=\"\\([^\"]+?\\)\".*>\\([^<]+?\\)</a>" nil t)
+      (while (re-search-forward "<a .*?href=\"\\([^\"]+?\\)\".*?>\\([^<]+?\\)</a>" nil t)
         (let* (
                ($hrefVal (match-string 1))
                ($linkText (match-string 2))
@@ -2128,6 +2129,7 @@ Version 2020-12-02 2021-05-13 2021-05-14"
                            )
                        $hrefVal
                        )))
+          (message "xdeleted %s" (buffer-substring-no-properties $tagBegin $tagEnd))
           (delete-region $tagBegin $tagEnd)
           (if (string-equal $url $linkText)
               (insert (format "%s" $url))
