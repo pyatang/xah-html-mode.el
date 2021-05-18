@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.18.20210516141254
+;; Version: 11.19.20210518145034
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -3106,7 +3106,6 @@ Version 2020-01-15 2021-05-02"
             )))
         (delete-region $p1 $p2)
         (insert
-
          (format "<a class=\"amz\" href=\"http://www.amazon.com/dp/%s/?tag=%s\" title=\"%s\">Buy at amazon</a>" $asin $trackId $thingName))
         (search-backward "\">")))))
 
@@ -3334,64 +3333,55 @@ Version 2020-08-07 2021-02-26 2021-05-13"
     ;;
     ))
 
-(defun xah-html-source-url-linkify (@prefixArg)
-  "Change URL under cursor into a HTML link.
-If there's a text selection, use the text selection as input.
-
-Example: http://example.com/x.htm
-becomes
-<a href=\"http://example.com/x.htm\" data-accessed=\"2008-12-25\">http://example.com/x.htm</a>
-
-If `universal-argument' is called first,
-The anchor text may be of 4 possibilities:
-
-1 → 「‹full url›」
-2 or 4 → 「‹domain›…」
-3 → 「img src」
-0 or any → smartly decide.
-
-URL `http://ergoemacs.org/emacs/elisp_html-linkify.html'
-Version 2020-07-15 2021-05-14"
-  (interactive "P")
-  (let ( $p1 $p2 $input $url $domainName $linkText )
+(defun xah-html-url-linkify ()
+  "Make the URL at cursor point into a HTML link.
+For example, http://example.org/t.html becomes <a href=\"http://example.org/t.html\">http://example.org/t.html</a>
+If text under cursor is a file path, use relative path for href value.
+URL `http://ergoemacs.org/emacs/wrap-url.html'
+Version 2006-10-30 2021-05-18"
+  (interactive)
+  (let (($p0 (point)) $p1 $p2 $input $newStr )
     (if (use-region-p)
         (setq $p1 (region-beginning) $p2 (region-end))
-      (let (($bds
-             ;; (xah-get-bounds-of-thing 'filepath )
-             ;; (xah-get-bounds-of-thing 'url )
-             (bounds-of-thing-at-point 'url)
-             ;; (bounds-of-thing-at-point 'filename)
-             ;;
-             ))
-        (setq $p1 (car $bds) $p2 (cdr $bds))))
-    (when (eq $p1 nil)
-      (user-error "Text under cursor probably not a url." ))
+      (save-excursion
+        ;; chars that are likely to be delimiters of full path, e.g. space, tabs, brakets.
+        (skip-chars-backward "^  \"\t\n'|[]{}<>〔〕“”〈〉《》【】〖〗〘〙«»‹›·。\\`")
+        (setq $p1 (point))
+        (goto-char $p0)
+        (skip-chars-forward "^  \"\t\n'|[]{}<>〔〕“”〈〉《》【】〖〗〘〙«»‹›·。\\'")
+        (setq $p2 (point))))
     (setq $input (buffer-substring-no-properties $p1 $p2))
-    (setq $url (replace-regexp-in-string "&amp;" "&" $input nil "LITERAL"))
-    ;; in case it's already encoded. TODO this is only 99% correct.
-    (setq $domainName
-          (progn
-            (string-match "://\\([^\/]+?\\)/?" $url)
-            (match-string 1 $url)))
-    (when (eq 0 (length $domainName))
-      (user-error "cannot find domain name. Got %s" $domainName))
-    (setq $linkText
-          (cond
-           ((equal @prefixArg 1) $url)
-           ((or (equal @prefixArg 2) (equal @prefixArg 4) (equal @prefixArg '(4))) (concat $domainName "…"))
-           ((equal @prefixArg 3) "image source")
-           (t (if
-                  (let ((case-fold-search t))
-                    (string-match "\\(wikimedia\\.org\\|wikipedia\\.org\\).+\\(jpg\\|png\\|svg\\)$" $url))
-                  "image source"
-                $url
-                ))))
-    (setq $url (replace-regexp-in-string "&" "&amp;" $url))
-    ;; delete URL and insert the link
+    (setq $newStr
+          (if (file-exists-p (replace-regexp-in-string "^file:///" "/" $input t t))
+              (file-relative-name $input)
+            $input
+            ))
+    (delete-region $p1 $p2)
+    (insert (format "<a href=\"%s\">%s</a>" $newStr $newStr ))))
+
+(defun xah-html-source-url-linkify ()
+  "Change URL under cursor into a HTML link.
+If there's a text selection, use the text selection as input.
+Example: http://example.com/x.htm becomes <a href=\"http://example.com/x.htm\" data-accessed=\"2008-12-25\">http://example.com/x.htm</a>
+URL `http://ergoemacs.org/emacs/elisp_html-linkify.html'
+Version 2008-12-25 2021-05-18"
+  (interactive "P")
+  (let (($p0 (point)) $p1 $p2 $input $url $domainName $linkText )
+    (if (use-region-p)
+        (setq $p1 (region-beginning) $p2 (region-end))
+      (save-excursion
+        ;; chars that are likely to be delimiters of full path, e.g. space, tabs, brakets.
+        (skip-chars-backward "^  \"\t\n'|[]{}<>〔〕“”〈〉《》【】〖〗〘〙«»‹›·。\\`")
+        (setq $p1 (point))
+        (goto-char $p0)
+        (skip-chars-forward "^  \"\t\n'|[]{}<>〔〕“”〈〉《》【】〖〗〘〙«»‹›·。\\'")
+        (setq $p2 (point))))
+    (setq $input (buffer-substring-no-properties $p1 $p2))
+    ;; (setq $url (replace-regexp-in-string "&amp;" "&" $input nil "LITERAL"))
     (delete-region $p1 $p2)
     (insert (format
              "<a href=\"%s\" data-accessed=\"%s\">%s</a>"
-             $url (format-time-string "%Y-%m-%d") $linkText
+             $input (format-time-string "%Y-%m-%d") $input
              ))))
 
 (defun xah-html-wikipedia-url-linkify ()
@@ -3442,38 +3432,6 @@ Version 2020-03-24 2021-05-02"
       (delete-region $p1 $p2)
       (insert $output-str))))
 
-(defun xah-html-url-linkify ()
-  "Make the URL at cursor point into a HTML link.
-Work on current non-whitespace char sequence or text selection.
-
-For example
-http://example.org/cat.html
-becomes
-<a href=\"http://example.org/cat.html\">http://example.org/cat.html</a>
-
-URL `http://ergoemacs.org/emacs/wrap-url.html'
-Version 2020-02-19"
-  (interactive)
-  (let ( $p1 $p2 $input $newStr )
-    (if (use-region-p)
-        (setq $p1 (region-beginning) $p2 (region-end))
-      (save-excursion
-        (let ($p0)
-          (setq $p0 (point))
-          ;; chars that are likely to be delimiters of full path, e.g. space, tabs, brakets.
-          (skip-chars-backward "^  \"\t\n'|[]{}<>〔〕“”〈〉《》【】〖〗〘〙«»‹›·。\\`")
-          (setq $p1 (point))
-          (goto-char $p0)
-          (skip-chars-forward "^  \"\t\n'|[]{}<>〔〕“”〈〉《》【】〖〗〘〙«»‹›·。\\'")
-          (setq $p2 (point)))))
-    (setq $input (buffer-substring-no-properties $p1 $p2))
-    (setq $newStr
-          (if (string-match "^http" $input )
-              $input
-            (progn (file-relative-name (xah-html-local-url-to-file-path $input)))))
-    (delete-region $p1 $p2)
-    (insert (concat "<a href=\"" (url-encode-url $newStr) "\">" $newStr "</a>" ))))
-
 (defun xah-html-wrap-p-tag ()
   "Add <p>…</p> tag to current block or text selection.
 If there's a text selection, wrap p around each text block.
@@ -3487,11 +3445,11 @@ Version 2019-06-21"
          ($bds (xah-get-bounds-of-thing-or-region 'block))
          ($p1 (car $bds))
          ($p2 (cdr $bds))
-         ($inputText (buffer-substring-no-properties $p1 $p2)))
+         ($input (buffer-substring-no-properties $p1 $p2)))
     (delete-region $p1 $p2 )
     (insert
      "<p>\n"
-     (replace-regexp-in-string "\n\n+" "</p>\n\n<p>" (string-trim $inputText))
+     (replace-regexp-in-string "\n\n+" "</p>\n\n<p>" (string-trim $input))
      "\n</p>")
     (skip-chars-forward "\n" )))
 
