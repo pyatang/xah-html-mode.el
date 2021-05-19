@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.19.20210518145034
+;; Version: 11.19.20210519113856
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -1900,26 +1900,23 @@ For Example:
  Emacs
 becomes
  <a href=\"http://en.wikipedia.org/wiki/Emacs\">Emacs</a>
-
 URL `http://ergoemacs.org/emacs/elisp_html_word_to_wikipedia_linkify.html'
-Version 2015-07-27"
+Version 2015-07-27 2021-05-18"
   (interactive)
-  (let ($p0 $p1 $p2 $linkText)
+  (let (($p0 (point)) $p1 $p2 $input $linkText)
     (if (region-active-p)
-         (setq $p1 (region-beginning) $p2 (region-end))
+        (setq $p1 (region-beginning) $p2 (region-end))
       (progn
-        (setq $p0 (point))
         (skip-chars-backward "^ \t\n")
         (setq $p1 (point))
         (goto-char $p0)
         (skip-chars-forward "^ \t\n")
         (setq $p2 (point))))
-    (setq $linkText
-          (replace-regexp-in-string "_" " " (buffer-substring-no-properties $p1 $p2)))
+    (setq $input (buffer-substring-no-properties $p1 $p2))
+    (setq $linkText (replace-regexp-in-string "_" " " $input))
     (delete-region $p1 $p2)
-    (insert (concat "<a href=\"http://en.wikipedia.org/wiki/"
-                    (replace-regexp-in-string " " "_" $linkText)
-                    "\">" $linkText "</a>"))))
+    (insert
+     (format "<a href=\"http://en.wikipedia.org/wiki/%s\">%s</a>" (replace-regexp-in-string " " "_" $linkText) $linkText ))))
 
 (defun xah-html-remove-paragraph-tags ()
   "Remove paragraph <p></p> tags.
@@ -2644,7 +2641,7 @@ Version 2020-07-15 2021-05-02"
     (setq $date (string-trim $date))
     (setq $date (xah-fix-datetime-string $date))
     (setq $url (string-trim $url))
-    (setq $url (with-temp-buffer (insert $url) (xah-html-source-url-linkify 1) (buffer-string)))
+    (setq $url (with-temp-buffer (insert $url) (xah-html-source-url-linkify) (buffer-string)))
     (delete-region $p1 $p2 )
     (insert (concat "[<cite>" $title "</cite> ")
             "<time>" $date "</time>"
@@ -3245,7 +3242,6 @@ Exactly what tag is used depends on the file name suffix. this command calls one
 `xah-html-video-file-linkify'
 `xah-html-youtube-linkify'
 `xah-html-amazon-linkify'
-`xah-html-source-url-linkify'
 `xah-html-image-figure-linkify'
 `xah-html-url-linkify'
 
@@ -3276,7 +3272,7 @@ Version 2020-08-07 2021-02-26 2021-05-13"
       (if (xah-html-image-file-suffix-p $input)
           (progn
             (message "Call %s" "xah-html-source-url-linkify")
-            (xah-html-source-url-linkify 3))
+            (xah-html-source-url-linkify))
         (progn
           (message "Call %s" "xah-html-wikipedia-url-linkify")
           (xah-html-wikipedia-url-linkify ))))
@@ -3307,14 +3303,9 @@ Version 2020-08-07 2021-02-26 2021-05-13"
       (progn
         (if (fboundp 'xahsite-url-is-xah-website-p)
             (if (xahsite-url-is-xah-website-p $input)
-                (progn
-                  (xah-file-linkify $p1 $p2))
-              (progn
-                (message "Call %s" "xah-html-source-url-linkify")
-                (xah-html-source-url-linkify 0)))
-          (progn
-            (message "Call %s" "xah-html-source-url-linkify")
-            (xah-html-source-url-linkify 0)))))
+                (xah-file-linkify $p1 $p2)
+              (xah-html-source-url-linkify))
+          (xah-html-source-url-linkify))))
      ((xah-html-image-file-suffix-p $input) (xah-html-image-figure-linkify))
      ((string-match
        (concat "^" (expand-file-name "~/" ) "web/")
