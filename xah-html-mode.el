@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.19.20210519113856
+;; Version: 11.19.20210520113521
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -3356,7 +3356,7 @@ If there's a text selection, use the text selection as input.
 Example: http://example.com/x.htm becomes <a href=\"http://example.com/x.htm\" data-accessed=\"2008-12-25\">http://example.com/x.htm</a>
 URL `http://ergoemacs.org/emacs/elisp_html-linkify.html'
 Version 2008-12-25 2021-05-18"
-  (interactive "P")
+  (interactive)
   (let (($p0 (point)) $p1 $p2 $input $url $domainName $linkText )
     (if (use-region-p)
         (setq $p1 (region-beginning) $p2 (region-end))
