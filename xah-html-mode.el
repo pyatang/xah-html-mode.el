@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.20.20210529194454
+;; Version: 11.20.20210530103605
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -1426,7 +1426,7 @@ becomes:
 <li>dog</li>
 </ul>
 
-Version 2019-03-15 2021-05-29"
+Version 2019-03-15 2021-05-30"
   (interactive)
   (let ($bds $p1 $p2 $input-str $resultStr )
     (setq $bds (xah-get-bounds-of-thing 'block))
@@ -1439,12 +1439,6 @@ Version 2019-03-15 2021-05-29"
               (insert $input-str)
               (goto-char (point-max))
               (insert "\n")
-              (progn
-                (goto-char (point-min))
-                (while
-                    (re-search-forward  "^http" nil t)
-                  (backward-char 1)
-                  (xah-html-any-linkify)))
               (progn
                 (goto-char (point-min))
                 (while
