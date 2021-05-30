@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.19.20210520113521
+;; Version: 11.20.20210529194454
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -1426,7 +1426,7 @@ becomes:
 <li>dog</li>
 </ul>
 
-Version 2019-03-15"
+Version 2019-03-15 2021-05-29"
   (interactive)
   (let ($bds $p1 $p2 $input-str $resultStr )
     (setq $bds (xah-get-bounds-of-thing 'block))
@@ -1439,6 +1439,12 @@ Version 2019-03-15"
               (insert $input-str)
               (goto-char (point-max))
               (insert "\n")
+              (progn
+                (goto-char (point-min))
+                (while
+                    (re-search-forward  "^http" nil t)
+                  (backward-char 1)
+                  (xah-html-any-linkify)))
               (progn
                 (goto-char (point-min))
                 (while
@@ -3246,7 +3252,7 @@ Exactly what tag is used depends on the file name suffix. this command calls one
 `xah-html-url-linkify'
 
 If region is active, use it as input.
-Version 2020-08-07 2021-02-26 2021-05-13"
+Version 2020-08-07 2021-02-26 2021-05-29"
   (interactive)
   (let ( $p1 $p2 $input)
     ;; (if (string-match "%" $input )
@@ -3280,39 +3286,32 @@ Version 2020-08-07 2021-02-26 2021-05-13"
      ((string-match-p "\\.pdf" $input) (xah-html-pdf-linkify))
      ((string-match-p "\\.js\\'\\|\\.ts\\'" $input) (xah-html-javascript-linkify))
      ((xah-html-audio-file-suffix-p $input)
-      (progn
-        (message "Call %s" "xah-html-audio-file-linkify")
-        (xah-html-audio-file-linkify t)))
+      (message "Call %s" "xah-html-audio-file-linkify")
+      (xah-html-audio-file-linkify t))
      ((xah-html-video-file-suffix-p $input)
-      (progn
-        (message "Call %s" "xah-html-video-file-linkify")
-        (xah-html-video-file-linkify t)))
-     ((string-match-p "youtube\.com/" $input)
-      (progn
-        (message "Call %s" "xah-html-youtube-linkify")
-        (xah-html-youtube-linkify)))
-     ((string-match-p "youtu\.be/" $input)
-      (progn
-        (message "Call %s" "xah-html-youtube-linkify")
-        (xah-html-youtube-linkify)))
+      (message "Call %s" "xah-html-video-file-linkify")
+      (xah-html-video-file-linkify t))
+     ((or (string-match-p "youtu\.be/" $input)
+          (string-match-p "youtube\.com/" $input))
+      (message "Call %s" "xah-html-youtube-linkify")
+      (xah-html-youtube-linkify))
      ((string-match-p "www\.amazon\.com/\\|//amzn\.to/" $input)
-      (progn
-        (message "Call %s" "xah-html-amazon-linkify")
-        (xah-html-amazon-linkify)))
+      (message "Call %s" "xah-html-amazon-linkify")
+      (xah-html-amazon-linkify))
      ((string-match-p "\\`https?://" $input)
-      (progn
-        (if (fboundp 'xahsite-url-is-xah-website-p)
-            (if (xahsite-url-is-xah-website-p $input)
-                (xah-file-linkify $p1 $p2)
-              (xah-html-source-url-linkify))
-          (xah-html-source-url-linkify))))
+      (if (fboundp 'xahsite-url-is-xah-website-p)
+          (if (xahsite-url-is-xah-website-p $input)
+              (xah-file-linkify $p1 $p2)
+            (xah-html-source-url-linkify))
+        (xah-html-source-url-linkify)))
      ((xah-html-image-file-suffix-p $input) (xah-html-image-figure-linkify))
+
      ((string-match
-       (concat "^" (expand-file-name "~/" ) "web/")
+       (format "^%sweb/" (expand-file-name "~/" ))
        (or (buffer-file-name) default-directory))
-      ;; (if (fboundp 'xah-all-linkify) (progn (xah-all-linkify)) (xah-html-url-linkify))
-      (progn
-        (message "Call %s" "xah-html-url-linkify")
+      (message "Call %s" "xah-file-linkify")
+      (if (fboundp 'xah-file-linkify)
+          (xah-file-linkify $p1 $p2)
         (xah-html-file-linkify $p1 $p2)))
      ((file-exists-p $input)
       (progn
@@ -3355,7 +3354,7 @@ Version 2006-10-30 2021-05-18"
 If there's a text selection, use the text selection as input.
 Example: http://example.com/x.htm becomes <a href=\"http://example.com/x.htm\" data-accessed=\"2008-12-25\">http://example.com/x.htm</a>
 URL `http://ergoemacs.org/emacs/elisp_html-linkify.html'
-Version 2008-12-25 2021-05-18"
+Version 2008-12-25 2021-05-20"
   (interactive)
   (let (($p0 (point)) $p1 $p2 $input $url $domainName $linkText )
     (if (use-region-p)
