@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.20.20210530103605
+;; Version: 11.20.20210531231652
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -265,8 +265,10 @@ Version 2021-01-03"
 (defun xah-html-delete-tag-pair ()
   "Remove the previous or current tag(s) under cursor.
 The tags removed is the first angle bracketed tag to the left of cursor. Both begin and end tags are removed, unless it's a self-closing tag such as <br />.
-Version 2021-01-03 2021-05-09"
+URL `http://ergoemacs.org/emacs/emacs_html_delete_tags.html'
+Version 2021-01-03 2021-05-31"
   (interactive)
+  (require 'sgml-mode)
   (save-excursion
     (let (p0 inEndTag-p p1 p2 openTag-p1 openTag-p2 selfCloseTag-p closingTag-p1 closingTag-p2 openTagStr closeTagStr)
       (setq p0 (point))
