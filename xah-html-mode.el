@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.20.20210531231652
+;; Version: 11.20.20210601222626
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -2372,11 +2372,11 @@ or
 Call this command, it prompt for a new path/name with one line for dir path and line for file name. The separate lines are for ease of editing.
 When done editing, newline characters in path are removed, and comma or space replaced by _. The file name is renamed, and link also updated.
 This command is for interactive use only.
-Version 2019-10-05 2021-02-10"
+Version 2019-10-05 2021-06-01"
   (interactive)
   (let* (
          ($p0 (point))
-         ($bounds (bounds-of-thing-at-point 'filename))
+         ($bounds (xah-get-bounds-of-thing 'filepath))
          ($p1 (car $bounds))
          ($p2 (cdr $bounds))
          ($input (buffer-substring-no-properties $p1 $p2))
