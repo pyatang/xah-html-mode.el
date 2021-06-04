@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.21.20210602221137
+;; Version: 11.21.20210604133840
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -3605,7 +3605,7 @@ Version 2017-03-17 2021-01-14"
 Changes are reported to message buffer with char position.
 
 When called in lisp code, @begin @end are region begin/end positions.
-Version 2019-09-11 2021-05-02"
+Version 2019-09-11 2021-05-02 2021-06-04"
   (interactive
    (let (($bds (xah-get-bounds-of-thing-or-region 'block)))
      (list (car $bds) (cdr $bds))))
@@ -3683,7 +3683,7 @@ Version 2019-09-11 2021-05-02"
               (overlay-put (make-overlay $p1 $p2) 'face 'highlight))))
         (progn
           (goto-char (point-min))
-          (while (re-search-forward "〔\\([ -_/\\:~.A-Za-z0-9%]+?\\)〕" nil t)
+          (while (re-search-forward "〔\\([^〕]+?\\)〕" nil t)
             (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) $changedItems)
             (replace-match "<code class=\"path_xl\">\\1</code>" t)
             (let ($p1 $p2)
@@ -3696,7 +3696,7 @@ Version 2019-09-11 2021-05-02"
               (search-forward "</code>"))))
         (progn
           (goto-char (point-min))
-          (while (re-search-forward "\\(…\\)" nil t)
+          (while (re-search-forward "\\(‹…›\\)" nil t)
             (push (concat (number-to-string (point)) " " (match-string-no-properties 1)) $changedItems)
             (replace-match "<var class=\"d\">\\1</var>" t)
             (let ($p1 $p2)
