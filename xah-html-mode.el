@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.21.20210604133840
+;; Version: 11.22.20210606202734
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -2462,6 +2462,9 @@ Version 2021-02-20 2021-03-22 2021-04-30"
 
 (defun xah-html-local-links-to-fullpath ()
   "Change all local links to fullpaths, in region or current text block.
+See also:
+`xah-html-local-links-to-fullpath'
+`xah-html-local-links-to-relative-path'
 Version 2021-04-09"
   (interactive)
   (require 'xah-get-thing)
@@ -2478,7 +2481,10 @@ Version 2021-04-09"
 
 (defun xah-html-local-links-to-relative-path ()
   "Change all local links to relative paths, in region or current text block.
-Version 2021-04-09"
+See also:
+`xah-html-local-links-to-fullpath'
+`xah-html-local-links-to-relative-path'
+Version 2021-04-09 2021-06-06"
   (interactive)
   (require 'xah-get-thing)
   (require 'subr-x)
@@ -3141,7 +3147,8 @@ Here's sample result:
 </figcaption>
 </figure>
 
-Version 2020-08-27 2021-04-08"
+URL `http://ergoemacs.org/emacs/elisp_embed_youtube_vid.html'
+Version 2020-08-27 2021-06-05"
   (interactive)
   (let ( $p1 $p2 $inputStr $id $timeStamp )
     (re-search-backward "[ \n]")
@@ -3294,7 +3301,6 @@ Version 2020-08-07 2021-02-26 2021-05-29"
             (xah-html-source-url-linkify))
         (xah-html-source-url-linkify)))
      ((xah-html-image-file-suffix-p $input) (xah-html-image-figure-linkify))
-
      ((string-match
        (format "^%sweb/" (expand-file-name "~/" ))
        (or (buffer-file-name) default-directory))
@@ -4705,6 +4711,8 @@ Version 2016-10-24"
   (define-key xah-html-leader-map (kbd "u") 'xah-html-delete-tag-pair)
   (define-key xah-html-leader-map (kbd "v") 'xah-html-lines-to-table)
   (define-key xah-html-leader-map (kbd "w") 'nil)
+  (define-key xah-html-leader-map (kbd "w t") 'xah-html-local-links-to-fullpath)
+  (define-key xah-html-leader-map (kbd "w h") 'xah-html-local-links-to-relative-path)
   (define-key xah-html-leader-map (kbd "w w") 'xah-html-named-entity-to-char)
   (define-key xah-html-leader-map (kbd "w c") 'xah-html-open-in-chrome)
   (define-key xah-html-leader-map (kbd "w f") 'xah-html-open-in-firefox)
