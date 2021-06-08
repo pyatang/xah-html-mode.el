@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.22.20210606202734
+;; Version: 11.23.20210608162747
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -249,35 +249,44 @@ Version 2020-01-15"
   (interactive)
   (member @tag-name xah-html-html5-self-close-tags))
 
-(defun xah-html-delete-tag ()
-  "Delete the tag under cursor.
-This function assume cursor is inside the tag <…▮…>.
-Version 2021-01-03"
-  (interactive)
-  (let (p1 p2)
-    (save-excursion
-      (search-backward "<" )
-      (setq p1 (point))
-      (search-forward ">")
-      (setq p2 (point))
-      (delete-region p1 p2))))
+;; (defun xah-html-delete-tag ()
+;;   "Delete the tag under cursor.
+;; This function assume cursor is inside the tag <…▮…>.
+;; Version 2021-01-03"
+;;   (interactive)
+;;   (let (p1 p2)
+;;     (save-excursion
+;;       (search-backward "<" )
+;;       (setq p1 (point))
+;;       (search-forward ">")
+;;       (setq p2 (point))
+;;       (delete-region p1 p2))))
 
 (defun xah-html-delete-tag-pair ()
-  "Remove the previous or current tag(s) under cursor.
-The tags removed is the first angle bracketed tag to the left of cursor. Both begin and end tags are removed, unless it's a self-closing tag such as <br />.
+  "Remove the next or current tag(s) under cursor.
+The tags removed is the first angle bracketed tag to the right of cursor. Both begin and end tags are removed, unless it's a self-closing tag such as <br />.
 URL `http://ergoemacs.org/emacs/emacs_html_delete_tags.html'
-Version 2021-01-03 2021-05-31"
+Version 2021-01-03 2021-06-08"
   (interactive)
   (require 'sgml-mode)
   (save-excursion
     (let (p0 inEndTag-p p1 p2 openTag-p1 openTag-p2 selfCloseTag-p closingTag-p1 closingTag-p2 openTagStr closeTagStr)
-      (setq p0 (point))
-      (search-backward "<")
-      (setq p1 (point))
-      (forward-char 1)
-      (setq inEndTag-p (char-equal (char-after ) ?/))
-      (search-forward ">")
-      (setq p2 (point))
+      ;; (progn
+      ;;   (setq p0 (point))
+      ;;   (search-backward "<")
+      ;;   (setq p1 (point))
+      ;;   (forward-char 1)
+      ;;   (setq inEndTag-p (char-equal (char-after ) ?/))
+      ;;   (search-forward ">")
+      ;;   (setq p2 (point)))
+      (progn
+        (setq p0 (point))
+        (search-forward ">" )
+        (setq p2 (point))
+        (search-backward "<")
+        (setq p1 (point))
+        (forward-char )
+        (setq inEndTag-p (char-equal (char-after ) ?/)))
       (if inEndTag-p
           (progn
             (setq closingTag-p1 p1)
@@ -1472,7 +1481,7 @@ Version 2019-03-15 2021-05-30"
     (delete-region $p1 $p2)
     (insert $resultStr)))
 
-(defun xah-html-lines-to-dl ()
+(defun xah-html-lines-to-def-list ()
   "Make the current block of lines into a HTML dl list.
 e.g.
 
@@ -3183,17 +3192,18 @@ Version 2020-08-27 2021-06-05"
     (backward-char 1)))
 
 (defun xah-html-file-linkify (&optional @begin @end)
-  "Make the path under cursor into a HTML link for xah site.
+  "Make the path under cursor into a link with relative path.
 
-For Example, if you cursor is on the text “../emacs/emacs.html”,
-then it'll become:
-“<a href=\"../emacs/emacs.html\">Emacs Tutorial</a>”.
-The link text is pulled from the file's <title> tag if exists.
+For Example,
+ ../emacs/emacs.html
+becomes
+ <a href=\"../emacs/emacs.html\">Emacs Tutorial</a>
+The link text is from the title tag of the file if exists.
 
 If there is text selection, use it as file path.
+The input file path can be a full path or relative path.
 
-The file path can also be a full path or URL.
-Version 2017-12-20 2021-02-14"
+Version 2017-12-20 2021-06-07"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -4706,7 +4716,7 @@ Version 2016-10-24"
   (define-key xah-html-leader-map (kbd "p") 'xah-html-browse-url-of-buffer)
   (define-key xah-html-leader-map (kbd "q") 'xah-html-make-link-defunct)
   (define-key xah-html-leader-map (kbd "r") 'nil)
-  (define-key xah-html-leader-map (kbd "s") 'xah-html-lines-to-dl)
+  (define-key xah-html-leader-map (kbd "s") 'xah-html-lines-to-def-list)
   (define-key xah-html-leader-map (kbd "t") 'xah-html-wrap-p-tag)
   (define-key xah-html-leader-map (kbd "u") 'xah-html-delete-tag-pair)
   (define-key xah-html-leader-map (kbd "v") 'xah-html-lines-to-table)
