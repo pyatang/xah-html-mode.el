@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.23.20210608162747
+;; Version: 11.23.20210609130717
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -263,30 +263,30 @@ Version 2020-01-15"
 ;;       (delete-region p1 p2))))
 
 (defun xah-html-delete-tag-pair ()
-  "Remove the next or current tag(s) under cursor.
-The tags removed is the first angle bracketed tag to the right of cursor. Both begin and end tags are removed, unless it's a self-closing tag such as <br />.
+  "Remove the previous tag(s) under cursor.
+The tags removed is the first angle bracketed tag to the left of cursor. Both begin and end tags are removed, unless it's a self-closing tag such as <br />.
 URL `http://ergoemacs.org/emacs/emacs_html_delete_tags.html'
-Version 2021-01-03 2021-06-08"
+Version 2021-01-03 2021-06-09"
   (interactive)
   (require 'sgml-mode)
   (save-excursion
     (let (p0 inEndTag-p p1 p2 openTag-p1 openTag-p2 selfCloseTag-p closingTag-p1 closingTag-p2 openTagStr closeTagStr)
-      ;; (progn
-      ;;   (setq p0 (point))
-      ;;   (search-backward "<")
-      ;;   (setq p1 (point))
-      ;;   (forward-char 1)
-      ;;   (setq inEndTag-p (char-equal (char-after ) ?/))
-      ;;   (search-forward ">")
-      ;;   (setq p2 (point)))
       (progn
         (setq p0 (point))
-        (search-forward ">" )
-        (setq p2 (point))
         (search-backward "<")
         (setq p1 (point))
-        (forward-char )
-        (setq inEndTag-p (char-equal (char-after ) ?/)))
+        (forward-char 1)
+        (setq inEndTag-p (char-equal (char-after ) ?/))
+        (search-forward ">")
+        (setq p2 (point)))
+      ;; (progn
+      ;;   (setq p0 (point))
+      ;;   (search-forward ">" )
+      ;;   (setq p2 (point))
+      ;;   (search-backward "<")
+      ;;   (setq p1 (point))
+      ;;   (forward-char )
+      ;;   (setq inEndTag-p (char-equal (char-after ) ?/)))
       (if inEndTag-p
           (progn
             (setq closingTag-p1 p1)
