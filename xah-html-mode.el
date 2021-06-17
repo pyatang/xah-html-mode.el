@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.23.20210609130717
+;; Version: 11.24.20210617145607
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -2371,22 +2371,31 @@ Place cursor anywhere inside a HTML source local file path, e.g.
 <img src=\"img/▮cats.jpg\" >
 or
 <a href=\"js_▮canvas_tutorial.html\">
+The cursor needs not to be on a path. It can be anywhere inside the start tag.
 Call this command, it prompt for a new path/name with one line for dir path and line for file name. The separate lines are for ease of editing.
 When done editing, newline characters in path are removed, and comma or space replaced by _. The file name is renamed, and link also updated.
+
 This command is for interactive use only.
-Version 2019-10-05 2021-06-01"
+Version 2019-10-05 2021-06-17"
   (interactive)
-  (let* (
-         ($p0 (point))
-         ($bounds (xah-get-bounds-of-thing 'filepath))
-         ($p1 (car $bounds))
-         ($p2 (cdr $bounds))
-         ($input (buffer-substring-no-properties $p1 $p2))
-         ($currentDir (file-name-directory (or (buffer-file-name) default-directory )))
-         ($oldPath (expand-file-name $input $currentDir))
-         ($promptPath (concat (file-name-directory $oldPath) "\n" (file-name-nondirectory $oldPath)))
-         ($userInputPath (read-string "New name: " $promptPath nil $promptPath ))
-         ($doit-p nil))
+  (let* ( ($p0 (point))
+          $bounds $p1 $p2 $input $currentDir $oldPath $promptPath $userInputPath
+          ($doit-p nil))
+    (progn
+      (save-excursion
+        (search-backward "<" )
+        (re-search-forward "href=\\|src=" )
+        (forward-char ))
+      (setq $bounds (xah-get-bounds-of-thing 'filepath))
+      (setq $p1 (car $bounds))
+      (setq $p2 (cdr $bounds))
+      (setq $input (buffer-substring-no-properties $p1 $p2))
+      (setq $currentDir (file-name-directory (or (buffer-file-name) default-directory )))
+      (setq $oldPath (expand-file-name $input $currentDir))
+      (setq $promptPath (concat (file-name-directory $oldPath) "\n" (file-name-nondirectory $oldPath)))
+      (setq $userInputPath (read-string "New name: " $promptPath nil $promptPath ))
+      (setq $doit-p nil))
+
     (setq $newPath
           (replace-regexp-in-string
            " \\|\n\\|," "_"
