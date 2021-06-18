@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.24.20210617145607
+;; Version: 11.25.20210618132139
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -2375,6 +2375,8 @@ The cursor needs not to be on a path. It can be anywhere inside the start tag.
 Call this command, it prompt for a new path/name with one line for dir path and line for file name. The separate lines are for ease of editing.
 When done editing, newline characters in path are removed, and comma or space replaced by _. The file name is renamed, and link also updated.
 
+URL `http://ergoemacs.org/emacs/emacs_html_rename_source_file_path.html'
+
 This command is for interactive use only.
 Version 2019-10-05 2021-06-17"
   (interactive)
@@ -2395,7 +2397,6 @@ Version 2019-10-05 2021-06-17"
       (setq $promptPath (concat (file-name-directory $oldPath) "\n" (file-name-nondirectory $oldPath)))
       (setq $userInputPath (read-string "New name: " $promptPath nil $promptPath ))
       (setq $doit-p nil))
-
     (setq $newPath
           (replace-regexp-in-string
            " \\|\n\\|," "_"
@@ -3546,7 +3547,7 @@ Version 2017-09-30 2021-02-03"
         ["\\bDEL\\b" "Delete"]
         ]))))
 
-(defun xah-html-htmlize-elisp-keywords (@begin @end)
+(defun xah-html-square-bracket-to-markup (@begin @end)
   "Replace 「square-bracketed」 elisp names to HTML markup, in current line or text selection.
 
 Example:
@@ -3639,7 +3640,7 @@ Version 2019-09-11 2021-05-02 2021-06-04"
       (save-restriction
         (narrow-to-region @begin @end)
         (when (and (buffer-file-name) (string-match "emacs" (buffer-file-name)))
-          (xah-html-htmlize-elisp-keywords @begin @end))
+          (xah-html-square-bracket-to-markup @begin @end))
         (progn
           (goto-char (point-min))
           (while (re-search-forward "「\\([^」]+?\\)」" nil t)
