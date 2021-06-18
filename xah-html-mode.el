@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.25.20210618132139
+;; Version: 11.26.20210618135612
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -3547,7 +3547,7 @@ Version 2017-09-30 2021-02-03"
         ["\\bDEL\\b" "Delete"]
         ]))))
 
-(defun xah-html-square-bracket-to-markup (@begin @end)
+(defun xah-html-corner-bracket-to-markup (@begin @end)
   "Replace 「square-bracketed」 elisp names to HTML markup, in current line or text selection.
 
 Example:
@@ -3617,7 +3617,7 @@ Version 2017-03-17 2021-01-14"
        (terpri))
      (reverse $changedItems))))
 
-(defun xah-html-brackets-to-html (@begin @end)
+(defun xah-html-bracket-to-markup (@begin @end)
   "Replace bracketed text to HTML markup in current line or text selection.
 
 • 「emacs-lisp-function-name」 → <code class=\"elisp_f_3d841\">emacs-lisp-function-name</code> if current file path contains “emacs”.
@@ -3640,7 +3640,7 @@ Version 2019-09-11 2021-05-02 2021-06-04"
       (save-restriction
         (narrow-to-region @begin @end)
         (when (and (buffer-file-name) (string-match "emacs" (buffer-file-name)))
-          (xah-html-square-bracket-to-markup @begin @end))
+          (xah-html-corner-bracket-to-markup @begin @end))
         (progn
           (goto-char (point-min))
           (while (re-search-forward "「\\([^」]+?\\)」" nil t)
@@ -4711,7 +4711,7 @@ Version 2016-10-24"
   (define-key xah-html-leader-map (kbd "d") 'xah-html-extract-url)
   (define-key xah-html-leader-map (kbd "e") 'xah-html-source-url-linkify)
   (define-key xah-html-leader-map (kbd "f") 'xah-html-image-linkify)
-  (define-key xah-html-leader-map (kbd "g") 'xah-html-brackets-to-html)
+  (define-key xah-html-leader-map (kbd "g") 'xah-html-bracket-to-markup)
   (define-key xah-html-leader-map (kbd "h") 'xah-html-any-linkify)
   (define-key xah-html-leader-map (kbd "i") 'nil)
   (define-key xah-html-leader-map (kbd "i c") 'xah-html-resize-img)
