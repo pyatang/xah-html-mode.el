@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.26.20210618135612
+;; Version: 11.26.20210618140918
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -3548,29 +3548,28 @@ Version 2017-09-30 2021-02-03"
         ]))))
 
 (defun xah-html-corner-bracket-to-markup (@begin @end)
-  "Replace 「square-bracketed」 elisp names to HTML markup, in current line or text selection.
+  "Replace 「elisp-symbol」 to HTML markup, in current line or text selection.
 
 Example:
  「sort-lines」
     becomes
   <code class=\"elisp_f_3d841\">sort-lines</code>
 
-When called in lisp code, @begin @end are region begin/end positions.
-
 Note: a word is changed only if all of the following are true:
-
-• The symbol string is tightly enclosed in double curly quotes, e.g. 「sort-lines」 but not 「use sort-lines」.
-• `fboundp' or `boundp' returns true.
+• `fboundp' or `boundp' on the bracketed text returns true.
 • symbol string's char contains only alphanumeric or hyphen, even though elisp identifier allows many other chars. e.g. `yas/reload-all', `color-cie-ε'.
 
 This command also makes a report of changed items.
 
 Some issues:
 
-• Some words are common in other lang, e.g. “while”, “print”, “string”, unix “find”, “grep”, HTML's “kbd” tag, etc. But they are also built-in elisp symbols. This command will tag them, but you may not want that.
+• Some words are common in other lang, e.g. while, print, string, find, grep, kbd, etc. But they are also built-in elisp symbols. This command will tag them, but you may not want that.
 
 • Some function/variable are from 3rd party libs, and some are not bundled with GNU emacs , e.g. 「'htmlize」. They may or may not be tagged depending whether they've been loaded.
-Version 2017-03-17 2021-01-14"
+
+When called in lisp code, @begin @end are region begin/end positions.
+
+Version 2017-03-17 2021-06-18"
   (interactive
    (if (use-region-p)
        (list (region-beginning) (region-end))
@@ -3620,8 +3619,7 @@ Version 2017-03-17 2021-01-14"
 (defun xah-html-bracket-to-markup (@begin @end)
   "Replace bracketed text to HTML markup in current line or text selection.
 
-• 「emacs-lisp-function-name」 → <code class=\"elisp_f_3d841\">emacs-lisp-function-name</code> if current file path contains “emacs”.
-• 「…」 → <code>…</code>
+• 「…」 → <code>…</code> or <code class=\"elisp_f_3d841\">...</code> if current file path contains “emacs”.
 • 〈…〉 → <cite>…</cite>
 • 《…》 → <cite>…</cite>
 • 〔…〕 → <code class=\"path_xl\">\\1</code>
@@ -3631,7 +3629,7 @@ Version 2017-03-17 2021-01-14"
 Changes are reported to message buffer with char position.
 
 When called in lisp code, @begin @end are region begin/end positions.
-Version 2019-09-11 2021-05-02 2021-06-04"
+Version 2019-09-11 2021-06-18"
   (interactive
    (let (($bds (xah-get-bounds-of-thing-or-region 'block)))
      (list (car $bds) (cdr $bds))))
