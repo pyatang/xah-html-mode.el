@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.26.20210618140918
+;; Version: 11.27.20210620143240
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -261,6 +261,47 @@ Version 2020-01-15"
 ;;       (search-forward ">")
 ;;       (setq p2 (point))
 ;;       (delete-region p1 p2))))
+
+(defun xah-html-select-current-element ()
+  "Select current element under cursor.
+Version 2021-06-19"
+  (interactive)
+  (require 'sgml-mode)
+  (let (p0 inEndTag-p p1 p2 openTag-p1 openTag-p2 selfCloseTag-p closingTag-p1 closingTag-p2  )
+    (progn
+      (setq p0 (point))
+      (search-backward "<")
+      (setq p1 (point))
+      (forward-char 1)
+      (setq inEndTag-p (char-equal (char-after ) ?/))
+      (search-forward ">")
+      (setq p2 (point)))
+    (if inEndTag-p
+        (progn
+          (setq closingTag-p1 p1 closingTag-p2 p2)
+          (goto-char (1+ closingTag-p1))
+          (sgml-skip-tag-backward 1)
+          (setq openTag-p1 (point))
+          (search-forward ">" )
+          (setq openTag-p2 (point))
+          (push-mark openTag-p1 t t)
+          (goto-char closingTag-p2))
+      (progn
+        (setq selfCloseTag-p (char-equal (char-after (- p2 2)) ?/))
+        (if selfCloseTag-p
+            (progn
+              (push-mark p2 t t)
+              (goto-char p1))
+          (progn
+            (setq openTag-p1 p1)
+            (setq openTag-p2 p2)
+            (goto-char (1+ p1))
+            (sgml-skip-tag-forward 1)
+            (setq closingTag-p2 (point))
+            (search-backward "<" )
+            (setq closingTag-p1 (point))
+            (goto-char closingTag-p2)
+            (push-mark openTag-p1 t t)))))))
 
 (defun xah-html-delete-tag-pair ()
   "Remove the previous tag(s) under cursor.
@@ -4727,6 +4768,7 @@ Version 2016-10-24"
   (define-key xah-html-leader-map (kbd "s") 'xah-html-lines-to-def-list)
   (define-key xah-html-leader-map (kbd "t") 'xah-html-wrap-p-tag)
   (define-key xah-html-leader-map (kbd "u") 'xah-html-delete-tag-pair)
+  (define-key xah-html-leader-map (kbd "-") 'xah-html-select-current-element)
   (define-key xah-html-leader-map (kbd "v") 'xah-html-lines-to-table)
   (define-key xah-html-leader-map (kbd "w") 'nil)
   (define-key xah-html-leader-map (kbd "w t") 'xah-html-local-links-to-fullpath)
