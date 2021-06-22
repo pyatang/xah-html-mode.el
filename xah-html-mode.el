@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 12.0.20210621204207
+;; Version: 12.0.20210621205052
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -1499,7 +1499,7 @@ Version ~2013 2021-06-21"
           (goto-char (point-max))
           (insert "</ul>")))
       (goto-char (point-min))
-      (while (re-search-forward "<li>(•\\|*\\|-\\|⓪\\|①\\|②\\|③\\|④\\|⑤\\|⑥\\|⑦\\|⑧\\|⑨\\|⑩) " nil "move")
+      (while (re-search-forward "<li>\\(•\\|*\\|-\\|⓪\\|①\\|②\\|③\\|④\\|⑤\\|⑥\\|⑦\\|⑧\\|⑨\\|⑩\\) " nil "move")
         (replace-match "<li>" t t ))
       (goto-char (point-min))
       (while (re-search-forward "<li></li>" nil "move" )
