@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 12.1.20210622094028
+;; Version: 12.2.20210622110058
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -2216,7 +2216,7 @@ Version 2019-04-12 2021-04-10"
             ["</li>" "" ]
 
             ["<code>" "「" ]
-            ["<code class=\"elisp_f_3d841\">" "「" ]
+            ["<code class=\"elisp_f\">" "「" ]
             ["<code class=\"path_xl\">" "「" ]
             ["</code>" "」" ]
 
@@ -3584,7 +3584,7 @@ Version 2017-09-30 2021-02-03"
 Example:
  「sort-lines」
     becomes
-  <code class=\"elisp_f_3d841\">sort-lines</code>
+  <code class=\"elisp_f\">sort-lines</code>
 
 Note: a word is changed only if all of the following are true:
 • `fboundp' or `boundp' on the bracketed text returns true.
@@ -3611,20 +3611,18 @@ Version 2017-03-17 2021-06-18"
         (narrow-to-region @begin @end)
         (progn
           (goto-char (point-min))
-          (while (re-search-forward
-                  "「\\([:-A-Za-z0-9]+\\)」"
-                  (point-max) t)
+          (while (re-search-forward "「\\([:-A-Za-z0-9]+\\)」" (point-max) t)
             (setq $mStr (match-string 1))
             (cond
              ((and (intern-soft $mStr) (fboundp (intern-soft $mStr)))
               (progn
                 (push (format "f %s" $mStr) $changedItems)
-                (replace-match (concat "<code class=\"elisp_f_3d841\">" $mStr "</code>") t t)
+                (replace-match (concat "<code class=\"elisp_f\">" $mStr "</code>") t t)
                 (let ($p1 $p2)
                   (search-backward "</code>" )
                   (setq $p2 (point))
-                  (search-backward "<code class=\"elisp_f_3d841\">" )
-                  (search-forward "<code class=\"elisp_f_3d841\">")
+                  (search-backward "<code class=\"elisp_f\">" )
+                  (search-forward "<code class=\"elisp_f\">")
                   (setq $p1 (point))
                   (overlay-put (make-overlay $p1 $p2) 'face (list :background "yellow"))
                   (search-forward "</code>"))))
@@ -3650,7 +3648,7 @@ Version 2017-03-17 2021-06-18"
 (defun xah-html-bracket-to-markup (@begin @end)
   "Replace bracketed text to HTML markup in current line or text selection.
 
-• 「…」 → <code>…</code> or <code class=\"elisp_f_3d841\">...</code> if current file path contains “emacs”.
+• 「…」 → <code>…</code> or <code class=\"elisp_f\">...</code> if current file path contains “emacs”.
 • 〈…〉 → <cite>…</cite>
 • 《…》 → <cite>…</cite>
 • 〔…〕 → <code class=\"path_xl\">\\1</code>
