@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 12.0.20210621205052
+;; Version: 12.1.20210622094028
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -1463,7 +1463,7 @@ If there is no selection, make each line into a list item.
 If there is selection, each text block becomes a list item. (text block is separated by empty lines.)
 If `universal-argument' is called first, use ordered list <ol> instead of <ul>.
 URL `http://ergoemacs.org/emacs/elisp_lines_to_list.html'
-Version ~2013 2021-06-21"
+Version ~2013 2021-06-22"
   (interactive)
   (let ($bds $p1 $p2 ($markActive mark-active))
     (if $markActive
@@ -1499,7 +1499,7 @@ Version ~2013 2021-06-21"
           (goto-char (point-max))
           (insert "</ul>")))
       (goto-char (point-min))
-      (while (re-search-forward "<li>\\(•\\|*\\|-\\|⓪\\|①\\|②\\|③\\|④\\|⑤\\|⑥\\|⑦\\|⑧\\|⑨\\|⑩\\) " nil "move")
+      (while (re-search-forward "<li>[-•*⓪①②③④⑤⑥⑦⑧⑨⑩] " nil "move")
         (replace-match "<li>" t t ))
       (goto-char (point-min))
       (while (re-search-forward "<li></li>" nil "move" )
