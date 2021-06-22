@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 11.27.20210620143240
+;; Version: 12.0.20210621204207
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -264,7 +264,8 @@ Version 2020-01-15"
 
 (defun xah-html-select-current-element ()
   "Select current element under cursor.
-Version 2021-06-19"
+URL `http://ergoemacs.org/emacs/emacs_html_select_current_element.html'
+Version 2021-06-19 2021-06-20"
   (interactive)
   (require 'sgml-mode)
   (let (p0 inEndTag-p p1 p2 openTag-p1 openTag-p2 selfCloseTag-p closingTag-p1 closingTag-p2  )
@@ -1457,70 +1458,59 @@ Version 2018-06-06"
       )))
 
 (defun xah-html-lines-to-list ()
-  "Make the current block of lines into a HTML list.
+  "Make the current lines or text blocks into a HTML list.
+If there is no selection, make each line into a list item.
+If there is selection, each text block becomes a list item. (text block is separated by empty lines.)
 If `universal-argument' is called first, use ordered list <ol> instead of <ul>.
-Example: If your cursor is in the following block of text:
-
-cat
-dog
-
-becomes:
-
-<ul>
-<li>cat</li>
-<li>dog</li>
-</ul>
-
-Version 2019-03-15 2021-05-30"
+URL `http://ergoemacs.org/emacs/elisp_lines_to_list.html'
+Version ~2013 2021-06-21"
   (interactive)
-  (let ($bds $p1 $p2 $input-str $resultStr )
-    (setq $bds (xah-get-bounds-of-thing 'block))
-    (setq $p1 (car $bds))
-    (setq $p2 (cdr $bds))
-    (setq $input-str (buffer-substring-no-properties $p1  $p2))
-    (save-excursion
-      (setq $resultStr
-            (with-temp-buffer
-              (insert $input-str)
-              (goto-char (point-max))
-              (insert "\n")
-              (progn
-                (goto-char (point-min))
-                (while
-                    (re-search-forward  "\.html$" nil t)
-                  (backward-char 1)
-                  (xah-html-any-linkify)))
-              (goto-char (point-min))
-              (while
-                  (not (equal (line-end-position) (point-max)))
-                (beginning-of-line)
-                (when (looking-at "• ")
-                  (delete-char 2))
-                (when (looking-at "* ")
-                  (delete-char 2))
-                (when (looking-at "- ")
-                  (delete-char 2))
-                (when (looking-at "⓪①②③④⑤⑥⑦⑧⑨⑩")
-                  (delete-char 1))
-                (while (looking-at " ")
-                  (delete-char 1))
-                (insert "<li>")
-                (end-of-line) (insert "</li>")
-                (forward-line 1 ))
-              (if current-prefix-arg
-                  (progn
-                    (goto-char (point-min))
-                    (insert "<ol>\n")
-                    (goto-char (point-max))
-                    (insert "</ol>"))
-                (progn
-                  (goto-char (point-min))
-                  (insert "<ul>\n")
-                  (goto-char (point-max))
-                  (insert "</ul>")))
-              (buffer-string))))
-    (delete-region $p1 $p2)
-    (insert $resultStr)))
+  (let ($bds $p1 $p2 ($markActive mark-active))
+    (if $markActive
+        (setq $p1 (region-beginning) $p2 (region-end))
+      (progn
+        (setq $bds (xah-get-bounds-of-thing 'block))
+        (setq $p1 (car $bds) $p2 (cdr $bds))))
+    (save-restriction
+      (narrow-to-region $p1 $p2)
+      (progn
+        (goto-char (point-min))
+        (while (re-search-forward  "\.html$" nil "move")
+          (backward-char 1)
+          (xah-html-any-linkify)))
+      (progn
+        (goto-char (point-min))
+        (insert "<li>")
+        (if $markActive
+            (while (re-search-forward "\n\n+" nil "move" )
+              (replace-match "</li>\n\n<li>" t t ))
+          (while (search-forward "\n" nil "move" )
+            (replace-match "</li>\n<li>" t t )))
+        (insert "</li>\n"))
+      (if current-prefix-arg
+          (progn
+            (goto-char (point-min))
+            (insert "<ol>\n")
+            (goto-char (point-max))
+            (insert "</ol>"))
+        (progn
+          (goto-char (point-min))
+          (insert "<ul>\n")
+          (goto-char (point-max))
+          (insert "</ul>")))
+      (goto-char (point-min))
+      (while (re-search-forward "<li>(•\\|*\\|-\\|⓪\\|①\\|②\\|③\\|④\\|⑤\\|⑥\\|⑦\\|⑧\\|⑨\\|⑩) " nil "move")
+        (replace-match "<li>" t t ))
+      (goto-char (point-min))
+      (while (re-search-forward "<li></li>" nil "move" )
+        (replace-match "" t t ))
+      (goto-char (point-min))
+      (while (re-search-forward "<li>\n" nil "move" )
+        (replace-match "<li>" t t ))
+      (goto-char (point-min))
+      (while (re-search-forward "\n\n+" nil "move" )
+        (replace-match "\n\n" t t ))
+      (insert "\n\n"))))
 
 (defun xah-html-lines-to-def-list ()
   "Make the current block of lines into a HTML dl list.
