@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 12.2.20210622110058
+;; Version: 12.3.20210622145735
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -181,189 +181,6 @@ Version 2018-08-17"
 
 ;; HHH___________________________________________________________________
 
-(defun xah-html--get-tag-name (&optional left<)
-  "Return the tag name.
-This function assumes your cursor is inside a tag, eg <…▮…>"
-  (let ( $p1 $p2 )
-    (when (not left<)
-      (setq left< (search-backward "<")))
-    (goto-char left<)
-    (forward-char 1)
-    (when (looking-at "/" )
-      (forward-char 1))
-    (setq $p1 (point))
-    (re-search-forward " \\|>")
-    (backward-char 1)
-    (setq $p2 (point))
-    (buffer-substring-no-properties $p1 $p2)))
-
-(defun xah-html--cursor-in-link-p ()
-  "Return true if curser is inside a string of src or href.
-Version 2020-01-15"
-  (interactive)
-  (let ((in-string-q (nth 3 (syntax-ppss))))
-    (if in-string-q
-        (save-excursion
-          (skip-chars-backward "^\"")
-          (backward-char)
-          (if (string-match "=" (char-to-string (char-before)))
-              (progn
-                (backward-char 1)
-                (if (or
-                     (string-match "href" (current-word))
-                     (string-match "src" (current-word))
-                     (string-match "poster" (current-word))
-                     (string-match "content" (current-word)))
-                    (progn t)
-                  (progn nil)))
-            nil))
-      nil
-      )))
-
-;; (defun xah-html--cursor-in-link-p ()
-;;   "Return true if curser is inside a string of src or href.
-;; Version 2018-02-21"
-;;   (interactive)
-;;   (let (
-;;         (p0 (point))
-;;         (in-string-q
-;;          (save-excursion
-;;            (beginning-of-line)
-;;            (re-search-forward "src=\"\\|href=\"" (line-end-position) t))))
-;;     (save-excursion
-;;       (skip-chars-backward "^\"")
-;;       (backward-char)
-;;       (if (string-match "=" (char-to-string (char-before)))
-;;           (progn
-;;             (backward-char 1)
-;;             (if (or
-;;                  (string-match "href" (current-word))
-;;                  (string-match "src" (current-word))
-;;                  (string-match "content" (current-word)))
-;;                 (progn t)
-;;               (progn nil)))
-;;         nil))))
-
-(defun xah-html--tag-self-closing-p (@tag-name)
-  "Return true if the tag is a self-closing tag, <br> or <br />"
-  (interactive)
-  (member @tag-name xah-html-html5-self-close-tags))
-
-;; (defun xah-html-delete-tag ()
-;;   "Delete the tag under cursor.
-;; This function assume cursor is inside the tag <…▮…>.
-;; Version 2021-01-03"
-;;   (interactive)
-;;   (let (p1 p2)
-;;     (save-excursion
-;;       (search-backward "<" )
-;;       (setq p1 (point))
-;;       (search-forward ">")
-;;       (setq p2 (point))
-;;       (delete-region p1 p2))))
-
-(defun xah-html-select-current-element ()
-  "Select current element under cursor.
-URL `http://ergoemacs.org/emacs/emacs_html_select_current_element.html'
-Version 2021-06-19 2021-06-20"
-  (interactive)
-  (require 'sgml-mode)
-  (let (p0 inEndTag-p p1 p2 openTag-p1 openTag-p2 selfCloseTag-p closingTag-p1 closingTag-p2  )
-    (progn
-      (setq p0 (point))
-      (search-backward "<")
-      (setq p1 (point))
-      (forward-char 1)
-      (setq inEndTag-p (char-equal (char-after ) ?/))
-      (search-forward ">")
-      (setq p2 (point)))
-    (if inEndTag-p
-        (progn
-          (setq closingTag-p1 p1 closingTag-p2 p2)
-          (goto-char (1+ closingTag-p1))
-          (sgml-skip-tag-backward 1)
-          (setq openTag-p1 (point))
-          (search-forward ">" )
-          (setq openTag-p2 (point))
-          (push-mark openTag-p1 t t)
-          (goto-char closingTag-p2))
-      (progn
-        (setq selfCloseTag-p (char-equal (char-after (- p2 2)) ?/))
-        (if selfCloseTag-p
-            (progn
-              (push-mark p2 t t)
-              (goto-char p1))
-          (progn
-            (setq openTag-p1 p1)
-            (setq openTag-p2 p2)
-            (goto-char (1+ p1))
-            (sgml-skip-tag-forward 1)
-            (setq closingTag-p2 (point))
-            (search-backward "<" )
-            (setq closingTag-p1 (point))
-            (goto-char closingTag-p2)
-            (push-mark openTag-p1 t t)))))))
-
-(defun xah-html-delete-tag-pair ()
-  "Remove the previous tag(s) under cursor.
-The tags removed is the first angle bracketed tag to the left of cursor. Both begin and end tags are removed, unless it's a self-closing tag such as <br />.
-URL `http://ergoemacs.org/emacs/emacs_html_delete_tags.html'
-Version 2021-01-03 2021-06-09"
-  (interactive)
-  (require 'sgml-mode)
-  (save-excursion
-    (let (p0 inEndTag-p p1 p2 openTag-p1 openTag-p2 selfCloseTag-p closingTag-p1 closingTag-p2 openTagStr closeTagStr)
-      (progn
-        (setq p0 (point))
-        (search-backward "<")
-        (setq p1 (point))
-        (forward-char 1)
-        (setq inEndTag-p (char-equal (char-after ) ?/))
-        (search-forward ">")
-        (setq p2 (point)))
-      ;; (progn
-      ;;   (setq p0 (point))
-      ;;   (search-forward ">" )
-      ;;   (setq p2 (point))
-      ;;   (search-backward "<")
-      ;;   (setq p1 (point))
-      ;;   (forward-char )
-      ;;   (setq inEndTag-p (char-equal (char-after ) ?/)))
-      (if inEndTag-p
-          (progn
-            (setq closingTag-p1 p1)
-            (setq closingTag-p2 p2)
-            (goto-char (1+ p1))
-            (sgml-skip-tag-backward 1)
-            (setq openTag-p1 (point))
-            (search-forward ">" )
-            (setq openTag-p2 (point))
-            (setq closeTagStr (buffer-substring closingTag-p1 closingTag-p2))
-            (setq openTagStr (buffer-substring openTag-p1 openTag-p2))
-            (message "Deleted: %s%s" openTagStr closeTagStr)
-            (delete-region closingTag-p1 closingTag-p2)
-            (delete-region openTag-p1 openTag-p2))
-        (progn
-          (setq selfCloseTag-p (char-equal (char-after (- p2 2)) ?/))
-          (if selfCloseTag-p
-              (progn
-                (setq openTagStr (buffer-substring p1 p2))
-                (message "Deleted:\n%s" openTagStr )
-                (delete-region p1 p2))
-            (progn
-              (setq openTag-p1 p1)
-              (setq openTag-p2 p2)
-              (goto-char (1+ p1))
-              (sgml-skip-tag-forward 1)
-              (setq closingTag-p2 (point))
-              (search-backward "<" )
-              (setq closingTag-p1 (point))
-              (setq closeTagStr (buffer-substring closingTag-p1 closingTag-p2))
-              (setq openTagStr (buffer-substring openTag-p1 openTag-p2))
-              (message "Deleted:%s%s" openTagStr closeTagStr)
-              (delete-region closingTag-p1 closingTag-p2)
-              (delete-region openTag-p1 openTag-p2))))))))
-
 (defun xah-html--get-bracket-positions ()
   "Returns HTML angle bracket positions.
 Returns a vector [ $pPrevL $pPrevR $pNextL $pNextR ]
@@ -429,6 +246,220 @@ Version 2016-10-18 2021-01-03"
            t
            ))
         nil)))
+
+(defun xah-html--get-tag-name (&optional tagBeginPos)
+  "Return the tag name.
+This function assumes your cursor is inside a tag, eg <…▮…>.
+tagBeginPos is the position to the left of <.
+Version 2021-06-22"
+  (let ( $p1 $p2 )
+    (when (not tagBeginPos)
+      (setq tagBeginPos (search-backward "<")))
+    (goto-char tagBeginPos)
+    (forward-char 1)
+    (when (looking-at "/" )
+      (forward-char 1))
+    (setq $p1 (point))
+    (re-search-forward " \\|>")
+    (backward-char 1)
+    (setq $p2 (point))
+    (buffer-substring-no-properties $p1 $p2)))
+
+(defun xah-html--is-opening-tag-p (&optional tagBeginPos)
+  "Return t if current tag is opening tag.
+Self closing tags such as br hr also returns t.
+This function assumes your cursor is inside a tag, eg <…▮…>.
+tagBeginPos is the position to the left of <.
+Version 2021-06-22"
+  (when (not tagBeginPos)
+    (save-excursion
+      (search-backward "<")
+      (setq tagBeginPos (point))))
+  (not (char-equal (char-after (1+ tagBeginPos)) ?/)))
+
+(defun xah-html--tag-self-closing-p (@tag-name)
+  "Return true if the tag is a self-closing tag, <br> or <br />"
+  (interactive)
+  (member @tag-name xah-html-html5-self-close-tags))
+
+(defun xah-html--cursor-in-link-p ()
+  "Return true if curser is inside a string of src or href.
+Version 2020-01-15"
+  (interactive)
+  (let ((in-string-q (nth 3 (syntax-ppss))))
+    (if in-string-q
+        (save-excursion
+          (skip-chars-backward "^\"")
+          (backward-char)
+          (if (string-match "=" (char-to-string (char-before)))
+              (progn
+                (backward-char 1)
+                (if (or
+                     (string-match "href" (current-word))
+                     (string-match "src" (current-word))
+                     (string-match "poster" (current-word))
+                     (string-match "content" (current-word)))
+                    (progn t)
+                  (progn nil)))
+            nil))
+      nil
+      )))
+
+;; (defun xah-html--cursor-in-link-p ()
+;;   "Return true if curser is inside a string of src or href.
+;; Version 2018-02-21"
+;;   (interactive)
+;;   (let (
+;;         (p0 (point))
+;;         (in-string-q
+;;          (save-excursion
+;;            (beginning-of-line)
+;;            (re-search-forward "src=\"\\|href=\"" (line-end-position) t))))
+;;     (save-excursion
+;;       (skip-chars-backward "^\"")
+;;       (backward-char)
+;;       (if (string-match "=" (char-to-string (char-before)))
+;;           (progn
+;;             (backward-char 1)
+;;             (if (or
+;;                  (string-match "href" (current-word))
+;;                  (string-match "src" (current-word))
+;;                  (string-match "content" (current-word)))
+;;                 (progn t)
+;;               (progn nil)))
+;;         nil))))
+
+;; (defun xah-html-delete-tag ()
+;;   "Delete the tag under cursor.
+;; This function assume cursor is inside the tag <…▮…>.
+;; Version 2021-01-03"
+;;   (interactive)
+;;   (let (p1 p2)
+;;     (save-excursion
+;;       (search-backward "<" )
+;;       (setq p1 (point))
+;;       (search-forward ">")
+;;       (setq p2 (point))
+;;       (delete-region p1 p2))))
+
+(defun xah-html-select-current-element ()
+  "Select previous element before cursor.
+Repeated call will expand selection to previous element, possibly parent.
+
+URL `http://ergoemacs.org/emacs/emacs_html_select_current_element.html'
+Version 2021-06-19 2021-06-22"
+  (interactive)
+  (require 'sgml-mode)
+  (let ($p0 $p1 $p2 $tagPos1 $tagPos2 $tagPos3 $tagPos4 )
+    (if (eq this-command last-command)
+        (progn
+          (setq $p1 (region-beginning) $p2 (region-end))
+          (goto-char $p1)
+          (search-backward "<" nil t)
+          (setq $tagPos1 (point))
+          (search-forward ">" nil t)
+          (setq $tagPos2 (point))
+          (if (xah-html--tag-self-closing-p (xah-html--get-tag-name $tagPos1))
+              (progn
+                (push-mark $tagPos1 t t)
+                (goto-char $p2))
+            (progn
+              (if (xah-html--is-opening-tag-p $tagPos1)
+                  (progn
+                    (goto-char (1+ $tagPos1))
+                    (sgml-skip-tag-forward 1)
+                    (search-backward "<" nil t)
+                    (setq $tagPos3 (point))
+                    (search-forward ">" nil t)
+                    (setq $tagPos4 (point))
+                    (push-mark $tagPos1 t t)
+                    (goto-char $tagPos4))
+                (progn
+                  (goto-char (1+ $tagPos1))
+                  (sgml-skip-tag-backward 1)
+                  (push-mark (point) t t)
+                  (goto-char $p2))))))
+      (progn
+        (setq $p0 (point))
+        (search-backward "<")
+        (setq $p1 (point))
+        (search-forward ">")
+        (setq $p2 (point))
+        (if (xah-html--tag-self-closing-p (xah-html--get-tag-name $p1))
+            (progn
+              (push-mark $p2 t t)
+              (goto-char $p1))
+          (if (xah-html--is-opening-tag-p $p1)
+              (progn
+                (message "is open" )
+                (goto-char (1+ $p1))
+                (sgml-skip-tag-forward 1)
+                (push-mark $p1 t t))
+            (progn
+              (goto-char (1+ $p1))
+              (sgml-skip-tag-backward 1)
+              (push-mark (point) t t)
+              (goto-char $p2))))))))
+
+(defun xah-html-delete-tag-pair ()
+  "Remove the previous tag(s) under cursor.
+The tags removed is the first angle bracketed tag to the left of cursor. Both begin and end tags are removed, unless it's a self-closing tag such as <br />.
+URL `http://ergoemacs.org/emacs/emacs_html_delete_tags.html'
+Version 2021-01-03 2021-06-09"
+  (interactive)
+  (require 'sgml-mode)
+  (save-excursion
+    (let (p0 inEndTag-p p1 p2 openTag-p1 openTag-p2 selfCloseTag-p closingTag-p1 closingTag-p2 openTagStr closeTagStr)
+      (progn
+        (setq p0 (point))
+        (search-backward "<")
+        (setq p1 (point))
+        (forward-char 1)
+        (setq inEndTag-p (char-equal (char-after ) ?/))
+        (search-forward ">")
+        (setq p2 (point)))
+      ;; (progn
+      ;;   (setq p0 (point))
+      ;;   (search-forward ">" )
+      ;;   (setq p2 (point))
+      ;;   (search-backward "<")
+      ;;   (setq p1 (point))
+      ;;   (forward-char )
+      ;;   (setq inEndTag-p (char-equal (char-after ) ?/)))
+      (if inEndTag-p
+          (progn
+            (setq closingTag-p1 p1)
+            (setq closingTag-p2 p2)
+            (goto-char (1+ p1))
+            (sgml-skip-tag-backward 1)
+            (setq openTag-p1 (point))
+            (search-forward ">" )
+            (setq openTag-p2 (point))
+            (setq closeTagStr (buffer-substring closingTag-p1 closingTag-p2))
+            (setq openTagStr (buffer-substring openTag-p1 openTag-p2))
+            (message "Deleted: %s%s" openTagStr closeTagStr)
+            (delete-region closingTag-p1 closingTag-p2)
+            (delete-region openTag-p1 openTag-p2))
+        (progn
+          (setq selfCloseTag-p (char-equal (char-after (- p2 2)) ?/))
+          (if selfCloseTag-p
+              (progn
+                (setq openTagStr (buffer-substring p1 p2))
+                (message "Deleted:\n%s" openTagStr )
+                (delete-region p1 p2))
+            (progn
+              (setq openTag-p1 p1)
+              (setq openTag-p2 p2)
+              (goto-char (1+ p1))
+              (sgml-skip-tag-forward 1)
+              (setq closingTag-p2 (point))
+              (search-backward "<" )
+              (setq closingTag-p1 (point))
+              (setq closeTagStr (buffer-substring closingTag-p1 closingTag-p2))
+              (setq openTagStr (buffer-substring openTag-p1 openTag-p2))
+              (message "Deleted:%s%s" openTagStr closeTagStr)
+              (delete-region closingTag-p1 closingTag-p2)
+              (delete-region openTag-p1 openTag-p2))))))))
 
 ;; HHH___________________________________________________________________
 
@@ -4717,6 +4748,9 @@ Version 2016-10-24"
   (define-key xah-html-mode-map (kbd "RET") 'xah-html-open-local-link)
   (define-key xah-html-mode-map (kbd "TAB") 'xah-html-wrap-html-tag)
   (define-key xah-html-mode-map (kbd "<C-return>") 'xah-html-insert-br-tag)
+  (define-key xah-html-mode-map (kbd "M-t") 'xah-html-select-current-element)
+  (define-key xah-html-mode-map (kbd "M-d") 'xah-html-delete-tag-pair)
+
   (define-prefix-command 'xah-html-leader-map)
   (define-key xah-html-leader-map (kbd "<backspace>") 'xah-html-remove-html-tags)
   (define-key xah-html-leader-map (kbd "<right>") 'xah-html-skip-tag-forward)
@@ -4755,8 +4789,7 @@ Version 2016-10-24"
   (define-key xah-html-leader-map (kbd "r") 'nil)
   (define-key xah-html-leader-map (kbd "s") 'xah-html-lines-to-def-list)
   (define-key xah-html-leader-map (kbd "t") 'xah-html-wrap-p-tag)
-  (define-key xah-html-leader-map (kbd "u") 'xah-html-delete-tag-pair)
-  (define-key xah-html-leader-map (kbd "-") 'xah-html-select-current-element)
+  ;; u
   (define-key xah-html-leader-map (kbd "v") 'xah-html-lines-to-table)
   (define-key xah-html-leader-map (kbd "w") 'nil)
   (define-key xah-html-leader-map (kbd "w t") 'xah-html-local-links-to-fullpath)
