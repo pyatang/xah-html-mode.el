@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 12.3.20210622145735
+;; Version: 12.4.20210624225631
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -344,7 +344,7 @@ Version 2020-01-15"
 
 (defun xah-html-select-current-element ()
   "Select previous element before cursor.
-Repeated call will expand selection to previous element, possibly parent.
+Repeated call will extend selection to previous element, possibly parent.
 
 URL `http://ergoemacs.org/emacs/emacs_html_select_current_element.html'
 Version 2021-06-19 2021-06-22"
@@ -4317,9 +4317,41 @@ Version 2021-05-15"
       (while  (search-forward "<dd>\n" nil t)
         (replace-match "<dd>" t t )))))
 
+;; (defun xah-html-auto-p-tags-buffer ()
+;;   "Add p tags around any text block that does not have any tags,
+;; in current buffer.
+;; Version 2021-06-24"
+;;   (interactive)
+;;   (let (p1 p2 msgList )
+;;     (save-excursion
+;;       (goto-char (point-min))
+;;       (while (re-search-forward "\n\n+" nil t)
+;;         (when (not (looking-at "<"))
+;;           (setq p1 (point))
+;;           (when (re-search-forward "[^>]\n\n+" nil t)
+;;             (skip-chars-backward "\n")
+;;             (setq p2 (point))
+;;             (let ($para)
+;;               (setq $para (buffer-substring-no-properties p1 p2 ))
+;;               (message "Added p tag:「%s」" $para)
+;;               (push $para msgList))
+;;             (insert "\n</p>")
+;;             (overlay-put (make-overlay (point) (- (point) 4))  'face 'highlight)
+;; ;; '(:foreground "red")
+;;             (goto-char p1)
+;;             (insert "<p>\n")
+;;             (overlay-put (make-overlay (- (point) 4) (- (point) 1))  'face 'highlight)))))
+;;     (message "%s" (mapconcat 'identity (reverse msgList) "\n"))
+;;     ))
+
+(defvar xah-html-browse-url-of-buffer-hook nil
+ "Hook for `xah-html-browse-url-of-buffer'. Hook functions are called before switching to browser.")
+
+;; (remove-hook 'xah-html-browse-url-of-buffer-hook 'xah-html-auto-p-tags-buffer)
+;; (add-hook 'xah-html-browse-url-of-buffer-hook 'xah-html-auto-p-tags-buffer)
+
 (defun xah-html-browse-url-of-buffer ()
   "Like `browse-url-of-buffer' but save file first.
-
 Then, if `universal-argument' is called, visit the corresponding xahsite URL.
 For example, if current buffer is of this file:
  ~/web/xahlee_info/index.html
@@ -4332,6 +4364,7 @@ Version 2020-06-26"
          (if current-prefix-arg
              (when (fboundp 'xahsite-filepath-to-url) (xahsite-filepath-to-url (buffer-file-name)))
            (buffer-file-name))))
+    (run-hooks 'xah-html-browse-url-of-buffer-hook )
     (when (buffer-modified-p )
       (when (fboundp 'xah-clean-whitespace) (xah-clean-whitespace))
       (save-buffer))
