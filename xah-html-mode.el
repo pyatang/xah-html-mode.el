@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 12.4.20210624225631
+;; Version: 12.5.20210626082031
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -2584,7 +2584,7 @@ Version 2021-04-09 2021-06-06"
   "Update the <title>…</title> and first <h1>…</h1> of current buffer.
 When called in elisp code, @title is new title, a string.
 URL `http://ergoemacs.org/emacs/elisp_update-html-title.html'
-Version 2019-01-11 2021-02-09"
+Version 2019-01-11 2021-02-09 2021-06-25"
   (interactive
    (let ($oldTitle)
      (save-excursion
@@ -2598,7 +2598,7 @@ Version 2019-01-11 2021-02-09"
       (progn (search-forward "<title>")
              (setq $p1 (point))
              (search-forward "</title>")
-             (setq $p2 (- (point) 8))
+             (setq $p2 (- (point) (length "</title>") ))
              (delete-region $p1 $p2 )
              (goto-char $p1)
              (insert @title ))
@@ -4347,27 +4347,17 @@ Version 2021-05-15"
 (defvar xah-html-browse-url-of-buffer-hook nil
  "Hook for `xah-html-browse-url-of-buffer'. Hook functions are called before switching to browser.")
 
-;; (remove-hook 'xah-html-browse-url-of-buffer-hook 'xah-html-auto-p-tags-buffer)
 ;; (add-hook 'xah-html-browse-url-of-buffer-hook 'xah-html-auto-p-tags-buffer)
+;; (remove-hook 'xah-html-browse-url-of-buffer-hook 'xah-html-auto-p-tags-buffer)
 
 (defun xah-html-browse-url-of-buffer ()
-  "Like `browse-url-of-buffer' but save file first.
-Then, if `universal-argument' is called, visit the corresponding xahsite URL.
-For example, if current buffer is of this file:
- ~/web/xahlee_info/index.html
-then after calling this function,
-default browser will be launched and opening this URL:
- http://xahlee.info/index.html
-Version 2020-06-26"
+  "View current buffer in default browser, but save first.
+Hook `xah-html-browse-url-of-buffer-hook' is run before saving and before opening in browser.
+Version 2020-06-26 2021-06-26"
   (interactive)
-  (let (($url
-         (if current-prefix-arg
-             (when (fboundp 'xahsite-filepath-to-url) (xahsite-filepath-to-url (buffer-file-name)))
-           (buffer-file-name))))
+  (let (($url (buffer-file-name)))
     (run-hooks 'xah-html-browse-url-of-buffer-hook )
-    (when (buffer-modified-p )
-      (when (fboundp 'xah-clean-whitespace) (xah-clean-whitespace))
-      (save-buffer))
+    (when (buffer-modified-p ) (save-buffer))
     (browse-url $url )))
 
 (defun xah-html-open-in-chrome-browser ()
