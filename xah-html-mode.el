@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 12.5.20210626082031
+;; Version: 12.6.20210626220201
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -4768,13 +4768,13 @@ Version 2016-10-24"
 (defvar xah-html-mode-map nil "Keybinding for `xah-html-mode'")
 (progn
   (setq xah-html-mode-map (make-sparse-keymap))
+  (define-prefix-command 'xah-html-leader-map)
   (define-key xah-html-mode-map (kbd "RET") 'xah-html-open-local-link)
   (define-key xah-html-mode-map (kbd "TAB") 'xah-html-wrap-html-tag)
   (define-key xah-html-mode-map (kbd "<C-return>") 'xah-html-insert-br-tag)
   (define-key xah-html-mode-map (kbd "M-t") 'xah-html-select-current-element)
   (define-key xah-html-mode-map (kbd "M-d") 'xah-html-delete-tag-pair)
-
-  (define-prefix-command 'xah-html-leader-map)
+  (define-key xah-html-mode-map (kbd "<f9>") xah-html-leader-map)
   (define-key xah-html-leader-map (kbd "<backspace>") 'xah-html-remove-html-tags)
   (define-key xah-html-leader-map (kbd "<right>") 'xah-html-skip-tag-forward)
   (define-key xah-html-leader-map (kbd "<left>") 'xah-html-skip-tag-backward)
@@ -4826,9 +4826,7 @@ Version 2016-10-24"
   (define-key xah-html-leader-map (kbd "y") 'xah-html-make-citation)
   (define-key xah-html-leader-map (kbd "z") 'xah-html-table-to-lines)
   (define-key xah-html-leader-map (kbd "SPC") 'nil)
-  (define-key xah-html-leader-map (kbd "SPC SPC") 'xah-html-insert-date-section)
-  ;; define separate, so that user can override the lead key
-  (define-key xah-html-mode-map (kbd "C-c C-c") xah-html-leader-map))
+  (define-key xah-html-leader-map (kbd "SPC SPC") 'xah-html-insert-date-section))
 
 ;; HHH___________________________________________________________________
 
