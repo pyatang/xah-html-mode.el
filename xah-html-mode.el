@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 12.6.20210626220201
+;; Version: 12.7.20210706221936
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -3132,16 +3132,16 @@ Version 2020-01-19"
   "Make the current amazon URL or selection into a link.
 
 Examples of amazon product URL formats
-http://www.amazon.com/Cyborg-R-T-Gaming-Mouse/dp/B003CP0BHM/ref=pd_sim_e_1
-http://www.amazon.com/gp/product/B003CP0BHM
-http://www.amazon.com/exec/obidos/ASIN/B003CP0BHM/xahh-20
-http://www.amazon.com/exec/obidos/tg/detail/-/B003CP0BHM/
-http://www.amazon.com/dp/B003CP0BHM?tag=xahhome-20
-http://amzn.to/1F5M1hA
+https://www.amazon.com/Cyborg-R-T-Gaming-Mouse/dp/B003CP0BHM/ref=pd_sim_e_1
+https://www.amazon.com/gp/product/B003CP0BHM
+https://www.amazon.com/exec/obidos/ASIN/B003CP0BHM/xahh-20
+https://www.amazon.com/exec/obidos/tg/detail/-/B003CP0BHM/
+https://www.amazon.com/dp/B003CP0BHM?tag=xahhome-20
+https://amzn.to/1F5M1hA
 https://alexa.design/2okfMcj
 
 Example output:
-<a href=\"http://www.amazon.com/dp/B003CP0BHM/?tag=xahh-20\" title=\"Cyborg R T Gaming Mouse\">amazon</a>
+<a href=\"https://www.amazon.com/dp/B003CP0BHM/?tag=xahh-20\" title=\"Cyborg R T Gaming Mouse\">amazon</a>
 
 ASIN is a 10 character string that's a product id.
 
@@ -3185,7 +3185,7 @@ Version 2020-01-15 2021-05-02"
             )))
         (delete-region $p1 $p2)
         (insert
-         (format "<a class=\"amz\" href=\"http://www.amazon.com/dp/%s/?tag=%s\" title=\"%s\">Buy at amazon</a>" $asin $trackId $thingName))
+         (format "<a class=\"amz\" href=\"https://www.amazon.com/dp/%s/?tag=%s\" title=\"%s\">Buy at amazon</a>" $asin $trackId $thingName))
         (search-backward "\">")))))
 
 (defun xah-html-get-youtube-id (@url)
