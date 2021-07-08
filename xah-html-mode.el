@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2021, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.info/ )
-;; Version: 12.7.20210706221936
+;; Version: 13.1.20210708140515
 ;; Created: 12 May 2012
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: languages, html, web
@@ -1004,23 +1004,22 @@ The opening tag must be of the form <pre class=\"‹langCode›\">.  The ‹lang
 
 Cursor will end up right before </pre>.
 
-See also: `xah-html-dehtml2', `xah-html-toggle-syntax-coloring-markup'.
+See also: `xah-html-dehtml2', `xah-html-toggle-syntax-color-tags'.
 This function requires the `htmlize-buffer' from htmlize.el by Hrvoje Niksic.
-Version 2018-09-28"
+Version 2018-09-28 2021-07-08"
   (interactive (list xah-html-lang-name-map))
-  (let* (
-         ($precodeData (xah-html-get-langcode))
-         ($langCode (elt $precodeData 0))
-         ($p1 (elt $precodeData 1))
-         ($p2 (elt $precodeData 2))
-         ($modeName (xah-html-langcode-to-mode-name $langCode @lang-code-map)))
+  (let ( $precodeData $langCode $p1 $p2 $modeName )
+         (setq $precodeData (xah-html-get-langcode))
+         (setq $langCode (elt $precodeData 0))
+         (setq $p1 (elt $precodeData 1))
+         (setq $p2 (elt $precodeData 2))
+         (setq $modeName (xah-html-langcode-to-mode-name $langCode @lang-code-map))
     (xah-html-htmlize-region $p1 $p2 $modeName)))
 
 (defun xah-html-dehtml2 (@begin @end)
   "Delete span tags between pre tags.
 Note: only span tags of the form 「<span class=\"…\">…</span>」 are deleted.
-This command does the inverse of `xah-html-htmlize2'.
-Version 2018-10-08"
+Version 2018-10-08 2021-07-08"
   (interactive
    (let* ( ($xx (xah-html-get-langcode)))
      (list (elt $xx 1) (elt $xx 2))))
@@ -1109,9 +1108,9 @@ Version 2018-10-03"
     $count
     ))
 
-(defun xah-html-toggle-syntax-coloring-markup (lang-name-map)
+(defun xah-html-toggle-syntax-color-tags (@lang-name-map)
   "Call `xah-html-htmlize2' or `xah-html-dehtml2'.
-Version 2019-06-13"
+Version 2019-06-13 2021-07-08"
   (interactive (list xah-html-lang-name-map))
   (let* (
          ($tmp (xah-html-get-langcode))
@@ -1119,7 +1118,7 @@ Version 2019-06-13"
          ($p2 (elt $tmp 2)))
     (if (xah-html-is-html-p $p1 $p2)
         (xah-html-dehtml2 $p1 $p2)
-      (xah-html-htmlize2 lang-name-map))))
+      (xah-html-htmlize2 @lang-name-map))))
 
 (defun xah-html-redo-syntax-coloring-file ( @file-path )
   "redo all pre lang code syntax coloring in current HTML page.
@@ -4783,7 +4782,7 @@ Version 2016-10-24"
   (define-key xah-html-leader-map (kbd ".") 'xah-html-escape-char-to-entity)
   (define-key xah-html-leader-map (kbd ";") 'xah-html-emacs-to-windows-kbd-notation)
   (define-key xah-html-leader-map (kbd "1") 'xah-html-get-precode-make-new-file)
-  (define-key xah-html-leader-map (kbd "2") 'xah-html-toggle-syntax-coloring-markup)
+  (define-key xah-html-leader-map (kbd "2") 'xah-html-toggle-syntax-color-tags)
   (define-key xah-html-leader-map (kbd "4") 'xah-html-markup-ruby)
   (define-key xah-html-leader-map (kbd "5") 'xah-html-mark-unicode)
   (define-key xah-html-leader-map (kbd "6") 'xah-html-html-to-text)
